@@ -36,6 +36,7 @@
 - **Testing Philosophy**: TDD methodology with strict single-test rule and comprehensive coverage requirements
 - **Quality Assurance**: Multiple analysis tools (Reek, RubyCritic, Skunk) for maintaining high code standards
 - **Contract Testing**: Pact implementation for reliable API contract verification between services
+- **Security**: Git history cleaned of sensitive files (master.key) using filter-branch, comprehensive .gitignore implemented
 
 **Current Architecture:**
 ```

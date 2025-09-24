@@ -480,12 +480,21 @@ docker-compose exec frontend npm run lint
 - XSS protection headers
 - Rate limiting on API endpoints
 - Audit logging for sensitive operations
+- **Never commit master.key or credentials to git**
+- Use environment variables for sensitive configuration
 
 ### Frontend Security
 - Sanitize all user inputs
 - Secure API token storage
 - HTTPS enforcement
 - Content Security Policy headers
+
+### Key Management Best Practices
+- **Rails master.key**: Must remain local only, never in version control
+- **Environment variables**: Use for deployment-specific secrets
+- **Git history**: Regularly audit for accidentally committed secrets
+- **Backup strategy**: Keep secure backups of keys separate from code
+- **Rotation policy**: Establish key rotation procedures for production
 
 ---
 
