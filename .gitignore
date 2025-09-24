@@ -1,0 +1,235 @@
+# Donation Tracker Project .gitignore
+
+# ============================================================================
+# OS GENERATED FILES
+# ============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# ============================================================================
+# BACKEND (Rails API)
+# ============================================================================
+
+# Dependencies
+donation_tracker_api/vendor/bundle/
+donation_tracker_api/.bundle/
+
+# Log files
+donation_tracker_api/log/*.log
+donation_tracker_api/log/*.log.*
+donation_tracker_api/tmp/pids/*.pid
+donation_tracker_api/tmp/cache/
+
+# Database
+donation_tracker_api/db/*.sqlite3
+donation_tracker_api/db/*.sqlite3-journal
+donation_tracker_api/db/*.sqlite3-wal
+
+# Temporary files
+donation_tracker_api/tmp/
+donation_tracker_api/storage/
+
+# Environment variables
+donation_tracker_api/.env
+donation_tracker_api/.env.local
+donation_tracker_api/.env.development.local
+donation_tracker_api/.env.test.local
+donation_tracker_api/.env.production.local
+
+# Secrets and credentials
+donation_tracker_api/config/credentials/
+donation_tracker_api/config/master.key*
+donation_tracker_api/config/secrets.yml
+
+# Code coverage reports
+donation_tracker_api/coverage/
+donation_tracker_api/.nyc_output
+
+# Test output
+donation_tracker_api/spec/reports/
+donation_tracker_api/spec/examples.txt
+
+# RubyCritic reports (generated files)
+donation_tracker_api/tmp/rubycritic/
+
+# Pact contracts (generated during tests)
+donation_tracker_api/spec/pacts/*.json
+
+# Bootsnap cache
+donation_tracker_api/tmp/bootsnap*
+
+# Rails asset compilation
+donation_tracker_api/public/assets/
+donation_tracker_api/public/packs/
+donation_tracker_api/public/pack-test/
+
+# ============================================================================
+# FRONTEND (React)
+# ============================================================================
+
+# Dependencies
+donation_tracker_frontend/node_modules/
+donation_tracker_frontend/.pnp/
+donation_tracker_frontend/.pnp.js
+
+# Production build
+donation_tracker_frontend/build/
+donation_tracker_frontend/dist/
+
+# Environment variables
+donation_tracker_frontend/.env
+donation_tracker_frontend/.env.local
+donation_tracker_frontend/.env.development.local
+donation_tracker_frontend/.env.test.local
+donation_tracker_frontend/.env.production.local
+
+# Test coverage reports
+donation_tracker_frontend/coverage/
+donation_tracker_frontend/.nyc_output
+
+# Testing
+donation_tracker_frontend/__snapshots__/
+
+# Logs
+donation_tracker_frontend/logs/
+donation_tracker_frontend/npm-debug.log*
+donation_tracker_frontend/yarn-debug.log*
+donation_tracker_frontend/yarn-error.log*
+donation_tracker_frontend/lerna-debug.log*
+
+# Vitest
+donation_tracker_frontend/.vitest/
+
+# Pact contracts and logs (generated during tests)
+donation_tracker_frontend/pacts/*.json
+donation_tracker_frontend/logs/pact.log*
+
+# ESLint cache
+donation_tracker_frontend/.eslintcache
+
+# Optional npm cache directory
+donation_tracker_frontend/.npm
+
+# Optional REPL history
+donation_tracker_frontend/.node_repl_history
+
+# Storybook build outputs
+donation_tracker_frontend/storybook-static
+
+# ============================================================================
+# DOCKER & CONTAINERIZATION
+# ============================================================================
+.dockerignore
+
+# ============================================================================
+# IDE & EDITOR FILES
+# ============================================================================
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains IDEs
+.idea/
+*.swp
+*.swo
+*~
+
+# Vim
+*.swp
+*.swo
+*.swn
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Sublime Text
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+*.sublime-workspace
+*.sublime-project
+
+# ============================================================================
+# DEVELOPMENT TOOLS
+# ============================================================================
+
+# SimpleCov coverage data
+.resultset.json
+
+# RuboCop cache
+.rubocop-*
+
+# Reek configuration overrides (use project defaults)
+.reek.yml
+
+# Skunk temporary files
+skunk_*
+
+# Test artifacts
+*.pid
+*.seed
+
+# Ignore master key for decrypting credentials and more.
+/config/master.key
+
+# ============================================================================
+# PROJECT-SPECIFIC IGNORES
+# ============================================================================
+
+# Local development notes
+NOTES.md
+TODO.md
+scratch/
+.scratch/
+
+# Database backups
+*.dump
+*.sql
+
+# Certificate files
+*.pem
+*.crt
+*.key
+
+# Local configuration overrides
+docker-compose.override.yml
+.env.override
+
+# Backup files
+*.backup
+*.bak
+
+# ============================================================================
+# DEPLOYMENT & PRODUCTION
+# ============================================================================
+
+# Deployment keys
+deploy_key*
+id_rsa*
+id_ed25519*
+
+# Terraform state files (if used for deployment)
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Ansible vault files
+vault.yml
+secrets.yml
