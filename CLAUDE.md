@@ -13,19 +13,62 @@
 - **Atomic feature commits** when features span both services
 
 ### Directory Structure
+
+```mermaid
+flowchart TB
+    A[DonationTracker/] --> B[docker-compose.yml<br/>Service orchestration]
+    A --> C[donation_tracker_api/<br/>Rails API backend]
+    A --> D[donation_tracker_frontend/<br/>React frontend]
+    A --> E[scripts/<br/>Testing & validation]
+    A --> F[DonationTracking.md<br/>Project specifications]
+    A --> G[CLAUDE.md<br/>Development conventions]
+
+    C --> C1[app/models/<br/>Business logic models]
+    C --> C2[spec/<br/>RSpec test suite]
+    C --> C3[spec/pact_helper.rb<br/>Contract testing]
+
+    D --> D1[src/<br/>TypeScript source]
+    D --> D2[src/api/client.ts<br/>Axios HTTP client]
+    D --> D3[src/tests/pact/<br/>Consumer contracts]
+
+    E --> E1[test-runner.sh<br/>Bash unit testing framework]
+    E --> E2[check-documentation.sh<br/>Documentation reminder]
+    E --> E3[pre-commit-backend.sh<br/>Backend quality gates]
+    E --> E4[pre-commit-frontend.sh<br/>Frontend quality gates]
+    E --> E5[test-*.sh<br/>Comprehensive test suite]
 ```
-DonationTracker/
-├── docker-compose.yml                    # Service orchestration
-├── donation_tracker_api/                 # Rails API backend
-│   ├── app/models/                       # Business logic models
-│   ├── spec/                            # RSpec test suite
-│   └── ...
-├── donation_tracker_frontend/            # React frontend
-│   ├── src/                             # TypeScript source
-│   ├── src/api/client.ts                # Axios HTTP client
-│   └── ...
-├── DonationTracking.md                   # Project specifications
-└── CLAUDE.md                            # This file
+
+---
+
+## 📊 Documentation & Diagram Standards
+
+### Mermaid Diagram Requirements
+- **All diagrams MUST use Mermaid format** for consistency and maintainability
+- **No ASCII art or text trees** - convert to proper Mermaid syntax
+- **Version controllable** - diagrams stored as code alongside documentation
+- **GitHub rendering** - automatically renders in markdown files and PRs
+
+### Supported Diagram Types
+- **Flowcharts**: Project structure, workflows, decision trees
+- **Sequence Diagrams**: API interactions, authentication flows
+- **Git Graphs**: Branch strategies, commit workflows
+- **Entity Relationship Diagrams**: Database schema, model relationships
+- **User Journey Maps**: Feature workflows, user interactions
+
+### Mermaid Benefits
+- **IDE Support**: Syntax highlighting and preview in VS Code
+- **Maintainable**: Easy to update as code changes
+- **Consistent**: Uniform styling across all documentation
+- **Professional**: Clean, standardized visual representation
+
+### Example Usage
+```mermaid
+flowchart TB
+    A[Project Root] --> B[Backend API]
+    A --> C[Frontend React]
+    A --> D[Scripts]
+    D --> E[Test Suite]
+    D --> F[Pre-commit Hooks]
 ```
 
 ---
@@ -49,9 +92,6 @@ DonationTracker/
 - Why this change was necessary
 - Any breaking changes or migration notes
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
-
-Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
 ### ⚠️ MANDATORY PRE-COMMIT RULE
@@ -87,6 +127,23 @@ feat: implement end-to-end donation workflow
    - **Functionality Preservation**: Must maintain all existing functionality during refactoring
    - **Convention Adherence**: Ensure established patterns are followed
 4. **Repeat**: Continue with next single test
+
+#### TDD Workflow Visualization
+
+```mermaid
+flowchart LR
+    A[🔴 RED<br/>Write ONE failing test] --> B[🟢 GREEN<br/>Minimal code to pass]
+    B --> C[🔵 REFACTOR<br/>Improve code/tests]
+    C --> D[All tests pass?]
+    D -->|Yes| A
+    D -->|No| E[🔧 Fix issues]
+    E --> C
+
+    style A fill:#ffcccc
+    style B fill:#ccffcc
+    style C fill:#ccccff
+    style E fill:#fff2cc
+```
 
 ### One Expectation Rule
 - Each test should make only ONE assertion
@@ -321,6 +378,40 @@ Before committing code:
 8. Contract tests must pass (Pact verification)
 9. Cost metrics should not increase significantly (Skunk)
 
+#### Pre-commit Hooks Flow
+
+```mermaid
+flowchart TD
+    A[Developer commits code] --> B[Pre-commit hooks triggered]
+
+    B --> C[Documentation Check]
+    C --> C1{DonationTracking.md<br/>& CLAUDE.md updated?}
+    C1 -->|No| C2[⚠️ Warning: Update docs]
+    C1 -->|Yes| D[Backend Validation]
+
+    D --> D1[RuboCop Linting]
+    D1 --> D2[Brakeman Security]
+    D2 --> D3[RSpec Tests]
+    D3 --> D4{All backend<br/>checks pass?}
+
+    D4 -->|No| F1[❌ Commit blocked]
+    D4 -->|Yes| E[Frontend Validation]
+
+    E --> E1[ESLint + Accessibility]
+    E1 --> E2[Prettier Formatting]
+    E2 --> E3[TypeScript Checks]
+    E3 --> E4{All frontend<br/>checks pass?}
+
+    E4 -->|No| F1
+    E4 -->|Yes| F2[✅ Commit allowed]
+
+    C2 --> D
+
+    style C2 fill:#fff2cc
+    style F1 fill:#ffcccc
+    style F2 fill:#ccffcc
+```
+
 ---
 
 ## 🚀 2025 Framework Best Practices
@@ -452,6 +543,21 @@ docker-compose exec frontend npm run vitest
 docker-compose exec frontend npm run vitest:ui
 docker-compose exec frontend npm run test:pact
 docker-compose exec frontend npm run lint
+
+# Pre-commit Scripts Testing (TDD-driven bash testing)
+bash scripts/test-check-documentation.sh      # Test documentation checker (2 tests)
+bash scripts/test-pre-commit-backend.sh       # Test backend validator (6 tests)
+bash scripts/test-pre-commit-frontend.sh      # Test frontend validator (5 tests)
+
+# Individual Script Testing
+bash scripts/check-documentation.sh           # Run documentation reminder
+bash scripts/pre-commit-backend.sh           # Run backend quality checks
+bash scripts/pre-commit-frontend.sh          # Run frontend quality checks
+
+# Pre-commit Hooks Installation
+pip install pre-commit                        # Install pre-commit framework
+pre-commit install                           # Install git hooks
+pre-commit run --all-files                  # Run all hooks manually
 ```
 
 ---

@@ -29,6 +29,14 @@
 - [x] Axios HTTP client with authentication interceptors
 - [x] Responsive foundation for mobile-first design
 
+**Quality Assurance & Pre-commit System:**
+- [x] TDD-driven pre-commit hooks system with comprehensive bash testing framework (13 passing tests)
+- [x] Documentation update enforcement before all commits (check-documentation.sh)
+- [x] Backend quality gates: RuboCop, Brakeman, RSpec validation (pre-commit-backend.sh)
+- [x] Frontend quality gates: ESLint, Prettier, TypeScript validation (pre-commit-frontend.sh)
+- [x] Bash unit testing framework with assert functions and comprehensive coverage (test-runner.sh)
+- [x] Three-phase testing approach: Unit tests (mocked) → Integration tests → Real tool execution
+
 **Development Decisions Made:**
 - **Authentication Strategy**: Started with username-only User model (not email-based initially) for TDD demonstration
 - **Repository Strategy**: Monorepo with service-separated commits for atomic feature development
@@ -39,21 +47,40 @@
 - **Security**: Git history cleaned of sensitive files (master.key) using filter-branch, comprehensive .gitignore implemented
 
 **Current Architecture:**
-```
-DonationTracker/
-├── docker-compose.yml                 # Service orchestration
-├── donation_tracker_api/              # Rails API (port 3001)
-│   ├── spec/pact_helper.rb            # Contract testing provider setup
-│   └── ...
-├── donation_tracker_frontend/         # React frontend (port 3000)
-│   ├── src/tests/pact/                # Contract testing consumer setup
-│   ├── vitest.config.ts               # Vitest configuration
-│   └── ...
-├── DonationTracking.md                # This specification
-└── CLAUDE.md                          # Development conventions & best practices
+
+```mermaid
+flowchart TB
+    A[DonationTracker/] --> B[docker-compose.yml<br/>Service orchestration]
+    A --> C[donation_tracker_api/<br/>Rails API - port 3001]
+    A --> D[donation_tracker_frontend/<br/>React frontend - port 3000]
+    A --> E[scripts/<br/>TDD testing & validation]
+    A --> F[.pre-commit-config.yaml<br/>Git hooks configuration]
+    A --> G[DonationTracking.md<br/>Project specifications]
+    A --> H[CLAUDE.md<br/>Development conventions]
+
+    C --> C1[spec/pact_helper.rb<br/>Contract testing provider]
+    C --> C2[app/models/<br/>Business logic & TDD demos]
+
+    D --> D1[src/tests/pact/<br/>Consumer contracts]
+    D --> D2[vitest.config.ts<br/>Modern testing config]
+
+    E --> E1[test-runner.sh<br/>Bash unit testing framework]
+    E --> E2[check-documentation.sh<br/>+2 tests]
+    E --> E3[pre-commit-backend.sh<br/>+6 tests]
+    E --> E4[pre-commit-frontend.sh<br/>+5 tests]
+
+    subgraph "Testing Coverage: 13 Tests"
+        E1
+        E2
+        E3
+        E4
+    end
 ```
 
-**Next Development Phase**: Expand User model → Create Donor model → Implement authentication system
+**Next Development Phase**:
+1. **Integration Testing**: Replace mock implementations with real tool execution (RuboCop, Brakeman, ESLint, etc.)
+2. **CI/CD Pipeline**: Implement automated quality gates and deployment workflows
+3. **Feature Development**: Expand User model → Create Donor model → Implement authentication system
 
 ---
 
