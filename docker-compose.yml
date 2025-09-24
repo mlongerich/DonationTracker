@@ -1,0 +1,121 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: donation_tracker_development
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (minimal - only for Stripe webhook jobs when implemented)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  # Rails API
+  api:
+    build:
+      context: ./donation_tracker_api
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./donation_tracker_api:/app
+      - bundle_cache:/usr/local/bundle
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/donation_tracker_development
+      - REDIS_URL=redis://redis:6379/0
+      - RAILS_ENV=development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "
+        rm -f tmp/pids/server.pid &&
+        bundle exec rails db:create db:migrate &&
+        bundle exec rails server -b 0.0.0.0 -p 3001
+      "
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./donation_tracker_frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./donation_tracker_frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001
+      - CHOKIDAR_USEPOLLING=true
+      - WDS_SOCKET_HOST=localhost
+      - WDS_SOCKET_PORT=3000
+    depends_on:
+      - api
+    stdin_open: true
+    tty: true
+
+# Test runners (optional profiles)
+  # Rails test runner
+  api-test:
+    build:
+      context: ./donation_tracker_api
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./donation_tracker_api:/app
+      - bundle_cache:/usr/local/bundle
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/donation_tracker_test
+      - REDIS_URL=redis://redis:6379/1
+      - RAILS_ENV=test
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      bash -c "
+        bundle exec rails db:create db:migrate RAILS_ENV=test &&
+        bundle exec rspec --format documentation
+      "
+    profiles:
+      - test
+
+  # React test runner
+  frontend-test:
+    build:
+      context: ./donation_tracker_frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./donation_tracker_frontend:/app
+      - /app/node_modules
+    environment:
+      - CI=true
+    command: npm test -- --coverage --watchAll=false
+    profiles:
+      - test
+
+volumes:
+  postgres_data:
+  redis_data:
+  bundle_cache:
