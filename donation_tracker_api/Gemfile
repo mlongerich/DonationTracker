@@ -62,6 +62,12 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # Code smell detection
+  gem "reek", require: false
+
+  # Contract testing
+  gem "pact", require: false
 end
 
 group :test do
@@ -74,4 +80,8 @@ end
 
 group :development do
   gem "bullet"
+
+  # Code quality analysis
+  gem "rubycritic", require: false
+  gem "skunk", require: false
 end
