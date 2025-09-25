@@ -1,5 +1,10 @@
 // Example Pact Consumer Test for User API
-import { setupProvider, finalizeProvider, verifyProvider, provider } from './setup';
+import {
+  setupProvider,
+  finalizeProvider,
+  verifyProvider,
+  provider,
+} from './setup';
 import { apiClient } from '../../api/client';
 
 describe('User API Contract Tests', () => {
@@ -18,19 +23,19 @@ describe('User API Contract Tests', () => {
 
   describe('GET /api/users/:id', () => {
     it('should get user by ID when user exists', async () => {
-      // Define the expected interaction
-      await provider
-        .given('user 123 exists')
-        .uponReceiving('a request for user 123')
-        .withRequest({
+      // Define the expected interaction using Pact v12 API
+      await provider.addInteraction({
+        state: 'user 123 exists',
+        uponReceiving: 'a request for user 123',
+        withRequest: {
           method: 'GET',
           path: '/api/users/123',
           headers: {
-            'Accept': 'application/json',
+            Accept: 'application/json',
             'Content-Type': 'application/json',
           },
-        })
-        .willRespondWith({
+        },
+        willRespondWith: {
           status: 200,
           headers: {
             'Content-Type': 'application/json; charset=utf-8',
@@ -39,7 +44,8 @@ describe('User API Contract Tests', () => {
             id: 123,
             username: 'testuser',
           },
-        });
+        },
+      });
 
       // Make the actual request
       const response = await apiClient.get('/users/123');
@@ -51,18 +57,18 @@ describe('User API Contract Tests', () => {
     });
 
     it('should return 404 when user does not exist', async () => {
-      await provider
-        .given('no users exist')
-        .uponReceiving('a request for non-existent user')
-        .withRequest({
+      await provider.addInteraction({
+        state: 'no users exist',
+        uponReceiving: 'a request for non-existent user',
+        withRequest: {
           method: 'GET',
           path: '/api/users/999',
           headers: {
-            'Accept': 'application/json',
+            Accept: 'application/json',
             'Content-Type': 'application/json',
           },
-        })
-        .willRespondWith({
+        },
+        willRespondWith: {
           status: 404,
           headers: {
             'Content-Type': 'application/json; charset=utf-8',
@@ -70,15 +76,15 @@ describe('User API Contract Tests', () => {
           body: {
             error: 'User not found',
           },
-        });
+        },
+      });
 
-      try {
-        await apiClient.get('/users/999');
-        fail('Expected request to fail with 404');
-      } catch (error: any) {
-        expect(error.response.status).toBe(404);
-        expect(error.response.data.error).toBe('User not found');
-      }
+      await expect(apiClient.get('/users/999')).rejects.toMatchObject({
+        response: {
+          status: 404,
+          data: { error: 'User not found' },
+        },
+      });
     });
   });
 
@@ -88,19 +94,19 @@ describe('User API Contract Tests', () => {
         username: 'newuser',
       };
 
-      await provider
-        .given('no users exist')
-        .uponReceiving('a request to create a user')
-        .withRequest({
+      await provider.addInteraction({
+        state: 'no users exist',
+        uponReceiving: 'a request to create a user',
+        withRequest: {
           method: 'POST',
           path: '/api/users',
           headers: {
-            'Accept': 'application/json',
+            Accept: 'application/json',
             'Content-Type': 'application/json',
           },
           body: { user: newUser },
-        })
-        .willRespondWith({
+        },
+        willRespondWith: {
           status: 201,
           headers: {
             'Content-Type': 'application/json; charset=utf-8',
@@ -109,7 +115,8 @@ describe('User API Contract Tests', () => {
             id: 1,
             username: 'newuser',
           },
-        });
+        },
+      });
 
       const response = await apiClient.post('/users', { user: newUser });
 

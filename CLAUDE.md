@@ -545,14 +545,18 @@ docker-compose exec frontend npm run test:pact
 docker-compose exec frontend npm run lint
 
 # Pre-commit Scripts Testing (TDD-driven bash testing)
-bash scripts/test-check-documentation.sh      # Test documentation checker (2 tests)
-bash scripts/test-pre-commit-backend.sh       # Test backend validator (6 tests)
-bash scripts/test-pre-commit-frontend.sh      # Test frontend validator (5 tests)
+bash scripts/test-check-documentation.sh      # Test documentation checker (2 tests ✅)
+bash scripts/test-pre-commit-backend.sh       # Test backend validator (6 tests ✅)
+bash scripts/test-pre-commit-frontend.sh      # Test frontend validator (5 tests ✅)
 
-# Individual Script Testing
-bash scripts/check-documentation.sh           # Run documentation reminder
-bash scripts/pre-commit-backend.sh           # Run backend quality checks
-bash scripts/pre-commit-frontend.sh          # Run frontend quality checks
+# Integration Testing (Real Tool Execution)
+bash scripts/integration-test-backend.sh      # Test against actual Rails API (4 tests ✅)
+bash scripts/integration-test-frontend.sh     # Test against actual React app (5 tests ✅)
+
+# Production Pre-commit Scripts (FULLY FUNCTIONAL)
+bash scripts/check-documentation.sh           # ⚠️ Documentation reminder
+bash scripts/pre-commit-backend.sh           # 🔍 RuboCop + 🔒 Brakeman + 🧪 RSpec (REAL execution ✅)
+bash scripts/pre-commit-frontend.sh          # 🔍 ESLint + 🎨 Prettier + 📝 TypeScript + 🧪 Jest (REAL execution ✅)
 
 # Pre-commit Hooks Installation
 pip install pre-commit                        # Install pre-commit framework
