@@ -172,18 +172,40 @@ flowchart LR
 - **Jest**: Unit testing framework (v27.5.1, via react-scripts)
 - **Vitest**: Modern testing alternative (v1.6.1) with UI dashboard
 - **React Testing Library**: Component testing (v16.3.0)
-- **Cypress**: End-to-end testing (v13.17.0)
+- **Cypress**: End-to-end testing (v13.17.0) - **MANDATORY for all user-facing features**
 - **MSW**: API mocking for integration tests (v2.0.0)
 
-#### Testing Framework Options
-```bash
-# Traditional Jest (current default)
-npm test
+#### Frontend TDD Workflow with Continuous E2E Validation
+**CRITICAL: Every frontend change must follow this workflow to prevent late-stage rewrites**
 
-# Modern Vitest (alternative)
-npm run vitest
-npm run vitest:ui    # Visual dashboard
+1. 🔴 **RED**: Write failing Jest unit test
+2. 🟢 **GREEN**: Write minimal code to pass Jest test
+3. 🔵 **REFACTOR**: Improve code quality (Jest still passing)
+4. 🧪 **RUN CYPRESS**: Immediately verify E2E test passes
+5. 👁️ **MANUAL CHECK**: Visual browser verification
+6. ✅ **COMPLETE**: Only then move to next feature/test
+
+**If Cypress fails**: STOP and fix immediately. Do not continue with broken UX.
+
+#### Testing Framework Commands
+```bash
+# Unit Tests (run first)
+npm test                     # Jest unit tests
+
+# E2E Tests (run after unit tests pass)
+npm run cypress:run          # Headless mode (CI-style)
+npm run cypress:open         # Interactive mode (debugging)
+
+# Alternative frameworks
+npm run vitest               # Modern Vitest
+npm run vitest:ui            # Vitest visual dashboard
 ```
+
+#### Testing Philosophy
+- **Jest**: Fast feedback on logic/component behavior (with mocked APIs)
+- **Cypress**: Real user validation (catches visual bugs, integration issues Jest mocks hide)
+- **Every user-facing feature MUST have both** unit tests AND E2E tests
+- **Run Cypress continuously**, not just before commits - prevents big surprises
 
 ### Contract Testing (Consumer-Driven) - Installed & Configured
 - **Pact**: Consumer-driven contract testing between React and Rails API
@@ -207,8 +229,9 @@ donation_tracker_frontend/src/tests/pact/*.test.ts # Example contracts
 ### Test Requirements
 - **All models**: Must have comprehensive validation and relationship tests
 - **All API endpoints**: Must have request/response tests
-- **Critical user flows**: Must have end-to-end tests
-- **Coverage minimum**: 90% for backend, 80% for frontend
+- **All user-facing frontend features**: MUST have both Jest unit tests AND Cypress E2E tests
+- **Critical user flows**: Must have end-to-end Cypress tests validating complete journeys
+- **Coverage minimum**: 90% for backend, 80% for frontend (Jest), 100% of user flows (Cypress)
 
 ### Code Smell Detection & Design Pattern Tracking (2025)
 
@@ -247,6 +270,88 @@ Track and enforce these Rails patterns:
 - **Pattern Recognition**: Look for repeated code that could use established patterns
 - **Incremental Approach**: Small, safe changes with full test coverage
 - **Convention Enforcement**: Ensure new code follows established project patterns
+
+---
+
+## 🎯 Thin Vertical Slice Development Methodology
+
+### Core Principle
+**Build complete features one at a time through all layers** rather than building all models, then all APIs, then all frontend components. Each vertical slice delivers a working, testable feature that provides immediate value.
+
+### Vertical Slice Definition
+A vertical slice includes:
+1. **Model**: Domain object with validations and relationships
+2. **API Layer**: RESTful endpoint with request/response handling
+3. **Frontend Component**: React component with forms/displays
+4. **Tests**: Unit, integration, and contract tests at each layer
+5. **Documentation**: Update specs and usage examples
+
+### Benefits
+- **Faster Feedback**: Working features available immediately for testing
+- **Risk Reduction**: Integration issues discovered early in each slice
+- **User Value**: Stakeholders see progress with each completed feature
+- **Easier Debugging**: Smaller, focused changes reduce complexity
+- **Better Planning**: Clear feature boundaries and completion criteria
+
+### Vertical Slice Workflow
+
+```mermaid
+flowchart TD
+    A[🎯 Choose Next Feature Slice] --> B[🔴 TDD: Model Tests]
+    B --> C[🟢 Implement Model]
+    C --> D[🔴 TDD: API Tests]
+    D --> E[🟢 Implement API Endpoint]
+    E --> F[🔴 TDD: Frontend Tests]
+    F --> G[🟢 Implement React Component]
+    G --> H[🔵 Integration Testing]
+    H --> I[📋 Update Documentation]
+    I --> J[✅ Feature Complete]
+    J --> K[Deploy/Demo Feature]
+    K --> A
+
+    style A fill:#e1f5fe
+    style B fill:#ffebee
+    style C fill:#e8f5e8
+    style D fill:#ffebee
+    E --> style E fill:#e8f5e8
+    F --> style F fill:#ffebee
+    G --> style G fill:#e8f5e8
+    H --> style H fill:#e3f2fd
+    I --> style I fill:#fff3e0
+    J --> style J fill:#e8f5e8
+    K --> style K fill:#f3e5f5
+```
+
+### Feature Slice Examples
+
+#### Example 1: "Basic Donor Management"
+- **Model**: Donor with name/email validation
+- **API**: `POST /api/donors`, `GET /api/donors/:id`
+- **Frontend**: DonorForm component, DonorDisplay component
+- **Tests**: Model validations, API requests/responses, component rendering
+- **Result**: Can create and view individual donors
+
+#### Example 2: "Simple Donation Entry"
+- **Model**: Donation with amount validation, belongs_to donor
+- **API**: `POST /api/donations`, donor association handling
+- **Frontend**: DonationForm with donor selection dropdown
+- **Tests**: Model relationships, API data flow, form submission
+- **Result**: Can record donations for existing donors
+
+### Slice Selection Criteria
+**Prioritize slices that:**
+- Provide immediate business value
+- Have minimal external dependencies
+- Can be completed in 1-3 days
+- Build incrementally on previous slices
+- Enable validation of core assumptions
+
+### Anti-Patterns to Avoid
+- ❌ Building all models before any endpoints
+- ❌ Creating full database schema upfront
+- ❌ Implementing all authentication before any features
+- ❌ Building complete UI framework before functionality
+- ❌ "Infrastructure first" approach that delays working features
 
 ---
 
@@ -486,14 +591,14 @@ describe('UserForm', () => {
 
 ## 🚀 Development Workflow
 
-### Feature Development Process
-1. **Plan**: Break feature into TDD-friendly tasks
-2. **Backend First**: Create models with TDD approach
-3. **API Layer**: Build endpoints with request/response tests
-4. **Frontend**: Create components with React Testing Library
-5. **Integration**: End-to-end testing with real API calls
-6. **Documentation**: Update DonationTracking.md and CLAUDE.md with changes
-7. **Review**: Code quality, performance, security
+### Feature Development Process (Vertical Slice Approach)
+1. **Plan**: Select next vertical slice based on business value and dependencies
+2. **TDD Model Layer**: Write failing model tests, implement minimal model code
+3. **TDD API Layer**: Write failing API tests, implement minimal endpoint code
+4. **TDD Frontend Layer**: Write failing component tests, implement minimal React code
+5. **Integration Testing**: End-to-end testing across all layers of the slice
+6. **Documentation**: Update DonationTracking.md and CLAUDE.md with completed slice
+7. **Demo/Validate**: Show working feature, gather feedback, plan next slice
 
 ### Branch Strategy
 - **main/master**: Production-ready code

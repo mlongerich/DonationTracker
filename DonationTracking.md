@@ -1,7 +1,7 @@
 # Children's Home Donation Tracking System - Development Specification
 
 ---
-## 🚀 DEVELOPMENT STATUS (Updated: 2025-09-24)
+## 🚀 DEVELOPMENT STATUS (Updated: 2025-10-03)
 
 ### ✅ COMPLETED WORK
 
@@ -19,6 +19,10 @@
 - [x] Contract testing: Pact gem for consumer-driven API contracts
 - [x] User model with TDD workflow demonstration (username validation - simplified from email-based auth)
 - [x] Database migrations and schema setup
+- [x] **Donor Model**: Email uniqueness validation, PaperTrail audit tracking, smart defaults
+- [x] **DonorService**: Smart data merging with date-based conflict resolution (preserves existing name when blank)
+- [x] **Donor API Endpoints**: POST /api/donors (returns 201 Created or 200 OK), GET /api/donors (ordered by created_at desc), GET /api/donors/:id
+- [x] **Status Code Differentiation**: 201 for new donor creation, 200 for existing donor updates
 
 **Frontend (React):**
 - [x] React 19.1.1 with TypeScript (upgraded to latest React)
@@ -28,6 +32,12 @@
 - [x] Code quality tools: ESLint with React and accessibility plugins, Prettier
 - [x] Axios HTTP client with authentication interceptors
 - [x] Responsive foundation for mobile-first design
+- [x] **Material-UI (MUI) v6**: Mobile-first component library with TypeScript support
+- [x] **DonorForm Component**: Create/update donors with name and email fields
+- [x] **Smart UI Feedback**: "Donor created successfully!" (201) vs "Donor updated successfully!" (200)
+- [x] **Form Auto-clear**: Name and email fields clear after successful submission
+- [x] **Hot Reload Configuration**: WATCHPACK_POLLING=300ms for automatic code changes without manual cache clearing
+- [x] **Cypress E2E Testing**: Continuous validation workflow (Jest → Cypress → Manual verification)
 
 **Quality Assurance & Pre-commit System:**
 - [x] TDD-driven pre-commit hooks system with comprehensive bash testing framework (13 passing tests)
@@ -81,10 +91,11 @@ flowchart TB
     end
 ```
 
-**Next Development Phase**:
-1. **Integration Testing**: Replace mock implementations with real tool execution (RuboCop, Brakeman, ESLint, etc.)
-2. **CI/CD Pipeline**: Implement automated quality gates and deployment workflows
-3. **Feature Development**: Expand User model → Create Donor model → Implement authentication system
+**Next Development Phase (Vertical Slice Approach)**:
+1. **Slice 1 - Basic Donor Management**: Donor model with validations → API endpoint → React component
+2. **Slice 2 - Simple Donation Entry**: Donation model → API endpoint → Form with donor selection
+3. **Slice 3 - Donor Dashboard**: List view → Search/filter → Basic reporting
+4. **Slice 4 - Authentication**: Google OAuth → Role-based access → Protected routes
 
 ---
 
@@ -138,58 +149,77 @@ A secure web application to track donations for a children's home and school org
 - **Relationships:** belongs_to donor, belongs_to child
 - **Note:** Many-to-many relationship (one donor can sponsor multiple children, one child can have multiple sponsors)
 
-## Key Features by Development Phase
+## Development Approach: Thin Vertical Slices
 
-### Phase 1 - Prototype (2-3 weeks)
-**Authentication & Basic CRUD:**
-- Google OAuth integration with role-based access
-- Donor management (create, read, update, delete)
-- Basic donation entry (manual only)
-- Children management
-- Simple list views with basic search
+### Core Philosophy
+**Build complete features one at a time** through all layers (model → API → frontend → tests) rather than building horizontally (all models, then all APIs, then all frontend). Each slice delivers immediate business value and enables faster feedback.
 
-**Essential Security:**
-- HTTPS setup
-- Input validation
-- Basic logging
-- CORS configuration
+### Vertical Slice Roadmap
 
-### Phase 2 - MVP (4-6 weeks)
-**Recurring Donations & Automation:**
-- Automated expected_next_date calculation
-- Daily background job for missed payment detection
-- Status updates (active → late → overdue → at_risk → cancelled)
-- Admin dashboard with overdue donation alerts
+#### Slice 1: Basic Donor Management (1-2 weeks)
+**Goal**: Create, view, and manage individual donors
+- **Model**: Donor with name/email validation and basic fields
+- **API**: `POST /api/donors`, `GET /api/donors/:id`
+- **Frontend**: DonorForm and DonorProfile components
+- **Tests**: Model validations, API endpoints, component behavior
+- **Value**: Can record and view donor information
 
-**Stripe Integration:**
-- Webhook endpoint for successful payments
-- Automatic donation record updates
-- Customer matching via metadata or email
+#### Slice 2: Simple Donation Entry (1-2 weeks)
+**Goal**: Record donations for existing donors
+- **Model**: Donation with amount validation, belongs_to donor
+- **API**: `POST /api/donations`, donor association handling
+- **Frontend**: DonationForm with donor selection dropdown
+- **Tests**: Model relationships, API data flow, form submission
+- **Value**: Can track donation amounts and link to donors
 
-**Enhanced Features:**
-- Project-based donations
-- Sponsorship assignment interface (manual matching)
-- Advanced search and filtering (using Ransack gem)
-- CSV import for historical Google Sheets data
+#### Slice 3: Donor Dashboard & Search (1-2 weeks)
+**Goal**: Browse and search existing donors and donations
+- **API**: `GET /api/donors` with search/pagination
+- **Frontend**: DonorList component with search and filtering
+- **Tests**: Search functionality, pagination, list rendering
+- **Value**: Can find and manage existing donor records
 
-**Reporting:**
-- Monthly donation totals
-- Annual donation reports
-- Individual donor giving history
-- Sponsorship status reports
+#### Slice 4: Basic Authentication (1-2 weeks)
+**Goal**: Secure the application with user access control
+- **Model**: Enhanced User model with Google OAuth fields
+- **API**: Authentication middleware, protected endpoints
+- **Frontend**: Login flow, protected routes, auth context
+- **Tests**: Authentication flows, access control
+- **Value**: Secure access to donation data
 
-### Phase 3 - Advanced Features
-**Enhanced Reporting & Analytics:**
-- Donor retention metrics
-- Revenue forecasting based on recurring donations
-- Sponsorship stability analytics
-- Custom date range reports
+#### Slice 5: Project-Based Donations (1-2 weeks)
+**Goal**: Track donations for specific projects/campaigns
+- **Model**: Project model, enhanced Donation with project association
+- **API**: Project CRUD, donation-project linking
+- **Frontend**: Project management, project selection in donation forms
+- **Value**: Organize donations by specific campaigns
 
-**User Experience:**
-- Dashboard widgets
-- Bulk actions for donation management
-- Email notifications for overdue payments
-- Export functionality (CSV, PDF)
+#### Slice 6: Children & Sponsorship Basics (2-3 weeks)
+**Goal**: Manage children and basic sponsorship tracking
+- **Models**: Child, Sponsorship (many-to-many donor-child)
+- **API**: Children management, sponsorship assignment
+- **Frontend**: Child profiles, sponsorship management interface
+- **Value**: Track child sponsorship relationships
+
+#### Future Slices (MVP+):
+- **Recurring Donation Logic**: Automated payment tracking
+- **Stripe Integration**: Payment processing webhooks
+- **Reporting Dashboard**: Analytics and summaries
+- **Advanced Features**: Bulk operations, export, notifications
+
+### Slice Selection Criteria
+**Prioritize slices that:**
+- Deliver immediate business value
+- Have minimal external dependencies
+- Can be completed in 1-2 weeks
+- Build incrementally on previous slices
+- Enable validation of core assumptions
+
+**Benefits of Vertical Slice Approach:**
+- **Faster Feedback**: Working features available immediately
+- **Risk Reduction**: Integration issues discovered early
+- **User Value**: Stakeholders see progress with each slice
+- **Easier Planning**: Clear completion criteria and dependencies
 
 ## Technical Implementation Details
 
