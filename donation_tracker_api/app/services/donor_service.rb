@@ -1,6 +1,8 @@
 class DonorService
   def self.find_or_update_by_email(donor_attributes, transaction_date)
-    existing_donor = Donor.find_by(email: donor_attributes[:email])
+    # Normalize email before lookup (match Donor model's set_defaults logic)
+    lookup_email = normalize_email(donor_attributes[:email], donor_attributes[:name])
+    existing_donor = Donor.find_by(email: lookup_email)
 
     if existing_donor
       # Update existing donor if transaction is newer
@@ -19,5 +21,16 @@ class DonorService
       donor.save!
       { donor: donor, created: true }
     end
+  end
+
+  private
+
+  def self.normalize_email(email, name)
+    return email unless email.blank?
+
+    # If email is blank, generate it from name (matching Donor model logic)
+    normalized_name = name.blank? ? "Anonymous" : name
+    clean_name = normalized_name.gsub(/\s+/, "")
+    "#{clean_name}@mailinator.com"
   end
 end

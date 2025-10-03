@@ -50,5 +50,24 @@ RSpec.describe DonorService, type: :service do
       expect(result[:donor].id).to eq(existing.id)
       expect(result[:donor].name).to eq("John Smith")  # Unchanged
     end
+
+    it "handles submitting blank name and blank email multiple times" do
+      # First submission with blank name and blank email
+      first_result = DonorService.find_or_update_by_email({ name: "", email: "" }, Time.current)
+
+      expect(first_result[:created]).to be true
+      expect(first_result[:donor].name).to eq("Anonymous")
+      expect(first_result[:donor].email).to eq("Anonymous@mailinator.com")
+
+      first_donor_id = first_result[:donor].id
+
+      # Second submission with blank name and blank email (should update same donor)
+      second_result = DonorService.find_or_update_by_email({ name: "", email: "" }, Time.current + 1.hour)
+
+      expect(second_result[:created]).to be false
+      expect(second_result[:donor].id).to eq(first_donor_id)
+      expect(second_result[:donor].name).to eq("Anonymous")
+      expect(second_result[:donor].email).to eq("Anonymous@mailinator.com")
+    end
   end
 end
