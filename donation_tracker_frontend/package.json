@@ -3,15 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^7.3.2",
+    "@mui/x-data-grid": "^8.12.1",
+    "@mui/x-date-pickers": "^8.12.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^13.5.0",
     "@types/jest": "^27.5.2",
     "@types/node": "^20.10.0",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "axios": "^1.6.0",
+    "dayjs": "^1.11.18",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^6.20.0",
@@ -20,16 +25,17 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
+    "@pact-foundation/pact": "^12.0.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react-router-dom": "^5.3.3",
+    "@vitejs/plugin-react": "^4.0.0",
+    "@vitest/ui": "^1.0.0",
     "cypress": "^13.6.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
     "msw": "^2.0.0",
     "prettier": "^3.0.0",
-    "@pact-foundation/pact": "^12.0.0",
-    "vitest": "^1.0.0",
-    "@vitest/ui": "^1.0.0",
-    "@vitejs/plugin-react": "^4.0.0"
+    "vitest": "^1.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -41,7 +47,7 @@
     "cypress:run": "cypress run",
     "vitest": "vitest",
     "vitest:ui": "vitest --ui",
-    "test:pact": "jest --testMatch='**/*.pact.test.{js,ts}'",
+    "test:pact": "jest --testMatch='**/*.pact.{js,ts}'",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "format": "prettier --write src/**/*.{ts,tsx,css,md}",
@@ -53,7 +59,9 @@
       "react-app/jest",
       "prettier"
     ],
-    "plugins": ["prettier"],
+    "plugins": [
+      "prettier"
+    ],
     "rules": {
       "prettier/prettier": "error"
     }
