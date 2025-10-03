@@ -25,6 +25,9 @@ gem "stripe"
 gem "ransack"
 gem "kaminari"
 
+# Audit trail
+gem "paper_trail"
+
 # Background jobs
 gem "sidekiq"
 
