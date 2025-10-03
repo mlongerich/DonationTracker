@@ -24,11 +24,9 @@ repos:
     hooks:
       - id: commit-msg-validation
         name: Validate commit message prefixes
-        entry: bash -c 'if ! grep -qE "^(backend|frontend|docs|feat|fix|chore|docker):" "$1"; then echo "❌ Commit message must start with one of: backend:, frontend:, docs:, feat:, fix:, chore:, docker:"; exit 1; fi'
-        language: system
+        entry: scripts/validate-commit-msg.sh
+        language: script
         stages: [commit-msg]
-        pass_filenames: false
-        args: ['.git/COMMIT_EDITMSG']
 
       # Documentation reminder (non-blocking warning)
       - id: documentation-reminder
@@ -58,7 +56,7 @@ repos:
       # Prevent sensitive files specific to our project
       - id: prevent-sensitive-files
         name: Prevent sensitive files from being committed
-        entry: bash -c 'if git diff --cached --name-only | grep -qE "(master\.key|\.pem|\.crt|secret|credential)$"; then echo "❌ Sensitive file detected in commit!"; exit 1; fi'
+        entry: 'bash -c "if git diff --cached --name-only | grep -qE \"(master\\.key|\\.pem|\\.crt|secret|credential)$\"; then echo \"❌ Sensitive file detected in commit!\"; exit 1; fi"'
         language: system
         stages: [pre-commit]
         pass_filenames: false

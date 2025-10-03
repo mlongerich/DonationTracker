@@ -35,6 +35,14 @@ rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
 RSpec.configure do |config|
+  # Clean database before entire test suite runs to prevent data pollution between runs
+  config.before(:suite) do
+    ActiveRecord::Base.connection.tables.each do |table|
+      next if table == 'schema_migrations' || table == 'ar_internal_metadata'
+      ActiveRecord::Base.connection.execute("TRUNCATE TABLE #{table} CASCADE")
+    end
+  end
+
   # Remove this line if you're not using ActiveRecord or ActiveRecord fixtures
   config.fixture_paths = [
     Rails.root.join('spec/fixtures')
