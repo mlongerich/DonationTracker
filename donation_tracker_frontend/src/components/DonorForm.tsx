@@ -2,6 +2,7 @@ import { useState, FormEvent } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
 import apiClient from '../api/client';
 
 interface DonorFormProps {
@@ -40,28 +41,28 @@ function DonorForm({ onSubmit }: DonorFormProps) {
 
   return (
     <form onSubmit={handleSubmit}>
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }}>
-          Donor {success} successfully!
-        </Alert>
-      )}
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-      <TextField
-        label="Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <TextField
-        label="Email"
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <Button type="submit">Submit</Button>
+      <Stack spacing={2}>
+        {success && (
+          <Alert severity="success">Donor {success} successfully!</Alert>
+        )}
+        {error && <Alert severity="error">{error}</Alert>}
+        <TextField
+          label="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          fullWidth
+        />
+        <TextField
+          label="Email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          fullWidth
+        />
+        <Button type="submit" variant="contained" color="primary" fullWidth>
+          Submit
+        </Button>
+      </Stack>
     </form>
   );
 }
