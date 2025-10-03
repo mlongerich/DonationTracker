@@ -70,6 +70,8 @@ services:
     environment:
       - REACT_APP_API_URL=http://localhost:3001
       - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=300
+      - FAST_REFRESH=true
       - WDS_SOCKET_HOST=localhost
       - WDS_SOCKET_PORT=3000
     depends_on:
