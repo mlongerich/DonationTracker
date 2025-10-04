@@ -1,6 +1,7 @@
 class Api::DonorsController < ApplicationController
   def index
-    donors = Donor.order(created_at: :desc)
+    @q = Donor.ransack(params[:q])
+    donors = @q.result.order(created_at: :desc).page(params[:page]).per(params[:per_page] || 25)
     render json: donors
   end
 
@@ -15,5 +16,22 @@ class Api::DonorsController < ApplicationController
   def show
     donor = Donor.find(params[:id])
     render json: donor
+  end
+
+  def update
+    donor = Donor.find(params[:id])
+    donor_params = params.require(:donor).permit(:name, :email)
+
+    # Update with current timestamp for date-based conflict resolution
+    donor.update!(donor_params.merge(last_updated_at: Time.current))
+
+    render json: donor, status: :ok
+  end
+
+  def destroy
+    donor = Donor.find(params[:id])
+    donor.destroy!
+
+    head :no_content
   end
 end

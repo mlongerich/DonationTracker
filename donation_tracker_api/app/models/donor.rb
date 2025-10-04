@@ -6,6 +6,11 @@ class Donor < ApplicationRecord
   validates :name, presence: true
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }, uniqueness: { case_sensitive: false }
 
+  # Ransack: Explicitly whitelist searchable attributes
+  def self.ransackable_attributes(auth_object = nil)
+    [ "name", "email", "created_at", "updated_at", "last_updated_at" ]
+  end
+
   private
 
   def set_defaults
