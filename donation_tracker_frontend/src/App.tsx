@@ -17,6 +17,7 @@ interface Donor {
 
 function App() {
   const [donors, setDonors] = useState<Donor[]>([]);
+  const [editingDonor, setEditingDonor] = useState<Donor | null>(null);
 
   const fetchDonors = async () => {
     try {
@@ -34,6 +35,11 @@ function App() {
   const handleDonorSubmit = (data: { name: string; email: string }) => {
     console.log('Donor submitted:', data);
     fetchDonors();
+    setEditingDonor(null);
+  };
+
+  const handleCancel = () => {
+    setEditingDonor(null);
   };
 
   return (
@@ -45,14 +51,22 @@ function App() {
             Donation Tracker
           </Typography>
           <Typography variant="h6" component="h2" gutterBottom>
-            Add Donor
+            {editingDonor ? 'Edit Donor' : 'Add Donor'}
           </Typography>
-          <DonorForm onSubmit={handleDonorSubmit} />
+          <DonorForm
+            donor={editingDonor || undefined}
+            onSubmit={handleDonorSubmit}
+            onCancel={handleCancel}
+          />
           <Box sx={{ mt: 4 }}>
             <Typography variant="h6" component="h2" gutterBottom>
               Donors
             </Typography>
-            <DonorList donors={donors} />
+            <DonorList
+              donors={donors}
+              onEdit={setEditingDonor}
+              editingDonorId={editingDonor?.id}
+            />
           </Box>
         </Box>
       </Container>

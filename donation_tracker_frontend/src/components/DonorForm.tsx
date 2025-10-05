@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
@@ -6,14 +6,27 @@ import Stack from '@mui/material/Stack';
 import apiClient from '../api/client';
 
 interface DonorFormProps {
+  donor?: { id: number; name: string; email: string };
   onSubmit?: (data: { name: string; email: string }) => void;
+  onCancel?: () => void;
 }
 
-function DonorForm({ onSubmit }: DonorFormProps) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+function DonorForm({ donor, onSubmit, onCancel }: DonorFormProps) {
+  const [name, setName] = useState(donor?.name || '');
+  const [email, setEmail] = useState(donor?.email || '');
   const [success, setSuccess] = useState<'created' | 'updated' | false>(false);
   const [error, setError] = useState('');
+
+  // Update form when donor prop changes
+  useEffect(() => {
+    if (donor) {
+      setName(donor.name);
+      setEmail(donor.email);
+    } else {
+      setName('');
+      setEmail('');
+    }
+  }, [donor]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -21,16 +34,25 @@ function DonorForm({ onSubmit }: DonorFormProps) {
     setError('');
 
     try {
-      const response = await apiClient.post('/api/donors', {
-        donor: {
-          name,
-          email,
-        },
-      });
+      const response = donor
+        ? await apiClient.patch(`/api/donors/${donor.id}`, {
+            donor: {
+              name,
+              email,
+            },
+          })
+        : await apiClient.post('/api/donors', {
+            donor: {
+              name,
+              email,
+            },
+          });
 
       setSuccess(response.status === 201 ? 'created' : 'updated');
-      setName('');
-      setEmail('');
+      if (!donor) {
+        setName('');
+        setEmail('');
+      }
       onSubmit?.({ name, email });
     } catch (err: any) {
       setError(
@@ -60,8 +82,18 @@ function DonorForm({ onSubmit }: DonorFormProps) {
           fullWidth
         />
         <Button type="submit" variant="contained" color="primary" fullWidth>
-          Submit
+          {donor ? 'Update' : 'Submit'}
         </Button>
+        {donor && (
+          <Button
+            variant="outlined"
+            color="secondary"
+            fullWidth
+            onClick={onCancel}
+          >
+            Cancel
+          </Button>
+        )}
       </Stack>
     </form>
   );

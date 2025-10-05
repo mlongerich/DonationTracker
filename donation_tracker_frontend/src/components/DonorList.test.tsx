@@ -35,4 +35,41 @@ describe('DonorList', () => {
     expect(screen.getByText('Middle Donor')).toBeInTheDocument();
     expect(screen.getByText('Oldest Donor')).toBeInTheDocument();
   });
+
+  it('renders edit button for each donor', () => {
+    const donors = [
+      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+    ];
+
+    render(<DonorList donors={donors} />);
+
+    const editButtons = screen.getAllByRole('button', { name: /edit/i });
+    expect(editButtons).toHaveLength(2);
+  });
+
+  it('calls onEdit when edit button clicked', async () => {
+    const donors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
+    const handleEdit = jest.fn();
+
+    render(<DonorList donors={donors} onEdit={handleEdit} />);
+
+    const editButton = screen.getByRole('button', { name: /edit/i });
+    editButton.click();
+
+    expect(handleEdit).toHaveBeenCalledWith(donors[0]);
+  });
+
+  it('accepts editingDonorId prop for highlighting', () => {
+    const donors = [
+      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+    ];
+
+    render(<DonorList donors={donors} editingDonorId={1} />);
+
+    // Verify the editing donor is displayed
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+    expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+  });
 });

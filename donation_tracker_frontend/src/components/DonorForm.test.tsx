@@ -185,4 +185,125 @@ describe('DonorForm', () => {
       ).toBeInTheDocument();
     });
   });
+
+  it('pre-fills form when donor prop is provided', () => {
+    const donor = {
+      id: 1,
+      name: 'Existing Donor',
+      email: 'existing@example.com',
+    };
+
+    render(
+      <ThemeProvider theme={theme}>
+        <DonorForm donor={donor} />
+      </ThemeProvider>
+    );
+
+    expect(screen.getByLabelText(/name/i)).toHaveValue('Existing Donor');
+    expect(screen.getByLabelText(/email/i)).toHaveValue('existing@example.com');
+  });
+
+  it('shows "Update" button text when donor prop is provided', () => {
+    const donor = {
+      id: 1,
+      name: 'Existing Donor',
+      email: 'existing@example.com',
+    };
+
+    render(
+      <ThemeProvider theme={theme}>
+        <DonorForm donor={donor} />
+      </ThemeProvider>
+    );
+
+    expect(screen.getByRole('button', { name: /update/i })).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /^submit$/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it('sends PATCH request when updating existing donor', async () => {
+    const donor = {
+      id: 1,
+      name: 'Original Name',
+      email: 'original@example.com',
+    };
+    mockedApiClient.patch.mockResolvedValue({
+      data: { id: 1, name: 'Updated Name', email: 'original@example.com' },
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as any,
+    });
+
+    const user = userEvent.setup();
+
+    render(
+      <ThemeProvider theme={theme}>
+        <DonorForm donor={donor} />
+      </ThemeProvider>
+    );
+
+    const nameInput = screen.getByLabelText(/name/i);
+    await user.clear(nameInput);
+    await user.type(nameInput, 'Updated Name');
+    await user.click(screen.getByRole('button', { name: /update/i }));
+
+    await waitFor(() => {
+      expect(mockedApiClient.patch).toHaveBeenCalledWith('/api/donors/1', {
+        donor: {
+          name: 'Updated Name',
+          email: 'original@example.com',
+        },
+      });
+    });
+  });
+
+  it('shows Cancel button when editing donor', () => {
+    const donor = {
+      id: 1,
+      name: 'Existing Donor',
+      email: 'existing@example.com',
+    };
+
+    render(
+      <ThemeProvider theme={theme}>
+        <DonorForm donor={donor} />
+      </ThemeProvider>
+    );
+
+    expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
+  });
+
+  it('does not show Cancel button when adding new donor', () => {
+    render(
+      <ThemeProvider theme={theme}>
+        <DonorForm />
+      </ThemeProvider>
+    );
+
+    expect(
+      screen.queryByRole('button', { name: /cancel/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it('calls onCancel when Cancel button is clicked', async () => {
+    const donor = {
+      id: 1,
+      name: 'Existing Donor',
+      email: 'existing@example.com',
+    };
+    const handleCancel = jest.fn();
+    const user = userEvent.setup();
+
+    render(
+      <ThemeProvider theme={theme}>
+        <DonorForm donor={donor} onCancel={handleCancel} />
+      </ThemeProvider>
+    );
+
+    await user.click(screen.getByRole('button', { name: /cancel/i }));
+
+    expect(handleCancel).toHaveBeenCalled();
+  });
 });

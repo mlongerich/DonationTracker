@@ -28,6 +28,28 @@ test('fetches and displays donors on mount', async () => {
   expect(screen.getByText('jane@example.com')).toBeInTheDocument();
 });
 
+test('passes donor to DonorForm when edit button clicked', async () => {
+  const user = userEvent.setup();
+  const mockDonors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
+
+  mockedApiClient.get.mockResolvedValue({ data: mockDonors });
+
+  render(<App />);
+
+  await waitFor(() => {
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+  });
+
+  const editButton = screen.getByRole('button', { name: /edit/i });
+  await user.click(editButton);
+
+  // Form should be pre-filled with donor data
+  expect(screen.getByLabelText(/name/i)).toHaveValue('John Doe');
+  expect(screen.getByLabelText(/email/i)).toHaveValue('john@example.com');
+  // Button should say "Update"
+  expect(screen.getByRole('button', { name: /update/i })).toBeInTheDocument();
+});
+
 test('refreshes donor list after successful form submission', async () => {
   const user = userEvent.setup();
   const initialDonors = [
@@ -63,4 +85,34 @@ test('refreshes donor list after successful form submission', async () => {
   await waitFor(() => {
     expect(screen.getByText('New Donor')).toBeInTheDocument();
   });
+});
+
+test('clears editing state when Cancel button is clicked', async () => {
+  const user = userEvent.setup();
+  const mockDonors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
+
+  mockedApiClient.get.mockResolvedValue({ data: mockDonors });
+
+  render(<App />);
+
+  await waitFor(() => {
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+  });
+
+  // Click edit button
+  const editButton = screen.getByRole('button', { name: /edit/i });
+  await user.click(editButton);
+
+  // Verify form is in edit mode
+  expect(screen.getByRole('button', { name: /update/i })).toBeInTheDocument();
+
+  // Click cancel button
+  const cancelButton = screen.getByRole('button', { name: /cancel/i });
+  await user.click(cancelButton);
+
+  // Verify form returned to add mode
+  expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
+  expect(
+    screen.queryByRole('button', { name: /cancel/i })
+  ).not.toBeInTheDocument();
 });
