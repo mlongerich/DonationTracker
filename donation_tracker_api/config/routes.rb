@@ -7,7 +7,9 @@ Rails.application.routes.draw do
 
   # API routes
   namespace :api do
-    resources :donors, only: [ :create, :show, :index, :update, :destroy ]
+    resources :donors, only: [ :create, :show, :index, :update, :destroy ] do
+      delete "all", action: :destroy_all, on: :collection
+    end
   end
 
   # Defines the root path route ("/")

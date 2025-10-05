@@ -34,4 +34,17 @@ class Api::DonorsController < ApplicationController
 
     head :no_content
   end
+
+  def destroy_all
+    # Only allow in development and test environments
+    if Rails.env.production?
+      render json: { error: "Not allowed in production" }, status: :forbidden
+      return
+    end
+
+    count = Donor.count
+    Donor.destroy_all
+
+    render json: { deleted_count: count }, status: :ok
+  end
 end

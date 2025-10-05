@@ -126,4 +126,20 @@ RSpec.describe "/api/donors", type: :request do
       expect(response).to have_http_status(:no_content)
     end
   end
+
+  describe "DELETE /api/donors/all" do
+    it "deletes all donors (test cleanup)" do
+      Donor.create!(name: "Donor 1", email: "donor1@example.com", last_updated_at: Time.current)
+      Donor.create!(name: "Donor 2", email: "donor2@example.com", last_updated_at: Time.current)
+      Donor.create!(name: "Donor 3", email: "donor3@example.com", last_updated_at: Time.current)
+
+      expect {
+        delete "/api/donors/all", headers: { "Host" => "api" }
+      }.to change(Donor, :count).by(-3)
+
+      expect(response).to have_http_status(:ok)
+      json_response = JSON.parse(response.body)
+      expect(json_response["deleted_count"]).to eq(3)
+    end
+  end
 end
