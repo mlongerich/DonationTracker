@@ -12,7 +12,9 @@ describe('Donor Form', () => {
     cy.contains('button', /submit/i).click();
 
     // Verify success message appears (created or updated)
-    cy.contains(/donor (created|updated) successfully/i, { timeout: 10000 }).should('be.visible');
+    cy.contains(/donor (created|updated) successfully/i, {
+      timeout: 10000,
+    }).should('be.visible');
 
     // Verify success alert has correct styling (green)
     cy.contains(/donor (created|updated) successfully/i)
@@ -35,7 +37,9 @@ describe('Donor Form', () => {
     cy.contains('button', /submit/i).click();
 
     // Wait for success message
-    cy.contains(/donor (created|updated) successfully/i, { timeout: 10000 }).should('be.visible');
+    cy.contains(/donor (created|updated) successfully/i, {
+      timeout: 10000,
+    }).should('be.visible');
 
     // Verify donor appears in the list
     cy.contains('Donors').should('be.visible');

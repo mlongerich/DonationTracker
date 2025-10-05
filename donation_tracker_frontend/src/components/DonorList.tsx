@@ -42,7 +42,9 @@ const DonorList: React.FC<DonorListProps> = ({
           <Card
             key={donor.id}
             variant="outlined"
+            data-testid="donor-row"
             data-editing={isEditing}
+            className={isEditing ? 'editing' : ''}
             sx={{
               borderColor: isEditing ? 'primary.main' : undefined,
               borderWidth: isEditing ? 2 : 1,
