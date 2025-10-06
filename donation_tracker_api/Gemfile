@@ -68,9 +68,6 @@ group :development, :test do
 
   # Code smell detection
   gem "reek", require: false
-
-  # Contract testing
-  gem "pact", require: false
 end
 
 group :test do
