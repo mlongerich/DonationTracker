@@ -25,11 +25,9 @@ flowchart TB
 
     C --> C1[app/models/<br/>Business logic models]
     C --> C2[spec/<br/>RSpec test suite]
-    C --> C3[spec/pact_helper.rb<br/>Contract testing]
 
     D --> D1[src/<br/>TypeScript source]
     D --> D2[src/api/client.ts<br/>Axios HTTP client]
-    D --> D3[src/tests/pact/<br/>Consumer contracts]
 
     E --> E1[test-runner.sh<br/>Bash unit testing framework]
     E --> E2[check-documentation.sh<br/>Documentation reminder]
@@ -207,24 +205,19 @@ npm run vitest:ui            # Vitest visual dashboard
 - **Every user-facing feature MUST have both** unit tests AND E2E tests
 - **Run Cypress continuously**, not just before commits - prevents big surprises
 
-### Contract Testing (Consumer-Driven) - Installed & Configured
-- **Pact**: Consumer-driven contract testing between React and Rails API
-- **Backend**: Pact gem (v1.66.1) with provider verification setup
-- **Frontend**: @pact-foundation/pact (v12.0.0) for consumer contract definition
-- **Consumer Tests**: React app defines expected API behavior in tests
-- **Provider Verification**: Rails API validates against consumer contracts
-- **CI/CD Integration**: Automated contract verification prevents breaking changes
+### Contract Testing - Deferred
+**Status**: Contract testing (Pact) has been deferred until a microservice architecture split is implemented.
 
-#### Configuration Files Created
-```bash
-# Backend
-donation_tracker_api/spec/pact_helper.rb           # Provider setup
-donation_tracker_api/spec/pacts/                   # Contract files
+**Rationale**:
+- **Monorepo architecture**: Both frontend and backend are developed/deployed together
+- **Comprehensive RSpec tests**: Complete API endpoint coverage with request specs
+- **Cypress E2E tests**: Validate real frontend→backend integration
+- **Single developer**: No need for independent service versioning
 
-# Frontend
-donation_tracker_frontend/src/tests/pact/setup.ts  # Consumer setup
-donation_tracker_frontend/src/tests/pact/*.test.ts # Example contracts
-```
+**Future consideration**: Reintroduce contract testing when services are:
+- Managed by separate teams
+- Deployed independently
+- Require API compatibility verification across teams
 
 ### Test Requirements
 - **All models**: Must have comprehensive validation and relationship tests
@@ -283,7 +276,7 @@ A vertical slice includes:
 1. **Model**: Domain object with validations and relationships
 2. **API Layer**: RESTful endpoint with request/response handling
 3. **Frontend Component**: React component with forms/displays
-4. **Tests**: Unit, integration, and contract tests at each layer
+4. **Tests**: Unit and integration tests at each layer
 5. **Documentation**: Update specs and usage examples
 
 ### Benefits
@@ -387,70 +380,6 @@ docker-compose exec frontend sh   # React debugging
 
 ---
 
-## 🤝 Contract Testing Implementation (2025)
-
-### Consumer-Driven Contract Testing Workflow
-
-#### Consumer Side (React Frontend)
-```javascript
-// Example: User API contract test
-describe('User API Contract', () => {
-  it('should get user by ID', async () => {
-    // Define expected contract
-    await provider
-      .given('user 123 exists')
-      .uponReceiving('a request for user 123')
-      .withRequest({
-        method: 'GET',
-        path: '/api/users/123',
-        headers: { 'Accept': 'application/json' }
-      })
-      .willRespondWith({
-        status: 200,
-        body: { id: 123, username: 'testuser' }
-      });
-
-    // Test against mock provider
-    const user = await apiClient.getUser(123);
-    expect(user.username).toBe('testuser');
-  });
-});
-```
-
-#### Provider Side (Rails API)
-```ruby
-# spec/pact_helper.rb
-RSpec.describe 'User API Provider', type: :pact do
-  let(:provider) { Pact::Provider.new }
-
-  before do
-    # Set up test data based on provider states
-    User.create!(id: 123, username: 'testuser')
-  end
-
-  it 'validates user contracts' do
-    Pact.verify_provider(
-      provider_base_url: 'http://localhost:3001',
-      pact_files: ['spec/pacts/frontend-api.json']
-    )
-  end
-end
-```
-
-#### Pact Broker Integration
-- Store and version contracts centrally
-- Enable independent deployments
-- Track consumer-provider compatibility
-- Automate contract verification in CI/CD
-
-#### Best Practices
-- **One Contract Per Consumer-Provider Pair**: Clear ownership and responsibility
-- **Provider States**: Use given() clauses to set up test data
-- **Semantic Versioning**: Version contracts with breaking change detection
-- **Fail Fast**: Contract failures should block deployments
-
----
-
 ## 🎯 Code Quality Standards
 
 ### Backend (Rails)
@@ -480,8 +409,7 @@ Before committing code:
 5. Coverage thresholds must be met (90% backend, 80% frontend)
 6. Code smell analysis must show no new issues (Reek)
 7. Quality metrics must be maintained (RubyCritic score ≥95)
-8. Contract tests must pass (Pact verification)
-9. Cost metrics should not increase significantly (Skunk)
+8. Cost metrics should not increase significantly (Skunk)
 
 #### Pre-commit Hooks Flow
 
@@ -578,8 +506,7 @@ describe('UserForm', () => {
 ### Testing Architecture Hierarchy
 1. **Unit Tests**: Fast, isolated, high coverage (90%+)
 2. **Integration Tests**: Component interactions, API calls (80%+)
-3. **Contract Tests**: API compatibility between services
-4. **E2E Tests**: Critical user journeys, slow but comprehensive
+3. **E2E Tests**: Critical user journeys, slow but comprehensive
 
 ### Performance Best Practices
 - **Bundle Analysis**: Monitor JavaScript bundle sizes
@@ -646,7 +573,6 @@ docker-compose exec api bundle exec skunk
 docker-compose exec frontend npm test
 docker-compose exec frontend npm run vitest
 docker-compose exec frontend npm run vitest:ui
-docker-compose exec frontend npm run test:pact
 docker-compose exec frontend npm run lint
 
 # Pre-commit Scripts Testing (TDD-driven bash testing)
