@@ -16,6 +16,7 @@
 - [x] Rails 8.0.2 API with Ruby 3.4.2 (upgraded from original Rails version)
 - [x] PostgreSQL 15 database configuration with Docker networking
 - [x] Comprehensive testing stack: RSpec, Factory Bot, Faker, SimpleCov, Shoulda Matchers, Database Cleaner, WebMock, VCR
+- [x] **FactoryBot Best Practices**: Default factory values with Faker for realistic test data (names, emails), DRY test code
 - [x] Code quality tools: RuboCop, Brakeman, Bullet (N+1 query detection)
 - [x] Advanced analysis tools: Reek (code smells), RubyCritic (quality reports), Skunk (cost metrics)
 - [x] Contract testing: Pact gem for consumer-driven API contracts
@@ -25,7 +26,7 @@
 - [x] **DonorService**: Smart data merging with date-based conflict resolution (preserves existing name when blank)
 - [x] **Donor API Endpoints**:
   - POST /api/donors (returns 201 Created or 200 OK)
-  - GET /api/donors (ordered by created_at desc, excludes discarded, pagination with metadata)
+  - GET /api/donors (ordered alphabetically by name, excludes discarded, pagination with metadata)
   - GET /api/donors?include_discarded=true (includes archived donors)
   - GET /api/donors/:id
   - PATCH /api/donors/:id
@@ -49,11 +50,13 @@
 - [x] **Smart UI Feedback**: "Donor created successfully!" (201) vs "Donor updated successfully!" (200)
 - [x] **Form Auto-clear**: Name and email fields clear after successful submission
 - [x] **DonorList Component**: Card-based layout with outlined variant, Typography variants (subtitle1 for names, body2 for emails)
+- [x] **Archive/Restore UI**: Visual indicators (opacity 0.6, Archive chip), Archive/Restore buttons with tooltips for accessibility
+- [x] **Archived Donors Toggle**: Show/hide archived donors with toggle button, search respects archived state
 - [x] **App Integration**: Fetches donors on mount, automatically refreshes list after form submission
 - [x] **Search UI**: Debounced search (300ms) for name OR email with placeholder "Search by name or email..."
 - [x] **Pagination UI**: Material-UI Pagination component with server-side pagination (10 per page)
 - [x] **Hot Reload Configuration**: WATCHPACK_POLLING=300ms for automatic code changes without manual cache clearing
-- [x] **Cypress E2E Testing**: Test database isolation via cy.intercept() redirecting to port 3002, comprehensive search validation (5 passing tests)
+- [x] **Cypress E2E Testing**: Test database isolation via cy.intercept() redirecting to port 3002, comprehensive search and archive validation (6 passing tests)
 - [x] **Config-Driven URLs**: REACT_APP_API_URL for dev, devApiUrl/testApiUrl for Cypress (no hardcoded ports)
 
 **Quality Assurance & Pre-commit System:**
@@ -67,7 +70,7 @@
 - [x] **FULLY FUNCTIONAL**: Backend (3 tools) and Frontend (4 tools) quality enforcement working
 - [x] **CODE QUALITY METRICS**: 0 RuboCop violations, 0 Brakeman security warnings, all tests passing
 - [x] **TYPE SAFETY**: TypeScript errors resolved, Pact v12 API correctly implemented
-- [x] **TEST COVERAGE**: Backend 33 RSpec tests, Frontend 27 Jest tests, 5 Cypress E2E tests (65 total tests passing)
+- [x] **TEST COVERAGE**: Backend 33 RSpec tests, Frontend 30 Jest tests, 6 Cypress E2E tests (69 total tests passing)
 - [x] **DATABASE CLEANUP**: before(:suite) hook prevents test pollution between runs
 
 **Development Decisions Made:**
@@ -75,6 +78,7 @@
 - **Repository Strategy**: Monorepo with service-separated commits for atomic feature development
 - **Containerization**: Solves native gem compilation issues and ensures consistent environment
 - **Testing Philosophy**: TDD methodology with strict single-test rule and comprehensive coverage requirements
+- **FactoryBot Conventions**: Use default factory values (Faker-generated names/emails) for DRY, maintainable tests; explicit values only when testing specific edge cases
 - **Test Database Isolation**: Separate api-e2e service with isolated test database prevents dev DB pollution during Cypress tests
 - **Config-Driven Development**: Environment variables for all URLs/ports (no hardcoded values) for CI/CD pipeline readiness
 - **Quality Assurance**: Multiple analysis tools (Reek, RubyCritic, Skunk) for maintaining high code standards

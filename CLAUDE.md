@@ -22,6 +22,8 @@ flowchart TB
     A --> E[scripts/<br/>Testing & validation]
     A --> F[DonationTracking.md<br/>Project specifications]
     A --> G[CLAUDE.md<br/>Development conventions]
+    A --> H[TICKETS.md<br/>Active work items]
+    A --> I[BACKLOG.md<br/>Future features]
 
     C --> C1[app/models/<br/>Business logic models]
     C --> C2[spec/<br/>RSpec test suite]
@@ -35,6 +37,52 @@ flowchart TB
     E --> E4[pre-commit-frontend.sh<br/>Frontend quality gates]
     E --> E5[test-*.sh<br/>Comprehensive test suite]
 ```
+
+---
+
+## 📋 Ticket & Task Management System
+
+### Active Work Tracking
+**File:** `TICKETS.md`
+- Current user stories and tasks being actively developed
+- Detailed acceptance criteria and technical notes
+- Links to commits and files changed
+- Use `/memory` to access during Claude Code sessions
+
+### Feature Backlog
+**File:** `BACKLOG.md`
+- Future feature ideas and enhancements
+- Prioritized by business value and effort
+- Log ideas here when discovered during development
+- Review periodically to plan next work
+
+### Workflow
+
+```mermaid
+flowchart LR
+    A[New Feature Idea] --> B{Currently Working<br/>on Something Else?}
+    B -->|Yes| C[Add to BACKLOG.md]
+    B -->|No| D[Add to TICKETS.md]
+    C --> E[Run /compact]
+    D --> F[Implement with TDD]
+    F --> G[Update TICKETS.md<br/>mark complete]
+    G --> H[Commit changes]
+    H --> I[Auto /compact]
+```
+
+### Benefits
+- **Context Persistence:** Tickets survive `/compact` (external files)
+- **Clean Context:** Compact after logging backlog items to remove distractions
+- **Async Feature Capture:** Don't lose ideas while focused on current work
+- **Historical Record:** Track what was built and why
+- **Claude Code Integration:** Use `/memory` to access ticket context
+
+### Best Practices
+1. **Create ticket BEFORE starting work** - Clarifies goals and acceptance criteria
+2. **Update tickets as you work** - Track progress and decisions
+3. **Compact after backlog entries** - Especially when discovered mid-task
+4. **One ticket = One vertical slice** - Complete feature through all layers
+5. **Link commits to tickets** - Maintains traceability
 
 ---
 

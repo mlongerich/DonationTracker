@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_TOOL_COMMAND\" =~ \"git commit\" ]] && [[ ! \"$CLAUDE_TOOL_COMMAND\" =~ \"--no-verify\" ]]; then echo '[AUTO-COMPACT] Git commit detected - compacting conversation...'; claude --compact; fi"
+          }
+        ]
+      }
+    ]
+  }
+}
