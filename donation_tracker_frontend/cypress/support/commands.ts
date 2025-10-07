@@ -8,7 +8,7 @@
  * Clears all donors from the database (test cleanup)
  */
 Cypress.Commands.add('clearDonors', () => {
-  cy.request('DELETE', 'http://localhost:3001/api/donors/all');
+  cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/donors/all`);
 });
 
 /**

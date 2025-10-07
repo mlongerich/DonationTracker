@@ -655,6 +655,32 @@ pre-commit run --all-files                  # Run all hooks manually
 
 ---
 
+## 🎯 Token Usage Optimization
+
+*Guidelines for efficient Claude Code interactions to manage API quota*
+
+### Response Verbosity
+- Provide minimal explanations unless explicitly requested
+- Skip preambles like "Sure, I'll help you with that"
+- Don't repeat the user's question back
+- After completing tasks, confirm completion in 1 sentence max
+- Only explain "why" when asked or when critical
+
+### Tool Usage
+- Batch related operations in single messages when possible
+- Avoid re-reading files already read in the conversation
+- Use targeted grep/glob instead of reading full files
+- Only run tests when explicitly asked or after making changes
+- Don't re-check status after successful operations
+- Combine related edits into single operations when safe
+
+### Session Management
+- Switch to shorter responses when requested
+- Skip redundant checks - if a test passed, don't verify again
+- Fewer tool confirmations - don't update todos for every tiny step
+
+---
+
 ## 🔄 Deployment Considerations
 
 ### Production Readiness Checklist
@@ -669,4 +695,4 @@ pre-commit run --all-files                  # Run all hooks manually
 ---
 
 *This document should be updated as development practices evolve*
-*Last updated: 2025-09-24*
+*Last updated: 2025-10-07*
