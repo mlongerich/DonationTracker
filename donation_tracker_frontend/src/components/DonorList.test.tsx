@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import DonorList from './DonorList';
 
 describe('DonorList', () => {
@@ -71,5 +72,48 @@ describe('DonorList', () => {
     // Verify the editing donor is displayed
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+  });
+
+  it('shows tooltip "Edit donor" when hovering over edit button', async () => {
+    const user = userEvent.setup();
+    const donors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
+
+    render(<DonorList donors={donors} />);
+
+    const editButton = screen.getByRole('button', { name: /edit/i });
+    await user.hover(editButton);
+
+    expect(await screen.findByText('Edit donor')).toBeInTheDocument();
+  });
+
+  it('shows tooltip "Archive donor" when hovering over archive button', async () => {
+    const user = userEvent.setup();
+    const donors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
+
+    render(<DonorList donors={donors} />);
+
+    const archiveButton = screen.getByRole('button', { name: /archive/i });
+    await user.hover(archiveButton);
+
+    expect(await screen.findByText('Archive donor')).toBeInTheDocument();
+  });
+
+  it('shows tooltip "Restore donor" when hovering over restore button', async () => {
+    const user = userEvent.setup();
+    const donors = [
+      {
+        id: 1,
+        name: 'Archived Donor',
+        email: 'archived@example.com',
+        discarded_at: '2025-10-07T00:00:00Z',
+      },
+    ];
+
+    render(<DonorList donors={donors} />);
+
+    const restoreButton = screen.getByRole('button', { name: /restore/i });
+    await user.hover(restoreButton);
+
+    expect(await screen.findByText('Restore donor')).toBeInTheDocument();
   });
 });

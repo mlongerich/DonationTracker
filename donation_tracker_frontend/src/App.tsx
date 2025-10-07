@@ -7,6 +7,8 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import { theme } from './theme';
 import DonorForm from './components/DonorForm';
 import DonorList from './components/DonorList';
@@ -16,6 +18,7 @@ interface Donor {
   id: number;
   name: string;
   email: string;
+  discarded_at?: string | null;
 }
 
 interface PaginationMeta {
@@ -31,6 +34,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [showArchived, setShowArchived] = useState(false);
   const [paginationMeta, setPaginationMeta] = useState<PaginationMeta>({
     total_count: 0,
     total_pages: 0,
@@ -62,6 +66,11 @@ function App() {
         };
       }
 
+      // Include archived donors if toggle is on
+      if (showArchived) {
+        params.include_discarded = 'true';
+      }
+
       const response = await apiClient.get('/api/donors', { params });
       setDonors(response.data.donors);
       setPaginationMeta(response.data.meta);
@@ -73,7 +82,7 @@ function App() {
   useEffect(() => {
     fetchDonors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedQuery, currentPage]);
+  }, [debouncedQuery, currentPage, showArchived]);
 
   const handleDonorSubmit = (data: { name: string; email: string }) => {
     console.log('Donor submitted:', data);
@@ -83,6 +92,24 @@ function App() {
 
   const handleCancel = () => {
     setEditingDonor(null);
+  };
+
+  const handleArchive = async (id: number) => {
+    try {
+      await apiClient.delete(`/api/donors/${id}`);
+      fetchDonors();
+    } catch (error) {
+      console.error('Failed to archive donor:', error);
+    }
+  };
+
+  const handleRestore = async (id: number) => {
+    try {
+      await apiClient.post(`/api/donors/${id}/restore`);
+      fetchDonors();
+    } catch (error) {
+      console.error('Failed to restore donor:', error);
+    }
   };
 
   const handlePageChange = (
@@ -127,10 +154,22 @@ function App() {
               sx={{ mb: 2 }}
               size="small"
             />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={showArchived}
+                  onChange={(e) => setShowArchived(e.target.checked)}
+                />
+              }
+              label="Show Archived Donors"
+              sx={{ mb: 2 }}
+            />
             <DonorList
               donors={donors}
               onEdit={setEditingDonor}
               editingDonorId={editingDonor?.id}
+              onArchive={handleArchive}
+              onRestore={handleRestore}
             />
             {paginationMeta.total_pages > 1 && (
               <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
