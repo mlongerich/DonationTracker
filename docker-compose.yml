@@ -43,6 +43,7 @@ services:
       - DATABASE_URL=postgresql://postgres:password@postgres:5432/donation_tracker_development
       - REDIS_URL=redis://redis:6379/0
       - RAILS_ENV=development
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
     depends_on:
       postgres:
         condition: service_healthy
@@ -78,6 +79,37 @@ services:
       - api
     stdin_open: true
     tty: true
+
+  # Rails API for E2E Tests (test environment)
+  api-e2e:
+    build:
+      context: ./donation_tracker_api
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./donation_tracker_api:/app
+      - bundle_cache:/usr/local/bundle
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@postgres:5432/donation_tracker_test
+      - REDIS_URL=redis://redis:6379/1
+      - RAILS_ENV=test
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "
+        rm -f tmp/pids/server.pid &&
+        bundle exec rails db:create db:migrate RAILS_ENV=test &&
+        bundle exec rails server -b 0.0.0.0 -p 3002
+      "
+    profiles:
+      - e2e
 
 # Test runners (optional profiles)
   # Rails test runner

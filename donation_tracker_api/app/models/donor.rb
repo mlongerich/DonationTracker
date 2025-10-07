@@ -8,7 +8,12 @@ class Donor < ApplicationRecord
 
   # Ransack: Explicitly whitelist searchable attributes
   def self.ransackable_attributes(auth_object = nil)
-    [ "name", "email", "created_at", "updated_at", "last_updated_at" ]
+    [ "name", "email", "created_at", "updated_at", "last_updated_at", "name_or_email" ]
+  end
+
+  # Custom Ransack searcher for name OR email
+  ransacker :name_or_email do
+    Arel.sql("CONCAT(name, ' ', email)")
   end
 
   private

@@ -48,9 +48,9 @@ RSpec.describe "/api/donors", type: :request do
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
-      expect(json_response.length).to eq(2)
-      expect(json_response[0]["email"]).to eq("new@example.com")
-      expect(json_response[1]["email"]).to eq("old@example.com")
+      expect(json_response["donors"].length).to eq(2)
+      expect(json_response["donors"][0]["email"]).to eq("new@example.com")
+      expect(json_response["donors"][1]["email"]).to eq("old@example.com")
     end
 
     it "filters donors by name using Ransack" do
@@ -62,8 +62,8 @@ RSpec.describe "/api/donors", type: :request do
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
-      expect(json_response.length).to eq(2)
-      expect(json_response.map { |d| d["name"] }).to contain_exactly("Alice Smith", "Alice Brown")
+      expect(json_response["donors"].length).to eq(2)
+      expect(json_response["donors"].map { |d| d["name"] }).to contain_exactly("Alice Smith", "Alice Brown")
     end
 
     it "filters donors by email using Ransack" do
@@ -74,8 +74,25 @@ RSpec.describe "/api/donors", type: :request do
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
-      expect(json_response.length).to eq(1)
-      expect(json_response[0]["email"]).to eq("test1@example.com")
+      expect(json_response["donors"].length).to eq(1)
+      expect(json_response["donors"][0]["email"]).to eq("test1@example.com")
+    end
+
+    it "filters donors by name OR email using Ransack" do
+      _donor1 = Donor.create!(name: "Michael Longerich", email: "mlongerich@gmail.com", last_updated_at: Time.current)
+      _donor2 = Donor.create!(name: "John Smith", email: "michael@mailinator.com", last_updated_at: Time.current)
+      _donor3 = Donor.create!(name: "Bob Example", email: "example@yahoo.com", last_updated_at: Time.current)
+
+      get "/api/donors", params: { q: { name_or_email_cont: "n" } }, headers: { "Host" => "api" }
+
+      expect(response).to have_http_status(:ok)
+      json_response = JSON.parse(response.body)
+      expect(json_response["donors"].length).to eq(2)
+      names_and_emails = json_response["donors"].map { |d| [ d["name"], d["email"] ] }
+      expect(names_and_emails).to contain_exactly(
+        [ "Michael Longerich", "mlongerich@gmail.com" ],
+        [ "John Smith", "michael@mailinator.com" ]
+      )
     end
 
     it "paginates donors using Kaminari" do
@@ -87,7 +104,24 @@ RSpec.describe "/api/donors", type: :request do
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
-      expect(json_response.length).to eq(10)
+      expect(json_response["donors"].length).to eq(10)
+    end
+
+    it "returns pagination metadata with donors" do
+      15.times do |i|
+        Donor.create!(name: "Donor #{i}", email: "donor#{i}@example.com", last_updated_at: Time.current)
+      end
+
+      get "/api/donors", params: { page: 2, per_page: 10 }, headers: { "Host" => "api" }
+
+      expect(response).to have_http_status(:ok)
+      json_response = JSON.parse(response.body)
+      expect(json_response["donors"]).to be_an(Array)
+      expect(json_response["donors"].length).to eq(5)
+      expect(json_response["meta"]["total_count"]).to eq(15)
+      expect(json_response["meta"]["total_pages"]).to eq(2)
+      expect(json_response["meta"]["current_page"]).to eq(2)
+      expect(json_response["meta"]["per_page"]).to eq(10)
     end
   end
 

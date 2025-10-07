@@ -2,7 +2,16 @@ class Api::DonorsController < ApplicationController
   def index
     @q = Donor.ransack(params[:q])
     donors = @q.result.order(created_at: :desc).page(params[:page]).per(params[:per_page] || 25)
-    render json: donors
+
+    render json: {
+      donors: donors,
+      meta: {
+        total_count: donors.total_count,
+        total_pages: donors.total_pages,
+        current_page: donors.current_page,
+        per_page: donors.limit_value
+      }
+    }
   end
 
   def create
