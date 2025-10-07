@@ -116,4 +116,36 @@ describe('DonorList', () => {
 
     expect(await screen.findByText('Restore donor')).toBeInTheDocument();
   });
+
+  it('hides @mailinator.com email addresses', () => {
+    const donors = [
+      { id: 1, name: 'Anonymous', email: 'Anonymous@mailinator.com' },
+    ];
+
+    render(<DonorList donors={donors} />);
+
+    expect(screen.getByText('Anonymous')).toBeInTheDocument();
+    expect(
+      screen.queryByText('Anonymous@mailinator.com')
+    ).not.toBeInTheDocument();
+  });
+
+  it('displays placeholder text for hidden emails', () => {
+    const donors = [
+      { id: 1, name: 'Anonymous', email: 'Anonymous@mailinator.com' },
+    ];
+
+    render(<DonorList donors={donors} />);
+
+    expect(screen.getByText('(No email provided)')).toBeInTheDocument();
+  });
+
+  it('shows real email addresses for non-mailinator domains', () => {
+    const donors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
+
+    render(<DonorList donors={donors} />);
+
+    expect(screen.getByText('john@example.com')).toBeInTheDocument();
+    expect(screen.queryByText('(No email provided)')).not.toBeInTheDocument();
+  });
 });
