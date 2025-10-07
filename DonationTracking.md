@@ -1,13 +1,15 @@
 # Children's Home Donation Tracking System - Development Specification
 
 ---
-## 🚀 DEVELOPMENT STATUS (Updated: 2025-10-03)
+## 🚀 DEVELOPMENT STATUS (Updated: 2025-10-07)
 
 ### ✅ COMPLETED WORK
 
 **Infrastructure & Environment:**
 - [x] Docker Compose setup with PostgreSQL 15, Redis, Rails API, React frontend
 - [x] Containerized development environment (all services operational on ports 5432, 6379, 3001, 3000)
+- [x] Isolated test environment: api-e2e service (port 3002) with separate test database for Cypress E2E tests
+- [x] CORS configuration via environment variables (CORS_ALLOWED_ORIGINS) for flexible deployment
 - [x] Git repository with service-separated commit strategy (`backend:`, `frontend:`, `docs:`)
 
 **Backend (Rails API):**
@@ -19,9 +21,19 @@
 - [x] Contract testing: Pact gem for consumer-driven API contracts
 - [x] User model with TDD workflow demonstration (username validation - simplified from email-based auth)
 - [x] Database migrations and schema setup
-- [x] **Donor Model**: Email uniqueness validation, PaperTrail audit tracking, smart defaults
+- [x] **Donor Model**: Email uniqueness validation, PaperTrail audit tracking, smart defaults, soft delete with Discard gem
 - [x] **DonorService**: Smart data merging with date-based conflict resolution (preserves existing name when blank)
-- [x] **Donor API Endpoints**: POST /api/donors (returns 201 Created or 200 OK), GET /api/donors (ordered by created_at desc), GET /api/donors/:id
+- [x] **Donor API Endpoints**:
+  - POST /api/donors (returns 201 Created or 200 OK)
+  - GET /api/donors (ordered by created_at desc, excludes discarded, pagination with metadata)
+  - GET /api/donors?include_discarded=true (includes archived donors)
+  - GET /api/donors/:id
+  - PATCH /api/donors/:id
+  - DELETE /api/donors/:id (soft delete/archive)
+  - POST /api/donors/:id/restore (restore archived donor)
+  - DELETE /api/donors/all (hard delete for test cleanup)
+- [x] **Search & Pagination**: Ransack gem with custom name_or_email searcher, Kaminari pagination (25 per page default)
+- [x] **Soft Delete**: Discard gem for archiving donors with discarded_at timestamp
 - [x] **Status Code Differentiation**: 201 for new donor creation, 200 for existing donor updates
 
 **Frontend (React):**
@@ -38,8 +50,11 @@
 - [x] **Form Auto-clear**: Name and email fields clear after successful submission
 - [x] **DonorList Component**: Card-based layout with outlined variant, Typography variants (subtitle1 for names, body2 for emails)
 - [x] **App Integration**: Fetches donors on mount, automatically refreshes list after form submission
+- [x] **Search UI**: Debounced search (300ms) for name OR email with placeholder "Search by name or email..."
+- [x] **Pagination UI**: Material-UI Pagination component with server-side pagination (10 per page)
 - [x] **Hot Reload Configuration**: WATCHPACK_POLLING=300ms for automatic code changes without manual cache clearing
-- [x] **Cypress E2E Testing**: Continuous validation workflow with donor list verification (3 passing tests)
+- [x] **Cypress E2E Testing**: Test database isolation via cy.intercept() redirecting to port 3002, comprehensive search validation (5 passing tests)
+- [x] **Config-Driven URLs**: REACT_APP_API_URL for dev, devApiUrl/testApiUrl for Cypress (no hardcoded ports)
 
 **Quality Assurance & Pre-commit System:**
 - [x] TDD-driven pre-commit hooks system with comprehensive bash testing framework (13 passing tests)
@@ -52,7 +67,7 @@
 - [x] **FULLY FUNCTIONAL**: Backend (3 tools) and Frontend (4 tools) quality enforcement working
 - [x] **CODE QUALITY METRICS**: 0 RuboCop violations, 0 Brakeman security warnings, all tests passing
 - [x] **TYPE SAFETY**: TypeScript errors resolved, Pact v12 API correctly implemented
-- [x] **TEST COVERAGE**: Backend 20 RSpec tests, Frontend 16 Jest tests, 3 Cypress E2E tests (39 total tests passing)
+- [x] **TEST COVERAGE**: Backend 33 RSpec tests, Frontend 27 Jest tests, 5 Cypress E2E tests (65 total tests passing)
 - [x] **DATABASE CLEANUP**: before(:suite) hook prevents test pollution between runs
 
 **Development Decisions Made:**
@@ -60,8 +75,10 @@
 - **Repository Strategy**: Monorepo with service-separated commits for atomic feature development
 - **Containerization**: Solves native gem compilation issues and ensures consistent environment
 - **Testing Philosophy**: TDD methodology with strict single-test rule and comprehensive coverage requirements
+- **Test Database Isolation**: Separate api-e2e service with isolated test database prevents dev DB pollution during Cypress tests
+- **Config-Driven Development**: Environment variables for all URLs/ports (no hardcoded values) for CI/CD pipeline readiness
 - **Quality Assurance**: Multiple analysis tools (Reek, RubyCritic, Skunk) for maintaining high code standards
-- **Contract Testing**: Pact implementation for reliable API contract verification between services
+- **Contract Testing**: Pact implementation deferred until microservice split (monorepo uses RSpec + Cypress integration tests)
 - **Security**: Git history cleaned of sensitive files (master.key) using filter-branch, comprehensive .gitignore implemented
 
 **Current Architecture:**
