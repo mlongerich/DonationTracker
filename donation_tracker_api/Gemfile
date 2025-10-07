@@ -28,6 +28,9 @@ gem "kaminari"
 # Audit trail
 gem "paper_trail"
 
+# Soft delete
+gem "discard"
+
 # Background jobs
 gem "sidekiq"
 

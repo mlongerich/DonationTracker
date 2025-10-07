@@ -1,6 +1,7 @@
 class Api::DonorsController < ApplicationController
   def index
-    @q = Donor.ransack(params[:q])
+    scope = params[:include_discarded] == "true" ? Donor.with_discarded : Donor.kept
+    @q = scope.ransack(params[:q])
     donors = @q.result.order(created_at: :desc).page(params[:page]).per(params[:per_page] || 25)
 
     render json: {
@@ -39,9 +40,16 @@ class Api::DonorsController < ApplicationController
 
   def destroy
     donor = Donor.find(params[:id])
-    donor.destroy!
+    donor.discard
 
     head :no_content
+  end
+
+  def restore
+    donor = Donor.with_discarded.find(params[:id])
+    donor.undiscard
+
+    render json: donor, status: :ok
   end
 
   def destroy_all

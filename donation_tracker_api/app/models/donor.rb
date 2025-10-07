@@ -1,4 +1,6 @@
 class Donor < ApplicationRecord
+  include Discard::Model
+
   has_paper_trail
 
   before_validation :set_defaults
@@ -8,7 +10,7 @@ class Donor < ApplicationRecord
 
   # Ransack: Explicitly whitelist searchable attributes
   def self.ransackable_attributes(auth_object = nil)
-    [ "name", "email", "created_at", "updated_at", "last_updated_at", "name_or_email" ]
+    [ "name", "email", "created_at", "updated_at", "last_updated_at", "name_or_email", "discarded_at" ]
   end
 
   # Custom Ransack searcher for name OR email

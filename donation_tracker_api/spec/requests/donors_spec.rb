@@ -53,6 +53,31 @@ RSpec.describe "/api/donors", type: :request do
       expect(json_response["donors"][1]["email"]).to eq("old@example.com")
     end
 
+    it "excludes discarded donors by default" do
+      _active_donor = Donor.create!(name: "Active", email: "active@example.com", last_updated_at: Time.current)
+      archived_donor = Donor.create!(name: "Archived", email: "archived@example.com", last_updated_at: Time.current)
+      archived_donor.discard
+
+      get "/api/donors", headers: { "Host" => "api" }
+
+      expect(response).to have_http_status(:ok)
+      json_response = JSON.parse(response.body)
+      expect(json_response["donors"].length).to eq(1)
+      expect(json_response["donors"][0]["email"]).to eq("active@example.com")
+    end
+
+    it "includes discarded donors when include_discarded param is true" do
+      _active_donor = Donor.create!(name: "Active", email: "active@example.com", last_updated_at: Time.current)
+      archived_donor = Donor.create!(name: "Archived", email: "archived@example.com", last_updated_at: Time.current)
+      archived_donor.discard
+
+      get "/api/donors", params: { include_discarded: "true" }, headers: { "Host" => "api" }
+
+      expect(response).to have_http_status(:ok)
+      json_response = JSON.parse(response.body)
+      expect(json_response["donors"].length).to eq(2)
+    end
+
     it "filters donors by name using Ransack" do
       _donor1 = Donor.create!(name: "Alice Smith", email: "alice@example.com", last_updated_at: Time.current)
       _donor2 = Donor.create!(name: "Bob Jones", email: "bob@example.com", last_updated_at: Time.current)
@@ -150,14 +175,31 @@ RSpec.describe "/api/donors", type: :request do
   end
 
   describe "DELETE /api/donors/:id" do
-    it "deletes donor" do
+    it "soft deletes donor (archives)" do
       donor = Donor.create!(name: "To Delete", email: "delete@example.com", last_updated_at: Time.current)
 
       expect {
         delete "/api/donors/#{donor.id}", headers: { "Host" => "api" }
-      }.to change(Donor, :count).by(-1)
+      }.not_to change(Donor, :count)
 
       expect(response).to have_http_status(:no_content)
+      donor.reload
+      expect(donor.discarded?).to be true
+      expect(donor.discarded_at).to be_present
+    end
+  end
+
+  describe "POST /api/donors/:id/restore" do
+    it "restores discarded donor" do
+      donor = Donor.create!(name: "Archived", email: "archived@example.com", last_updated_at: Time.current)
+      donor.discard
+
+      post "/api/donors/#{donor.id}/restore", headers: { "Host" => "api" }
+
+      expect(response).to have_http_status(:ok)
+      donor.reload
+      expect(donor.discarded?).to be false
+      expect(donor.discarded_at).to be_nil
     end
   end
 
