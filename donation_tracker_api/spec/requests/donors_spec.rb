@@ -16,7 +16,7 @@ RSpec.describe "/api/donors", type: :request do
     end
 
     it "returns 200 OK when updating existing donor with newer data" do
-      Donor.create!(name: "Old Name", email: "existing@test.com", last_updated_at: 1.day.ago)
+      create(:donor, name: "Old Name", email: "existing@test.com", last_updated_at: 1.day.ago)
 
       donor_params = { name: "Updated Name", email: "existing@test.com" }
       post "/api/donors", params: { donor: donor_params }, headers: { "Host" => "api" }
@@ -29,7 +29,7 @@ RSpec.describe "/api/donors", type: :request do
 
   describe "GET /api/donors/:id" do
     it "returns donor by id" do
-      donor = Donor.create!(name: "Alice Brown", email: "alice@example.com", last_updated_at: Time.current)
+      donor = create(:donor, name: "Alice Brown")
 
       get "/api/donors/#{donor.id}", headers: { "Host" => "api" }
 
@@ -40,22 +40,24 @@ RSpec.describe "/api/donors", type: :request do
   end
 
   describe "GET /api/donors" do
-    it "returns all donors ordered by most recent first" do
-      _donor1 = Donor.create!(name: "Old Donor", email: "old@example.com", last_updated_at: Time.current, created_at: 2.days.ago)
-      _donor2 = Donor.create!(name: "New Donor", email: "new@example.com", last_updated_at: Time.current, created_at: 1.hour.ago)
+    it "returns all donors ordered alphabetically by name" do
+      _donor1 = create(:donor, name: "Charlie Brown")
+      _donor2 = create(:donor, name: "Alice Smith")
+      _donor3 = create(:donor, name: "Bob Jones")
 
       get "/api/donors", headers: { "Host" => "api" }
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
-      expect(json_response["donors"].length).to eq(2)
-      expect(json_response["donors"][0]["email"]).to eq("new@example.com")
-      expect(json_response["donors"][1]["email"]).to eq("old@example.com")
+      expect(json_response["donors"].length).to eq(3)
+      expect(json_response["donors"][0]["name"]).to eq("Alice Smith")
+      expect(json_response["donors"][1]["name"]).to eq("Bob Jones")
+      expect(json_response["donors"][2]["name"]).to eq("Charlie Brown")
     end
 
     it "excludes discarded donors by default" do
-      _active_donor = Donor.create!(name: "Active", email: "active@example.com", last_updated_at: Time.current)
-      archived_donor = Donor.create!(name: "Archived", email: "archived@example.com", last_updated_at: Time.current)
+      active_donor = create(:donor)
+      archived_donor = create(:donor)
       archived_donor.discard
 
       get "/api/donors", headers: { "Host" => "api" }
@@ -63,12 +65,12 @@ RSpec.describe "/api/donors", type: :request do
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
       expect(json_response["donors"].length).to eq(1)
-      expect(json_response["donors"][0]["email"]).to eq("active@example.com")
+      expect(json_response["donors"][0]["id"]).to eq(active_donor.id)
     end
 
     it "includes discarded donors when include_discarded param is true" do
-      _active_donor = Donor.create!(name: "Active", email: "active@example.com", last_updated_at: Time.current)
-      archived_donor = Donor.create!(name: "Archived", email: "archived@example.com", last_updated_at: Time.current)
+      _active_donor = create(:donor)
+      archived_donor = create(:donor)
       archived_donor.discard
 
       get "/api/donors", params: { include_discarded: "true" }, headers: { "Host" => "api" }
@@ -79,9 +81,9 @@ RSpec.describe "/api/donors", type: :request do
     end
 
     it "filters donors by name using Ransack" do
-      _donor1 = Donor.create!(name: "Alice Smith", email: "alice@example.com", last_updated_at: Time.current)
-      _donor2 = Donor.create!(name: "Bob Jones", email: "bob@example.com", last_updated_at: Time.current)
-      _donor3 = Donor.create!(name: "Alice Brown", email: "alice.brown@example.com", last_updated_at: Time.current)
+      _donor1 = create(:donor, name: "Alice Smith")
+      _donor2 = create(:donor, name: "Bob Jones")
+      _donor3 = create(:donor, name: "Alice Brown")
 
       get "/api/donors", params: { q: { name_cont: "Alice" } }, headers: { "Host" => "api" }
 
@@ -92,8 +94,8 @@ RSpec.describe "/api/donors", type: :request do
     end
 
     it "filters donors by email using Ransack" do
-      _donor1 = Donor.create!(name: "Test One", email: "test1@example.com", last_updated_at: Time.current)
-      _donor2 = Donor.create!(name: "Test Two", email: "test2@different.com", last_updated_at: Time.current)
+      _donor1 = create(:donor, email: "test1@example.com")
+      _donor2 = create(:donor, email: "test2@different.com")
 
       get "/api/donors", params: { q: { email_cont: "example.com" } }, headers: { "Host" => "api" }
 
@@ -104,9 +106,9 @@ RSpec.describe "/api/donors", type: :request do
     end
 
     it "filters donors by name OR email using Ransack" do
-      _donor1 = Donor.create!(name: "Michael Longerich", email: "mlongerich@gmail.com", last_updated_at: Time.current)
-      _donor2 = Donor.create!(name: "John Smith", email: "michael@mailinator.com", last_updated_at: Time.current)
-      _donor3 = Donor.create!(name: "Bob Example", email: "example@yahoo.com", last_updated_at: Time.current)
+      _donor1 = create(:donor, name: "Michael Longerich", email: "mlongerich@gmail.com")
+      _donor2 = create(:donor, name: "John Smith", email: "michael@mailinator.com")
+      _donor3 = create(:donor, name: "Bob Example", email: "example@yahoo.com")
 
       get "/api/donors", params: { q: { name_or_email_cont: "n" } }, headers: { "Host" => "api" }
 
@@ -121,9 +123,7 @@ RSpec.describe "/api/donors", type: :request do
     end
 
     it "paginates donors using Kaminari" do
-      15.times do |i|
-        Donor.create!(name: "Donor #{i}", email: "donor#{i}@example.com", last_updated_at: Time.current)
-      end
+      create_list(:donor, 15)
 
       get "/api/donors", params: { page: 1, per_page: 10 }, headers: { "Host" => "api" }
 
@@ -133,9 +133,7 @@ RSpec.describe "/api/donors", type: :request do
     end
 
     it "returns pagination metadata with donors" do
-      15.times do |i|
-        Donor.create!(name: "Donor #{i}", email: "donor#{i}@example.com", last_updated_at: Time.current)
-      end
+      create_list(:donor, 15)
 
       get "/api/donors", params: { page: 2, per_page: 10 }, headers: { "Host" => "api" }
 
@@ -152,7 +150,7 @@ RSpec.describe "/api/donors", type: :request do
 
   describe "PATCH /api/donors/:id" do
     it "updates donor with valid attributes" do
-      donor = Donor.create!(name: "Original Name", email: "original@example.com", last_updated_at: 1.day.ago)
+      donor = create(:donor, name: "Original Name", email: "original@example.com", last_updated_at: 1.day.ago)
 
       patch "/api/donors/#{donor.id}", params: { donor: { name: "Updated Name" } }, headers: { "Host" => "api" }
 
@@ -163,7 +161,7 @@ RSpec.describe "/api/donors", type: :request do
     end
 
     it "updates last_updated_at timestamp" do
-      donor = Donor.create!(name: "Test", email: "test@example.com", last_updated_at: 2.days.ago)
+      donor = create(:donor, last_updated_at: 2.days.ago)
       old_timestamp = donor.last_updated_at
 
       patch "/api/donors/#{donor.id}", params: { donor: { name: "New Name" } }, headers: { "Host" => "api" }
@@ -176,7 +174,7 @@ RSpec.describe "/api/donors", type: :request do
 
   describe "DELETE /api/donors/:id" do
     it "soft deletes donor (archives)" do
-      donor = Donor.create!(name: "To Delete", email: "delete@example.com", last_updated_at: Time.current)
+      donor = create(:donor)
 
       expect {
         delete "/api/donors/#{donor.id}", headers: { "Host" => "api" }
@@ -191,7 +189,7 @@ RSpec.describe "/api/donors", type: :request do
 
   describe "POST /api/donors/:id/restore" do
     it "restores discarded donor" do
-      donor = Donor.create!(name: "Archived", email: "archived@example.com", last_updated_at: Time.current)
+      donor = create(:donor)
       donor.discard
 
       post "/api/donors/#{donor.id}/restore", headers: { "Host" => "api" }
@@ -205,9 +203,7 @@ RSpec.describe "/api/donors", type: :request do
 
   describe "DELETE /api/donors/all" do
     it "deletes all donors (test cleanup)" do
-      Donor.create!(name: "Donor 1", email: "donor1@example.com", last_updated_at: Time.current)
-      Donor.create!(name: "Donor 2", email: "donor2@example.com", last_updated_at: Time.current)
-      Donor.create!(name: "Donor 3", email: "donor3@example.com", last_updated_at: Time.current)
+      create_list(:donor, 3)
 
       expect {
         delete "/api/donors/all", headers: { "Host" => "api" }

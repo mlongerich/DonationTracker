@@ -35,6 +35,9 @@ rescue ActiveRecord::PendingMigrationError => e
   abort e.to_s.strip
 end
 RSpec.configure do |config|
+  # Include FactoryBot methods (create, build, etc.)
+  config.include FactoryBot::Syntax::Methods
+
   # Clean database before entire test suite runs to prevent data pollution between runs
   config.before(:suite) do
     ActiveRecord::Base.connection.tables.each do |table|

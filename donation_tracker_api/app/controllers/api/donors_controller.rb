@@ -2,7 +2,7 @@ class Api::DonorsController < ApplicationController
   def index
     scope = params[:include_discarded] == "true" ? Donor.with_discarded : Donor.kept
     @q = scope.ransack(params[:q])
-    donors = @q.result.order(created_at: :desc).page(params[:page]).per(params[:per_page] || 25)
+    donors = @q.result.order(name: :asc).page(params[:page]).per(params[:per_page] || 25)
 
     render json: {
       donors: donors,
