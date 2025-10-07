@@ -22,7 +22,7 @@ flowchart TB
     A --> E[scripts/<br/>Testing & validation]
     A --> F[DonationTracking.md<br/>Project specifications]
     A --> G[CLAUDE.md<br/>Development conventions]
-    A --> H[TICKETS.md<br/>Active work items]
+    A --> H[tickets/<br/>Active work items]
     A --> I[BACKLOG.md<br/>Future features]
 
     C --> C1[app/models/<br/>Business logic models]
@@ -36,6 +36,9 @@ flowchart TB
     E --> E3[pre-commit-backend.sh<br/>Backend quality gates]
     E --> E4[pre-commit-frontend.sh<br/>Frontend quality gates]
     E --> E5[test-*.sh<br/>Comprehensive test suite]
+
+    H --> H1[README.md<br/>Ticket index]
+    H --> H2[TICKET-XXX-*.md<br/>Individual tickets]
 ```
 
 ---
@@ -43,11 +46,13 @@ flowchart TB
 ## 📋 Ticket & Task Management System
 
 ### Active Work Tracking
-**File:** `TICKETS.md`
+**Location:** `tickets/` directory
+- Each ticket in its own file: `TICKET-XXX-descriptive-slug.md`
 - Current user stories and tasks being actively developed
 - Detailed acceptance criteria and technical notes
 - Links to commits and files changed
 - Use `/memory` to access during Claude Code sessions
+- Index available at `tickets/README.md`
 
 ### Feature Backlog
 **File:** `BACKLOG.md`
@@ -62,10 +67,10 @@ flowchart TB
 flowchart LR
     A[New Feature Idea] --> B{Currently Working<br/>on Something Else?}
     B -->|Yes| C[Add to BACKLOG.md]
-    B -->|No| D[Add to TICKETS.md]
+    B -->|No| D[Create ticket in<br/>tickets/ folder]
     C --> E[Run /compact]
     D --> F[Implement with TDD]
-    F --> G[Update TICKETS.md<br/>mark complete]
+    F --> G[Update ticket<br/>mark complete]
     G --> H[Commit changes]
     H --> I[Auto /compact]
 ```
@@ -83,6 +88,44 @@ flowchart LR
 3. **Compact after backlog entries** - Especially when discovered mid-task
 4. **One ticket = One vertical slice** - Complete feature through all layers
 5. **Link commits to tickets** - Maintains traceability
+
+### Ticket File Template
+
+Each ticket is stored in `tickets/TICKET-XXX-descriptive-slug.md` format.
+
+```markdown
+## [TICKET-XXX] Ticket Title
+
+**Status:** 🔵 In Progress | ⏸️ Blocked | ✅ Complete | 📋 Planned
+**Priority:** 🔴 High | 🟡 Medium | 🟢 Low
+**Started:** YYYY-MM-DD
+**Completed:** YYYY-MM-DD (if done)
+**Dependencies:** TICKET-XXX, TICKET-YYY (if any)
+
+### User Story
+As a [user type], I want [goal] so that [benefit].
+
+### Acceptance Criteria
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] Criterion 3
+
+### Technical Notes
+- Implementation details
+- Dependencies
+- Breaking changes
+
+### Files Changed
+- `path/to/file.rb`
+- `path/to/file.tsx`
+
+### Related Commits
+- `commit-hash`: Description
+```
+
+### Example: Completed Ticket
+
+See [TICKET-001: Donor Soft Delete with Archive/Restore](tickets/TICKET-001-donor-soft-delete-archive-restore.md) for a complete example.
 
 ---
 
