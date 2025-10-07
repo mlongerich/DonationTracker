@@ -36,6 +36,10 @@
 - [x] **Search & Pagination**: Ransack gem with custom name_or_email searcher, Kaminari pagination (25 per page default)
 - [x] **Soft Delete**: Discard gem for archiving donors with discarded_at timestamp
 - [x] **Status Code Differentiation**: 201 for new donor creation, 200 for existing donor updates
+- [x] **CSV Import**: DonorImportService for bulk donor import via CLI with error handling and summary reporting
+- [x] **Rake Task**: `donors:import[file.csv]` for importing donors from Stripe CSV exports
+- [x] **Stripe Format Support**: Auto-detects "Billing Details Name" and "Cust Email" headers
+- [x] **Case-Insensitive Lookups**: Email matching ignores capitalization for duplicate detection
 
 **Frontend (React):**
 - [x] React 19.1.1 with TypeScript (upgraded to latest React)
@@ -70,7 +74,7 @@
 - [x] **FULLY FUNCTIONAL**: Backend (3 tools) and Frontend (4 tools) quality enforcement working
 - [x] **CODE QUALITY METRICS**: 0 RuboCop violations, 0 Brakeman security warnings, all tests passing
 - [x] **TYPE SAFETY**: TypeScript errors resolved, Pact v12 API correctly implemented
-- [x] **TEST COVERAGE**: Backend 33 RSpec tests, Frontend 30 Jest tests, 6 Cypress E2E tests (69 total tests passing)
+- [x] **TEST COVERAGE**: Backend 41 RSpec tests, Frontend 30 Jest tests, 6 Cypress E2E tests (77 total tests passing)
 - [x] **DATABASE CLEANUP**: before(:suite) hook prevents test pollution between runs
 
 **Development Decisions Made:**

@@ -2,7 +2,8 @@ class DonorService
   def self.find_or_update_by_email(donor_attributes, transaction_date)
     # Normalize email before lookup (match Donor model's set_defaults logic)
     lookup_email = normalize_email(donor_attributes[:email], donor_attributes[:name])
-    existing_donor = Donor.find_by(email: lookup_email)
+    # Case-insensitive email lookup to match uniqueness validation
+    existing_donor = Donor.where("LOWER(email) = ?", lookup_email.downcase).first
 
     if existing_donor
       # Update existing donor if transaction is newer
