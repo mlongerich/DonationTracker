@@ -1,25 +1,25 @@
-FROM node:18-alpine
+FROM node:22-alpine
 
 # Set working directory
 WORKDIR /app
 
 # Install dependencies first for better caching
-COPY package*.json ./
+# Note: package-lock.json is intentionally excluded for dev environment
+# to avoid conflicts with host machine's npm version (11.6.1)
+COPY package.json ./
+
+# Install dependencies
+# Using npm install (not npm ci) to be flexible with lock file versions
 RUN npm install
 
 # Copy source code
+# In docker-compose.yml, this will be overridden by volume mount
+# but needed for standalone docker build
 COPY . .
-
-# Create user for security
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S reactjs -u 1001
-
-# Change ownership of the app directory
-RUN chown -R reactjs:nodejs /app
-USER reactjs
 
 # Expose port
 EXPOSE 3000
 
 # Start development server
+# Using exec form to ensure proper signal handling (prevents container exit)
 CMD ["npm", "start"]

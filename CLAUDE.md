@@ -469,6 +469,35 @@ docker-compose exec frontend sh   # React debugging
 **Database connection failures**: Verify host/port in database.yml
 **npm installation failures**: Delete package-lock.json and use `npm install`
 
+### Colima Resource Requirements (macOS Docker Alternative)
+**Minimum Resources for Frontend Container Stability:**
+- **Memory**: 6GB RAM (default 2GB insufficient)
+- **CPUs**: 4 cores (default 2 cores insufficient)
+- **Disk**: 100GB (default 60GB may fill up)
+
+**Common Issue**: Frontend container crashes with "process exited too early" after successful webpack compilation
+**Root Cause**: Insufficient Colima VM resources causing Node.js memory constraints
+**Solution**: Increase Colima resources before starting Docker services
+
+```bash
+# Stop Colima
+colima stop
+
+# Start with increased resources
+colima start --cpu 4 --memory 6 --disk 100
+
+# Verify allocation
+colima status
+
+# Then start Docker services
+docker-compose up
+```
+
+**Resource Limits in docker-compose.yml:**
+- Frontend service has memory limit of 4GB (requires 6GB Colima VM for headroom)
+- CPU limits: 2 cores max, 1 core reserved
+- Healthcheck monitors frontend availability on port 3000
+
 ---
 
 ## 🎯 Code Quality Standards

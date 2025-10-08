@@ -67,18 +67,35 @@ services:
       - "3000:3000"
     volumes:
       - ./donation_tracker_frontend:/app
-      - /app/node_modules
+      - frontend_node_modules:/app/node_modules
     environment:
       - REACT_APP_API_URL=http://localhost:3001
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=300
-      - FAST_REFRESH=true
+      - FAST_REFRESH=false
       - WDS_SOCKET_HOST=localhost
       - WDS_SOCKET_PORT=3000
+      # Increase Node.js memory limit to prevent "process exited too early" crashes
+      - NODE_OPTIONS=--max-old-space-size=4096
     depends_on:
       - api
     stdin_open: true
     tty: true
+    # Resource limits to prevent overconsumption
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
 
   # Rails API for E2E Tests (test environment)
   api-e2e:
@@ -153,3 +170,4 @@ volumes:
   postgres_data:
   redis_data:
   bundle_cache:
+  frontend_node_modules:
