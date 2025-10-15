@@ -92,6 +92,7 @@
 - **Quality Assurance**: Multiple analysis tools (Reek, RubyCritic, Skunk) for maintaining high code standards
 - **Contract Testing**: Pact implementation deferred until microservice split (monorepo uses RSpec + Cypress integration tests)
 - **Security**: Git history cleaned of sensitive files (master.key) using filter-branch, comprehensive .gitignore implemented
+- **Service Object Patterns**: Established conventions for class vs instance methods based on complexity (class methods for simple/stateless, instance methods for complex/stateful with private helper extraction)
 
 **Current Architecture:**
 
@@ -387,6 +388,31 @@ gem 'faker'
 - Mapping: detect recurring donations from historical patterns
 - Donor deduplication logic
 - Validation and error reporting during import
+
+## Recent Refactoring & Code Quality Improvements
+
+### TICKET-014: DonorMergeService Refactoring (2025-10-15)
+**Objective**: Reduce code complexity and establish consistent service object patterns
+
+**Changes:**
+- Refactored `DonorMergeService` from class method to instance pattern
+- Extracted single 21-statement method (42.48 flog) into 9 focused private methods
+- **Complexity reduced**: 42.48 flog → **4.6 flog/method average**
+- Added comprehensive class documentation with usage examples
+- Eliminated unclear variable names (`d` → `donor`)
+
+**Files Modified:**
+- `app/services/donor_merge_service.rb` - Instance pattern with private helpers
+- `app/controllers/api/donors_controller.rb` - Updated to `.new(...).merge` syntax
+- `spec/services/donor_merge_service_spec.rb` - Updated test syntax
+- `spec/requests/donors_spec.rb` - Updated request spec syntax
+- `CLAUDE.md` - Added service pattern conventions section
+
+**Results:**
+- ✅ All 52 RSpec tests passing
+- ✅ Pattern consistency: Complex services use instance pattern
+- ✅ Maintainability: Private method extraction for clarity
+- ✅ Documentation: Clear usage examples and inline comments
 
 ## Future Considerations
 - Email notifications to donors

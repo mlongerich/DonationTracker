@@ -17,6 +17,7 @@ Current work items and user stories being actively developed.
 - [TICKET-001: Donor Soft Delete with Archive/Restore](TICKET-001-donor-soft-delete-archive-restore.md) - ✅ Complete (2025-10-07)
 - [TICKET-002: Stripe CSV Donor Import via CLI (Iteration 1)](TICKET-002-stripe-csv-donor-import.md) - ✅ Complete (2025-10-07)
 - [TICKET-003: Hide Auto-Generated Emails in Donor Display](TICKET-003-hide-auto-generated-emails.md) - ✅ Complete (2025-10-07)
+- [TICKET-014: Refactor Donor Merge Service Pattern Consistency](TICKET-014-refactor-donor-merge-service-pattern-consistency.md) - ✅ Complete (2025-10-15)
 
 ### 📋 Planned Tickets
 
@@ -35,8 +36,8 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 13
-- **Completed:** 3
+- **Total Tickets:** 14
+- **Completed:** 4
 - **In Progress:** 0
 - **Planned:** 9
 - **Blocked:** 1

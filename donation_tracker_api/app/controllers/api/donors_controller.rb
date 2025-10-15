@@ -58,10 +58,10 @@ class Api::DonorsController < ApplicationController
     donor_ids = params[:donor_ids].map(&:to_i)
     field_selections = params[:field_selections].to_unsafe_h.symbolize_keys.transform_values(&:to_i)
 
-    result = DonorMergeService.merge(
+    result = DonorMergeService.new(
       donor_ids: donor_ids,
       field_selections: field_selections
-    )
+    ).merge
 
     render json: result[:merged_donor], status: :ok
   end

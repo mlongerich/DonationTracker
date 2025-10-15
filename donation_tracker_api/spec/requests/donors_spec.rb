@@ -84,10 +84,10 @@ RSpec.describe "/api/donors", type: :request do
       donor1 = create(:donor, name: 'Alice Smith', email: 'alice@example.com')
       donor2 = create(:donor, name: 'Alice S.', email: 'alice.smith@example.com')
 
-      DonorMergeService.merge(
+      DonorMergeService.new(
         donor_ids: [ donor1.id, donor2.id ],
         field_selections: { name: donor1.id, email: donor2.id }
-      )
+      ).merge
 
       get "/api/donors", params: { include_discarded: "true" }, headers: { "Host" => "api" }
 

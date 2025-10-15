@@ -509,6 +509,62 @@ docker-compose up
 - **No comments**: Let code be self-documenting
 - **Convention**: Follow Rails conventions, use existing patterns
 
+#### Service Object Pattern Conventions
+Rails services should follow consistent patterns based on complexity:
+
+**Class Methods (Stateless, Simple Operations)**
+- Use for simple, stateless operations
+- No instance variables needed
+- Example: `DonorService.find_or_update_by_email`
+
+```ruby
+class DonorService
+  def self.find_or_update_by_email(attributes, timestamp)
+    # Simple stateless logic
+  end
+end
+```
+
+**Instance Methods (Stateful, Complex Operations)**
+- Use for complex operations with multiple steps
+- Store state in instance variables
+- Extract private helper methods for complexity management
+- Example: `DonorMergeService.new(...).merge`, `DonorImportService.new(...).import`
+
+```ruby
+# Service for merging multiple donor records into a single donor.
+# Handles field selection, validation, and transactional merge operations.
+class DonorMergeService
+  def initialize(donor_ids:, field_selections:)
+    @donor_ids = donor_ids
+    @field_selections = field_selections
+  end
+
+  def merge
+    validate_inputs!
+    load_donors
+    perform_merge_transaction
+  end
+
+  private
+
+  def validate_inputs!
+    # Extract validation logic
+  end
+
+  def perform_merge_transaction
+    # Extract transaction logic
+  end
+end
+```
+
+**Benefits of Instance Pattern for Complex Services:**
+1. **State Management**: Instance variables track operation state
+2. **Maintainability**: Private methods reduce complexity per method
+3. **Testability**: Can test individual private methods if needed
+4. **Readability**: Clear flow with descriptive method names
+5. **Complexity Reduction**: Target <10 flog score per method
+
 ### Frontend (React)
 - **ESLint**: React, accessibility, and TypeScript rules
 - **Prettier**: Consistent code formatting
