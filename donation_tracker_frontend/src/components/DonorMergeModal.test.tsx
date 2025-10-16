@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import DonorMergeModal from './DonorMergeModal';
 
@@ -18,8 +17,12 @@ describe('DonorMergeModal', () => {
       />
     );
 
-    expect(screen.getByText('Alice Smith')).toBeInTheDocument();
-    expect(screen.getByText('Alice S.')).toBeInTheDocument();
+    // Use getAllByText since names appear multiple times (display + radio labels)
+    const aliceSmithElements = screen.getAllByText('Alice Smith');
+    expect(aliceSmithElements.length).toBeGreaterThan(0);
+
+    const aliceSElements = screen.getAllByText('Alice S.');
+    expect(aliceSElements.length).toBeGreaterThan(0);
   });
 
   it('displays radio buttons for name field selection', () => {
@@ -32,7 +35,8 @@ describe('DonorMergeModal', () => {
       />
     );
 
-    const nameRadios = screen.getAllByRole('radio', { name: /name/i });
-    expect(nameRadios).toHaveLength(2);
+    // Find radios by their labels (the donor names)
+    expect(screen.getByLabelText('Alice Smith')).toBeInTheDocument();
+    expect(screen.getByLabelText('Alice S.')).toBeInTheDocument();
   });
 });

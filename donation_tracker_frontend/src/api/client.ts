@@ -56,4 +56,15 @@ export const mergeDonors = async (
   return response.data;
 };
 
+export const createDonation = async (donation: {
+  amount: number;
+  date: string;
+  donor_id: number;
+  status?: string;
+  description?: string;
+}) => {
+  const response = await apiClient.post('/api/donations', { donation });
+  return response.data;
+};
+
 export default apiClient;

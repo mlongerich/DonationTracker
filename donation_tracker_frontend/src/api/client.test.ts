@@ -1,34 +1,40 @@
-import { mergeDonors } from './client';
-import { http, HttpResponse } from 'msw';
-import { setupServer } from 'msw/node';
+// Mock axios first to avoid ESM issues
+jest.mock('axios', () => ({
+  __esModule: true,
+  default: {
+    create: jest.fn(() => ({
+      post: jest.fn(),
+      get: jest.fn(),
+      delete: jest.fn(),
+      interceptors: {
+        request: { use: jest.fn(), eject: jest.fn() },
+        response: { use: jest.fn(), eject: jest.fn() }
+      }
+    }))
+  }
+}));
 
-const server = setupServer();
-
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
+// Now we can import and use the actual client module
+import apiClient from './client';
+const actualModule = jest.requireActual<typeof import('./client')>('./client');
+const { mergeDonors } = actualModule;
 
 describe('mergeDonors', () => {
-  it('sends POST request to /api/donors/merge with correct payload', async () => {
+  it('calls apiClient.post with correct endpoint and payload', async () => {
     const mockMergedDonor = {
       id: 3,
       name: 'Alice Smith',
       email: 'alice.smith@example.com',
     };
 
-    server.use(
-      http.post('http://localhost:3001/api/donors/merge', async ({ request }) => {
-        const body = await request.json();
-        expect(body).toEqual({
-          donor_ids: [1, 2],
-          field_selections: { name: 1, email: 2 },
-        });
-        return HttpResponse.json(mockMergedDonor);
-      })
-    );
+    (apiClient.post as jest.Mock).mockResolvedValue({ data: mockMergedDonor });
 
     const result = await mergeDonors([1, 2], { name: 1, email: 2 });
 
+    expect(apiClient.post).toHaveBeenCalledWith('/api/donors/merge', {
+      donor_ids: [1, 2],
+      field_selections: { name: 1, email: 2 },
+    });
     expect(result).toEqual(mockMergedDonor);
   });
 });

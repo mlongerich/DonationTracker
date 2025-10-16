@@ -14,6 +14,8 @@ import { theme } from './theme';
 import DonorForm from './components/DonorForm';
 import DonorList from './components/DonorList';
 import DonorMergeModal from './components/DonorMergeModal';
+import DonationForm from './components/DonationForm';
+import DonationList from './components/DonationList';
 import apiClient, { mergeDonors } from './api/client';
 
 interface Donor {
@@ -21,6 +23,14 @@ interface Donor {
   name: string;
   email: string;
   discarded_at?: string | null;
+}
+
+interface Donation {
+  id: number;
+  amount: string;
+  date: string;
+  donor_id: number;
+  donor_name?: string;
 }
 
 interface PaginationMeta {
@@ -32,6 +42,8 @@ interface PaginationMeta {
 
 function App() {
   const [donors, setDonors] = useState<Donor[]>([]);
+  const [allDonors, setAllDonors] = useState<Donor[]>([]); // Unpaginated for dropdown
+  const [donations, setDonations] = useState<Donation[]>([]);
   const [editingDonor, setEditingDonor] = useState<Donor | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -83,14 +95,40 @@ function App() {
     }
   };
 
+  const fetchAllDonors = async () => {
+    try {
+      const response = await apiClient.get('/api/donors', {
+        params: { per_page: 1000 }, // Large number to get all donors for dropdown
+      });
+      setAllDonors(response.data.donors || []);
+    } catch (error) {
+      console.error('Failed to fetch all donors:', error);
+    }
+  };
+
+  const fetchDonations = async () => {
+    try {
+      const response = await apiClient.get('/api/donations');
+      setDonations(response.data.donations || []);
+      if (response.data.meta) {
+        setPaginationMeta(response.data.meta);
+      }
+    } catch (error) {
+      console.error('Failed to fetch donations:', error);
+    }
+  };
+
   useEffect(() => {
     fetchDonors();
+    fetchAllDonors(); // For dropdown
+    fetchDonations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQuery, currentPage, showArchived]);
 
   const handleDonorSubmit = (data: { name: string; email: string }) => {
     console.log('Donor submitted:', data);
     fetchDonors();
+    fetchAllDonors(); // Refresh dropdown donors
     setEditingDonor(null);
   };
 
@@ -146,14 +184,33 @@ function App() {
           <Typography variant="h4" component="h1" gutterBottom>
             Donation Tracker
           </Typography>
-          <Typography variant="h6" component="h2" gutterBottom>
-            {editingDonor ? 'Edit Donor' : 'Add Donor'}
+
+          <Typography variant="h6" component="h2" gutterBottom sx={{ mt: 3 }}>
+            Record Donation
           </Typography>
-          <DonorForm
-            donor={editingDonor || undefined}
-            onSubmit={handleDonorSubmit}
-            onCancel={handleCancel}
-          />
+          <DonationForm donors={allDonors} onSuccess={fetchDonations} />
+
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="h6" component="h2" gutterBottom>
+              Recent Donations
+            </Typography>
+            <DonationList
+              donations={donations}
+              paginationMeta={paginationMeta}
+              onPageChange={(_, page) => setCurrentPage(page)}
+            />
+          </Box>
+
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h6" component="h2" gutterBottom>
+              {editingDonor ? 'Edit Donor' : 'Add Donor'}
+            </Typography>
+            <DonorForm
+              donor={editingDonor || undefined}
+              onSubmit={handleDonorSubmit}
+              onCancel={handleCancel}
+            />
+          </Box>
           <Box sx={{ mt: 4 }}>
             <Stack
               direction="row"

@@ -6,14 +6,30 @@ import apiClient from './api/client';
 jest.mock('./api/client');
 const mockedApiClient = apiClient as jest.Mocked<typeof apiClient>;
 
-test('renders with MUI ThemeProvider', () => {
-  mockedApiClient.get.mockResolvedValue({
-    data: {
-      donors: [],
-      meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
-    },
+test('renders with MUI ThemeProvider', async () => {
+  mockedApiClient.get.mockImplementation((url: string) => {
+    if (url === '/api/donations') {
+      return Promise.resolve({
+        data: {
+          donations: [],
+          meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+        },
+      });
+    }
+    return Promise.resolve({
+      data: {
+        donors: [],
+        meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+      },
+    });
   });
   render(<App />);
+
+  // Wait for initial async effects to complete
+  await waitFor(() => {
+    expect(mockedApiClient.get).toHaveBeenCalled();
+  });
+
   expect(screen.getByText('Donation Tracker')).toBeInTheDocument();
 });
 
@@ -23,11 +39,21 @@ test('fetches and displays donors on mount', async () => {
     { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
   ];
 
-  mockedApiClient.get.mockResolvedValue({
-    data: {
-      donors: mockDonors,
-      meta: { total_count: 2, total_pages: 1, current_page: 1, per_page: 25 },
-    },
+  mockedApiClient.get.mockImplementation((url: string) => {
+    if (url === '/api/donations') {
+      return Promise.resolve({
+        data: {
+          donations: [],
+          meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+        },
+      });
+    }
+    return Promise.resolve({
+      data: {
+        donors: mockDonors,
+        meta: { total_count: 2, total_pages: 1, current_page: 1, per_page: 25 },
+      },
+    });
   });
 
   render(<App />);
@@ -42,11 +68,21 @@ test('passes donor to DonorForm when edit button clicked', async () => {
   const user = userEvent.setup();
   const mockDonors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
 
-  mockedApiClient.get.mockResolvedValue({
-    data: {
-      donors: mockDonors,
-      meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
-    },
+  mockedApiClient.get.mockImplementation((url: string) => {
+    if (url === '/api/donations') {
+      return Promise.resolve({
+        data: {
+          donations: [],
+          meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+        },
+      });
+    }
+    return Promise.resolve({
+      data: {
+        donors: mockDonors,
+        meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+      },
+    });
   });
 
   render(<App />);
@@ -75,19 +111,32 @@ test('refreshes donor list after successful form submission', async () => {
     { id: 1, name: 'John Doe', email: 'john@example.com' },
   ];
 
-  mockedApiClient.get
-    .mockResolvedValueOnce({
-      data: {
-        donors: initialDonors,
-        meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
-      },
-    })
-    .mockResolvedValueOnce({
+  let callCount = 0;
+  mockedApiClient.get.mockImplementation((url: string) => {
+    if (url === '/api/donations') {
+      return Promise.resolve({
+        data: {
+          donations: [],
+          meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+        },
+      });
+    }
+    callCount++;
+    if (callCount === 1) {
+      return Promise.resolve({
+        data: {
+          donors: initialDonors,
+          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+        },
+      });
+    }
+    return Promise.resolve({
       data: {
         donors: updatedDonors,
         meta: { total_count: 2, total_pages: 1, current_page: 1, per_page: 25 },
       },
     });
+  });
 
   mockedApiClient.post.mockResolvedValue({
     status: 201,
@@ -116,11 +165,21 @@ test('clears editing state when Cancel button is clicked', async () => {
   const user = userEvent.setup();
   const mockDonors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
 
-  mockedApiClient.get.mockResolvedValue({
-    data: {
-      donors: mockDonors,
-      meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
-    },
+  mockedApiClient.get.mockImplementation((url: string) => {
+    if (url === '/api/donations') {
+      return Promise.resolve({
+        data: {
+          donations: [],
+          meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+        },
+      });
+    }
+    return Promise.resolve({
+      data: {
+        donors: mockDonors,
+        meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+      },
+    });
   });
 
   render(<App />);

@@ -6,4 +6,7 @@ const mockApiClient = {
   delete: jest.fn(),
 };
 
+export const mergeDonors = jest.fn();
+export const createDonation = jest.fn();
+
 export default mockApiClient;
