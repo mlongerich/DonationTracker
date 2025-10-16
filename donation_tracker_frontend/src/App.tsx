@@ -42,7 +42,6 @@ interface PaginationMeta {
 
 function App() {
   const [donors, setDonors] = useState<Donor[]>([]);
-  const [allDonors, setAllDonors] = useState<Donor[]>([]); // Unpaginated for dropdown
   const [donations, setDonations] = useState<Donation[]>([]);
   const [editingDonor, setEditingDonor] = useState<Donor | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,16 +94,6 @@ function App() {
     }
   };
 
-  const fetchAllDonors = async () => {
-    try {
-      const response = await apiClient.get('/api/donors', {
-        params: { per_page: 1000 }, // Large number to get all donors for dropdown
-      });
-      setAllDonors(response.data.donors || []);
-    } catch (error) {
-      console.error('Failed to fetch all donors:', error);
-    }
-  };
 
   const fetchDonations = async () => {
     try {
@@ -120,7 +109,6 @@ function App() {
 
   useEffect(() => {
     fetchDonors();
-    fetchAllDonors(); // For dropdown
     fetchDonations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQuery, currentPage, showArchived]);
@@ -128,7 +116,6 @@ function App() {
   const handleDonorSubmit = (data: { name: string; email: string }) => {
     console.log('Donor submitted:', data);
     fetchDonors();
-    fetchAllDonors(); // Refresh dropdown donors
     setEditingDonor(null);
   };
 
@@ -188,7 +175,7 @@ function App() {
           <Typography variant="h6" component="h2" gutterBottom sx={{ mt: 3 }}>
             Record Donation
           </Typography>
-          <DonationForm donors={allDonors} onSuccess={fetchDonations} />
+          <DonationForm onSuccess={fetchDonations} />
 
           <Box sx={{ mt: 3 }}>
             <Typography variant="h6" component="h2" gutterBottom>

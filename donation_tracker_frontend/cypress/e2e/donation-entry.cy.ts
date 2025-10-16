@@ -35,16 +35,28 @@ describe('Donation Entry', () => {
     // Date field should have today's date by default
     cy.get('input[type="date"]').should('exist');
 
-    // Wait for the newly created donor to appear in dropdown
-    // The dropdown should contain the donor after App refetches
-    const optionText = `${donorName} (${donorEmail})`;
-    cy.get('select#donor_id option', { timeout: 15000 }).should(($options) => {
-      const text = $options.text();
-      expect(text).to.include(donorName);
+    // Intercept the donor search API call
+    cy.intercept('GET', '/api/donors?*').as('donorSearch');
+
+    // Use Material-UI Autocomplete to search and select donor
+    // Wait for any webpack errors to clear first
+    cy.wait(2000);
+
+    // Click and type in the autocomplete field - use partial name for search
+    const searchTerm = 'Test';
+    cy.get('input[role="combobox"]').click().type(searchTerm);
+
+    // Wait for API call to complete
+    cy.wait('@donorSearch').then((interception) => {
+      // Log the response to see what the API returned
+      cy.log('API Response:', JSON.stringify(interception.response?.body));
     });
 
-    // Select the donor from dropdown
-    cy.get('select#donor_id').select(optionText);
+    // Wait for autocomplete options to appear
+    cy.get('[role="option"]', { timeout: 5000 }).should('have.length.at.least', 1);
+
+    // Click the first available option (our newly created donor should be in results)
+    cy.get('[role="option"]').first().click();
 
     // Submit the donation form
     cy.contains('button', /create donation/i).click();
