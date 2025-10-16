@@ -66,6 +66,15 @@
 - [x] **Hot Reload Configuration**: WATCHPACK_POLLING=300ms for automatic code changes without manual cache clearing
 - [x] **Cypress E2E Testing**: Test database isolation via cy.intercept() redirecting to port 3002, comprehensive search and archive validation, donor merge workflow test (7 passing tests)
 - [x] **Config-Driven URLs**: REACT_APP_API_URL for dev, devApiUrl/testApiUrl for Cypress (no hardcoded ports)
+- [x] **Donation Model**: Created with validations (amount > 0, date not in future), belongs_to :donor association, `ransackable_attributes` for Ransack filtering
+- [x] **Donation API Endpoints**: POST /api/donations (create), GET /api/donations/:id (show), GET /api/donations (index with pagination/filtering)
+- [x] **Donation List & Pagination**: Kaminari pagination (25/page), Material-UI Pagination component, response format `{donations: [...], meta: {...}}`
+- [x] **Donation Filtering**: Ransack filtering by donor_id (`donor_id_eq`) and date range (`date_gteq`, `date_lteq`), sort by date descending
+- [x] **DonationForm Component**: Amount, date, donor dropdown selection with success messages
+- [x] **DonationList Component**: Display donations with pagination controls, shows amount/date/donor name
+- [x] **Donation Testing**: 4 model tests, 7 request tests (pagination/filtering), 5 DonationForm tests, 4 DonationList tests, Cypress E2E test (donation creation flow)
+- [x] **Factory Bot Integration**: All tests use Factory Bot with Faker for maintainable test data generation
+- [x] **Jest Act() Warning Fix**: Added waitFor() pattern for async useEffect initial renders
 
 **Quality Assurance & Pre-commit System:**
 - [x] TDD-driven pre-commit hooks system with comprehensive bash testing framework (13 passing tests)
@@ -78,7 +87,7 @@
 - [x] **FULLY FUNCTIONAL**: Backend (3 tools) and Frontend (4 tools) quality enforcement working
 - [x] **CODE QUALITY METRICS**: 0 RuboCop violations, 0 Brakeman security warnings, all tests passing
 - [x] **TYPE SAFETY**: TypeScript errors resolved, Pact v12 API correctly implemented
-- [x] **TEST COVERAGE**: Backend 49 RSpec tests (6 DonorMergeService + 1 merge request spec), Frontend 34 Jest tests (2 DonorList + 2 DonorMergeModal), 7 Cypress E2E tests (90 total tests passing)
+- [x] **TEST COVERAGE**: Backend 64 RSpec tests (4 Donation model + 7 donation requests + 6 DonorMergeService + 1 merge request spec + more), Frontend 50 Jest tests (4 DonationList + 5 DonationForm + 5 App + more), Cypress E2E tests (114 total tests passing)
 - [x] **DATABASE CLEANUP**: before(:suite) hook prevents test pollution between runs
 
 **Development Decisions Made:**
