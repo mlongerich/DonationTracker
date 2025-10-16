@@ -80,6 +80,24 @@ RSpec.describe "/api/donors", type: :request do
       expect(json_response["donors"].length).to eq(2)
     end
 
+    it "excludes merged donors from archived list" do
+      donor1 = create(:donor, name: 'Alice Smith', email: 'alice@example.com')
+      donor2 = create(:donor, name: 'Alice S.', email: 'alice.smith@example.com')
+
+      DonorMergeService.merge(
+        donor_ids: [ donor1.id, donor2.id ],
+        field_selections: { name: donor1.id, email: donor2.id }
+      )
+
+      get "/api/donors", params: { include_discarded: "true" }, headers: { "Host" => "api" }
+
+      expect(response).to have_http_status(:ok)
+      donor_ids = JSON.parse(response.body)['donors'].map { |d| d['id'] }
+
+      expect(donor_ids).not_to include(donor1.id)
+      expect(donor_ids).not_to include(donor2.id)
+    end
+
     it "filters donors by name using Ransack" do
       _donor1 = create(:donor, name: "Alice Smith")
       _donor2 = create(:donor, name: "Bob Jones")
@@ -212,6 +230,23 @@ RSpec.describe "/api/donors", type: :request do
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
       expect(json_response["deleted_count"]).to eq(3)
+    end
+  end
+
+  describe "POST /api/donors/merge" do
+    it "merges donors with selected fields" do
+      donor1 = create(:donor, name: 'Alice Smith', email: 'alice@example.com')
+      donor2 = create(:donor, name: 'Alice S.', email: 'alice.smith@example.com')
+
+      post "/api/donors/merge", params: {
+        donor_ids: [ donor1.id, donor2.id ],
+        field_selections: { name: donor1.id, email: donor2.id }
+      }, headers: { "Host" => "api" }
+
+      expect(response).to have_http_status(:ok)
+      json_response = JSON.parse(response.body)
+      expect(json_response["name"]).to eq("Alice Smith")
+      expect(json_response["email"]).to eq("alice.smith@example.com")
     end
   end
 end

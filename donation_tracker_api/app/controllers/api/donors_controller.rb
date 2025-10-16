@@ -1,6 +1,8 @@
 class Api::DonorsController < ApplicationController
   def index
     scope = params[:include_discarded] == "true" ? Donor.with_discarded : Donor.kept
+    # Exclude merged donors (they have merged_into_id set)
+    scope = scope.where(merged_into_id: nil)
     @q = scope.ransack(params[:q])
     donors = @q.result.order(name: :asc).page(params[:page]).per(params[:per_page] || 25)
 
@@ -50,6 +52,18 @@ class Api::DonorsController < ApplicationController
     donor.undiscard
 
     render json: donor, status: :ok
+  end
+
+  def merge
+    donor_ids = params[:donor_ids].map(&:to_i)
+    field_selections = params[:field_selections].to_unsafe_h.symbolize_keys.transform_values(&:to_i)
+
+    result = DonorMergeService.merge(
+      donor_ids: donor_ids,
+      field_selections: field_selections
+    )
+
+    render json: result[:merged_donor], status: :ok
   end
 
   def destroy_all
