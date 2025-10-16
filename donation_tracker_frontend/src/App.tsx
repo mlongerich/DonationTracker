@@ -9,10 +9,12 @@ import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
+import Button from '@mui/material/Button';
 import { theme } from './theme';
 import DonorForm from './components/DonorForm';
 import DonorList from './components/DonorList';
-import apiClient from './api/client';
+import DonorMergeModal from './components/DonorMergeModal';
+import apiClient, { mergeDonors } from './api/client';
 
 interface Donor {
   id: number;
@@ -35,6 +37,8 @@ function App() {
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [showArchived, setShowArchived] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [showMergeModal, setShowMergeModal] = useState(false);
   const [paginationMeta, setPaginationMeta] = useState<PaginationMeta>({
     total_count: 0,
     total_pages: 0,
@@ -119,6 +123,21 @@ function App() {
     setCurrentPage(page);
   };
 
+  const handleMergeClick = () => {
+    setShowMergeModal(true);
+  };
+
+  const handleMergeConfirm = async (fieldSelections: { name: number; email: number }) => {
+    try {
+      await mergeDonors(selectedIds, fieldSelections);
+      setSelectedIds([]);
+      setShowMergeModal(false);
+      fetchDonors();
+    } catch (error) {
+      console.error('Failed to merge donors:', error);
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -164,12 +183,24 @@ function App() {
               label="Show Archived Donors"
               sx={{ mb: 2 }}
             />
+            {selectedIds.length >= 2 && (
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleMergeClick}
+                sx={{ mb: 2 }}
+              >
+                Merge Selected
+              </Button>
+            )}
             <DonorList
               donors={donors}
               onEdit={setEditingDonor}
               editingDonorId={editingDonor?.id}
               onArchive={handleArchive}
               onRestore={handleRestore}
+              selectedIds={selectedIds}
+              onSelectionChange={setSelectedIds}
             />
             {paginationMeta.total_pages > 1 && (
               <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
@@ -183,6 +214,12 @@ function App() {
             )}
           </Box>
         </Box>
+        <DonorMergeModal
+          open={showMergeModal}
+          donors={donors.filter(d => selectedIds.includes(d.id))}
+          onClose={() => setShowMergeModal(false)}
+          onConfirm={handleMergeConfirm}
+        />
       </Container>
     </ThemeProvider>
   );

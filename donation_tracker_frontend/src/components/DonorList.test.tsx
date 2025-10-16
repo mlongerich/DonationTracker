@@ -148,4 +148,31 @@ describe('DonorList', () => {
     expect(screen.getByText('john@example.com')).toBeInTheDocument();
     expect(screen.queryByText('(No email provided)')).not.toBeInTheDocument();
   });
+
+  it('renders checkboxes for donor selection', () => {
+    const donors = [
+      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+    ];
+
+    render(<DonorList donors={donors} />);
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    expect(checkboxes).toHaveLength(2);
+  });
+
+  it('calls onSelectionChange when checkbox is clicked', async () => {
+    const donors = [
+      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+    ];
+    const handleSelectionChange = jest.fn();
+
+    render(<DonorList donors={donors} onSelectionChange={handleSelectionChange} />);
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    checkboxes[0].click();
+
+    expect(handleSelectionChange).toHaveBeenCalledWith([1]);
+  });
 });

@@ -8,6 +8,7 @@ import {
   IconButton,
   Chip,
   Tooltip,
+  Checkbox,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
@@ -27,6 +28,8 @@ interface DonorListProps {
   editingDonorId?: number;
   onArchive?: (id: number) => void;
   onRestore?: (id: number) => void;
+  selectedIds?: number[];
+  onSelectionChange?: (ids: number[]) => void;
 }
 
 const DonorList: React.FC<DonorListProps> = ({
@@ -35,7 +38,18 @@ const DonorList: React.FC<DonorListProps> = ({
   editingDonorId,
   onArchive,
   onRestore,
+  selectedIds = [],
+  onSelectionChange,
 }) => {
+  const handleCheckboxChange = (donorId: number) => {
+    if (!onSelectionChange) return;
+
+    const newSelection = selectedIds.includes(donorId)
+      ? selectedIds.filter(id => id !== donorId)
+      : [...selectedIds, donorId];
+
+    onSelectionChange(newSelection);
+  };
   if (donors.length === 0) {
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -72,6 +86,10 @@ const DonorList: React.FC<DonorListProps> = ({
                   alignItems: 'start',
                 }}
               >
+                <Checkbox
+                  checked={selectedIds.includes(donor.id)}
+                  onChange={() => handleCheckboxChange(donor.id)}
+                />
                 <Box sx={{ flex: 1 }}>
                   <Box
                     sx={{

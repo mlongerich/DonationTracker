@@ -44,4 +44,16 @@ apiClient.interceptors.response.use(
   }
 );
 
+// API Methods
+export const mergeDonors = async (
+  donorIds: number[],
+  fieldSelections: { name: number; email: number }
+) => {
+  const response = await apiClient.post('/api/donors/merge', {
+    donor_ids: donorIds,
+    field_selections: fieldSelections,
+  });
+  return response.data;
+};
+
 export default apiClient;
