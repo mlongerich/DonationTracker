@@ -12,6 +12,8 @@ Rails.application.routes.draw do
       post "merge", action: :merge, on: :collection
       post "restore", action: :restore, on: :member
     end
+
+    resources :donations, only: [ :index, :create, :show ]
   end
 
   # Defines the root path route ("/")

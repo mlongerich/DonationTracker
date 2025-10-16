@@ -10,9 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_08_085418) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_15_095226) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "donations", force: :cascade do |t|
+    t.decimal "amount"
+    t.date "date"
+    t.bigint "donor_id", null: false
+    t.string "status"
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["donor_id"], name: "index_donations_on_donor_id"
+  end
 
   create_table "donors", force: :cascade do |t|
     t.string "name"
@@ -42,4 +53,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_08_085418) do
     t.text "object"
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
+
+  add_foreign_key "donations", "donors"
 end

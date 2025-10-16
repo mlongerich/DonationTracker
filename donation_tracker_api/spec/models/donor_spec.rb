@@ -53,4 +53,9 @@ RSpec.describe Donor, type: :model do
     expect(donor.versions.first.event).to eq("create")
     expect(donor.versions.last.event).to eq("update")
   end
+
+  it "has many donations" do
+    association = Donor.reflect_on_association(:donations)
+    expect(association.macro).to eq(:has_many)
+  end
 end

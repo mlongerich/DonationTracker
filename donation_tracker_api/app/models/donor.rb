@@ -2,6 +2,7 @@ class Donor < ApplicationRecord
   include Discard::Model
 
   has_paper_trail
+  has_many :donations
 
   before_validation :set_defaults
 
