@@ -1,7 +1,7 @@
 # Children's Home Donation Tracking System - Development Specification
 
 ---
-## 🚀 DEVELOPMENT STATUS (Updated: 2025-10-07)
+## 🚀 DEVELOPMENT STATUS (Updated: 2025-10-15)
 
 ### ✅ COMPLETED WORK
 
@@ -32,7 +32,10 @@
   - PATCH /api/donors/:id
   - DELETE /api/donors/:id (soft delete/archive)
   - POST /api/donors/:id/restore (restore archived donor)
+  - POST /api/donors/merge (merge multiple donors with field selection)
   - DELETE /api/donors/all (hard delete for test cleanup)
+- [x] **DonorMergeService**: Transaction-safe donor merging with field-level selection, merged_into_id tracking, automatic soft delete of source donors
+- [x] **Merged Donor Filtering**: Donors with merged_into_id excluded from both active and archived lists (prevents duplicate display)
 - [x] **Search & Pagination**: Ransack gem with custom name_or_email searcher, Kaminari pagination (25 per page default)
 - [x] **Soft Delete**: Discard gem for archiving donors with discarded_at timestamp
 - [x] **Status Code Differentiation**: 201 for new donor creation, 200 for existing donor updates
@@ -53,14 +56,15 @@
 - [x] **DonorForm Component**: Create/update donors with styled button (variant="contained"), fullWidth fields, Stack spacing
 - [x] **Smart UI Feedback**: "Donor created successfully!" (201) vs "Donor updated successfully!" (200)
 - [x] **Form Auto-clear**: Name and email fields clear after successful submission
-- [x] **DonorList Component**: Card-based layout with outlined variant, Typography variants (subtitle1 for names, body2 for emails)
+- [x] **DonorList Component**: Card-based layout with outlined variant, Typography variants (subtitle1 for names, body2 for emails), multi-select checkboxes for donor merging
+- [x] **Donor Merge UI**: "Merge Selected" button (appears when ≥2 donors selected), DonorMergeModal with side-by-side comparison and radio button field selection
 - [x] **Archive/Restore UI**: Visual indicators (opacity 0.6, Archive chip), Archive/Restore buttons with tooltips for accessibility
 - [x] **Archived Donors Toggle**: Show/hide archived donors with toggle button, search respects archived state
 - [x] **App Integration**: Fetches donors on mount, automatically refreshes list after form submission
 - [x] **Search UI**: Debounced search (300ms) for name OR email with placeholder "Search by name or email..."
 - [x] **Pagination UI**: Material-UI Pagination component with server-side pagination (10 per page)
 - [x] **Hot Reload Configuration**: WATCHPACK_POLLING=300ms for automatic code changes without manual cache clearing
-- [x] **Cypress E2E Testing**: Test database isolation via cy.intercept() redirecting to port 3002, comprehensive search and archive validation (6 passing tests)
+- [x] **Cypress E2E Testing**: Test database isolation via cy.intercept() redirecting to port 3002, comprehensive search and archive validation, donor merge workflow test (7 passing tests)
 - [x] **Config-Driven URLs**: REACT_APP_API_URL for dev, devApiUrl/testApiUrl for Cypress (no hardcoded ports)
 
 **Quality Assurance & Pre-commit System:**
@@ -74,7 +78,7 @@
 - [x] **FULLY FUNCTIONAL**: Backend (3 tools) and Frontend (4 tools) quality enforcement working
 - [x] **CODE QUALITY METRICS**: 0 RuboCop violations, 0 Brakeman security warnings, all tests passing
 - [x] **TYPE SAFETY**: TypeScript errors resolved, Pact v12 API correctly implemented
-- [x] **TEST COVERAGE**: Backend 41 RSpec tests, Frontend 30 Jest tests, 6 Cypress E2E tests (77 total tests passing)
+- [x] **TEST COVERAGE**: Backend 49 RSpec tests (6 DonorMergeService + 1 merge request spec), Frontend 34 Jest tests (2 DonorList + 2 DonorMergeModal), 7 Cypress E2E tests (90 total tests passing)
 - [x] **DATABASE CLEANUP**: before(:suite) hook prevents test pollution between runs
 
 **Development Decisions Made:**
