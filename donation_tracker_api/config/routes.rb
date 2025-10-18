@@ -14,6 +14,11 @@ Rails.application.routes.draw do
     end
 
     resources :donations, only: [ :index, :create, :show ]
+
+    # Test-only routes (development/test environments only)
+    namespace :test do
+      delete "cleanup", action: :cleanup
+    end
   end
 
   # Defines the root path route ("/")
