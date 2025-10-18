@@ -65,6 +65,7 @@ function App() {
     startDate: null,
     endDate: null,
   });
+  const [selectedDonorId, setSelectedDonorId] = useState<number | null>(null);
 
   // Debounce search query
   useEffect(() => {
@@ -107,14 +108,17 @@ function App() {
     try {
       const params: Record<string, unknown> = {};
 
-      // Add Ransack date range filters if dates are selected
-      if (dateRange.startDate || dateRange.endDate) {
-        const q: Record<string, string> = {};
+      // Add Ransack filters if any are selected
+      if (dateRange.startDate || dateRange.endDate || selectedDonorId) {
+        const q: Record<string, string | number> = {};
         if (dateRange.startDate) {
           q.date_gteq = dateRange.startDate;
         }
         if (dateRange.endDate) {
           q.date_lteq = dateRange.endDate;
+        }
+        if (selectedDonorId) {
+          q.donor_id_eq = selectedDonorId;
         }
         params.q = q;
       }
@@ -133,7 +137,7 @@ function App() {
     fetchDonors();
     fetchDonations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedQuery, currentPage, showArchived, dateRange]);
+  }, [debouncedQuery, currentPage, showArchived, dateRange, selectedDonorId]);
 
   const handleDonorSubmit = (data: { name: string; email: string }) => {
     console.log('Donor submitted:', data);
@@ -195,6 +199,11 @@ function App() {
     setDateRange({ startDate, endDate });
   };
 
+  const handleDonorFilterChange = (donorId: number | null) => {
+    setSelectedDonorId(donorId);
+    setCurrentPage(1); // Reset to page 1 when donor filter changes
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -219,6 +228,7 @@ function App() {
               paginationMeta={paginationMeta}
               onPageChange={(_, page) => setCurrentPage(page)}
               onDateRangeChange={handleDateRangeChange}
+              onDonorChange={handleDonorFilterChange}
             />
           </Box>
 

@@ -159,4 +159,65 @@ describe('DonationList', () => {
     // Verify callback is called with null values
     expect(mockOnDateRangeChange).toHaveBeenLastCalledWith(null, null);
   });
+
+  it('renders donor autocomplete filter', () => {
+    renderWithLocalization(<DonationList donations={[]} />);
+
+    expect(screen.getByLabelText(/donor/i)).toBeInTheDocument();
+  });
+
+  it('calls onDonorChange when donor is selected', async () => {
+    const mockOnDonorChange = jest.fn();
+    const user = userEvent.setup();
+
+    // Mock API response for donor search
+    const mockDonors = [
+      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+    ];
+
+    jest.spyOn(require('../api/client').default, 'get').mockResolvedValue({
+      data: { donors: mockDonors },
+    });
+
+    renderWithLocalization(<DonationList donations={[]} onDonorChange={mockOnDonorChange} />);
+
+    const donorInput = screen.getByLabelText(/donor/i);
+    await user.type(donorInput, 'John');
+
+    // Wait for debounce and API call
+    await screen.findByText('John Doe (john@example.com)');
+
+    // Select the donor
+    await user.click(screen.getByText('John Doe (john@example.com)'));
+
+    expect(mockOnDonorChange).toHaveBeenCalledWith(1);
+  });
+
+  it('clears donor selection when clear filters is clicked', async () => {
+    const mockOnDonorChange = jest.fn();
+    const user = userEvent.setup();
+
+    const mockDonors = [
+      { id: 1, name: 'John Doe', email: 'john@example.com' },
+    ];
+
+    jest.spyOn(require('../api/client').default, 'get').mockResolvedValue({
+      data: { donors: mockDonors },
+    });
+
+    renderWithLocalization(<DonationList donations={[]} onDonorChange={mockOnDonorChange} />);
+
+    const donorInput = screen.getByLabelText(/donor/i);
+    await user.type(donorInput, 'John');
+    await screen.findByText('John Doe (john@example.com)');
+    await user.click(screen.getByText('John Doe (john@example.com)'));
+
+    // Clear filters
+    const clearButton = screen.getByRole('button', { name: /clear filters/i });
+    await user.click(clearButton);
+
+    // Verify donor selection is cleared
+    expect(mockOnDonorChange).toHaveBeenLastCalledWith(null);
+  });
 });

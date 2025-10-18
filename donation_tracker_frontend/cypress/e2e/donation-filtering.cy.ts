@@ -245,4 +245,85 @@ describe('Donation Date Range Filtering', () => {
     cy.get('[role="group"]').first().should('have.attr', 'aria-invalid', 'true');
     cy.get('[role="group"]').eq(1).should('have.attr', 'aria-invalid', 'true');
   });
+
+  it('filters donations by donor selection', () => {
+    // Use unique names to avoid conflicts with existing test data
+    const timestamp = Date.now();
+    const aliceName = `Alice TestUser ${timestamp}`;
+    const bobName = `Bob TestUser ${timestamp}`;
+
+    // Create two donors with donations
+    cy.request('POST', 'http://localhost:3001/api/donors', {
+      donor: { name: aliceName, email: `alice${timestamp}@example.com` },
+    }).then((aliceResponse) => {
+      const aliceId = aliceResponse.body.id;
+
+      cy.request('POST', 'http://localhost:3001/api/donors', {
+        donor: { name: bobName, email: `bob${timestamp}@example.com` },
+      }).then((bobResponse) => {
+        const bobId = bobResponse.body.id;
+
+        // Create donations for each donor
+        cy.request('POST', 'http://localhost:3001/api/donations', {
+          donation: {
+            amount: 111.11,
+            date: '2024-06-15',
+            donor_id: aliceId,
+          },
+        });
+
+        cy.request('POST', 'http://localhost:3001/api/donations', {
+          donation: {
+            amount: 222.22,
+            date: '2024-06-15',
+            donor_id: bobId,
+          },
+        });
+
+        // Reload to fetch new donations
+        cy.reload();
+        cy.wait('@getDonations');
+
+        // Should see both donations initially
+        cy.contains('$111.11', { timeout: 5000 }).should('be.visible');
+        cy.contains('$222.22').should('be.visible');
+
+        // Filter by donor using autocomplete IN THE RECENT DONATIONS SECTION
+        // (not the donor dropdown in the Record Donation form at the top)
+        cy.contains('h2', 'Recent Donations')
+          .parent()
+          .contains('label', 'Donor')
+          .parent()
+          .find('input')
+          .type(`Alice TestUser ${timestamp}`);
+
+        // Wait for autocomplete dropdown and options to load
+        cy.get('[role="listbox"]').should('be.visible');
+        cy.get('[role="option"]').contains(`Alice TestUser ${timestamp}`).should('be.visible');
+
+        // Use keyboard navigation to select (most reliable for MUI Autocomplete)
+        cy.contains('h2', 'Recent Donations')
+          .parent()
+          .contains('label', 'Donor')
+          .parent()
+          .find('input')
+          .type('{downarrow}{enter}');
+
+        // Wait for autocomplete to close (confirms selection registered)
+        cy.get('[role="listbox"]').should('not.exist');
+
+        // Verify the filtered result in UI
+        cy.contains('$111.11').should('be.visible');
+        cy.contains('$222.22').should('not.exist');
+
+        // Clear filters
+        cy.contains('button', 'Clear Filters').click();
+        cy.wait('@getDonations');
+
+        // Both donations should be visible again
+        cy.contains('$111.11').should('be.visible');
+        cy.contains('$222.22').should('be.visible');
+      });
+    });
+  });
 });
