@@ -5,14 +5,8 @@ module Api
       @q = scope.ransack(params[:q])
       donations = @q.result.order(date: :desc).page(params[:page]).per(params[:per_page] || 25)
 
-      # Format response with donor names
-      donations_with_donor_name = donations.map do |donation|
-        donation.as_json.merge(donor_name: donation.donor.name)
-      end
-
-      # Include pagination metadata
       render json: {
-        donations: donations_with_donor_name,
+        donations: CollectionPresenter.new(donations, DonationPresenter).as_json,
         meta: {
           total_count: donations.total_count,
           total_pages: donations.total_pages,
@@ -26,15 +20,16 @@ module Api
       donation = Donation.new(donation_params)
 
       if donation.save
-        render json: donation, status: :created
+        donation.reload
+        render json: DonationPresenter.new(donation).as_json, status: :created
       else
         render json: { errors: donation.errors.full_messages }, status: :unprocessable_entity
       end
     end
 
     def show
-      donation = Donation.find(params[:id])
-      render json: donation, status: :ok
+      donation = Donation.includes(:donor).find(params[:id])
+      render json: DonationPresenter.new(donation).as_json, status: :ok
     end
 
     private

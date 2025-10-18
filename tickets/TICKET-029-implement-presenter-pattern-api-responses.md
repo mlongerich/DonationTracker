@@ -1,9 +1,10 @@
 ## [TICKET-029] Implement Presenter Pattern for API Responses
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 **Priority:** 🟡 Medium
 **Effort:** M (Medium)
 **Created:** 2025-10-18
+**Completed:** 2025-10-18
 **Dependencies:** None
 
 ### User Story
@@ -21,13 +22,13 @@ end
 **Issue:** Formatting logic cannot be reused, tested in isolation, or easily modified
 
 ### Acceptance Criteria
-- [ ] Create `DonationPresenter` class to encapsulate JSON formatting
-- [ ] Extract donor name merging logic from controller to presenter
-- [ ] Refactor `DonationsController#index` to use presenter
-- [ ] Add presenter specs with comprehensive JSON structure tests
-- [ ] All existing request specs pass without modification
-- [ ] Update CLAUDE.md with Presenter pattern documentation
-- [ ] Create base `BasePresenter` class for future presenters
+- [x] Create `DonationPresenter` class to encapsulate JSON formatting
+- [x] Extract donor name merging logic from controller to presenter
+- [x] Refactor `DonationsController#index` to use presenter
+- [x] Add presenter specs with comprehensive JSON structure tests
+- [x] All existing request specs pass without modification (7 specs passing)
+- [x] Update CLAUDE.md with Presenter pattern documentation
+- [x] Create base `BasePresenter` class for future presenters
 
 ### Technical Approach
 
@@ -181,14 +182,15 @@ end
 - Aggregating data from multiple models
 - Different representations of same model
 
-### Files to Change
-- `app/presenters/base_presenter.rb` (NEW)
-- `app/presenters/donation_presenter.rb` (NEW)
-- `app/presenters/collection_presenter.rb` (NEW)
-- `app/controllers/api/donations_controller.rb` (MODIFY)
-- `spec/presenters/donation_presenter_spec.rb` (NEW)
-- `spec/presenters/collection_presenter_spec.rb` (NEW)
-- `CLAUDE.md` (UPDATE - add Presenter pattern to design pattern registry)
+### Files Changed
+- `app/presenters/base_presenter.rb` ✅ (NEW)
+- `app/presenters/donation_presenter.rb` ✅ (NEW)
+- `app/presenters/collection_presenter.rb` ✅ (NEW)
+- `app/controllers/api/donations_controller.rb` ✅ (MODIFIED)
+- `spec/presenters/base_presenter_spec.rb` ✅ (NEW - 3 tests)
+- `spec/presenters/donation_presenter_spec.rb` ✅ (NEW - 3 tests)
+- `spec/presenters/collection_presenter_spec.rb` ✅ (NEW - 2 tests)
+- `CLAUDE.md` ✅ (UPDATED - added Presenter pattern to design pattern registry)
 
 ### Future Enhancements
 - Create `DonorPresenter` for consistent donor JSON formatting
@@ -198,10 +200,18 @@ end
 
 ### Related Tickets
 - TICKET-028: Works well with extracted controller concerns
+- TICKET-009: Presenter pattern prepares for adding project info to donations
 - Part of broader code quality improvement initiative
 
-### Notes
-- This is a refactoring ticket - no API contract changes
-- All existing tests should pass without modification
-- N+1 query for `donation.donor.name` already resolved with `includes(:donor)` in controller
-- Keep presenters simple - no business logic, only presentation logic
+### Implementation Notes
+- ✅ Used strict TDD workflow (one test at a time)
+- ✅ All existing 7 request specs pass without modification (no API contract changes)
+- ✅ N+1 query for `donation.donor.name` already resolved with `includes(:donor)` in controller
+- ✅ Presenters kept simple - no business logic, only presentation logic
+- ✅ BasePresenter provides foundation for future presenters (DonorPresenter, ProjectPresenter)
+
+### Why This Prepares for TICKET-009
+When project support is added to donations:
+1. Simply add `project_title` field to `DonationPresenter#as_json`
+2. No controller changes needed
+3. Centralized formatting logic makes it easy to add conditional project display

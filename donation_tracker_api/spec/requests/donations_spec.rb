@@ -15,6 +15,22 @@ RSpec.describe "/api/donations", type: :request do
 
       expect(response).to have_http_status(:created)
     end
+
+    it "includes donor_name in response" do
+      donor = create(:donor, name: "Jane Doe")
+
+      post "/api/donations", params: {
+        donation: {
+          amount: 50.00,
+          date: Date.today,
+          donor_id: donor.id
+        }
+      }
+
+      expect(response).to have_http_status(:created)
+      json = JSON.parse(response.body)
+      expect(json["donor_name"]).to eq("Jane Doe")
+    end
   end
 
   describe "GET /api/donations" do
@@ -93,6 +109,17 @@ RSpec.describe "/api/donations", type: :request do
       get "/api/donations/#{donation.id}"
 
       expect(response).to have_http_status(:ok)
+    end
+
+    it "includes donor_name in response" do
+      donor = create(:donor, name: "John Smith")
+      donation = create(:donation, donor: donor)
+
+      get "/api/donations/#{donation.id}"
+
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body)
+      expect(json["donor_name"]).to eq("John Smith")
     end
   end
 end

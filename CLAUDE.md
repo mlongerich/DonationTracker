@@ -344,7 +344,13 @@ Track and enforce these Rails patterns:
 - **Service Objects**: Encapsulate complex business logic
 - **Query Objects**: Complex database queries
 - **Form Objects**: Handle complex form validations
-- **Decorator/Presenter**: View-specific logic
+- **Decorator/Presenter**: View-specific logic (✅ **IMPLEMENTED** - `app/presenters/`)
+  - `BasePresenter`: Abstract base class for all presenters
+  - `CollectionPresenter`: Wraps collections with item-specific presenters
+  - `DonationPresenter`: Formats donation JSON responses with donor_name
+  - **Usage**: `CollectionPresenter.new(donations, DonationPresenter).as_json`
+  - **Benefits**: Separation of concerns, testability, reusability
+  - **When to use**: Complex JSON structures, computed fields, multiple model aggregation
 - **Value Objects**: Immutable data structures
 - **Policy Objects**: Authorization logic
 - **Interactors**: Multi-step business processes
@@ -786,6 +792,44 @@ pre-commit run --all-files                  # Run all hooks manually
 - Use semantic HTML elements
 - Include proper ARIA labels
 - Test with screen readers
+
+### Shared Component Pattern
+
+**When to Extract a Shared Component:**
+- Logic is duplicated in 2+ components
+- Component has clear, well-defined interface
+- Behavior is consistent across usages
+- Would reduce code duplication by 50+ lines
+
+**TDD Approach for Shared Components:**
+1. **Write tests first** - One test at a time (strict TDD)
+2. **Minimal implementation** - Make each test pass with simplest code
+3. **Refactor duplicates** - Replace duplicate logic in existing components
+4. **Verify integration** - Ensure all original tests still pass
+
+**Example: DonorAutocomplete Component**
+- **Extracted from**: DonationForm, DonationList (100+ lines duplicated)
+- **Features**: Debounced search, loading states, email hiding, configurable size/required
+- **Interface**: `value`, `onChange`, `label`, `size`, `required` props
+- **Tests**: 7 unit tests covering all features
+- **Result**: Single source of truth, easier maintenance
+
+```tsx
+// Usage example
+<DonorAutocomplete
+  value={selectedDonor}
+  onChange={setSelectedDonor}
+  size="small"
+  required
+/>
+```
+
+**Benefits:**
+- DRY principle adherence
+- Single source of truth for behavior
+- Easier to add features (update once, affects all usages)
+- Better testability (test component once, not in every usage)
+- Type safety with exported interfaces
 
 ---
 
