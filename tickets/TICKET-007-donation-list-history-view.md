@@ -20,9 +20,9 @@ As a user, I want to view all donations with filtering options so that I can see
 - [x] Frontend: Show amount, date, donor name for each donation
 - [x] Frontend: Pagination controls (Material-UI Pagination component)
 - [x] Frontend: Jest tests for pagination rendering (4 tests)
-- [ ] **DEFERRED**: Filter by donor dropdown (see TICKET-017 for autocomplete)
-- [ ] **DEFERRED**: Date range picker for filtering (will be added in future ticket)
-- [ ] **DEFERRED**: Cypress E2E test for filtering (basic donation E2E exists in TICKET-006)
+- [x] Filter by donor dropdown ✅ **COMPLETED in TICKET-023** (autocomplete donor filter)
+- [x] Date range picker for filtering ✅ **COMPLETED in TICKET-016** (MUI X DatePicker)
+- [x] Cypress E2E test for filtering ✅ **COMPLETED in TICKET-016** (donation-filtering.cy.ts)
 
 ### Technical Notes
 - **TDD approach**: Red-Green-Refactor cycle followed for all tests (one test at a time)

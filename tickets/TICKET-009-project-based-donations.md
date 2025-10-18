@@ -1,31 +1,44 @@
-## [TICKET-009] Project-Based Donations
+## [TICKET-009] Project-Based Donations (Hybrid Approach)
 
 **Status:** 📋 Planned
-**Priority:** 🟢 Low
+**Priority:** 🟡 Medium (Required for Stripe import - TICKET-024)
 **Dependencies:** TICKET-006 (Donation model)
 
 ### User Story
-As an admin, I want to assign donations to specific projects/campaigns so that I can track funding for different initiatives.
+As an admin, I want to assign donations to specific projects/campaigns so that I can track funding for different initiatives, with all donations defaulting to "General Donation" if no project is specified.
 
 ### Acceptance Criteria
-- [ ] Backend: Project model (name, description, goal_amount, start_date, end_date)
-- [ ] Backend: Add project_id to donations table
+- [ ] Backend: Project model (title, description, goal_amount, start_date, end_date, project_type, system)
+- [ ] Backend: Add nullable project_id to donations table (optional: true in model)
+- [ ] Backend: Seed "General Donation" system project in migration
 - [ ] Backend: Project CRUD endpoints (GET, POST, PUT, DELETE /api/projects)
+- [ ] Backend: Prevent deletion/editing of system projects (validation)
 - [ ] Backend: Include project info in donation responses
-- [ ] Frontend: Project management page (list, create, edit)
-- [ ] Frontend: Add project dropdown to DonationForm
-- [ ] Frontend: Show project name in DonationList
+- [ ] Backend: Project extraction from description text (for Stripe import)
+- [ ] Frontend: Project management page (list, create, edit - excluding system projects)
+- [ ] Frontend: Add project dropdown to DonationForm with "General Donation" default
+- [ ] Frontend: Auto-create/assign "General Donation" if user doesn't select project
+- [ ] Frontend: Show project title in DonationList (display "General Donation" for null project_id)
 - [ ] Frontend: Project dashboard showing total raised vs goal
-- [ ] RSpec tests for Project model and API
-- [ ] Cypress E2E test for project assignment
+- [ ] RSpec tests for Project model, validations, and API (8+ tests)
+- [ ] Cypress E2E test for project assignment and default behavior
 
 ### Technical Notes
 - **TDD approach**: Red-Green-Refactor cycle followed for all tests
-- **Model**: `rails g model Project name:string description:text goal_amount:decimal start_date:date end_date:date`
+- **Hybrid Model Design**: Schema allows nullable project_id, but UI enforces project selection
+- **Model**: `rails g model Project title:string description:text goal_amount:decimal start_date:date end_date:date project_type:integer system:boolean`
 - **Migration**: `rails g migration AddProjectToDonations project:references`
-- **Optional field**: project_id nullable (not all donations need projects)
+- **Project types enum**: `enum project_type: { general: 0, campaign: 1, sponsorship: 2 }`
+- **System project**: "General Donation" created in migration with `system: true, project_type: :general`
+- **Validation**: Prevent deletion/editing of projects where `system: true`
 - **Calculations**: `project.donations.sum(:amount)` for total raised
-- **Future**: Project progress bars, analytics
+- **Frontend logic**: `projectId = selectedProject?.id || await getOrCreateGeneralProject()`
+- **Virtual attribute**: `donation.project_title` returns `project&.title || "General Donation"`
+- **Migration path**: Existing donations with null project_id display as "General Donation" in UI
+- **Stripe Integration**: Extract project titles from Stripe description field
+  - "Monthly Sponsorship Donation for Sangwan" → Project: "Sponsor Sangwan"
+  - "$100 - General Monthly Donation" → Project: "General Donation"
+- **Future**: Backfill null project_id values to "General Donation" project if desired
 
 ### Files Changed
 - Backend: `app/models/project.rb` (new)

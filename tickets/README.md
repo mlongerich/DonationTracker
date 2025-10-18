@@ -26,6 +26,7 @@ Current work items and user stories being actively developed.
 
 ### 📋 Planned Tickets
 
+#### Feature Development
 - [TICKET-004: Manual Donor Merge with Field Selection](TICKET-004-manual-donor-merge-field-selection.md) - 📋 Planned
 - [TICKET-005: Auto-Reassign Donations After Donor Merge](TICKET-005-auto-reassign-donations-after-merge.md) - ⏸️ Blocked (needs TICKET-004)
 - [TICKET-008: Basic Authentication with Google OAuth](TICKET-008-basic-authentication-google-oauth.md) - 📋 Planned
@@ -33,23 +34,45 @@ Current work items and user stories being actively developed.
 - [TICKET-010: Children & Basic Sponsorship Tracking](TICKET-010-children-basic-sponsorship-tracking.md) - 📋 Planned
 - [TICKET-011: Recurring Donation Tracking](TICKET-011-recurring-donation-tracking.md) - 📋 Planned
 - [TICKET-012: Stripe Webhook Integration](TICKET-012-stripe-webhook-integration.md) - 📋 Planned
-- [TICKET-013: Fix Docker Frontend Infrastructure Issues](TICKET-013-fix-docker-frontend-infrastructure.md) - 📋 Planned
 - [TICKET-018: Fix Donation Amount Decimal Formatting](TICKET-018-donation-amount-decimal-formatting.md) - 📋 Planned
-- [TICKET-019: Multi-Page Architecture with React Router](TICKET-019-multi-page-architecture-react-router.md) - 📋 Planned
 - [TICKET-020: Consistent Material-UI Styling for DonationForm](TICKET-020-donation-form-material-ui-styling.md) - 📋 Planned
 - [TICKET-021: Quick Donor Creation from Donation Page](TICKET-021-quick-donor-creation-from-donation-page.md) - 📋 Planned
 - [TICKET-022: Anonymous Donation Support](TICKET-022-anonymous-donation-support.md) - 📋 Planned
 - [TICKET-023: Donation List Donor Filter](TICKET-023-donation-list-donor-filter.md) - 📋 Planned (🟡 Medium)
 
+#### Infrastructure & Technical Debt
+- [TICKET-013: Fix Docker Frontend Infrastructure Issues](TICKET-013-fix-docker-frontend-infrastructure.md) - 📋 Planned
+
+#### Code Quality & Architecture Improvements
+- [TICKET-028: Extract Controller Concerns for Pagination/Filtering](TICKET-028-extract-controller-concerns-pagination-filtering.md) - 📋 Planned (🟡 Medium, S)
+- [TICKET-029: Implement Presenter Pattern for API Responses](TICKET-029-implement-presenter-pattern-api-responses.md) - 📋 Planned (🟡 Medium, M)
+- [TICKET-030: Refactor App.tsx into Multi-Page Architecture](TICKET-030-refactor-app-multi-page-architecture.md) - 📋 Planned (🔴 High, L)
+- [TICKET-031: Extract DonorAutocomplete Shared Component](TICKET-031-extract-donor-autocomplete-shared-component.md) - 📋 Planned (🟡 Medium, S)
+- [TICKET-032: Create Custom Hooks Library](TICKET-032-create-custom-hooks-library.md) - 📋 Planned (🟡 Medium, M)
+- [TICKET-033: Implement Policy Objects for Authorization](TICKET-033-implement-policy-objects-authorization.md) - 📋 Planned (🟡 Medium, M)
+- [TICKET-034: Create Query Objects for Complex Database Queries](TICKET-034-create-query-objects-complex-database-queries.md) - 📋 Planned (🟢 Low, M)
+- [TICKET-035: Add Database Indexes for Query Performance](TICKET-035-add-database-indexes-query-performance.md) - 📋 Planned (🟡 Medium, S)
+- [TICKET-036: Implement React Error Boundary](TICKET-036-implement-react-error-boundary.md) - 📋 Planned (🟡 Medium, S)
+- [TICKET-037: Standardize Service Object Patterns](TICKET-037-standardize-service-object-patterns.md) - 📋 Planned (🟢 Low, S)
+- [TICKET-038: Define Cascade Delete Strategy for Donations](TICKET-038-define-cascade-delete-strategy-donations.md) - 📋 Planned (🟢 Low, S)
+- [TICKET-039: Add Donation Status Enum Validation](TICKET-039-add-donation-status-enum-validation.md) - 📋 Planned (🟢 Low, S)
+- [TICKET-040: Implement Context API for Donor/Donation State](TICKET-040-implement-context-api-donor-donation-state.md) - 📋 Planned (🟢 Low, L)
+
 ---
 
 ## Quick Stats
 
-- **Total Tickets:** 23
+- **Total Tickets:** 40
 - **Completed:** 9
 - **In Progress:** 0
-- **Planned:** 13
+- **Planned:** 30
 - **Blocked:** 1
+
+### By Category
+- **Feature Development:** 11 planned
+- **Infrastructure:** 1 planned
+- **Code Quality & Architecture:** 13 planned
+- **Completed:** 9
 
 ---
 
