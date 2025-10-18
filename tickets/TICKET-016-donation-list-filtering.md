@@ -109,4 +109,6 @@ Duration:     10 seconds
 
 ### Related Commits
 
-- (To be added after final commit)
+- `42c2e9c`: frontend: upgrade donation list date filters to MUI X DatePicker (TICKET-016)
+- `cee57d1`: backend: add test cleanup endpoint for Cypress E2E tests (TICKET-016)
+- `3af5d95`: chore: prettier formatting fixes

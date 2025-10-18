@@ -17,11 +17,12 @@ Current work items and user stories being actively developed.
 - [TICKET-001: Donor Soft Delete with Archive/Restore](TICKET-001-donor-soft-delete-archive-restore.md) - ✅ Complete (2025-10-07)
 - [TICKET-002: Stripe CSV Donor Import via CLI (Iteration 1)](TICKET-002-stripe-csv-donor-import.md) - ✅ Complete (2025-10-07)
 - [TICKET-003: Hide Auto-Generated Emails in Donor Display](TICKET-003-hide-auto-generated-emails.md) - ✅ Complete (2025-10-07)
+- [TICKET-006: Simple Donation Entry](TICKET-006-simple-donation-entry.md) - ✅ Complete (2025-10-15)
+- [TICKET-007: Donation List History View](TICKET-007-donation-list-history-view.md) - ✅ Complete (2025-10-15)
 - [TICKET-014: Refactor Donor Merge Service Pattern Consistency](TICKET-014-refactor-donor-merge-service-pattern-consistency.md) - ✅ Complete (2025-10-15)
-
-### 🔵 In Progress Tickets
-
-- [TICKET-006+007: Donation Entry & List View (Merged)](TICKET-006-simple-donation-entry.md) - 🔵 In Progress (🔴 High Priority)
+- [TICKET-015: Donation List Pagination](TICKET-015-donation-list-pagination.md) - ✅ Complete (2025-10-17)
+- [TICKET-016: Donation List Filtering & Date Range](TICKET-016-donation-list-filtering.md) - ✅ Complete (2025-10-18)
+- [TICKET-017: Replace Donor Dropdown with Autocomplete Search](TICKET-017-donor-autocomplete-search.md) - ✅ Complete (2025-10-16)
 
 ### 📋 Planned Tickets
 
@@ -33,17 +34,21 @@ Current work items and user stories being actively developed.
 - [TICKET-011: Recurring Donation Tracking](TICKET-011-recurring-donation-tracking.md) - 📋 Planned
 - [TICKET-012: Stripe Webhook Integration](TICKET-012-stripe-webhook-integration.md) - 📋 Planned
 - [TICKET-013: Fix Docker Frontend Infrastructure Issues](TICKET-013-fix-docker-frontend-infrastructure.md) - 📋 Planned
-- [TICKET-015: Donation List Pagination](TICKET-015-donation-list-pagination.md) - 📋 Planned (🟡 Medium)
-- [TICKET-016: Donation List Filtering & Date Range](TICKET-016-donation-list-filtering.md) - 📋 Planned (🟡 Medium)
+- [TICKET-018: Fix Donation Amount Decimal Formatting](TICKET-018-donation-amount-decimal-formatting.md) - 📋 Planned
+- [TICKET-019: Multi-Page Architecture with React Router](TICKET-019-multi-page-architecture-react-router.md) - 📋 Planned
+- [TICKET-020: Consistent Material-UI Styling for DonationForm](TICKET-020-donation-form-material-ui-styling.md) - 📋 Planned
+- [TICKET-021: Quick Donor Creation from Donation Page](TICKET-021-quick-donor-creation-from-donation-page.md) - 📋 Planned
+- [TICKET-022: Anonymous Donation Support](TICKET-022-anonymous-donation-support.md) - 📋 Planned
+- [TICKET-023: Donation List Donor Filter](TICKET-023-donation-list-donor-filter.md) - 📋 Planned (🟡 Medium)
 
 ---
 
 ## Quick Stats
 
-- **Total Tickets:** 15
-- **Completed:** 4
-- **In Progress:** 1
-- **Planned:** 9
+- **Total Tickets:** 23
+- **Completed:** 9
+- **In Progress:** 0
+- **Planned:** 13
 - **Blocked:** 1
 
 ---

@@ -52,7 +52,8 @@
 - [x] Code quality tools: ESLint with React and accessibility plugins, Prettier
 - [x] Axios HTTP client with authentication interceptors
 - [x] Responsive foundation for mobile-first design
-- [x] **Material-UI (MUI) v6**: Mobile-first component library with Stack, Card, Typography, Button, TextField, Alert
+- [x] **Material-UI (MUI) v7**: Mobile-first component library with Stack, Card, Typography, Button, TextField, Alert, Autocomplete, Pagination
+- [x] **MUI X Date Pickers v8**: DatePicker components with dayjs adapter (@mui/x-date-pickers v8.12.0, dayjs v1.11.18)
 - [x] **DonorForm Component**: Create/update donors with styled button (variant="contained"), fullWidth fields, Stack spacing
 - [x] **Smart UI Feedback**: "Donor created successfully!" (201) vs "Donor updated successfully!" (200)
 - [x] **Form Auto-clear**: Name and email fields clear after successful submission
@@ -74,9 +75,14 @@
 - [x] **Donor Autocomplete Search (TICKET-017)**: Material-UI Autocomplete with dynamic API search, replaces static dropdown, ~100x performance improvement (10 results vs 1000+ donors)
 - [x] **Mailinator Email Hiding**: Consistent email display across donor list and autocomplete using `shouldDisplayEmail()` utility
 - [x] **DonationList Component**: Display donations with pagination controls, shows amount/date/donor name
-- [x] **Donation Testing**: 4 model tests, 7 request tests (pagination/filtering), 7 DonationForm tests (includes mailinator hiding), 4 DonationList tests, Cypress E2E test (donation creation flow)
+- [x] **Donation Testing**: 4 model tests, 7 request tests (pagination/filtering), 7 DonationForm tests (includes mailinator hiding), 10 DonationList tests (upgraded for DatePicker), Cypress E2E tests (donation creation + 5 filtering tests)
 - [x] **Factory Bot Integration**: All tests use Factory Bot with Faker for maintainable test data generation
 - [x] **Jest Act() Warning Fix**: Added waitFor() pattern for async useEffect initial renders
+- [x] **MUI X DatePicker Integration (TICKET-016)**: Upgraded donation list date filters from HTML5 inputs to MUI X DatePicker components
+- [x] **LocalizationProvider**: Configured at App.tsx level with AdapterDayjs for all DatePicker components
+- [x] **Date Validation**: Dayjs isValid() checks before formatting, prevents invalid date submissions
+- [x] **Test Cleanup Endpoint**: /api/test/cleanup for Cypress E2E database cleanup (development/test only)
+- [x] **DatePicker Testing**: 10 Jest unit tests with LocalizationProvider wrapper, 5 Cypress E2E tests with segmented month/day/year inputs
 
 **Quality Assurance & Pre-commit System:**
 - [x] TDD-driven pre-commit hooks system with comprehensive bash testing framework (13 passing tests)
