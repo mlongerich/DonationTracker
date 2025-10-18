@@ -1,22 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Pagination from '@mui/material/Pagination';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
-import CircularProgress from '@mui/material/CircularProgress';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Dayjs } from 'dayjs';
-import apiClient from '../api/client';
-import { shouldDisplayEmail } from '../utils/emailUtils';
-
-interface Donor {
-  id: number;
-  name: string;
-  email: string;
-}
+import DonorAutocomplete, { Donor } from './DonorAutocomplete';
 
 interface Donation {
   id: number;
@@ -55,36 +45,6 @@ const DonationList: React.FC<DonationListProps> = ({
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [dateError, setDateError] = useState<string | null>(null);
   const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
-  const [donorOptions, setDonorOptions] = useState<Donor[]>([]);
-  const [searchInput, setSearchInput] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  // Debounced search for donors
-  useEffect(() => {
-    const timer = setTimeout(async () => {
-      if (searchInput.trim()) {
-        setLoading(true);
-        try {
-          const response = await apiClient.get('/api/donors', {
-            params: {
-              q: { name_or_email_cont: searchInput },
-              per_page: 10,
-            },
-          });
-          setDonorOptions(response.data.donors || []);
-        } catch (error) {
-          console.error('Failed to search donors:', error);
-          setDonorOptions([]);
-        } finally {
-          setLoading(false);
-        }
-      } else {
-        setDonorOptions([]);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchInput]);
 
   const validateDateRange = (
     start: Dayjs | null,
@@ -138,7 +98,6 @@ const DonationList: React.FC<DonationListProps> = ({
     setEndDate(null);
     setDateError(null);
     setSelectedDonor(null);
-    setSearchInput('');
     if (onDateRangeChange) {
       onDateRangeChange(null, null);
     }
@@ -155,43 +114,10 @@ const DonationList: React.FC<DonationListProps> = ({
             {dateError}
           </Alert>
         )}
-        <Autocomplete
-          options={donorOptions}
-          loading={loading}
+        <DonorAutocomplete
           value={selectedDonor}
-          onChange={(_, newValue) => handleDonorChange(newValue)}
-          inputValue={searchInput}
-          onInputChange={(_, newInputValue) => setSearchInput(newInputValue)}
-          getOptionLabel={(option) => {
-            if (shouldDisplayEmail(option.email)) {
-              return `${option.name} (${option.email})`;
-            }
-            return `${option.name} (No email provided)`;
-          }}
-          isOptionEqualToValue={(option, value) => option.id === value.id}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Donor"
-              size="small"
-              slotProps={{
-                input: {
-                  ...params.InputProps,
-                  endAdornment: (
-                    <>
-                      {loading ? (
-                        <CircularProgress color="inherit" size={20} />
-                      ) : null}
-                      {params.InputProps.endAdornment}
-                    </>
-                  ),
-                },
-              }}
-            />
-          )}
-          noOptionsText={
-            searchInput ? 'No donors found' : 'Start typing to search donors'
-          }
+          onChange={handleDonorChange}
+          size="small"
         />
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
