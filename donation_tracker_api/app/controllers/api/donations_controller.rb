@@ -1,18 +1,16 @@
 module Api
   class DonationsController < ApplicationController
+    include PaginationConcern
+    include RansackFilterable
+
     def index
       scope = Donation.includes(:donor).all
-      @q = scope.ransack(params[:q])
-      donations = @q.result.order(date: :desc).page(params[:page]).per(params[:per_page] || 25)
+      filtered_scope = apply_ransack_filters(scope)
+      donations = paginate_collection(filtered_scope.order(date: :desc))
 
       render json: {
         donations: CollectionPresenter.new(donations, DonationPresenter).as_json,
-        meta: {
-          total_count: donations.total_count,
-          total_pages: donations.total_pages,
-          current_page: donations.current_page,
-          per_page: donations.limit_value
-        }
+        meta: pagination_meta(donations)
       }, status: :ok
     end
 

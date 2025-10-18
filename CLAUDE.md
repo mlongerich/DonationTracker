@@ -571,6 +571,52 @@ end
 4. **Readability**: Clear flow with descriptive method names
 5. **Complexity Reduction**: Target <10 flog score per method
 
+#### Controller Concerns Pattern
+Extract repeated logic across controllers into reusable concerns following DRY principles.
+
+**When to Extract a Concern:**
+- Logic duplicated in 2+ controllers
+- Cross-cutting functionality (pagination, filtering, authentication)
+- Clear, well-defined responsibility
+- Would reduce code duplication by 20+ lines
+
+**Implemented Concerns:**
+- **PaginationConcern**: Kaminari pagination with metadata generation
+- **RansackFilterable**: Ransack query building and filtering
+
+**Example Usage:**
+```ruby
+class Api::DonorsController < ApplicationController
+  include PaginationConcern
+  include RansackFilterable
+
+  def index
+    scope = Donor.all
+    filtered_scope = apply_ransack_filters(scope)
+    donors = paginate_collection(filtered_scope.order(name: :asc))
+
+    render json: {
+      donors: donors,
+      meta: pagination_meta(donors)
+    }
+  end
+end
+```
+
+**PaginationConcern Methods:**
+- `paginate_collection(collection)` - Apply Kaminari pagination (default: 25 per page)
+- `pagination_meta(paginated_collection)` - Generate metadata hash (total_count, total_pages, current_page, per_page)
+
+**RansackFilterable Methods:**
+- `apply_ransack_filters(scope)` - Build Ransack query from `params[:q]`, returns filtered scope
+
+**Benefits:**
+- **DRY**: Single source of truth for common logic
+- **Testability**: Concerns can be tested in isolation with anonymous controllers
+- **Reusability**: Same concerns used across Donors, Donations, Projects controllers
+- **Maintainability**: Changes to pagination/filtering logic apply everywhere
+- **Rails Convention**: Standard pattern for cross-cutting functionality
+
 ### Frontend (React)
 - **ESLint**: React, accessibility, and TypeScript rules
 - **Prettier**: Consistent code formatting

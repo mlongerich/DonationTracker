@@ -431,6 +431,29 @@ gem 'faker'
 - ✅ Maintainability: Private method extraction for clarity
 - ✅ Documentation: Clear usage examples and inline comments
 
+### TICKET-028: Controller Concerns for Pagination/Filtering (2025-10-18)
+**Objective**: Extract repeated pagination and filtering logic into reusable concerns following DRY principles
+
+**Changes:**
+- Created `PaginationConcern` with `paginate_collection` and `pagination_meta` methods
+- Created `RansackFilterable` concern for Ransack query building
+- Refactored `DonorsController` and `DonationsController` to use both concerns
+- Added 5 comprehensive concern specs (tested with anonymous controllers)
+
+**Files Modified:**
+- `app/controllers/concerns/pagination_concern.rb` (NEW)
+- `app/controllers/concerns/ransack_filterable.rb` (NEW)
+- `app/controllers/api/donors_controller.rb` - Uses concerns
+- `app/controllers/api/donations_controller.rb` - Uses concerns
+- `spec/controllers/concerns/` (NEW - 2 spec files)
+- `CLAUDE.md` - Added Controller Concerns pattern documentation
+
+**Results:**
+- ✅ All 81 RSpec tests passing
+- ✅ DRY: Single source of truth for pagination/filtering
+- ✅ Reusability: Prepares for TICKET-009 (Projects controller)
+- ✅ Maintainability: Changes apply everywhere automatically
+
 ## Future Considerations
 - Email notifications to donors
 - Donor portal for self-service

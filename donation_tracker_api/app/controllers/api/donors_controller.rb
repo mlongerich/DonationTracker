@@ -1,19 +1,18 @@
 class Api::DonorsController < ApplicationController
+  include PaginationConcern
+  include RansackFilterable
+
   def index
     scope = params[:include_discarded] == "true" ? Donor.with_discarded : Donor.kept
     # Exclude merged donors (they have merged_into_id set)
     scope = scope.where(merged_into_id: nil)
-    @q = scope.ransack(params[:q])
-    donors = @q.result.order(name: :asc).page(params[:page]).per(params[:per_page] || 25)
+
+    filtered_scope = apply_ransack_filters(scope)
+    donors = paginate_collection(filtered_scope.order(name: :asc))
 
     render json: {
       donors: donors,
-      meta: {
-        total_count: donors.total_count,
-        total_pages: donors.total_pages,
-        current_page: donors.current_page,
-        per_page: donors.limit_value
-      }
+      meta: pagination_meta(donors)
     }
   end
 

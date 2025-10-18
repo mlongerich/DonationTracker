@@ -1,9 +1,10 @@
 ## [TICKET-028] Extract Controller Concerns for Pagination/Filtering
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 **Priority:** 🟡 Medium
 **Effort:** S (Small)
 **Created:** 2025-10-18
+**Completed:** 2025-10-18
 **Dependencies:** None
 
 ### User Story
@@ -118,21 +119,39 @@ RSpec.describe PaginationConcern, type: :controller do
 end
 ```
 
-### Files to Change
-- `app/controllers/concerns/pagination_concern.rb` (NEW)
-- `app/controllers/concerns/ransack_filterable.rb` (NEW)
-- `app/controllers/api/donors_controller.rb` (MODIFY)
-- `app/controllers/api/donations_controller.rb` (MODIFY)
-- `spec/controllers/concerns/pagination_concern_spec.rb` (NEW)
-- `spec/controllers/concerns/ransack_filterable_spec.rb` (NEW)
-- `CLAUDE.md` (UPDATE - add concern pattern to conventions)
+### Files Changed
+- `app/controllers/concerns/pagination_concern.rb` ✅ (NEW - 14 lines)
+- `app/controllers/concerns/ransack_filterable.rb` ✅ (NEW - 8 lines)
+- `app/controllers/api/donors_controller.rb` ✅ (MODIFIED - refactored index action)
+- `app/controllers/api/donations_controller.rb` ✅ (MODIFIED - refactored index action)
+- `spec/controllers/concerns/pagination_concern_spec.rb` ✅ (NEW - 3 tests)
+- `spec/controllers/concerns/ransack_filterable_spec.rb` ✅ (NEW - 2 tests)
+- `CLAUDE.md` ✅ (UPDATED - added Controller Concerns pattern documentation)
+
+### Implementation Summary
+**Created PaginationConcern:**
+- `paginate_collection(collection)` - Applies Kaminari pagination with params
+- `pagination_meta(paginated_collection)` - Generates consistent metadata hash
+
+**Created RansackFilterable:**
+- `apply_ransack_filters(scope)` - Builds Ransack query from params[:q]
+
+**Refactored Controllers:**
+- DonorsController: Reduced index action from 10 lines to 8 lines using concerns
+- DonationsController: Reduced index action from 9 lines to 7 lines using concerns
+- Both controllers now include PaginationConcern and RansackFilterable
+
+**Test Results:**
+- All 81 specs passing (18 donor + 9 donation + 5 concern + 49 other specs)
+- No API contract changes - all existing integration tests pass
 
 ### Related Tickets
+- ✅ Prepares for TICKET-009 (Projects will use same concerns)
 - Part of code quality improvement initiative
-- Enables easier implementation of future endpoints
+- TICKET-029 (Presenter Pattern) already complete - works well together
 
 ### Notes
-- This is a refactoring ticket - no new functionality
-- All existing tests should pass without modification
-- Focus on extraction, not enhancement
-- Consider adding request specs if controller specs don't exist
+- This is a refactoring ticket - no functionality changes
+- All existing tests pass without modification
+- Concerns tested in isolation using anonymous controllers
+- Pattern documented in CLAUDE.md for future reference
