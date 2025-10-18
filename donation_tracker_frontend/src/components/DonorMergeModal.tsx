@@ -34,7 +34,9 @@ const DonorMergeModal: React.FC<DonorMergeModalProps> = ({
   onConfirm,
 }) => {
   const [selectedName, setSelectedName] = useState<number>(donors[0]?.id || 0);
-  const [selectedEmail, setSelectedEmail] = useState<number>(donors[0]?.id || 0);
+  const [selectedEmail, setSelectedEmail] = useState<number>(
+    donors[0]?.id || 0
+  );
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>

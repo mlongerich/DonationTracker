@@ -127,7 +127,9 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
                 ...params.InputProps,
                 endAdornment: (
                   <>
-                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                    {loading ? (
+                      <CircularProgress color="inherit" size={20} />
+                    ) : null}
                     {params.InputProps.endAdornment}
                   </>
                 ),
@@ -135,7 +137,9 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
             }}
           />
         )}
-        noOptionsText={searchInput ? "No donors found" : "Start typing to search donors"}
+        noOptionsText={
+          searchInput ? 'No donors found' : 'Start typing to search donors'
+        }
       />
 
       <button type="submit" disabled={isSubmitting}>

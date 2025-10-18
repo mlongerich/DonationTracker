@@ -45,7 +45,7 @@ const DonorList: React.FC<DonorListProps> = ({
     if (!onSelectionChange) return;
 
     const newSelection = selectedIds.includes(donorId)
-      ? selectedIds.filter(id => id !== donorId)
+      ? selectedIds.filter((id) => id !== donorId)
       : [...selectedIds, donorId];
 
     onSelectionChange(newSelection);
