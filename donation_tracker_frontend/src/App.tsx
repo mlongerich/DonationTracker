@@ -10,6 +10,8 @@ import Stack from '@mui/material/Stack';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Button from '@mui/material/Button';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { theme } from './theme';
 import DonorForm from './components/DonorForm';
 import DonorList from './components/DonorList';
@@ -56,6 +58,13 @@ function App() {
     current_page: 1,
     per_page: 25,
   });
+  const [dateRange, setDateRange] = useState<{
+    startDate: string | null;
+    endDate: string | null;
+  }>({
+    startDate: null,
+    endDate: null,
+  });
 
   // Debounce search query
   useEffect(() => {
@@ -94,10 +103,23 @@ function App() {
     }
   };
 
-
   const fetchDonations = async () => {
     try {
-      const response = await apiClient.get('/api/donations');
+      const params: Record<string, unknown> = {};
+
+      // Add Ransack date range filters if dates are selected
+      if (dateRange.startDate || dateRange.endDate) {
+        const q: Record<string, string> = {};
+        if (dateRange.startDate) {
+          q.date_gteq = dateRange.startDate;
+        }
+        if (dateRange.endDate) {
+          q.date_lteq = dateRange.endDate;
+        }
+        params.q = q;
+      }
+
+      const response = await apiClient.get('/api/donations', { params });
       setDonations(response.data.donations || []);
       if (response.data.meta) {
         setPaginationMeta(response.data.meta);
@@ -111,7 +133,7 @@ function App() {
     fetchDonors();
     fetchDonations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedQuery, currentPage, showArchived]);
+  }, [debouncedQuery, currentPage, showArchived, dateRange]);
 
   const handleDonorSubmit = (data: { name: string; email: string }) => {
     console.log('Donor submitted:', data);
@@ -152,7 +174,10 @@ function App() {
     setShowMergeModal(true);
   };
 
-  const handleMergeConfirm = async (fieldSelections: { name: number; email: number }) => {
+  const handleMergeConfirm = async (fieldSelections: {
+    name: number;
+    email: number;
+  }) => {
     try {
       await mergeDonors(selectedIds, fieldSelections);
       setSelectedIds([]);
@@ -163,11 +188,19 @@ function App() {
     }
   };
 
+  const handleDateRangeChange = (
+    startDate: string | null,
+    endDate: string | null
+  ) => {
+    setDateRange({ startDate, endDate });
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Container maxWidth="sm">
-        <Box sx={{ my: 4 }}>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <Container maxWidth="sm">
+          <Box sx={{ my: 4 }}>
           <Typography variant="h4" component="h1" gutterBottom>
             Donation Tracker
           </Typography>
@@ -185,6 +218,7 @@ function App() {
               donations={donations}
               paginationMeta={paginationMeta}
               onPageChange={(_, page) => setCurrentPage(page)}
+              onDateRangeChange={handleDateRangeChange}
             />
           </Box>
 
@@ -257,14 +291,15 @@ function App() {
               </Box>
             )}
           </Box>
-        </Box>
-        <DonorMergeModal
-          open={showMergeModal}
-          donors={donors.filter(d => selectedIds.includes(d.id))}
-          onClose={() => setShowMergeModal(false)}
-          onConfirm={handleMergeConfirm}
-        />
-      </Container>
+          </Box>
+          <DonorMergeModal
+            open={showMergeModal}
+            donors={donors.filter((d) => selectedIds.includes(d.id))}
+            onClose={() => setShowMergeModal(false)}
+            onConfirm={handleMergeConfirm}
+          />
+        </Container>
+      </LocalizationProvider>
     </ThemeProvider>
   );
 }
