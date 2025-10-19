@@ -34,6 +34,35 @@ What needs to be done first?
 
 ## Prioritized Backlog
 
+### [Page Separation & Navigation Refactoring]
+**Added:** 2025-10-18
+**Priority:** 🟡 Medium
+**Effort:** M
+
+**Description:**
+Refactor the monolithic App.tsx component into separate page components (DonorsPage, DonationsPage, HomePage) with proper routing structure. Currently all application logic lives in App.tsx (300+ lines), making it difficult to maintain and navigate.
+
+**User Value:**
+- Improved code organization and maintainability
+- Faster navigation between sections with route-based URLs
+- Better separation of concerns (donations vs donors vs projects)
+- Enables browser back/forward navigation between sections
+- Shareable URLs for specific pages
+
+**Technical Approach:**
+- Create `src/pages/HomePage.tsx` - Main dashboard/donation entry
+- Create `src/pages/DonorsPage.tsx` - Donor CRUD operations
+- Create `src/pages/DonationsPage.tsx` - Donation list and filtering
+- Move routing from inside App to index.tsx or dedicated Router component
+- Extract shared state management (consider Context API or state management library)
+- Add navigation header/sidebar component for page switching
+- Update all components to work with page-level routing
+
+**Dependencies:**
+- Basic routing structure ✅ (TICKET-009 added /projects route)
+
+---
+
 ### [Donor Bulk Operations]
 **Added:** 2025-10-07
 **Priority:** 🟡 Medium

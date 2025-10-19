@@ -83,6 +83,18 @@
 - [x] **Date Validation**: Dayjs isValid() checks before formatting, prevents invalid date submissions
 - [x] **Test Cleanup Endpoint**: /api/test/cleanup for Cypress E2E database cleanup (development/test only)
 - [x] **DatePicker Testing**: 10 Jest unit tests with LocalizationProvider wrapper, 5 Cypress E2E tests with segmented month/day/year inputs
+- [x] **Project Model (TICKET-009)**: Created with validations (title presence, project_type enum), belongs_to relationships optional
+- [x] **Project Types**: Enum values (general: 0, campaign: 1, sponsorship: 2) for categorization
+- [x] **System Projects**: "General Donation" seed project with system flag preventing deletion/editing
+- [x] **Project API Endpoints**: GET /api/projects (index), POST /api/projects (create), PUT /api/projects/:id (update), DELETE /api/projects/:id (destroy with system protection)
+- [x] **Project-Donation Integration**: Nullable project_id on donations, DonationPresenter includes project_title field
+- [x] **ProjectsPage Component**: Full CRUD interface with MUI styling (Container, Box, Typography, Alert), form reset via key prop, success notifications with auto-dismiss
+- [x] **ProjectForm Component**: Create/update form with Stack spacing, TextField inputs, project_type select, button text changes based on edit mode
+- [x] **ProjectList Component**: Displays projects with Edit/Delete buttons, prevents system project modification
+- [x] **Project Selection in Donations**: Dropdown in DonationForm, project title display in DonationList with "General Donation" fallback
+- [x] **React Router Integration**: Added /projects route with BrowserRouter, Link navigation from home page
+- [x] **Project Testing**: 8 RSpec model tests, 7 API request tests, 10 Jest component tests (5 ProjectForm + 5 ProjectList), 1 Cypress E2E test, 2 routing tests
+- [x] **Bug Fix**: Added project_id to donation_params permit list in donations_controller.rb (donations now correctly save project associations)
 
 **Quality Assurance & Pre-commit System:**
 - [x] TDD-driven pre-commit hooks system with comprehensive bash testing framework (13 passing tests)
@@ -178,8 +190,10 @@ A secure web application to track donations for a children's home and school org
 - **Relationships:** has_many sponsorships
 
 ### Projects
-- **Fields:** id, name, description, funding_goal, current_amount, active, created_at, updated_at
+- **Fields:** id, title, description, project_type (enum: general/campaign/sponsorship), system (boolean), created_at, updated_at
 - **Relationships:** has_many donations
+- **System Projects**: "General Donation" seeded with system: true (cannot be deleted/edited)
+- **Project Types**: general (0), campaign (1), sponsorship (2)
 
 ### Donations
 - **Fields:**
