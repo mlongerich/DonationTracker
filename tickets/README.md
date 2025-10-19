@@ -19,10 +19,14 @@ Current work items and user stories being actively developed.
 - [TICKET-003: Hide Auto-Generated Emails in Donor Display](TICKET-003-hide-auto-generated-emails.md) - ✅ Complete (2025-10-07)
 - [TICKET-006: Simple Donation Entry](TICKET-006-simple-donation-entry.md) - ✅ Complete (2025-10-15)
 - [TICKET-007: Donation List History View](TICKET-007-donation-list-history-view.md) - ✅ Complete (2025-10-15)
+- [TICKET-009: Project-Based Donations](TICKET-009-project-based-donations.md) - ✅ Complete (2025-10-19)
 - [TICKET-014: Refactor Donor Merge Service Pattern Consistency](TICKET-014-refactor-donor-merge-service-pattern-consistency.md) - ✅ Complete (2025-10-15)
 - [TICKET-015: Donation List Pagination](TICKET-015-donation-list-pagination.md) - ✅ Complete (2025-10-17)
 - [TICKET-016: Donation List Filtering & Date Range](TICKET-016-donation-list-filtering.md) - ✅ Complete (2025-10-18)
 - [TICKET-017: Replace Donor Dropdown with Autocomplete Search](TICKET-017-donor-autocomplete-search.md) - ✅ Complete (2025-10-16)
+- [TICKET-028: Extract Controller Concerns for Pagination/Filtering](TICKET-028-extract-controller-concerns-pagination-filtering.md) - ✅ Complete (2025-10-18)
+- [TICKET-029: Implement Presenter Pattern for API Responses](TICKET-029-implement-presenter-pattern-api-responses.md) - ✅ Complete (2025-10-18)
+- [TICKET-031: Extract DonorAutocomplete Shared Component](TICKET-031-extract-donor-autocomplete-shared-component.md) - ✅ Complete (2025-10-16)
 
 ### 📋 Planned Tickets
 
@@ -30,7 +34,6 @@ Current work items and user stories being actively developed.
 - [TICKET-004: Manual Donor Merge with Field Selection](TICKET-004-manual-donor-merge-field-selection.md) - 📋 Planned
 - [TICKET-005: Auto-Reassign Donations After Donor Merge](TICKET-005-auto-reassign-donations-after-merge.md) - ⏸️ Blocked (needs TICKET-004)
 - [TICKET-008: Basic Authentication with Google OAuth](TICKET-008-basic-authentication-google-oauth.md) - 📋 Planned
-- [TICKET-009: Project-Based Donations](TICKET-009-project-based-donations.md) - 📋 Planned
 - [TICKET-010: Children & Basic Sponsorship Tracking](TICKET-010-children-basic-sponsorship-tracking.md) - 📋 Planned
 - [TICKET-011: Recurring Donation Tracking](TICKET-011-recurring-donation-tracking.md) - 📋 Planned
 - [TICKET-012: Stripe Webhook Integration](TICKET-012-stripe-webhook-integration.md) - 📋 Planned
@@ -44,10 +47,7 @@ Current work items and user stories being actively developed.
 - [TICKET-013: Fix Docker Frontend Infrastructure Issues](TICKET-013-fix-docker-frontend-infrastructure.md) - 📋 Planned
 
 #### Code Quality & Architecture Improvements
-- [TICKET-028: Extract Controller Concerns for Pagination/Filtering](TICKET-028-extract-controller-concerns-pagination-filtering.md) - 📋 Planned (🟡 Medium, S)
-- [TICKET-029: Implement Presenter Pattern for API Responses](TICKET-029-implement-presenter-pattern-api-responses.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-030: Refactor App.tsx into Multi-Page Architecture](TICKET-030-refactor-app-multi-page-architecture.md) - 📋 Planned (🔴 High, L)
-- [TICKET-031: Extract DonorAutocomplete Shared Component](TICKET-031-extract-donor-autocomplete-shared-component.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-032: Create Custom Hooks Library](TICKET-032-create-custom-hooks-library.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-033: Implement Policy Objects for Authorization](TICKET-033-implement-policy-objects-authorization.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-034: Create Query Objects for Complex Database Queries](TICKET-034-create-query-objects-complex-database-queries.md) - 📋 Planned (🟢 Low, M)
@@ -57,22 +57,27 @@ Current work items and user stories being actively developed.
 - [TICKET-038: Define Cascade Delete Strategy for Donations](TICKET-038-define-cascade-delete-strategy-donations.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-039: Add Donation Status Enum Validation](TICKET-039-add-donation-status-enum-validation.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-040: Implement Context API for Donor/Donation State](TICKET-040-implement-context-api-donor-donation-state.md) - 📋 Planned (🟢 Low, L)
+- [TICKET-041: Add Test Coverage for API Client Methods](TICKET-041-api-client-test-coverage.md) - 📋 Planned (🟡 Medium, M)
+- [TICKET-042: Add Class-Level Documentation Comments](TICKET-042-add-class-documentation-comments.md) - 📋 Planned (🟡 Medium, S)
+- [TICKET-043: Refine Controller Concerns Implementation](TICKET-043-refine-controller-concerns-implementation.md) - 📋 Planned (🟢 Low, S)
+- [TICKET-044: Extract Shared TypeScript Types](TICKET-044-extract-shared-typescript-types.md) - 📋 Planned (🟡 Medium, S)
+- [TICKET-045: Refactor DonorImportService Complexity](TICKET-045-refactor-donor-import-service-complexity.md) - 📋 Planned (🟢 Low, M)
 
 ---
 
 ## Quick Stats
 
-- **Total Tickets:** 40
-- **Completed:** 9
+- **Total Tickets:** 45
+- **Completed:** 13
 - **In Progress:** 0
-- **Planned:** 30
+- **Planned:** 31
 - **Blocked:** 1
 
 ### By Category
-- **Feature Development:** 11 planned
+- **Feature Development:** 10 planned
 - **Infrastructure:** 1 planned
-- **Code Quality & Architecture:** 13 planned
-- **Completed:** 9
+- **Code Quality & Architecture:** 17 planned
+- **Completed:** 13
 
 ---
 
