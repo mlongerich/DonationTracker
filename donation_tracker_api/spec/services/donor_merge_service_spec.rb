@@ -2,8 +2,8 @@ require 'rails_helper'
 
 RSpec.describe DonorMergeService do
   describe '#merge' do
-    let!(:donor1) { Donor.create!(name: 'Alice Smith', email: 'alice@example.com') }
-    let!(:donor2) { Donor.create!(name: 'Alice S.', email: 'alice.smith@example.com') }
+    let!(:donor1) { create(:donor, name: 'Alice Smith', email: 'alice@example.com') }
+    let!(:donor2) { create(:donor, name: 'Alice S.', email: 'alice.smith@example.com') }
 
     it 'raises error when fewer than 2 donors provided' do
       expect {

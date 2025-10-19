@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_15_095226) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_18_125407) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -22,7 +22,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_15_095226) do
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "project_id"
     t.index ["donor_id"], name: "index_donations_on_donor_id"
+    t.index ["project_id"], name: "index_donations_on_project_id"
   end
 
   create_table "donors", force: :cascade do |t|
@@ -36,6 +38,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_15_095226) do
     t.index ["discarded_at"], name: "index_donors_on_discarded_at"
     t.index ["email"], name: "index_donors_on_email", unique: true
     t.index ["merged_into_id"], name: "index_donors_on_merged_into_id"
+  end
+
+  create_table "projects", force: :cascade do |t|
+    t.string "title", null: false
+    t.text "description"
+    t.integer "project_type", default: 0, null: false
+    t.boolean "system", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["system"], name: "index_projects_on_system"
+    t.index ["title"], name: "index_projects_on_title"
   end
 
   create_table "users", force: :cascade do |t|
@@ -55,4 +68,5 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_15_095226) do
   end
 
   add_foreign_key "donations", "donors"
+  add_foreign_key "donations", "projects"
 end

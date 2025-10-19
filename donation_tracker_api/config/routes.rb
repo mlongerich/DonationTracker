@@ -15,6 +15,8 @@ Rails.application.routes.draw do
 
     resources :donations, only: [ :index, :create, :show ]
 
+    resources :projects, only: [ :index, :show, :create, :update, :destroy ]
+
     # Test-only routes (development/test environments only)
     namespace :test do
       delete "cleanup", action: :cleanup

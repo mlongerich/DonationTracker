@@ -31,6 +31,29 @@ RSpec.describe "/api/donations", type: :request do
       json = JSON.parse(response.body)
       expect(json["donor_name"]).to eq("Jane Doe")
     end
+
+    it "saves project_id and returns project_title when project is provided" do
+      donor = create(:donor)
+      project = create(:project, title: "Summer Campaign")
+
+      post "/api/donations", params: {
+        donation: {
+          amount: 100.00,
+          date: Date.today,
+          donor_id: donor.id,
+          project_id: project.id
+        }
+      }
+
+      expect(response).to have_http_status(:created)
+      json = JSON.parse(response.body)
+      expect(json["project_id"]).to eq(project.id)
+      expect(json["project_title"]).to eq("Summer Campaign")
+
+      # Verify it was actually saved to database
+      donation = Donation.last
+      expect(donation.project_id).to eq(project.id)
+    end
   end
 
   describe "GET /api/donations" do
