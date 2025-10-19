@@ -14,13 +14,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
 import { shouldDisplayEmail } from '../utils/emailUtils';
-
-interface Donor {
-  id: number;
-  name: string;
-  email: string;
-  discarded_at?: string | null;
-}
+import { Donor } from '../types';
 
 interface DonorListProps {
   donors: Donor[];

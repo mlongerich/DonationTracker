@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { DonationFormData, ProjectFormData } from '../types';
 
 // Create axios instance with base configuration
 export const apiClient = axios.create({
@@ -56,14 +57,7 @@ export const mergeDonors = async (
   return response.data;
 };
 
-export const createDonation = async (donation: {
-  amount: number;
-  date: string;
-  donor_id: number;
-  project_id?: number | null;
-  status?: string;
-  description?: string;
-}) => {
+export const createDonation = async (donation: DonationFormData) => {
   const response = await apiClient.post('/api/donations', { donation });
   return response.data;
 };
@@ -79,20 +73,12 @@ export const fetchProject = async (id: number) => {
   return response.data;
 };
 
-export const createProject = async (project: {
-  title: string;
-  description?: string;
-  project_type: string;
-}) => {
+export const createProject = async (project: ProjectFormData) => {
   const response = await apiClient.post('/api/projects', { project });
   return response.data;
 };
 
-export const updateProject = async (id: number, project: {
-  title?: string;
-  description?: string;
-  project_type?: string;
-}) => {
+export const updateProject = async (id: number, project: Partial<ProjectFormData>) => {
   const response = await apiClient.put(`/api/projects/${id}`, { project });
   return response.data;
 };

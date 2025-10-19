@@ -6,14 +6,7 @@ import Alert from '@mui/material/Alert';
 import ProjectForm from '../components/ProjectForm';
 import ProjectList from '../components/ProjectList';
 import { fetchProjects, createProject, updateProject, deleteProject } from '../api/client';
-
-interface Project {
-  id: number;
-  title: string;
-  description?: string;
-  project_type: 'general' | 'campaign' | 'sponsorship';
-  system: boolean;
-}
+import { Project } from '../types';
 
 const ProjectsPage: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);

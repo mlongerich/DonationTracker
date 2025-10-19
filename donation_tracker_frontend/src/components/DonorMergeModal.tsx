@@ -13,12 +13,7 @@ import {
   FormLabel,
   Button,
 } from '@mui/material';
-
-interface Donor {
-  id: number;
-  name: string;
-  email: string;
-}
+import { Donor } from '../types';
 
 interface DonorMergeModalProps {
   open: boolean;

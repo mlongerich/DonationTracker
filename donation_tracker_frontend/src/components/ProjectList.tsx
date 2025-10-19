@@ -1,13 +1,6 @@
 import React from 'react';
 import Button from '@mui/material/Button';
-
-interface Project {
-  id: number;
-  title: string;
-  description?: string;
-  project_type: 'general' | 'campaign' | 'sponsorship';
-  system: boolean;
-}
+import { Project } from '../types';
 
 interface ProjectListProps {
   projects: Project[];

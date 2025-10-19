@@ -624,6 +624,45 @@ end
 - **Mobile-first**: All components must be responsive
 - **Axios**: Standardized API client with interceptors
 
+#### TypeScript Type Organization
+**Central Type Definitions:**
+- All shared types live in `src/types/`
+- Use barrel export pattern (`src/types/index.ts`)
+- Organize by domain: `donor.ts`, `donation.ts`, `project.ts`, `pagination.ts`, `api.ts`
+- Include JSDoc comments for documentation
+
+**Best Practices:**
+- Never duplicate type definitions across files
+- Import from `'../types'` using barrel export
+- Use `interface` for object shapes
+- Use `type` for unions, primitives, or composed types
+- Add JSDoc comments for complex types
+
+**Example:**
+```typescript
+// src/types/donor.ts
+/**
+ * Represents a donor who contributes to the organization.
+ */
+export interface Donor {
+  id: number;
+  name: string;
+  email: string;
+  discarded_at?: string | null;
+}
+
+// src/components/DonorForm.tsx
+import { Donor } from '../types';
+```
+
+**Type Files:**
+- `src/types/donor.ts` - Donor, DonorFormData, DonorMergeResult
+- `src/types/donation.ts` - Donation, DonationFormData
+- `src/types/project.ts` - Project, ProjectType, ProjectFormData
+- `src/types/pagination.ts` - PaginationMeta, PaginatedResponse
+- `src/types/api.ts` - API response types (DonorsApiResponse, etc.)
+- `src/types/index.ts` - Barrel export for all types
+
 ### Pre-commit Requirements
 Before committing code:
 1. **Documentation Update Rule**: ALWAYS update DonationTracking.md and CLAUDE.md to reflect changes

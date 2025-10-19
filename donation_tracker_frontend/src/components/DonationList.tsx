@@ -7,22 +7,7 @@ import Alert from '@mui/material/Alert';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Dayjs } from 'dayjs';
 import DonorAutocomplete, { Donor } from './DonorAutocomplete';
-
-interface Donation {
-  id: number;
-  amount: string;
-  date: string;
-  donor_id: number;
-  donor_name?: string;
-  project_title?: string;
-}
-
-interface PaginationMeta {
-  total_count: number;
-  total_pages: number;
-  current_page: number;
-  per_page: number;
-}
+import { Donation, PaginationMeta } from '../types';
 
 interface DonationListProps {
   donations: Donation[];

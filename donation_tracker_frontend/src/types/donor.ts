@@ -1,0 +1,26 @@
+/**
+ * Represents a donor who contributes to the organization.
+ */
+export interface Donor {
+  id: number;
+  name: string;
+  email: string;
+  discarded_at?: string | null;
+  merged_into_id?: number | null;
+}
+
+/**
+ * Data required to create or update a donor.
+ */
+export interface DonorFormData {
+  name: string;
+  email: string;
+}
+
+/**
+ * API response for donor merge operation.
+ */
+export interface DonorMergeResult {
+  merged_donor: Donor;
+  merged_count: number;
+}

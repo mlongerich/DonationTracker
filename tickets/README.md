@@ -27,6 +27,7 @@ Current work items and user stories being actively developed.
 - [TICKET-028: Extract Controller Concerns for Pagination/Filtering](TICKET-028-extract-controller-concerns-pagination-filtering.md) - ✅ Complete (2025-10-18)
 - [TICKET-029: Implement Presenter Pattern for API Responses](TICKET-029-implement-presenter-pattern-api-responses.md) - ✅ Complete (2025-10-18)
 - [TICKET-031: Extract DonorAutocomplete Shared Component](TICKET-031-extract-donor-autocomplete-shared-component.md) - ✅ Complete (2025-10-16)
+- [TICKET-044: Extract Shared TypeScript Types](TICKET-044-extract-shared-typescript-types.md) - ✅ Complete (2025-10-19)
 
 ### 📋 Planned Tickets
 
@@ -60,7 +61,6 @@ Current work items and user stories being actively developed.
 - [TICKET-041: Add Test Coverage for API Client Methods](TICKET-041-api-client-test-coverage.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-042: Add Class-Level Documentation Comments](TICKET-042-add-class-documentation-comments.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-043: Refine Controller Concerns Implementation](TICKET-043-refine-controller-concerns-implementation.md) - 📋 Planned (🟢 Low, S)
-- [TICKET-044: Extract Shared TypeScript Types](TICKET-044-extract-shared-typescript-types.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-045: Refactor DonorImportService Complexity](TICKET-045-refactor-donor-import-service-complexity.md) - 📋 Planned (🟢 Low, M)
 
 ---
@@ -68,16 +68,16 @@ Current work items and user stories being actively developed.
 ## Quick Stats
 
 - **Total Tickets:** 45
-- **Completed:** 13
+- **Completed:** 14
 - **In Progress:** 0
-- **Planned:** 31
+- **Planned:** 30
 - **Blocked:** 1
 
 ### By Category
 - **Feature Development:** 10 planned
 - **Infrastructure:** 1 planned
-- **Code Quality & Architecture:** 17 planned
-- **Completed:** 13
+- **Code Quality & Architecture:** 16 planned
+- **Completed:** 14
 
 ---
 

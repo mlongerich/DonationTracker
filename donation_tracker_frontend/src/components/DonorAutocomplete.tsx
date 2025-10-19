@@ -2,12 +2,9 @@ import { useState, useEffect } from 'react';
 import { Autocomplete, TextField, CircularProgress } from '@mui/material';
 import apiClient from '../api/client';
 import { shouldDisplayEmail } from '../utils/emailUtils';
+import { Donor } from '../types';
 
-export interface Donor {
-  id: number;
-  name: string;
-  email: string;
-}
+export type { Donor };
 
 interface DonorAutocompleteProps {
   value: Donor | null;

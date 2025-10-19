@@ -21,28 +21,7 @@ import DonationForm from './components/DonationForm';
 import DonationList from './components/DonationList';
 import ProjectsPage from './pages/ProjectsPage';
 import apiClient, { mergeDonors } from './api/client';
-
-interface Donor {
-  id: number;
-  name: string;
-  email: string;
-  discarded_at?: string | null;
-}
-
-interface Donation {
-  id: number;
-  amount: string;
-  date: string;
-  donor_id: number;
-  donor_name?: string;
-}
-
-interface PaginationMeta {
-  total_count: number;
-  total_pages: number;
-  current_page: number;
-  per_page: number;
-}
+import { Donor, Donation, PaginationMeta } from './types';
 
 function App() {
   const [donors, setDonors] = useState<Donor[]>([]);

@@ -3,17 +3,10 @@ import TextField from '@mui/material/TextField';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-
-interface Project {
-  id: number;
-  title: string;
-  description?: string;
-  project_type: 'general' | 'campaign' | 'sponsorship';
-  system: boolean;
-}
+import { Project, ProjectFormData } from '../types';
 
 interface ProjectFormProps {
-  onSubmit: (data: { title: string; description?: string; project_type: string }) => void;
+  onSubmit: (data: ProjectFormData) => void;
   project?: Project;
 }
 

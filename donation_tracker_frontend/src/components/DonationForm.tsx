@@ -1,13 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createDonation, fetchProjects } from '../api/client';
 import DonorAutocomplete, { Donor } from './DonorAutocomplete';
-
-interface Project {
-  id: number;
-  title: string;
-  project_type: string;
-  system: boolean;
-}
+import { Project } from '../types';
 
 interface DonationFormProps {
   onSuccess?: () => void;

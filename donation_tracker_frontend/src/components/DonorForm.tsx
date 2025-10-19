@@ -4,10 +4,11 @@ import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import apiClient from '../api/client';
+import { Donor, DonorFormData } from '../types';
 
 interface DonorFormProps {
-  donor?: { id: number; name: string; email: string };
-  onSubmit?: (data: { name: string; email: string }) => void;
+  donor?: Donor;
+  onSubmit?: (data: DonorFormData) => void;
   onCancel?: () => void;
 }
 
