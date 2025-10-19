@@ -60,10 +60,45 @@ export const createDonation = async (donation: {
   amount: number;
   date: string;
   donor_id: number;
+  project_id?: number | null;
   status?: string;
   description?: string;
 }) => {
   const response = await apiClient.post('/api/donations', { donation });
+  return response.data;
+};
+
+// Project API methods
+export const fetchProjects = async (params?: { page?: number; per_page?: number }) => {
+  const response = await apiClient.get('/api/projects', { params });
+  return response.data;
+};
+
+export const fetchProject = async (id: number) => {
+  const response = await apiClient.get(`/api/projects/${id}`);
+  return response.data;
+};
+
+export const createProject = async (project: {
+  title: string;
+  description?: string;
+  project_type: string;
+}) => {
+  const response = await apiClient.post('/api/projects', { project });
+  return response.data;
+};
+
+export const updateProject = async (id: number, project: {
+  title?: string;
+  description?: string;
+  project_type?: string;
+}) => {
+  const response = await apiClient.put(`/api/projects/${id}`, { project });
+  return response.data;
+};
+
+export const deleteProject = async (id: number) => {
+  const response = await apiClient.delete(`/api/projects/${id}`);
   return response.data;
 };
 

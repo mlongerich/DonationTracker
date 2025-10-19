@@ -14,6 +14,7 @@ interface Donation {
   date: string;
   donor_id: number;
   donor_name?: string;
+  project_title?: string;
 }
 
 interface PaginationMeta {
@@ -167,6 +168,7 @@ const DonationList: React.FC<DonationListProps> = ({
               <li key={donation.id}>
                 ${Number(donation.amount).toFixed(2)} on {donation.date} -{' '}
                 {donation.donor_name || `Donor #${donation.donor_id}`}
+                {` - ${donation.project_title || 'General Donation'}`}
               </li>
             ))}
           </ul>

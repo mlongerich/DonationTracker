@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import Container from '@mui/material/Container';
@@ -18,6 +19,7 @@ import DonorList from './components/DonorList';
 import DonorMergeModal from './components/DonorMergeModal';
 import DonationForm from './components/DonationForm';
 import DonationList from './components/DonationList';
+import ProjectsPage from './pages/ProjectsPage';
 import apiClient, { mergeDonors } from './api/client';
 
 interface Donor {
@@ -208,16 +210,23 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Container maxWidth="sm">
-          <Box sx={{ my: 4 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Donation Tracker
-          </Typography>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/" element={
+              <Container maxWidth="sm">
+                <Box sx={{ my: 4 }}>
+                <Typography variant="h4" component="h1" gutterBottom>
+                  Donation Tracker
+                </Typography>
+                <Box sx={{ mb: 2 }}>
+                  <Link to="/projects">Manage Projects</Link>
+                </Box>
 
-          <Typography variant="h6" component="h2" gutterBottom sx={{ mt: 3 }}>
-            Record Donation
-          </Typography>
-          <DonationForm onSuccess={fetchDonations} />
+                <Typography variant="h6" component="h2" gutterBottom sx={{ mt: 3 }}>
+                  Record Donation
+                </Typography>
+                <DonationForm onSuccess={fetchDonations} />
 
           <Box sx={{ mt: 3 }}>
             <Typography variant="h6" component="h2" gutterBottom>
@@ -309,6 +318,9 @@ function App() {
             onConfirm={handleMergeConfirm}
           />
         </Container>
+            } />
+          </Routes>
+        </BrowserRouter>
       </LocalizationProvider>
     </ThemeProvider>
   );

@@ -1,13 +1,21 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DonationForm from './DonationForm';
-import apiClient from '../api/client';
+import apiClient, { fetchProjects, createDonation } from '../api/client';
 
-jest.mock('../api/client');
+jest.mock('../api/client', () => ({
+  __esModule: true,
+  default: {
+    get: jest.fn(),
+  },
+  fetchProjects: jest.fn(),
+  createDonation: jest.fn(),
+}));
 
 describe('DonationForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (fetchProjects as jest.Mock).mockResolvedValue({ projects: [] });
   });
   it('renders donation form fields', () => {
     render(<DonationForm />);
@@ -124,5 +132,34 @@ describe('DonationForm', () => {
       },
       { timeout: 5000 }
     );
+  });
+
+  it('renders project select field', () => {
+    render(<DonationForm />);
+
+    expect(screen.getByLabelText(/project/i)).toBeInTheDocument();
+  });
+
+  it('fetches and displays projects in dropdown', async () => {
+    const mockProjects = [
+      { id: 1, title: 'Summer Campaign', project_type: 'campaign', system: false },
+      { id: 2, title: 'General Donation', project_type: 'general', system: true },
+    ];
+
+    (fetchProjects as jest.Mock).mockResolvedValue({
+      projects: mockProjects,
+    });
+
+    render(<DonationForm />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('option', { name: /summer campaign/i })).toBeInTheDocument();
+    });
+  });
+
+  it('displays project autocomplete field', () => {
+    render(<DonationForm />);
+
+    expect(screen.getByLabelText(/project/i)).toBeInTheDocument();
   });
 });

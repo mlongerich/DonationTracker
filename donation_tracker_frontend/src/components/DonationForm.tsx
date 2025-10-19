@@ -1,6 +1,13 @@
-import React, { useState } from 'react';
-import { createDonation } from '../api/client';
+import React, { useState, useEffect } from 'react';
+import { createDonation, fetchProjects } from '../api/client';
 import DonorAutocomplete, { Donor } from './DonorAutocomplete';
+
+interface Project {
+  id: number;
+  title: string;
+  project_type: string;
+  system: boolean;
+}
 
 interface DonationFormProps {
   onSuccess?: () => void;
@@ -10,8 +17,22 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
+  const [projectId, setProjectId] = useState<number | null>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const data = await fetchProjects();
+        setProjects(data.projects);
+      } catch (err) {
+        console.error('Failed to fetch projects:', err);
+      }
+    };
+    loadProjects();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +48,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
         amount: parseFloat(amount),
         date,
         donor_id: selectedDonor.id,
+        project_id: projectId,
       });
 
       setSuccess(true);
@@ -67,6 +89,20 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
         onChange={setSelectedDonor}
         required={!selectedDonor}
       />
+
+      <label htmlFor="project">Project</label>
+      <select
+        id="project"
+        value={projectId || ''}
+        onChange={(e) => setProjectId(e.target.value ? parseInt(e.target.value) : null)}
+      >
+        <option value="">General Donation</option>
+        {projects.map((project) => (
+          <option key={project.id} value={project.id}>
+            {project.title}
+          </option>
+        ))}
+      </select>
 
       <button type="submit" disabled={isSubmitting}>
         {isSubmitting ? 'Creating...' : 'Create Donation'}

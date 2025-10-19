@@ -39,6 +39,23 @@ describe('DonationList', () => {
     expect(screen.getByText(/John Doe/i)).toBeInTheDocument();
   });
 
+  it('renders donation with project title', () => {
+    const donations = [
+      {
+        id: 1,
+        amount: '100.50',
+        date: '2025-10-15',
+        donor_id: 1,
+        donor_name: 'John Doe',
+        project_title: 'Summer Campaign',
+      },
+    ];
+
+    renderWithLocalization(<DonationList donations={donations} />);
+
+    expect(screen.getByText(/Summer Campaign/i)).toBeInTheDocument();
+  });
+
   it('renders pagination controls when metadata provided', () => {
     const donations = [
       {
@@ -219,5 +236,39 @@ describe('DonationList', () => {
 
     // Verify donor selection is cleared
     expect(mockOnDonorChange).toHaveBeenLastCalledWith(null);
+  });
+
+  it('displays project title for each donation', () => {
+    const donations = [
+      {
+        id: 1,
+        amount: '100.00',
+        date: '2024-01-15',
+        donor_id: 1,
+        donor_name: 'John Doe',
+        project_title: 'Summer Campaign',
+      },
+    ];
+
+    renderWithLocalization(<DonationList donations={donations} />);
+
+    expect(screen.getByText(/summer campaign/i)).toBeInTheDocument();
+  });
+
+  it('displays "General Donation" when project_title is undefined', () => {
+    const donations = [
+      {
+        id: 1,
+        amount: '100.00',
+        date: '2024-01-15',
+        donor_id: 1,
+        donor_name: 'John Doe',
+        project_title: undefined,
+      },
+    ];
+
+    renderWithLocalization(<DonationList donations={donations} />);
+
+    expect(screen.getByText(/general donation/i)).toBeInTheDocument();
   });
 });
