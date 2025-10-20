@@ -78,16 +78,27 @@ const ProjectsPage: React.FC = () => {
           </Alert>
         )}
 
-        <ProjectForm
-          key={formKey}
-          onSubmit={handleSubmit}
-          project={editingProject || undefined}
-        />
-        <ProjectList
-          projects={projects}
-          onEdit={setEditingProject}
-          onDelete={handleDelete}
-        />
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" component="h2" gutterBottom>
+            {editingProject ? 'Edit Project' : 'Create Project'}
+          </Typography>
+          <ProjectForm
+            key={formKey}
+            onSubmit={handleSubmit}
+            project={editingProject || undefined}
+          />
+        </Box>
+
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" component="h2" gutterBottom>
+            Project List
+          </Typography>
+          <ProjectList
+            projects={projects}
+            onEdit={setEditingProject}
+            onDelete={handleDelete}
+          />
+        </Box>
       </Box>
     </Container>
   );

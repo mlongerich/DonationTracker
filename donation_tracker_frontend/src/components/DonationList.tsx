@@ -4,6 +4,9 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
+import Typography from '@mui/material/Typography';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
 import {
   DatePicker,
   DateValidationError,
@@ -173,18 +176,26 @@ const DonationList: React.FC<DonationListProps> = ({
       </Stack>
 
       {donations.length === 0 ? (
-        <div>No donations yet.</div>
+        <Box sx={{ textAlign: 'center', py: 4 }}>
+          <Typography color="text.secondary">No donations yet</Typography>
+        </Box>
       ) : (
         <>
-          <ul>
+          <Stack spacing={2}>
             {donations.map((donation) => (
-              <li key={donation.id}>
-                ${Number(donation.amount).toFixed(2)} on {donation.date} -{' '}
-                {donation.donor_name || `Donor #${donation.donor_id}`}
-                {` - ${donation.project_title || 'General Donation'}`}
-              </li>
+              <Card key={donation.id} variant="outlined">
+                <CardContent>
+                  <Typography variant="subtitle1">
+                    ${Number(donation.amount).toFixed(2)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {donation.date} - {donation.donor_name || `Donor #${donation.donor_id}`}
+                    {` - ${donation.project_title || 'General Donation'}`}
+                  </Typography>
+                </CardContent>
+              </Card>
             ))}
-          </ul>
+          </Stack>
 
           {paginationMeta && paginationMeta.total_pages > 1 && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>

@@ -21,6 +21,17 @@ describe('DonationList', () => {
     expect(screen.getByText(/no donations/i)).toBeInTheDocument();
   });
 
+  it('empty state should use Material-UI Typography with centered layout', () => {
+    renderWithLocalization(<DonationList donations={[]} />);
+
+    const emptyMessage = screen.getByText(/no donations/i);
+    expect(emptyMessage).toHaveClass('MuiTypography-root');
+
+    // Verify it's wrapped in a Box (parent element)
+    const boxWrapper = emptyMessage.closest('.MuiBox-root');
+    expect(boxWrapper).toBeInTheDocument();
+  });
+
   it('renders donation with amount and date', () => {
     const donations = [
       {
@@ -37,6 +48,28 @@ describe('DonationList', () => {
     expect(screen.getByText(/\$100.50/i)).toBeInTheDocument();
     expect(screen.getByText(/2025-10-15/i)).toBeInTheDocument();
     expect(screen.getByText(/John Doe/i)).toBeInTheDocument();
+  });
+
+  it('each donation should be rendered as a Material-UI Card', () => {
+    const donations = [
+      {
+        id: 1,
+        amount: '100.50',
+        date: '2025-10-15',
+        donor_id: 1,
+        donor_name: 'John Doe',
+      },
+    ];
+
+    const { container } = renderWithLocalization(<DonationList donations={donations} />);
+
+    // Should have Card component
+    const card = container.querySelector('.MuiCard-root');
+    expect(card).toBeInTheDocument();
+
+    // Should have CardContent
+    const cardContent = container.querySelector('.MuiCardContent-root');
+    expect(cardContent).toBeInTheDocument();
   });
 
   it('renders donation with project title', () => {

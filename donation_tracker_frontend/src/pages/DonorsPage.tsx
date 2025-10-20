@@ -112,43 +112,48 @@ const DonorsPage = () => {
         />
       </Box>
 
-      <TextField
-        fullWidth
-        placeholder="Search by name or email..."
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        sx={{ mb: 2 }}
-        size="small"
-      />
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={showArchived}
-            onChange={(e) => setShowArchived(e.target.checked)}
-          />
-        }
-        label="Show Archived Donors"
-        sx={{ mb: 2 }}
-      />
-      {selectedIds.length >= 2 && (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => setShowMergeModal(true)}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" component="h2" gutterBottom>
+          List Donors
+        </Typography>
+        <TextField
+          fullWidth
+          placeholder="Search by name or email..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
           sx={{ mb: 2 }}
-        >
-          Merge Selected
-        </Button>
-      )}
-      <DonorList
-        donors={donors}
-        onEdit={setEditingDonor}
-        editingDonorId={editingDonor?.id}
-        onArchive={handleArchive}
-        onRestore={handleRestore}
-        selectedIds={selectedIds}
-        onSelectionChange={setSelectedIds}
-      />
+          size="small"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={showArchived}
+              onChange={(e) => setShowArchived(e.target.checked)}
+            />
+          }
+          label="Show Archived Donors"
+          sx={{ mb: 2 }}
+        />
+        {selectedIds.length >= 2 && (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setShowMergeModal(true)}
+            sx={{ mb: 2 }}
+          >
+            Merge Selected
+          </Button>
+        )}
+        <DonorList
+          donors={donors}
+          onEdit={setEditingDonor}
+          editingDonorId={editingDonor?.id}
+          onArchive={handleArchive}
+          onRestore={handleRestore}
+          selectedIds={selectedIds}
+          onSelectionChange={setSelectedIds}
+        />
+      </Box>
       {paginationMeta.total_pages > 1 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
           <Pagination
