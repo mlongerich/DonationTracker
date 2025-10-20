@@ -1,6 +1,6 @@
 describe('Donor Form', () => {
   beforeEach(() => {
-    cy.visit('/');
+    cy.visit('/donors');
   });
 
   it('user can create donor and see success alert', () => {

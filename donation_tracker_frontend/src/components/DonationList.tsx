@@ -4,7 +4,11 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import {
+  DatePicker,
+  DateValidationError,
+  PickerChangeHandlerContext,
+} from '@mui/x-date-pickers';
 import { Dayjs } from 'dayjs';
 import DonorAutocomplete, { Donor } from './DonorAutocomplete';
 import { Donation, PaginationMeta } from '../types';
@@ -44,31 +48,55 @@ const DonationList: React.FC<DonationListProps> = ({
     return true;
   };
 
-  const handleStartDateChange = (value: Dayjs | null) => {
+  const handleStartDateChange = (
+    value: Dayjs | null,
+    _context: PickerChangeHandlerContext<DateValidationError>
+  ) => {
     setStartDate(value);
     // Only call onChange if date is valid (not null and valid dayjs object)
-    if (value && value.isValid() && validateDateRange(value, endDate) && onDateRangeChange) {
+    if (
+      value &&
+      value.isValid() &&
+      validateDateRange(value, endDate) &&
+      onDateRangeChange
+    ) {
       onDateRangeChange(
         value.format('YYYY-MM-DD'),
         endDate && endDate.isValid() ? endDate.format('YYYY-MM-DD') : null
       );
     } else if (!value && onDateRangeChange) {
       // Handle clearing the date
-      onDateRangeChange(null, endDate && endDate.isValid() ? endDate.format('YYYY-MM-DD') : null);
+      onDateRangeChange(
+        null,
+        endDate && endDate.isValid() ? endDate.format('YYYY-MM-DD') : null
+      );
     }
   };
 
-  const handleEndDateChange = (value: Dayjs | null) => {
+  const handleEndDateChange = (
+    value: Dayjs | null,
+    _context: PickerChangeHandlerContext<DateValidationError>
+  ) => {
     setEndDate(value);
     // Only call onChange if date is valid (not null and valid dayjs object)
-    if (value && value.isValid() && validateDateRange(startDate, value) && onDateRangeChange) {
+    if (
+      value &&
+      value.isValid() &&
+      validateDateRange(startDate, value) &&
+      onDateRangeChange
+    ) {
       onDateRangeChange(
-        startDate && startDate.isValid() ? startDate.format('YYYY-MM-DD') : null,
+        startDate && startDate.isValid()
+          ? startDate.format('YYYY-MM-DD')
+          : null,
         value.format('YYYY-MM-DD')
       );
     } else if (!value && onDateRangeChange) {
       // Handle clearing the date
-      onDateRangeChange(startDate && startDate.isValid() ? startDate.format('YYYY-MM-DD') : null, null);
+      onDateRangeChange(
+        startDate && startDate.isValid() ? startDate.format('YYYY-MM-DD') : null,
+        null
+      );
     }
   };
 

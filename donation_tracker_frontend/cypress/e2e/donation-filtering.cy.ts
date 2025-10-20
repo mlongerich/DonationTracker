@@ -5,7 +5,7 @@ describe('Donation Date Range Filtering', () => {
 
     // Intercept donations API calls globally for all tests
     cy.intercept('GET', '/api/donations*').as('getDonations');
-    cy.visit('/');
+    cy.visit('/donations');
     // Wait for initial page load
     cy.wait('@getDonations');
   });

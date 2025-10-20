@@ -1,9 +1,12 @@
 describe('Donation Entry', () => {
   beforeEach(() => {
-    cy.visit('/');
+    cy.visit('/donors');
   });
 
   it('displays the donation form with all required fields', () => {
+    // Override beforeEach - donation form is on /donations page
+    cy.visit('/donations');
+
     cy.contains('Record Donation').should('be.visible');
     cy.contains('label', /amount/i).should('be.visible');
     cy.contains('label', /date/i).should('be.visible');
@@ -25,6 +28,9 @@ describe('Donation Entry', () => {
     cy.contains(/donor (created|updated) successfully/i, {
       timeout: 10000,
     }).should('be.visible');
+
+    // Navigate to donations page to create donation
+    cy.visit('/donations');
 
     // Step 2: Create a donation for the new donor
     cy.contains('Record Donation').scrollIntoView();

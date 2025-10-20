@@ -1,7 +1,7 @@
 describe('Donor Edit Workflow', () => {
   beforeEach(() => {
     cy.clearDonors();
-    cy.visit('/');
+    cy.visit('/donors');
   });
 
   it('displays edit button for each donor in the list', () => {

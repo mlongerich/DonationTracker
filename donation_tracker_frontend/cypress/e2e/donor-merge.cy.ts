@@ -2,7 +2,7 @@ describe('Donor Merge', () => {
   beforeEach(() => {
     // Clear database
     cy.request('DELETE', 'http://localhost:3001/api/donors/all');
-    cy.visit('/');
+    cy.visit('/donors');
   });
 
   it('merges two donors with selected field values', () => {

@@ -6,7 +6,7 @@ describe('Donor Search & Pagination', () => {
     });
 
     cy.clearDonors();
-    cy.visit('/');
+    cy.visit('/donors');
     // Wait for page to fully load
     cy.contains('Donation Tracker').should('be.visible');
     cy.contains('Add Donor').should('be.visible');

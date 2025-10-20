@@ -8,7 +8,7 @@ describe('Donor Email Display', () => {
     });
 
     cy.clearDonors();
-    cy.visit('/');
+    cy.visit('/donors');
     cy.contains('Donation Tracker').should('be.visible');
   });
 
