@@ -50,7 +50,7 @@ describe('Donation Entry', () => {
 
     // Click and type in the autocomplete field - use partial name for search
     const searchTerm = 'Test';
-    cy.get('input[role="combobox"]').click().type(searchTerm);
+    cy.get('input[role="combobox"]').first().click().type(searchTerm);
 
     // Wait for API call to complete
     cy.wait('@donorSearch').then((interception) => {

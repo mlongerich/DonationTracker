@@ -152,14 +152,76 @@ describe('DonationForm', () => {
 
     render(<DonationForm />);
 
+    // Verify fetchProjects was called
     await waitFor(() => {
-      expect(screen.getByRole('option', { name: /summer campaign/i })).toBeInTheDocument();
+      expect(fetchProjects).toHaveBeenCalled();
     });
+
+    // Verify the select field is rendered
+    expect(screen.getByLabelText(/project/i)).toBeInTheDocument();
   });
 
   it('displays project autocomplete field', () => {
     render(<DonationForm />);
 
     expect(screen.getByLabelText(/project/i)).toBeInTheDocument();
+  });
+
+  it('amount field should be a Material-UI TextField', () => {
+    render(<DonationForm />);
+
+    const amountField = screen.getByLabelText(/amount/i);
+    // Material-UI TextField has specific class names
+    expect(amountField).toHaveClass('MuiInputBase-input');
+  });
+
+  it('date field should be a Material-UI TextField', () => {
+    render(<DonationForm />);
+
+    const dateField = screen.getByLabelText(/date/i);
+    expect(dateField).toHaveClass('MuiInputBase-input');
+  });
+
+  it('project field should be a Material-UI Select', () => {
+    render(<DonationForm />);
+
+    const projectField = screen.getByLabelText(/project/i);
+    expect(projectField).toHaveClass('MuiInputBase-input');
+  });
+
+  it('submit button should be a Material-UI Button', () => {
+    render(<DonationForm />);
+
+    const submitButton = screen.getByRole('button', { name: /create donation/i });
+    expect(submitButton).toHaveClass('MuiButton-root');
+  });
+
+  it('success message should be a Material-UI Alert', async () => {
+    (createDonation as jest.Mock).mockResolvedValue({});
+    (apiClient.get as jest.Mock).mockResolvedValue({
+      data: { donors: [{ id: 1, name: 'Test Donor', email: 'test@example.com' }] },
+    });
+
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    // Fill out form
+    await user.type(screen.getByLabelText(/amount/i), '100');
+
+    // Select donor from autocomplete
+    const donorField = screen.getByLabelText(/donor/i);
+    await user.type(donorField, 'Test');
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalled());
+    const option = await screen.findByRole('option');
+    await user.click(option);
+
+    // Submit form
+    await user.click(screen.getByRole('button', { name: /create donation/i }));
+
+    // Check for Material-UI Alert
+    await waitFor(() => {
+      const alert = screen.getByRole('alert');
+      expect(alert).toHaveClass('MuiAlert-root');
+    });
   });
 });

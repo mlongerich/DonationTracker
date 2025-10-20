@@ -1,4 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import Alert from '@mui/material/Alert';
+import Stack from '@mui/material/Stack';
+import MenuItem from '@mui/material/MenuItem';
 import { createDonation, fetchProjects } from '../api/client';
 import DonorAutocomplete, { Donor } from './DonorAutocomplete';
 import { Project } from '../types';
@@ -59,50 +64,53 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <label htmlFor="amount">Amount</label>
-      <input
-        id="amount"
-        type="number"
-        step="0.01"
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-        required
-      />
-
-      <label htmlFor="date">Date</label>
-      <input
-        id="date"
-        type="date"
-        value={date}
-        onChange={(e) => setDate(e.target.value)}
-        required
-      />
-
-      <DonorAutocomplete
-        value={selectedDonor}
-        onChange={setSelectedDonor}
-        required={!selectedDonor}
-      />
-
-      <label htmlFor="project">Project</label>
-      <select
-        id="project"
-        value={projectId || ''}
-        onChange={(e) => setProjectId(e.target.value ? parseInt(e.target.value) : null)}
-      >
-        <option value="">General Donation</option>
-        {projects.map((project) => (
-          <option key={project.id} value={project.id}>
-            {project.title}
-          </option>
-        ))}
-      </select>
-
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Creating...' : 'Create Donation'}
-      </button>
-
-      {success && <div role="alert">Donation created successfully!</div>}
+      <Stack spacing={2}>
+        {success && <Alert severity="success">Donation created successfully!</Alert>}
+        <TextField
+          label="Amount"
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          inputProps={{ step: 0.01 }}
+          fullWidth
+          required
+        />
+        <TextField
+          label="Date"
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          fullWidth
+          required
+          slotProps={{
+            inputLabel: {
+              shrink: true,
+            },
+          }}
+        />
+        <DonorAutocomplete
+          value={selectedDonor}
+          onChange={setSelectedDonor}
+          required={!selectedDonor}
+        />
+        <TextField
+          select
+          label="Project"
+          value={projectId || ''}
+          onChange={(e) => setProjectId(e.target.value ? parseInt(e.target.value) : null)}
+          fullWidth
+        >
+          <MenuItem value="">General Donation</MenuItem>
+          {projects.map((project) => (
+            <MenuItem key={project.id} value={project.id}>
+              {project.title}
+            </MenuItem>
+          ))}
+        </TextField>
+        <Button type="submit" variant="contained" color="primary" fullWidth disabled={isSubmitting}>
+          {isSubmitting ? 'Creating...' : 'Create Donation'}
+        </Button>
+      </Stack>
     </form>
   );
 };
