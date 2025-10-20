@@ -7,7 +7,9 @@ class DonorService
 
     if existing_donor
       # Update existing donor if transaction is newer
-      if transaction_date > existing_donor.last_updated_at
+      # Handle nil last_updated_at for legacy donors (default to very old date)
+      last_updated = existing_donor.last_updated_at || Time.zone.at(0)
+      if transaction_date > last_updated
         # Smart field preservation: don't overwrite existing data with blank values
         update_attrs = donor_attributes.merge(last_updated_at: transaction_date)
         update_attrs.delete(:name) if donor_attributes[:name].blank?
