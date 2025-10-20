@@ -916,6 +916,171 @@ pre-commit run --all-files                  # Run all hooks manually
 - Better testability (test component once, not in every usage)
 - Type safety with exported interfaces
 
+### React Router Multi-Page Architecture
+
+**Implemented:** TICKET-030 (2025-10-20)
+
+#### File Structure
+```
+src/
+├── App.tsx                    # Router configuration (~30 lines)
+├── pages/                     # Page components with state management
+│   ├── DonorsPage.tsx        # Donor CRUD + search + merge (16 tests)
+│   ├── DonorsPage.test.tsx
+│   ├── DonationsPage.tsx     # Donation CRUD + filtering (8 tests)
+│   ├── DonationsPage.test.tsx
+│   ├── ProjectsPage.tsx      # Project CRUD (5 tests)
+│   └── ProjectsPage.test.tsx
+├── components/
+│   ├── Layout.tsx            # Shared layout with Outlet (3 tests)
+│   ├── Layout.test.tsx
+│   ├── Navigation.tsx        # AppBar navigation (4 tests)
+│   └── Navigation.test.tsx
+└── types/                    # Centralized TypeScript types
+```
+
+#### Routing Configuration Pattern
+```tsx
+// src/App.tsx
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Layout from './components/Layout';
+import DonorsPage from './pages/DonorsPage';
+import DonationsPage from './pages/DonationsPage';
+
+function App() {
+  return (
+    <ThemeProvider theme={theme}>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Navigate to="/donations" replace />} />
+              <Route path="donations" element={<DonationsPage />} />
+              <Route path="donors" element={<DonorsPage />} />
+              <Route path="projects" element={<ProjectsPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </LocalizationProvider>
+    </ThemeProvider>
+  );
+}
+```
+
+#### Layout Component Pattern
+```tsx
+// src/components/Layout.tsx
+import { Outlet } from 'react-router-dom';
+import { Container } from '@mui/material';
+import Navigation from './Navigation';
+
+const Layout = () => {
+  return (
+    <Container maxWidth="sm">
+      <Navigation />
+      <Outlet />  {/* Page components render here */}
+    </Container>
+  );
+};
+```
+
+#### Navigation Component Pattern
+```tsx
+// src/components/Navigation.tsx
+import { NavLink } from 'react-router-dom';
+import { AppBar, Toolbar, Button, Typography } from '@mui/material';
+
+const Navigation = () => {
+  return (
+    <AppBar position="static">
+      <Toolbar>
+        <Typography variant="h6" sx={{ flexGrow: 1 }}>
+          Donation Tracker
+        </Typography>
+        <Button component={NavLink} to="/donations" color="inherit">
+          Donations
+        </Button>
+        <Button component={NavLink} to="/donors" color="inherit">
+          Donors
+        </Button>
+        <Button component={NavLink} to="/projects" color="inherit">
+          Projects
+        </Button>
+      </Toolbar>
+    </AppBar>
+  );
+};
+```
+
+#### Page Component Pattern
+```tsx
+// src/pages/DonorsPage.tsx
+const DonorsPage = () => {
+  // Page-level state management (no Context API needed yet)
+  const [donors, setDonors] = useState<Donor[]>([]);
+  const [editingDonor, setEditingDonor] = useState<Donor | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Data fetching at page level
+  useEffect(() => {
+    fetchDonors();
+  }, [currentPage, searchQuery]);
+
+  return (
+    <Box>
+      <Typography variant="h4" gutterBottom>
+        Donor Management
+      </Typography>
+      {/* All donor-related UI here */}
+    </Box>
+  );
+};
+```
+
+#### Routing Best Practices
+- **Keep App.tsx minimal** - Only router configuration, providers stay at app level
+- **Page-level state** - Each page manages its own state (useState, useEffect)
+- **No Context API yet** - Not needed until state sharing across pages is required
+- **Index route redirect** - `/` redirects to primary page (`/donations`)
+- **Browser navigation** - Back/forward buttons work automatically with React Router
+- **E2E testing** - Always add Cypress navigation tests for new routes
+- **MUI integration** - Use `component={NavLink}` for styled navigation buttons
+
+#### Testing Patterns
+```typescript
+// Unit test for page component
+describe('DonorsPage', () => {
+  it('renders donor management heading', () => {
+    render(
+      <BrowserRouter>
+        <DonorsPage />
+      </BrowserRouter>
+    );
+    expect(screen.getByText(/donor management/i)).toBeInTheDocument();
+  });
+});
+
+// E2E test for navigation
+describe('Navigation', () => {
+  it('navigates between pages', () => {
+    cy.visit('http://localhost:3000');
+    cy.url().should('eq', 'http://localhost:3000/');
+
+    cy.contains('a', 'Donors').click();
+    cy.url().should('include', '/donors');
+    cy.contains('Donor Management').should('be.visible');
+  });
+});
+```
+
+#### Benefits
+- **Single Responsibility**: Each page handles one domain (donors, donations, projects)
+- **Maintainability**: Easy to find and modify code (318 lines → 3 focused pages)
+- **Scalability**: Simple to add new pages (Settings, Reports, Analytics)
+- **User Experience**: URL-based routing, browser back/forward navigation
+- **Testing**: Can test pages independently with proper mocks
+- **Performance**: Can implement lazy loading if needed later
+
 ---
 
 ## 🔒 Security Requirements
@@ -1000,4 +1165,4 @@ pre-commit run --all-files                  # Run all hooks manually
 ---
 
 *This document should be updated as development practices evolve*
-*Last updated: 2025-10-07*
+*Last updated: 2025-10-20*
