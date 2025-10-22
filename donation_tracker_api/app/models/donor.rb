@@ -3,6 +3,8 @@ class Donor < ApplicationRecord
 
   has_paper_trail
   has_many :donations
+  has_many :sponsorships
+  has_many :children, through: :sponsorships
 
   before_validation :set_defaults
 

@@ -58,4 +58,12 @@ RSpec.describe Donor, type: :model do
     association = Donor.reflect_on_association(:donations)
     expect(association.macro).to eq(:has_many)
   end
+
+  it "has many sponsorships" do
+    expect(Donor.new).to respond_to(:sponsorships)
+  end
+
+  it "has many children through sponsorships" do
+    expect(Donor.new).to respond_to(:children)
+  end
 end

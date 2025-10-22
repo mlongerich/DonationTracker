@@ -10,9 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_18_125407) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_20_121702) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "children", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "donations", force: :cascade do |t|
     t.decimal "amount"
@@ -51,6 +57,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_18_125407) do
     t.index ["title"], name: "index_projects_on_title"
   end
 
+  create_table "sponsorships", force: :cascade do |t|
+    t.bigint "donor_id", null: false
+    t.bigint "child_id", null: false
+    t.bigint "project_id", null: false
+    t.decimal "monthly_amount"
+    t.date "end_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["child_id"], name: "index_sponsorships_on_child_id"
+    t.index ["donor_id"], name: "index_sponsorships_on_donor_id"
+    t.index ["project_id"], name: "index_sponsorships_on_project_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "username"
     t.datetime "created_at", null: false
@@ -69,4 +88,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_18_125407) do
 
   add_foreign_key "donations", "donors"
   add_foreign_key "donations", "projects"
+  add_foreign_key "sponsorships", "children"
+  add_foreign_key "sponsorships", "donors"
+  add_foreign_key "sponsorships", "projects"
 end
