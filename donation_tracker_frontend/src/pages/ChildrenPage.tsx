@@ -15,15 +15,18 @@ const ChildrenPage = () => {
 
   useEffect(() => {
     const loadChildren = async () => {
-      const response = await apiClient.get('/api/children', { params: undefined });
+      const response = await apiClient.get('/api/children', {
+        params: { include_sponsorships: true }
+      });
       setChildren(response.data.children);
 
-      // Fetch sponsorships for each child
+      // Build sponsorship map from nested data (no extra requests)
       const sponsorshipMap = new Map<number, Sponsorship[]>();
-      for (const child of response.data.children) {
-        const sponsorshipResponse = await apiClient.get(`/api/children/${child.id}/sponsorships`);
-        sponsorshipMap.set(child.id, sponsorshipResponse.data.sponsorships);
-      }
+      response.data.children.forEach((child: Child & { sponsorships?: Sponsorship[] }) => {
+        if (child.sponsorships) {
+          sponsorshipMap.set(child.id, child.sponsorships);
+        }
+      });
       setSponsorships(sponsorshipMap);
     };
     loadChildren();
@@ -61,12 +64,19 @@ const ChildrenPage = () => {
 
   const handleSponsorshipSuccess = async () => {
     setSelectedChildForSponsorship(null);
-    // Refetch sponsorships to show updated data
+    // Refetch children with sponsorships to show updated data
+    const response = await apiClient.get('/api/children', {
+      params: { include_sponsorships: true }
+    });
+    setChildren(response.data.children);
+
+    // Rebuild sponsorship map from nested data
     const sponsorshipMap = new Map<number, Sponsorship[]>();
-    for (const child of children) {
-      const sponsorshipResponse = await apiClient.get(`/api/children/${child.id}/sponsorships`);
-      sponsorshipMap.set(child.id, sponsorshipResponse.data.sponsorships);
-    }
+    response.data.children.forEach((child: Child & { sponsorships?: Sponsorship[] }) => {
+      if (child.sponsorships) {
+        sponsorshipMap.set(child.id, child.sponsorships);
+      }
+    });
     setSponsorships(sponsorshipMap);
   };
 
