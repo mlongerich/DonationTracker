@@ -22,15 +22,13 @@ Reek analysis identified **20 IrresponsibleModule warnings** across the codebase
 **Issue:** Missing class-level comments make onboarding and maintenance harder
 
 ### Acceptance Criteria
-- [ ] Add documentation comments to all 5 controllers
-- [ ] Add documentation comments to all 4 models
+- [ ] Add documentation comments to all 7 controllers (including Children, Sponsorships)
+- [ ] Add documentation comments to all 7 models (including Child, Sponsorship, ApplicationRecord)
 - [ ] Add documentation comments to all 3 services
-- [ ] Add documentation comments to all 3 presenters
 - [ ] Add documentation comments to all 2 concerns
-- [ ] Add documentation comments to ApplicationController, ApplicationRecord, ApplicationJob
 - [ ] All comments include purpose, responsibilities, and usage examples
-- [ ] Reek IrresponsibleModule warnings reduced to 0
-- [ ] All existing tests pass
+- [ ] Run `bundle exec reek app/` - verify IrresponsibleModule warnings reduced to 0
+- [ ] All existing tests pass unchanged
 - [ ] Update CLAUDE.md with documentation standards
 
 ### Technical Approach
@@ -197,37 +195,34 @@ end
 
 ### Files to Modify
 
-**Controllers (5 files):**
+**Controllers (7 files - from Reek analysis):**
+- `app/controllers/api/children_controller.rb` ⚠️ NEW
 - `app/controllers/api/donations_controller.rb`
 - `app/controllers/api/donors_controller.rb`
 - `app/controllers/api/projects_controller.rb`
-- `app/controllers/application_controller.rb`
+- `app/controllers/api/sponsorships_controller.rb` ⚠️ NEW
 - `app/controllers/api/test_controller.rb`
+- `app/controllers/application_controller.rb`
 
-**Models (4 files):**
+**Models (7 files - from Reek analysis):**
+- `app/models/child.rb` ⚠️ NEW
 - `app/models/donation.rb`
 - `app/models/donor.rb`
 - `app/models/project.rb`
+- `app/models/sponsorship.rb` ⚠️ NEW
 - `app/models/user.rb`
+- `app/models/application_record.rb`
 
 **Services (3 files):**
 - `app/services/donor_service.rb`
 - `app/services/donor_import_service.rb`
 - `app/services/donor_merge_service.rb`
 
-**Presenters (3 files):**
-- `app/presenters/base_presenter.rb`
-- `app/presenters/collection_presenter.rb`
-- `app/presenters/donation_presenter.rb`
-
 **Concerns (2 files):**
 - `app/controllers/concerns/pagination_concern.rb`
 - `app/controllers/concerns/ransack_filterable.rb`
 
-**Base Classes (3 files):**
-- `app/models/application_record.rb`
-- `app/jobs/application_job.rb`
-- `app/mailers/application_mailer.rb`
+**Note:** Presenters already have good documentation (not flagged by Reek)
 
 ### Documentation Standards (for CLAUDE.md)
 

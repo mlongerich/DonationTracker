@@ -36,10 +36,9 @@ Current work items and user stories being actively developed.
 - [TICKET-031: Extract DonorAutocomplete Shared Component](completed/TICKET-031-extract-donor-autocomplete-shared-component.md) - ✅ Complete (2025-10-18)
 - [TICKET-044: Extract Shared TypeScript Types](completed/TICKET-044-extract-shared-typescript-types.md) - ✅ Complete (2025-10-19)
 - [TICKET-047: Consistent Material-UI Card Styling for Lists](completed/TICKET-047-list-styling-standardization.md) - ✅ Complete (2025-10-20)
+- [TICKET-010: Children & Basic Sponsorship Tracking](completed/TICKET-010-children-basic-sponsorship-tracking.md) - ✅ Complete (2025-10-22)
 
 ### 🔵 In Progress Tickets
-
-- [TICKET-010: Children & Basic Sponsorship Tracking](TICKET-010-children-basic-sponsorship-tracking.md) - 🔵 In Progress (Started 2025-10-22)
 
 ### ⏸️ Blocked Tickets
 
@@ -71,6 +70,8 @@ Current work items and user stories being actively developed.
 - [TICKET-055: Sponsorship Management Actions](TICKET-055-sponsorship-reactivate-delete-actions.md) - 📋 Planned (🟡 Medium, S) - Depends on TICKET-056
 - [TICKET-056: Sponsorship Business Logic & Validation](TICKET-056-sponsorship-business-logic-validation.md) - 📋 Planned (🔴 High, M)
 - [TICKET-057: Children Page Multi-Sponsor Display](TICKET-057-children-page-multi-sponsor-display.md) - 📋 Planned (🟡 Medium, S)
+- [TICKET-058: Donor Sponsorship List Endpoint](TICKET-058-donor-sponsorship-list-endpoint.md) - 📋 Planned (🟢 Low, S)
+- [TICKET-059: Child Info Display on Donation Pages](TICKET-059-child-info-display-donation-pages.md) - 📋 Planned (🟡 Medium, S)
 
 #### Code Quality & Architecture Improvements
 - [TICKET-032: Create Custom Hooks Library](TICKET-032-create-custom-hooks-library.md) - 📋 Planned (🟡 Medium, M)
@@ -83,26 +84,28 @@ Current work items and user stories being actively developed.
 - [TICKET-039: Add Donation Status Enum Validation](TICKET-039-add-donation-status-enum-validation.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-040: Implement Context API for Donor/Donation State](TICKET-040-implement-context-api-donor-donation-state.md) - 📋 Planned (🟢 Low, L)
 - [TICKET-041: Add Test Coverage for API Client Methods](TICKET-041-api-client-test-coverage.md) - 📋 Planned (🟡 Medium, M)
-- [TICKET-042: Add Class-Level Documentation Comments](TICKET-042-add-class-documentation-comments.md) - 📋 Planned (🟡 Medium, S)
+- [TICKET-042: Add Class-Level Documentation Comments](TICKET-042-add-class-documentation-comments.md) - 📋 Planned (🟡 Medium, S) - Updated with Reek findings
 - [TICKET-043: Refine Controller Concerns Implementation](TICKET-043-refine-controller-concerns-implementation.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-045: Refactor DonorImportService Complexity](TICKET-045-refactor-donor-import-service-complexity.md) - 📋 Planned (🟢 Low, M)
+- [TICKET-060: Extract SponsorshipPresenter Pattern](TICKET-060-sponsorship-presenter-pattern.md) - 📋 Planned (🟡 Medium, S) - From code smell analysis
+- [TICKET-061: Fix ChildrenPage N+1 Query](TICKET-061-fix-children-page-n-plus-1-query.md) - 📋 Planned (🔴 High, S) - Performance bottleneck
 
 ---
 
 ## Quick Stats
 
-- **Total Tickets:** 57
+- **Total Tickets:** 61
 - **Completed:** 20
-- **In Progress:** 1
-- **Planned:** 35
+- **In Progress:** 0
+- **Planned:** 40
 - **Blocked:** 1
 
 ### By Category
 - **Feature Development:** 12 planned
-- **Sponsorship & Children Features:** 8 planned
-- **Code Quality & Architecture:** 15 planned
+- **Sponsorship & Children Features:** 10 planned
+- **Code Quality & Architecture:** 17 planned (2 new from code smell analysis)
 - **Completed:** 20
-- **In Progress:** 1 (TICKET-010)
+- **In Progress:** 0
 - **Blocked:** 1 (TICKET-005)
 
 ---
