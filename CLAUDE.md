@@ -348,6 +348,7 @@ Track and enforce these Rails patterns:
   - `BasePresenter`: Abstract base class for all presenters
   - `CollectionPresenter`: Wraps collections with item-specific presenters
   - `DonationPresenter`: Formats donation JSON responses with donor_name
+  - `SponsorshipPresenter`: Formats sponsorship JSON responses with donor_name, child_name, project_id
   - **Usage**: `CollectionPresenter.new(donations, DonationPresenter).as_json`
   - **Benefits**: Separation of concerns, testability, reusability
   - **When to use**: Complex JSON structures, computed fields, multiple model aggregation

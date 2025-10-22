@@ -37,6 +37,7 @@ Current work items and user stories being actively developed.
 - [TICKET-044: Extract Shared TypeScript Types](completed/TICKET-044-extract-shared-typescript-types.md) - ✅ Complete (2025-10-19)
 - [TICKET-047: Consistent Material-UI Card Styling for Lists](completed/TICKET-047-list-styling-standardization.md) - ✅ Complete (2025-10-20)
 - [TICKET-010: Children & Basic Sponsorship Tracking](completed/TICKET-010-children-basic-sponsorship-tracking.md) - ✅ Complete (2025-10-22)
+- [TICKET-060: Extract SponsorshipPresenter Pattern](TICKET-060-sponsorship-presenter-pattern.md) - ✅ Complete (2025-10-22)
 - [TICKET-061: Fix Children Page N+1 Query Problem](completed/TICKET-061-fix-children-page-n-plus-1-query.md) - ✅ Complete (2025-10-22)
 
 ### 🔵 In Progress Tickets
@@ -88,23 +89,22 @@ Current work items and user stories being actively developed.
 - [TICKET-042: Add Class-Level Documentation Comments](TICKET-042-add-class-documentation-comments.md) - 📋 Planned (🟡 Medium, S) - Updated with Reek findings
 - [TICKET-043: Refine Controller Concerns Implementation](TICKET-043-refine-controller-concerns-implementation.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-045: Refactor DonorImportService Complexity](TICKET-045-refactor-donor-import-service-complexity.md) - 📋 Planned (🟢 Low, M)
-- [TICKET-060: Extract SponsorshipPresenter Pattern](TICKET-060-sponsorship-presenter-pattern.md) - 📋 Planned (🟡 Medium, S) - From code smell analysis
 
 ---
 
 ## Quick Stats
 
 - **Total Tickets:** 61
-- **Completed:** 21
+- **Completed:** 22
 - **In Progress:** 0
-- **Planned:** 39
+- **Planned:** 38
 - **Blocked:** 1
 
 ### By Category
 - **Feature Development:** 12 planned
 - **Sponsorship & Children Features:** 10 planned
-- **Code Quality & Architecture:** 16 planned (1 completed: TICKET-061)
-- **Completed:** 21
+- **Code Quality & Architecture:** 15 planned (2 completed: TICKET-060, TICKET-061)
+- **Completed:** 22
 - **In Progress:** 0
 - **Blocked:** 1 (TICKET-005)
 
