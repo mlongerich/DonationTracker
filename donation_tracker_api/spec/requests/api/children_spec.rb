@@ -43,6 +43,61 @@ RSpec.describe "/api/children", type: :request do
       expect(json["children"].length).to eq(2)
       expect(json["children"].map { |c| c["name"] }).to contain_exactly("Maria", "Mariana")
     end
+
+    context "with include_sponsorships param" do
+      it "returns children without sponsorships by default" do
+        child = create(:child, name: "Maria")
+        donor = create(:donor)
+        create(:sponsorship, child: child, donor: donor, monthly_amount: 50)
+
+        get "/api/children"
+
+        json = JSON.parse(response.body)
+        expect(json["children"].first.keys).not_to include("sponsorships")
+      end
+
+      it "returns children with sponsorships when param is true" do
+        child = create(:child, name: "Maria")
+        donor = create(:donor, name: "John Doe")
+        sponsorship = create(:sponsorship, child: child, donor: donor, monthly_amount: 50)
+
+        get "/api/children", params: { include_sponsorships: "true" }
+
+        expect(response).to have_http_status(:success)
+        json = JSON.parse(response.body)
+        expect(json["children"].first["sponsorships"]).to be_an(Array)
+        expect(json["children"].first["sponsorships"].length).to eq(1)
+
+        sponsorship_data = json["children"].first["sponsorships"].first
+        expect(sponsorship_data["id"]).to eq(sponsorship.id)
+        expect(sponsorship_data["donor_name"]).to eq("John Doe")
+        expect(sponsorship_data["monthly_amount"]).to eq("50.0")
+        expect(sponsorship_data["active"]).to be true
+      end
+
+      it "does not perform N+1 queries when including sponsorships" do
+        child1 = create(:child, name: "Maria")
+        child2 = create(:child, name: "Juan")
+        donor1 = create(:donor, name: "John Doe")
+        donor2 = create(:donor, name: "Jane Smith")
+        create(:sponsorship, child: child1, donor: donor1, monthly_amount: 50)
+        create(:sponsorship, child: child2, donor: donor2, monthly_amount: 75)
+
+        # Count queries during request
+        query_count = 0
+        query_counter = ->(name, started, finished, unique_id, payload) {
+          query_count += 1 unless payload[:name] == "SCHEMA" || payload[:sql].include?("SAVEPOINT")
+        }
+
+        ActiveSupport::Notifications.subscribed(query_counter, "sql.active_record") do
+          get "/api/children", params: { include_sponsorships: "true" }
+        end
+
+        # Expect: 1 query for children + 1 for sponsorships + 1 for donors (eager loaded)
+        # Allow some flexibility for transaction/count queries
+        expect(query_count).to be <= 5
+      end
+    end
   end
 
   describe "POST /api/children" do

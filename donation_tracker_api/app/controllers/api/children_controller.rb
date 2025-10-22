@@ -4,11 +4,43 @@ class Api::ChildrenController < ApplicationController
 
   def index
     scope = Child.all
+
+    # Conditionally eager load sponsorships to avoid N+1 queries
+    if params[:include_sponsorships] == "true"
+      scope = scope.includes(sponsorships: :donor)
+    end
+
     filtered_scope = apply_ransack_filters(scope)
     children = paginate_collection(filtered_scope.order(name: :asc))
 
+    # Build children data with optional sponsorships
+    children_data = children.map do |child|
+      child_json = {
+        id: child.id,
+        name: child.name,
+        created_at: child.created_at,
+        updated_at: child.updated_at
+      }
+
+      if params[:include_sponsorships] == "true"
+        child_json[:sponsorships] = child.sponsorships.map do |s|
+          {
+            id: s.id,
+            donor_id: s.donor_id,
+            donor_name: s.donor&.name,
+            child_id: s.child_id,
+            monthly_amount: s.monthly_amount.to_s,
+            active: s.active?,
+            end_date: s.end_date
+          }
+        end
+      end
+
+      child_json
+    end
+
     render json: {
-      children: children,
+      children: children_data,
       meta: pagination_meta(children)
     }
   end
