@@ -1,0 +1,16 @@
+/**
+ * Represents a child who can receive sponsorships.
+ */
+export interface Child {
+  id: number;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Form data for creating or updating a child.
+ */
+export interface ChildFormData {
+  name: string;
+}
