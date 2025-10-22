@@ -618,6 +618,63 @@ end
 - **Maintainability**: Changes to pagination/filtering logic apply everywhere
 - **Rails Convention**: Standard pattern for cross-cutting functionality
 
+#### Database Indexing Strategy
+Maintain database indexes for optimal query performance (TICKET-035).
+
+**Index Guidelines:**
+- Index columns used in WHERE clauses (filtering)
+- Index columns used in ORDER BY (sorting)
+- Index foreign keys for JOIN operations
+- Use composite indexes for multi-column queries
+- Monitor index usage and remove unused indexes
+
+**Current Indexes (as of 2025-10-22):**
+
+**Donations table:**
+- `date` - Date range filtering and ordering (Ransack queries)
+- `status` - Status filtering
+- `(project_id, date)` - Project donations sorted by date
+- `donor_id` - Foreign key (auto-created)
+- `project_id` - Foreign key (auto-created)
+
+**Sponsorships table:**
+- `end_date` - Active sponsorship queries (`where(end_date: nil)`)
+- `(donor_id, child_id, monthly_amount, end_date)` - Uniqueness validation (TICKET-056)
+- `donor_id`, `child_id`, `project_id` - Foreign keys (auto-created)
+
+**Projects table:**
+- `project_type` - Filtering by type (general vs sponsorship)
+- `system` - System project filtering
+- `title` - Title lookups
+
+**Donors table:**
+- `email` - Unique constraint + lookups
+- `discarded_at` - Soft delete filtering
+- `merged_into_id` - Merge tracking
+
+**Index Trade-offs:**
+- ✅ **Read-heavy workload**: 10x faster queries on filtered/sorted columns
+- ⚠️ **Write overhead**: Slightly slower INSERTs (minimal impact)
+- ⚠️ **Disk space**: Typically <1% of table size
+
+**When to Add Indexes:**
+1. Column used in WHERE clause with >1000 rows
+2. Column used in ORDER BY frequently
+3. Foreign key columns (Rails doesn't auto-index these!)
+4. Composite indexes for common multi-column queries
+5. Uniqueness validation queries
+
+**Index Naming Convention:**
+- Single: `index_table_on_column`
+- Composite: `index_table_on_column1_and_column2`
+- Descriptive: `index_sponsorships_on_uniqueness_fields`
+
+**Monitoring:**
+- Use PostgreSQL's `pg_stat_user_indexes` to track index usage
+- Remove indexes with low usage
+- Run `EXPLAIN` on slow queries to verify index usage
+- Use Bullet gem to detect N+1 queries needing indexes
+
 ### Frontend (React)
 - **ESLint**: React, accessibility, and TypeScript rules
 - **Prettier**: Consistent code formatting

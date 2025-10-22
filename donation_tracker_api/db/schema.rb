@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_20_121702) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_22_180000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -29,8 +29,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_20_121702) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
+    t.index ["date"], name: "index_donations_on_date"
     t.index ["donor_id"], name: "index_donations_on_donor_id"
+    t.index ["project_id", "date"], name: "index_donations_on_project_id_and_date"
     t.index ["project_id"], name: "index_donations_on_project_id"
+    t.index ["status"], name: "index_donations_on_status"
   end
 
   create_table "donors", force: :cascade do |t|
@@ -53,6 +56,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_20_121702) do
     t.boolean "system", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["project_type"], name: "index_projects_on_project_type"
     t.index ["system"], name: "index_projects_on_system"
     t.index ["title"], name: "index_projects_on_title"
   end
@@ -66,7 +70,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_20_121702) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["child_id"], name: "index_sponsorships_on_child_id"
+    t.index ["donor_id", "child_id", "monthly_amount", "end_date"], name: "index_sponsorships_on_uniqueness_fields"
     t.index ["donor_id"], name: "index_sponsorships_on_donor_id"
+    t.index ["end_date"], name: "index_sponsorships_on_end_date"
     t.index ["project_id"], name: "index_sponsorships_on_project_id"
   end
 
