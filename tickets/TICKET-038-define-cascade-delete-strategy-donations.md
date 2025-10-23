@@ -1,22 +1,38 @@
-## [TICKET-038] Define Cascade Delete Strategy for Donations
+## [TICKET-038] Define Cascade Delete Strategy for Donations, Sponsorships, and Projects
 
-**Status:** 📋 Planned
-**Priority:** 🟢 Low
-**Effort:** S (Small)
+**Status:** 🔵 In Progress
+**Priority:** 🔴 High (upgraded from Low - data integrity issue)
+**Effort:** M (Medium - expanded scope)
 **Created:** 2025-10-18
+**Updated:** 2025-10-23 (expanded to include Projects)
 **Dependencies:** None
 
 ### User Story
-As a database administrator, I want a clear cascade delete strategy for donations so that referential integrity is maintained and data retention policies are explicit.
+As a database administrator, I want a clear cascade delete strategy for donations, sponsorships, and projects so that referential integrity is maintained and data retention policies are explicit.
 
 ### Problem Statement
-Currently, the relationship between donors and donations lacks an explicit cascade delete strategy:
+Currently, relationships lack explicit cascade delete strategies:
+
+**Donors → Donations:**
 - What happens to donations when a donor is soft-deleted?
 - What happens to donations when a donor is permanently deleted?
 - No documented data retention policy
 
-**Database Smell:** Missing cascade behavior definition
-**Issue:** Donor model has_many :donations with no dependent: option (donor.rb:5)
+**Projects → Donations:**
+- Projects can be deleted even if donations exist (data corruption risk)
+- No prevention of orphaned donation records
+- Missing association: `Project` has no `has_many :sponsorships`
+
+**Projects → Sponsorships:**
+- Projects can be deleted even if sponsorships exist (data corruption risk)
+- Sponsorships would be orphaned without project_id
+- Frontend shows delete button for all non-system projects (no association check)
+
+**Database Smells:**
+- Missing cascade behavior definitions
+- Donor model: `has_many :donations` with no `dependent:` option
+- Project model: `has_many :donations` with no `dependent:` option
+- Project model: Missing `has_many :sponsorships` association entirely
 
 ### Current Behavior Analysis
 
@@ -142,7 +158,9 @@ end
 
 ### Recommended Implementation
 
-#### 1. Add Dependent Restriction
+## Part 1: Donor → Donations Strategy
+
+#### 1. Add Dependent Restriction to Donor Model
 
 ```ruby
 # app/models/donor.rb
@@ -316,10 +334,289 @@ RSpec.describe "DELETE /api/donors/:id", type: :request do
 end
 ```
 
+## Part 2: Project → Donations & Sponsorships Strategy
+
+### Current Issues
+1. **Missing association**: Project model has no `has_many :sponsorships`
+2. **Missing dependent strategy**: Project can be deleted even with donations/sponsorships
+3. **No database-level protection**: Only checks `system` flag
+4. **Frontend allows deletion**: Delete button shown for all non-system projects
+
+### Implementation
+
+#### 1. Add Missing Association and Dependent Restrictions
+
+```ruby
+# app/models/project.rb
+class Project < ApplicationRecord
+  has_many :donations, dependent: :restrict_with_error
+  has_many :sponsorships, dependent: :restrict_with_error
+
+  enum :project_type, { general: 0, campaign: 1, sponsorship: 2 }, prefix: true
+
+  validates :title, presence: true
+
+  before_destroy :prevent_system_project_deletion
+  before_destroy :prevent_deletion_with_associations
+
+  private
+
+  def prevent_system_project_deletion
+    if system?
+      errors.add(:base, "Cannot delete system projects")
+      throw :abort
+    end
+  end
+
+  def prevent_deletion_with_associations
+    if donations.any?
+      errors.add(:base, "Cannot delete project with associated donations")
+      throw :abort
+    end
+
+    if sponsorships.any?
+      errors.add(:base, "Cannot delete project with associated sponsorships")
+      throw :abort
+    end
+  end
+
+  def can_be_deleted?
+    !system? && donations.empty? && sponsorships.empty?
+  end
+end
+```
+
+#### 2. Update API to Include Association Counts
+
+```ruby
+# app/presenters/project_presenter.rb (new file)
+class ProjectPresenter < BasePresenter
+  def as_json(options = {})
+    {
+      id: object.id,
+      title: object.title,
+      description: object.description,
+      project_type: object.project_type,
+      system: object.system,
+      donations_count: object.donations.count,
+      sponsorships_count: object.sponsorships.count,
+      can_be_deleted: object.can_be_deleted?
+    }
+  end
+end
+
+# app/controllers/api/projects_controller.rb
+def index
+  scope = Project.all
+  filtered_scope = apply_ransack_filters(scope)
+  projects = paginate_collection(filtered_scope.order(title: :asc))
+
+  render json: {
+    projects: CollectionPresenter.new(projects, ProjectPresenter).as_json,
+    meta: pagination_meta(projects)
+  }
+end
+```
+
+#### 3. Frontend: Hide Delete Button When Associations Exist
+
+```tsx
+// src/components/ProjectList.tsx
+interface ProjectListProps {
+  projects: Project[];
+  onEdit?: (project: Project) => void;
+  onDelete?: (project: Project) => void;
+}
+
+const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDelete }) => {
+  const canDelete = (project: Project) => {
+    return !project.system &&
+           project.donations_count === 0 &&
+           project.sponsorships_count === 0;
+  };
+
+  return (
+    <Stack spacing={2}>
+      {projects.map((project) => (
+        <Card key={project.id} variant="outlined">
+          <CardContent>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+              <Typography variant="subtitle1">{project.title}</Typography>
+              {!project.system && (
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  <Tooltip title="Edit project">
+                    <IconButton onClick={() => onEdit?.(project)}>
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                  {canDelete(project) && (
+                    <Tooltip title="Delete project">
+                      <IconButton onClick={() => onDelete?.(project)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </Box>
+              )}
+            </Box>
+          </CardContent>
+        </Card>
+      ))}
+    </Stack>
+  );
+};
+```
+
+#### 4. Update TypeScript Types
+
+```typescript
+// src/types/project.ts
+export interface Project {
+  id: number;
+  title: string;
+  description?: string;
+  project_type: ProjectType;
+  system: boolean;
+  donations_count: number;        // NEW
+  sponsorships_count: number;     // NEW
+  can_be_deleted: boolean;        // NEW
+}
+```
+
+### Testing Strategy
+
+```ruby
+# spec/models/project_spec.rb
+RSpec.describe Project, type: :model do
+  describe "associations" do
+    it "has many sponsorships" do
+      expect(Project.new).to respond_to(:sponsorships)
+    end
+
+    it "restricts deletion when donations exist" do
+      project = create(:project)
+      create(:donation, project: project)
+
+      expect { project.destroy }.to raise_error(ActiveRecord::DeleteRestrictionError)
+    end
+
+    it "restricts deletion when sponsorships exist" do
+      project = create(:project, project_type: :sponsorship)
+      child = create(:child)
+      donor = create(:donor)
+      create(:sponsorship, project: project, child: child, donor: donor)
+
+      expect { project.destroy }.to raise_error(ActiveRecord::DeleteRestrictionError)
+    end
+
+    it "allows deletion when no donations or sponsorships exist" do
+      project = create(:project)
+
+      expect { project.destroy }.to change(Project, :count).by(-1)
+    end
+  end
+
+  describe "#can_be_deleted?" do
+    it "returns true when project has no associations and is not system" do
+      project = create(:project, system: false)
+      expect(project.can_be_deleted?).to be true
+    end
+
+    it "returns false when project has donations" do
+      project = create(:project)
+      create(:donation, project: project)
+      expect(project.can_be_deleted?).to be false
+    end
+
+    it "returns false when project has sponsorships" do
+      project = create(:project, project_type: :sponsorship)
+      child = create(:child)
+      donor = create(:donor)
+      create(:sponsorship, project: project, child: child, donor: donor)
+      expect(project.can_be_deleted?).to be false
+    end
+
+    it "returns false when project is system" do
+      project = create(:project, system: true)
+      expect(project.can_be_deleted?).to be false
+    end
+  end
+end
+```
+
+```typescript
+// src/components/ProjectList.test.tsx
+describe('ProjectList', () => {
+  it('shows delete button for project with no associations', () => {
+    const projects = [{
+      id: 1,
+      title: 'Empty Project',
+      project_type: 'general',
+      system: false,
+      donations_count: 0,
+      sponsorships_count: 0,
+      can_be_deleted: true
+    }];
+
+    render(<ProjectList projects={projects} onDelete={jest.fn()} />);
+
+    expect(screen.getByLabelText('delete')).toBeInTheDocument();
+  });
+
+  it('hides delete button when donations exist', () => {
+    const projects = [{
+      id: 1,
+      title: 'Project with Donations',
+      project_type: 'general',
+      system: false,
+      donations_count: 5,
+      sponsorships_count: 0,
+      can_be_deleted: false
+    }];
+
+    render(<ProjectList projects={projects} onDelete={jest.fn()} />);
+
+    expect(screen.queryByLabelText('delete')).not.toBeInTheDocument();
+  });
+
+  it('hides delete button when sponsorships exist', () => {
+    const projects = [{
+      id: 1,
+      title: 'Sponsor Maria',
+      project_type: 'sponsorship',
+      system: false,
+      donations_count: 0,
+      sponsorships_count: 1,
+      can_be_deleted: false
+    }];
+
+    render(<ProjectList projects={projects} onDelete={jest.fn()} />);
+
+    expect(screen.queryByLabelText('delete')).not.toBeInTheDocument();
+  });
+});
+```
+
 ### Files to Modify
+
+**Backend - Donor:**
 - `app/models/donor.rb` (ADD dependent: :restrict_with_error)
 - `spec/models/donor_spec.rb` (ADD cascade delete tests)
 - `spec/requests/api/donors_spec.rb` (VERIFY soft delete behavior)
+
+**Backend - Project:**
+- `app/models/project.rb` (ADD has_many :sponsorships, dependent strategies, callbacks)
+- `app/presenters/project_presenter.rb` (NEW FILE - add counts and can_be_deleted)
+- `app/controllers/api/projects_controller.rb` (UPDATE to use ProjectPresenter)
+- `spec/models/project_spec.rb` (ADD 7 new tests for associations and can_be_deleted?)
+- `spec/presenters/project_presenter_spec.rb` (NEW FILE - test JSON structure)
+
+**Frontend - Project:**
+- `src/types/project.ts` (ADD donations_count, sponsorships_count, can_be_deleted fields)
+- `src/components/ProjectList.tsx` (ADD canDelete() logic, conditionally show delete button)
+- `src/components/ProjectList.test.tsx` (ADD 3 new tests for delete button visibility)
+
+**Documentation:**
 - `CLAUDE.md` (ADD data retention policy section)
 - `DonationTracking.md` (ADD data retention policy)
 

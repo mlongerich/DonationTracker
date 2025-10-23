@@ -675,6 +675,39 @@ Maintain database indexes for optimal query performance (TICKET-035).
 - Run `EXPLAIN` on slow queries to verify index usage
 - Use Bullet gem to detect N+1 queries needing indexes
 
+#### Data Retention & Cascade Delete Policy
+
+**Policy:** Prevent accidental data loss by restricting deletion of models with dependent records.
+
+**Project Model (TICKET-038):**
+```ruby
+class Project < ApplicationRecord
+  has_many :donations, dependent: :restrict_with_exception
+  has_many :sponsorships, dependent: :restrict_with_exception
+
+  def can_be_deleted?
+    !system? && donations.empty? && sponsorships.empty?
+  end
+end
+```
+
+**Deletion Rules:**
+- **System projects**: Cannot be deleted (enforced by `before_destroy` callback)
+- **Projects with donations**: Cannot be deleted (raises `ActiveRecord::DeleteRestrictionError`)
+- **Projects with sponsorships**: Cannot be deleted (raises `ActiveRecord::DeleteRestrictionError`)
+- **Empty projects**: Can be deleted safely
+
+**Note:** Rails 8 uses `dependent: :restrict_with_exception` (not `restrict_with_error`)
+
+**Frontend Integration:**
+- API includes `donations_count`, `sponsorships_count`, `can_be_deleted` fields (via ProjectPresenter)
+- Delete button conditionally shown based on `can_be_deleted` status
+- Prevents user from attempting impossible deletions
+
+**Related:**
+- TICKET-038: Define Cascade Delete Strategy for Donations, Sponsorships, and Projects
+- Donor soft delete (TICKET-001) uses `Discard` gem with `dependent: :restrict_with_exception`
+
 ### Frontend (React)
 - **ESLint**: React, accessibility, and TypeScript rules
 - **Prettier**: Consistent code formatting

@@ -52,6 +52,11 @@ Project Dropdown:
 - [ ] Right: "Other Project" with Project dropdown
 - [ ] Radio buttons to choose which applies
 
+#### General UX Improvement (All Options)
+- [ ] When user selects a project with `project_type === 'sponsorship'`, auto-populate donation amount to $100
+- [ ] User can still manually override the pre-populated amount
+- [ ] Provides sensible default for typical sponsorship donation amounts
+
 ### Recommended Approach: Option B (Toggle-Based)
 
 **Benefits:**
@@ -196,7 +201,21 @@ const availableProjects = isSponsorshipDonation
 )}
 ```
 
-**3. API Client Method:**
+**3. Amount Pre-Population for Sponsorship Projects:**
+
+```tsx
+// Watch for project selection changes
+useEffect(() => {
+  if (projectId) {
+    const selectedProject = projects.find(p => p.id === projectId);
+    if (selectedProject?.project_type === 'sponsorship') {
+      setAmount('100.00'); // Pre-populate with default sponsorship amount
+    }
+  }
+}, [projectId, projects]);
+```
+
+**4. API Client Method:**
 ```typescript
 export const fetchActiveSponsorshipForChild = async (childId: number) => {
   const response = await apiClient.get(`/api/children/${childId}/active_sponsorship`);
@@ -224,6 +243,8 @@ export const fetchActiveSponsorshipForChild = async (childId: number) => {
 - [ ] DonationForm: Auto-populates projectId when child selected
 - [ ] DonationForm: Filters out sponsorship projects from dropdown
 - [ ] DonationForm: Displays sponsorship info alert when child selected
+- [ ] DonationForm: Pre-populates amount to '100.00' when sponsorship project selected
+- [ ] DonationForm: User can override pre-populated amount
 
 **E2E Tests (Cypress):**
 - [ ] User toggles sponsorship mode

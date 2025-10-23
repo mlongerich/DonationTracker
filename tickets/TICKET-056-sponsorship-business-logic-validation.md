@@ -131,15 +131,19 @@ try {
 
 **Backend:**
 - `app/models/sponsorship.rb` - Add validation, update project callback
-- `app/controllers/api/sponsorships_controller.rb` - Return validation errors
+- `app/controllers/api/sponsorships_controller.rb` - Add start_date to permitted params
+- `app/presenters/sponsorship_presenter.rb` - Add start_date and project_title to JSON
 - `db/migrate/YYYYMMDD_add_start_date_to_sponsorships.rb` - New migration
 - `spec/models/sponsorship_spec.rb` - Add 7 validation tests
 
 **Frontend:**
-- `src/types/sponsorship.ts` - Add start_date field
 - `src/components/SponsorshipList.tsx` - Display start_date column
 - `src/pages/SponsorshipsPage.tsx` - Handle 422 errors, show message
-- `src/pages/SponsorshipsPage.test.tsx` - Test error handling
+- `src/pages/SponsorshipsPage.test.tsx` - Test error handling (create if needed)
+
+**Already Complete:**
+- ✅ `src/types/sponsorship.ts` - start_date field already exists
+- ✅ Database index for uniqueness - completed in TICKET-035
 
 ### Test Plan
 
@@ -177,3 +181,19 @@ try {
   - Defer to post-MVP
 
 **Recommendation:** Use Option 1 (computed) for now
+
+---
+
+### Implementation Notes (2025-10-22)
+
+**Current Codebase Status:**
+- ✅ Composite index already exists: `index ["donor_id", "child_id", "monthly_amount", "end_date"]` (TICKET-035)
+- ✅ TypeScript type already has `start_date?: string` field
+- ✅ SponsorshipPresenter exists (TICKET-060) - needs start_date and project_title added
+- ⚠️ start_date will be stored as database column (not computed) for simplicity
+
+**Implementation Strategy:**
+- Store start_date as database column with migration
+- Add to permitted params and presenter
+- Display in SponsorshipList table UI
+- Can compute from donations later if needed for backfill
