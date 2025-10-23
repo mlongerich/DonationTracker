@@ -10,7 +10,9 @@ class SponsorshipPresenter < BasePresenter
       active: object.active?,
       end_date: object.end_date,
       created_at: object.created_at,
-      project_id: object.project_id
+      project_id: object.project_id,
+      start_date: object.start_date,
+      project_title: object.project&.title
     }
   end
 end

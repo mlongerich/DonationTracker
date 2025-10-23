@@ -42,6 +42,6 @@ class Api::SponsorshipsController < ApplicationController
   private
 
   def sponsorship_params
-    params.require(:sponsorship).permit(:donor_id, :child_id, :monthly_amount)
+    params.require(:sponsorship).permit(:donor_id, :child_id, :monthly_amount, :start_date)
   end
 end

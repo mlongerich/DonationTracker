@@ -11,7 +11,8 @@ RSpec.describe SponsorshipPresenter do
     it 'includes all required fields' do
       expect(subject.keys).to match_array([
         :id, :donor_id, :donor_name, :child_id, :child_name,
-        :monthly_amount, :active, :end_date, :created_at, :project_id
+        :monthly_amount, :active, :end_date, :created_at, :project_id,
+        :start_date, :project_title
       ])
     end
 

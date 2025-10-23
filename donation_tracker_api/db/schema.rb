@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_22_180000) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_22_180001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -69,6 +69,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_22_180000) do
     t.date "end_date"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "start_date"
     t.index ["child_id"], name: "index_sponsorships_on_child_id"
     t.index ["donor_id", "child_id", "monthly_amount", "end_date"], name: "index_sponsorships_on_uniqueness_fields"
     t.index ["donor_id"], name: "index_sponsorships_on_donor_id"

@@ -36,6 +36,26 @@ RSpec.describe "/api/sponsorships", type: :request do
       json = JSON.parse(response.body)
       expect(json["errors"]).to be_present
     end
+
+    it "creates sponsorship with start_date when provided" do
+      donor = create(:donor)
+      child = create(:child)
+      start_date = Date.new(2025, 1, 15)
+      sponsorship_params = {
+        sponsorship: {
+          donor_id: donor.id,
+          child_id: child.id,
+          monthly_amount: 50,
+          start_date: start_date
+        }
+      }
+
+      post "/api/sponsorships", params: sponsorship_params
+
+      expect(response).to have_http_status(:created)
+      json = JSON.parse(response.body)
+      expect(json["sponsorship"]["start_date"]).to eq(start_date.to_s)
+    end
   end
 
   describe "DELETE /api/sponsorships/:id" do
