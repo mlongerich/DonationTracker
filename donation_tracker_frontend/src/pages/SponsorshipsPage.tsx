@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Card, CardContent, Box } from '@mui/material';
+import { Container, Typography, Card, CardContent, Box, Alert } from '@mui/material';
 import apiClient from '../api/client';
 import { Sponsorship, SponsorshipFormData } from '../types';
 import SponsorshipList from '../components/SponsorshipList';
@@ -8,6 +8,7 @@ import SponsorshipForm from '../components/SponsorshipForm';
 const SponsorshipsPage: React.FC = () => {
   const [sponsorships, setSponsorships] = useState<Sponsorship[]>([]);
   const [page, setPage] = useState(1);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchSponsorships();
@@ -26,8 +27,20 @@ const SponsorshipsPage: React.FC = () => {
   };
 
   const handleCreateSponsorship = async (data: SponsorshipFormData) => {
-    await apiClient.post('/api/sponsorships', data);
-    fetchSponsorships();
+    try {
+      await apiClient.post('/api/sponsorships', { sponsorship: data });
+      fetchSponsorships();
+      setError(null);
+    } catch (err: any) {
+      if (err.response?.status === 422) {
+        const errorMsg = err.response.data.errors?.base?.[0]
+          || 'This sponsorship already exists';
+        setError(errorMsg);
+      } else {
+        setError('Failed to create sponsorship');
+      }
+      console.error('Failed to create sponsorship:', err);
+    }
   };
 
   return (
@@ -35,6 +48,12 @@ const SponsorshipsPage: React.FC = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         Sponsorships
       </Typography>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
 
       <Card sx={{ mb: 3 }}>
         <CardContent>

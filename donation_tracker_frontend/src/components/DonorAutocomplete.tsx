@@ -26,11 +26,17 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
   const [donorOptions, setDonorOptions] = useState<Donor[]>([]);
   const [searchInput, setSearchInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
 
   // Debounced search for donors
   useEffect(() => {
+    if (searchInput.trim()) {
+      setIsTyping(true);
+    }
+
     const timer = setTimeout(async () => {
       if (searchInput.trim()) {
+        setIsTyping(false);
         setLoading(true);
         try {
           const response = await apiClient.get('/api/donors', {
@@ -47,6 +53,7 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
           setLoading(false);
         }
       } else {
+        setIsTyping(false);
         setDonorOptions([]);
       }
     }, 300);
@@ -61,6 +68,12 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
     return `${option.name} (No email provided)`;
   };
 
+  const getNoOptionsText = () => {
+    if (isTyping || loading) return 'Searching...';
+    if (searchInput.trim()) return 'No results';
+    return 'Type to search';
+  };
+
   return (
     <Autocomplete
       options={donorOptions}
@@ -71,6 +84,8 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
       onInputChange={(_, newInputValue) => setSearchInput(newInputValue)}
       getOptionLabel={getOptionLabel}
       isOptionEqualToValue={(option, value) => option.id === value.id}
+      noOptionsText={getNoOptionsText()}
+      loadingText="Searching..."
       renderInput={(params) => (
         <TextField
           {...params}

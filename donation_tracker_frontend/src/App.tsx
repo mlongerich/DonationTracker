@@ -8,6 +8,8 @@ import Layout from './components/Layout';
 import DonationsPage from './pages/DonationsPage';
 import DonorsPage from './pages/DonorsPage';
 import ProjectsPage from './pages/ProjectsPage';
+import ChildrenPage from './pages/ChildrenPage';
+import SponsorshipsPage from './pages/SponsorshipsPage';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
               <Route index element={<DonationsPage />} />
               <Route path="donations" element={<DonationsPage />} />
               <Route path="donors" element={<DonorsPage />} />
+              <Route path="children" element={<ChildrenPage />} />
+              <Route path="sponsorships" element={<SponsorshipsPage />} />
               <Route path="projects" element={<ProjectsPage />} />
             </Route>
           </Routes>

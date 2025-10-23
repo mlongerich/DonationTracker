@@ -13,7 +13,7 @@ interface SponsorshipFormProps {
 const SponsorshipForm: React.FC<SponsorshipFormProps> = ({ onSubmit, onCancel, childId }) => {
   const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
-  const [monthlyAmount, setMonthlyAmount] = useState<number>(0);
+  const [monthlyAmount, setMonthlyAmount] = useState<number>(100);
 
   const handleSubmit = () => {
     const finalChildId = childId ?? selectedChild?.id;

@@ -67,6 +67,25 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
       <Stack spacing={2}>
         {success && <Alert severity="success">Donation created successfully!</Alert>}
         <TextField
+          select
+          label="Project"
+          value={projectId || ''}
+          onChange={(e) => setProjectId(e.target.value ? parseInt(e.target.value) : null)}
+          fullWidth
+        >
+          <MenuItem value="">General Donation</MenuItem>
+          {projects.map((project) => (
+            <MenuItem key={project.id} value={project.id}>
+              {project.title}
+            </MenuItem>
+          ))}
+        </TextField>
+        <DonorAutocomplete
+          value={selectedDonor}
+          onChange={setSelectedDonor}
+          required={!selectedDonor}
+        />
+        <TextField
           label="Amount"
           type="number"
           value={amount}
@@ -88,25 +107,6 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
             },
           }}
         />
-        <DonorAutocomplete
-          value={selectedDonor}
-          onChange={setSelectedDonor}
-          required={!selectedDonor}
-        />
-        <TextField
-          select
-          label="Project"
-          value={projectId || ''}
-          onChange={(e) => setProjectId(e.target.value ? parseInt(e.target.value) : null)}
-          fullWidth
-        >
-          <MenuItem value="">General Donation</MenuItem>
-          {projects.map((project) => (
-            <MenuItem key={project.id} value={project.id}>
-              {project.title}
-            </MenuItem>
-          ))}
-        </TextField>
         <Button type="submit" variant="contained" color="primary" fullWidth disabled={isSubmitting}>
           {isSubmitting ? 'Creating...' : 'Create Donation'}
         </Button>

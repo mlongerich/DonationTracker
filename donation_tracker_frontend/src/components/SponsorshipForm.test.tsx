@@ -65,6 +65,16 @@ describe('SponsorshipForm', () => {
     expect(mockSubmit).not.toHaveBeenCalled();
   });
 
+  it('defaults monthly amount to 100', () => {
+    const mockSubmit = jest.fn();
+    const mockCancel = jest.fn();
+
+    render(<SponsorshipForm onSubmit={mockSubmit} onCancel={mockCancel} childId={1} />);
+
+    const amountField = screen.getByLabelText(/monthly amount/i) as HTMLInputElement;
+    expect(amountField.value).toBe('100');
+  });
+
   it('does not call onSubmit when amount is 0', async () => {
     const mockSubmit = jest.fn();
     const mockCancel = jest.fn();
@@ -72,7 +82,12 @@ describe('SponsorshipForm', () => {
 
     render(<SponsorshipForm onSubmit={mockSubmit} onCancel={mockCancel} childId={1} />);
 
-    // Amount defaults to 0, just click submit
+    // Explicitly set amount to 0
+    const amountField = screen.getByLabelText(/monthly amount/i);
+    await user.clear(amountField);
+    await user.type(amountField, '0');
+
+    // Click submit
     const submitButton = screen.getByText(/submit/i);
     await user.click(submitButton);
 

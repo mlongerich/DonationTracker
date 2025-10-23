@@ -33,6 +33,26 @@ describe('Navigation', () => {
     expect(screen.getByRole('link', { name: /projects/i })).toBeInTheDocument();
   });
 
+  it('renders Children link', () => {
+    render(
+      <BrowserRouter>
+        <Navigation />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByRole('link', { name: /children/i })).toBeInTheDocument();
+  });
+
+  it('renders Sponsorships link', () => {
+    render(
+      <BrowserRouter>
+        <Navigation />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByRole('link', { name: /sponsorships/i })).toBeInTheDocument();
+  });
+
   it('uses Material-UI AppBar component', () => {
     const { container } = render(
       <BrowserRouter>

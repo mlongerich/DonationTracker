@@ -29,6 +29,7 @@ const SponsorshipList: React.FC<SponsorshipListProps> = ({ sponsorships, onEndSp
             <TableCell>Donor</TableCell>
             <TableCell>Child</TableCell>
             <TableCell>Monthly Amount</TableCell>
+            <TableCell>Start Date</TableCell>
             <TableCell>Status</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
@@ -39,6 +40,7 @@ const SponsorshipList: React.FC<SponsorshipListProps> = ({ sponsorships, onEndSp
               <TableCell>{sponsorship.donor_name}</TableCell>
               <TableCell>{sponsorship.child_name}</TableCell>
               <TableCell>${parseFloat(sponsorship.monthly_amount).toFixed(2)}</TableCell>
+              <TableCell>{sponsorship.start_date || 'Not set'}</TableCell>
               <TableCell>{sponsorship.active ? 'Active' : 'Ended'}</TableCell>
               <TableCell>
                 {sponsorship.active && (

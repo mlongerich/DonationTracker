@@ -129,4 +129,51 @@ describe('DonorAutocomplete', () => {
     const input = screen.getByLabelText(/donor/i);
     expect(input).toBeRequired();
   });
+
+  it('shows "Type to search" when input is empty', async () => {
+    render(<DonorAutocomplete value={null} onChange={mockOnChange} />);
+
+    const input = screen.getByRole('combobox');
+    const user = userEvent.setup();
+
+    await user.click(input);
+
+    await waitFor(() => {
+      expect(screen.getByText('Type to search')).toBeInTheDocument();
+    });
+  });
+
+  it('shows "Searching..." immediately while typing before debounce fires', async () => {
+    (apiClient.get as jest.Mock).mockResolvedValue({
+      data: { donors: [] },
+    });
+
+    const user = userEvent.setup();
+    render(<DonorAutocomplete value={null} onChange={mockOnChange} />);
+
+    const input = screen.getByRole('combobox');
+
+    // Type a single character
+    await user.type(input, 'J');
+
+    // Should show "Searching..." immediately, not "No results"
+    expect(screen.getByText('Searching...')).toBeInTheDocument();
+    expect(screen.queryByText('No results')).not.toBeInTheDocument();
+  });
+
+  it('shows "No results" when search returns empty', async () => {
+    (apiClient.get as jest.Mock).mockResolvedValue({
+      data: { donors: [] },
+    });
+
+    const user = userEvent.setup();
+    render(<DonorAutocomplete value={null} onChange={mockOnChange} />);
+
+    const input = screen.getByRole('combobox');
+    await user.type(input, 'NonexistentDonor');
+
+    await waitFor(() => {
+      expect(screen.getByText('No results')).toBeInTheDocument();
+    });
+  });
 });
