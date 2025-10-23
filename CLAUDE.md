@@ -769,12 +769,49 @@ Before committing code:
 7. Quality metrics must be maintained (RubyCritic score ≥95)
 8. Cost metrics should not increase significantly (Skunk)
 
+#### Native Git Hooks (No Stashing!)
+
+**Important Change (2025-10-23):** We replaced the pre-commit framework with native Git hooks to eliminate stashing behavior that was causing data loss.
+
+**Key Features:**
+- ✅ **No stashing** - unstaged changes always remain in working directory
+- ✅ **Automatic backups** - every commit creates backup in `.git/backups/`
+- ✅ **Recovery tool** - restore lost work with `bash scripts/recover-backup.sh`
+- ✅ **Faster** - no framework overhead, direct script execution
+- ✅ **Safer** - work never lost due to interrupted commits
+
+**Installation:**
+```bash
+# Already installed, but to reinstall:
+bash scripts/install-native-hooks.sh
+```
+
+**Installed Hooks:**
+- `.git/hooks/pre-commit` → `scripts/native-pre-commit.sh`
+- `.git/hooks/commit-msg` → `scripts/native-commit-msg.sh`
+
+**Recovery Process:**
+```bash
+# View available backups
+bash scripts/recover-backup.sh
+
+# Apply specific backup
+bash scripts/recover-backup.sh .git/backups/pre-commit_YYYYMMDD_HHMMSS.patch
+```
+
+**Backup System:**
+- Creates 3 files per commit:
+  - `pre-commit_TIMESTAMP.patch` - Unstaged changes
+  - `pre-commit_TIMESTAMP.staged.patch` - Staged changes
+  - `pre-commit_TIMESTAMP.untracked.txt` - List of untracked files
+- Keeps last 20 backups automatically
+- All backups stored in `.git/backups/` (not tracked)
+
 #### Pre-commit Hooks Flow
 
 ```mermaid
 flowchart TD
-    A[Developer commits code] --> B[Pre-commit hooks triggered]
-
+    A[Developer commits code] --> B[🛡️ Create Safety Backup]
     B --> C[Documentation Check]
     C --> C1{DonationTracking.md<br/>& CLAUDE.md updated?}
     C1 -->|No| C2[⚠️ Warning: Update docs]
@@ -785,7 +822,7 @@ flowchart TD
     D2 --> D3[RSpec Tests]
     D3 --> D4{All backend<br/>checks pass?}
 
-    D4 -->|No| F1[❌ Commit blocked]
+    D4 -->|No| F1[❌ Commit blocked<br/>💡 Backup available]
     D4 -->|Yes| E[Frontend Validation]
 
     E --> E1[ESLint + Accessibility]
@@ -794,13 +831,41 @@ flowchart TD
     E3 --> E4{All frontend<br/>checks pass?}
 
     E4 -->|No| F1
-    E4 -->|Yes| F2[✅ Commit allowed]
+    E4 -->|Yes| F2[✅ Commit allowed<br/>📝 No stashing occurred]
 
     C2 --> D
 
+    style B fill:#d4edda
     style C2 fill:#fff2cc
     style F1 fill:#ffcccc
     style F2 fill:#ccffcc
+```
+
+**Why Native Hooks vs Pre-commit Framework:**
+
+The pre-commit framework automatically stashes unstaged files before running hooks. If a hook times out or crashes, the unstash may fail, resulting in lost work. This happened multiple times, causing significant data loss.
+
+Native Git hooks eliminate this problem by:
+1. Never stashing unstaged changes
+2. Creating explicit backups before validation
+3. Providing clear recovery path
+4. Running faster without framework overhead
+
+**Previous Issue Example:**
+```bash
+# With pre-commit framework:
+$ git commit -m "..."
+[WARNING] Unstaged files detected.
+[INFO] Stashing unstaged files to ~/.cache/pre-commit/patch...
+# Hook times out...
+# Unstash never happens → WORK LOST
+
+# With native hooks:
+$ git commit -m "..."
+🛡️  Creating safety backup...
+✓ Backup saved to: .git/backups/pre-commit_20251023_192533.patch
+# Hook runs...
+# Unstaged files still in working directory → WORK SAFE
 ```
 
 ---
@@ -947,10 +1012,10 @@ bash scripts/check-documentation.sh           # ⚠️ Documentation reminder
 bash scripts/pre-commit-backend.sh           # 🔍 RuboCop + 🔒 Brakeman + 🧪 RSpec (REAL execution ✅)
 bash scripts/pre-commit-frontend.sh          # 🔍 ESLint + 🎨 Prettier + 📝 TypeScript + 🧪 Jest (REAL execution ✅)
 
-# Pre-commit Hooks Installation
-pip install pre-commit                        # Install pre-commit framework
-pre-commit install                           # Install git hooks
-pre-commit run --all-files                  # Run all hooks manually
+# Native Git Hooks Installation (NO STASHING!)
+bash scripts/install-native-hooks.sh         # Install native hooks (replaces pre-commit framework)
+bash scripts/recover-backup.sh               # View/restore backups from failed commits
+git commit --allow-empty -m "chore: test"   # Test hooks are working
 ```
 
 ---

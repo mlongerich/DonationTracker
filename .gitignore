@@ -243,3 +243,6 @@ id_ed25519*
 # Ansible vault files
 vault.yml
 secrets.yml
+
+# Git hook backups (native hooks create these)
+.git/backups/
