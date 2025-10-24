@@ -131,6 +131,45 @@ erDiagram
 
 ---
 
+## Cascade Delete Strategy
+
+**Policy:** Prevent accidental data loss by restricting deletion of models with dependent records.
+
+### Project Deletion Rules (TICKET-038)
+
+**Implementation:**
+```ruby
+class Project < ApplicationRecord
+  has_many :donations, dependent: :restrict_with_exception
+  has_many :sponsorships, dependent: :restrict_with_exception
+
+  before_destroy :prevent_system_project_deletion
+
+  def can_be_deleted?
+    !system? && donations.empty? && sponsorships.empty?
+  end
+end
+```
+
+**Deletion Behavior:**
+- **System projects**: Cannot be deleted (enforced by `before_destroy` callback)
+- **Projects with donations**: Cannot be deleted (raises `ActiveRecord::DeleteRestrictionError`)
+- **Projects with sponsorships**: Cannot be deleted (raises `ActiveRecord::DeleteRestrictionError`)
+- **Empty projects**: Can be deleted safely
+
+**Frontend Integration:**
+- API includes `donations_count`, `sponsorships_count`, `can_be_deleted` fields via ProjectPresenter
+- Delete button conditionally shown based on `can_be_deleted` status
+- Prevents users from attempting impossible deletions
+
+**Note:** Rails 8 uses `dependent: :restrict_with_exception` (not Rails 7's `restrict_with_error`)
+
+### Future: Donor Deletion Rules
+
+Donor cascade delete strategy deferred for future implementation (Part 1 of TICKET-038).
+
+---
+
 ## Related Documentation
 
 - **[API Endpoints](api-endpoints.md)** - REST API for these models

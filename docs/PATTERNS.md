@@ -849,4 +849,96 @@ export default DonorsPage;
 
 ---
 
-*Last updated: 2025-10-21*
+## Data Retention & Cascade Delete Policy
+
+**Policy:** Prevent accidental data loss by restricting deletion of models with dependent records.
+
+### Implementation Pattern
+
+**Project Model Example (TICKET-038):**
+
+```ruby
+class Project < ApplicationRecord
+  has_many :donations, dependent: :restrict_with_exception
+  has_many :sponsorships, dependent: :restrict_with_exception
+
+  before_destroy :prevent_system_project_deletion
+
+  def can_be_deleted?
+    !system? && donations.empty? && sponsorships.empty?
+  end
+
+  private
+
+  def prevent_system_project_deletion
+    if system?
+      errors.add(:base, "System projects cannot be deleted")
+      throw(:abort)
+    end
+  end
+end
+```
+
+**Deletion Rules:**
+
+- **System projects**: Cannot be deleted (enforced by `before_destroy` callback)
+- **Projects with donations**: Cannot be deleted (raises `ActiveRecord::DeleteRestrictionError`)
+- **Projects with sponsorships**: Cannot be deleted (raises `ActiveRecord::DeleteRestrictionError`)
+- **Empty projects**: Can be deleted safely
+
+**Note:** Rails 8 uses `dependent: :restrict_with_exception` (not `restrict_with_error`)
+
+### Frontend Integration
+
+**API includes computed fields via ProjectPresenter:**
+
+```ruby
+class ProjectPresenter < BasePresenter
+  def as_json(options = {})
+    {
+      id: object.id,
+      title: object.title,
+      description: object.description,
+      donations_count: object.donations.count,
+      sponsorships_count: object.sponsorships.count,
+      can_be_deleted: object.can_be_deleted?  # Computed field
+    }
+  end
+end
+```
+
+**React component shows/hides delete button:**
+
+```tsx
+<Button
+  variant="contained"
+  color="error"
+  disabled={!project.can_be_deleted}
+  onClick={() => handleDelete(project.id)}
+>
+  Delete
+</Button>
+
+{!project.can_be_deleted && (
+  <Typography variant="caption" color="error">
+    Cannot delete: {project.donations_count} donations,
+    {project.sponsorships_count} sponsorships
+  </Typography>
+)}
+```
+
+**Benefits:**
+
+- Prevents accidental data loss
+- Clear user feedback on why deletion is blocked
+- Backend enforcement (can't bypass via API)
+- Frontend UX optimization (hide impossible actions)
+
+**Related Patterns:**
+
+- Donor soft delete (TICKET-001) uses `Discard` gem with `dependent: :restrict_with_exception`
+- See docs/project/data-models.md for database schema and indexing strategy
+
+---
+
+*Last updated: 2025-10-24*

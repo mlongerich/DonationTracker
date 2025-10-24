@@ -83,8 +83,9 @@ Current work items and user stories being actively developed.
 - [TICKET-035: Add Database Indexes for Query Performance](TICKET-035-add-database-indexes-query-performance.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-036: Implement React Error Boundary](TICKET-036-implement-react-error-boundary.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-037: Standardize Service Object Patterns](TICKET-037-standardize-service-object-patterns.md) - 📋 Planned (🟢 Low, S)
-- [TICKET-038: Define Cascade Delete Strategy for Donations](TICKET-038-define-cascade-delete-strategy-donations.md) - 📋 Planned (🟢 Low, S)
+- [TICKET-038: Define Cascade Delete Strategy for Donations](TICKET-038-define-cascade-delete-strategy-donations.md) - ✅ Complete (🔴 High, M) - Part 2 (Projects)
 - [TICKET-039: Add Donation Status Enum Validation](TICKET-039-add-donation-status-enum-validation.md) - 📋 Planned (🟢 Low, S)
+- [TICKET-062: Donor Cascade Delete Strategy](TICKET-062-donor-cascade-delete-strategy.md) - 📋 Planned (🟡 Medium, S) - Part 1 of TICKET-038
 - [TICKET-040: Implement Context API for Donor/Donation State](TICKET-040-implement-context-api-donor-donation-state.md) - 📋 Planned (🟢 Low, L)
 - [TICKET-041: Add Test Coverage for API Client Methods](TICKET-041-api-client-test-coverage.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-042: Add Class-Level Documentation Comments](TICKET-042-add-class-documentation-comments.md) - 📋 Planned (🟡 Medium, S) - Updated with Reek findings
@@ -95,8 +96,8 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 61
-- **Completed:** 23
+- **Total Tickets:** 62
+- **Completed:** 24
 - **In Progress:** 0
 - **Planned:** 37
 - **Blocked:** 1
@@ -104,8 +105,8 @@ Current work items and user stories being actively developed.
 ### By Category
 - **Feature Development:** 12 planned
 - **Sponsorship & Children Features:** 10 planned
-- **Code Quality & Architecture:** 14 planned (3 completed: TICKET-035, TICKET-060, TICKET-061)
-- **Completed:** 23
+- **Code Quality & Architecture:** 15 planned (4 completed: TICKET-035, TICKET-038, TICKET-060, TICKET-061)
+- **Completed:** 24
 - **In Progress:** 0
 - **Blocked:** 1 (TICKET-005)
 

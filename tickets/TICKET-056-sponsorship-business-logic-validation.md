@@ -1,9 +1,10 @@
 ## [TICKET-056] Sponsorship Business Logic & Validation
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 **Priority:** 🔴 High (blocks duplicate sponsorships - data integrity)
 **Effort:** M (Medium - 3-4 hours)
 **Created:** 2025-10-22
+**Completed:** 2025-10-23
 **Dependencies:** TICKET-010 (Sponsorship model exists) ✅
 
 ### User Story
@@ -22,56 +23,27 @@ Current implementation allows data integrity issues:
 #### 1. Prevent Duplicate Active Sponsorships
 
 **Backend Validation:**
-- [ ] Add uniqueness validation to Sponsorship model:
-  ```ruby
-  validates :donor_id, uniqueness: {
-    scope: [:child_id, :monthly_amount],
-    conditions: -> { where(end_date: nil) },
-    message: "already has an active sponsorship for this child with this amount"
-  }
-  ```
-- [ ] Return 422 error with message: "This sponsorship already exists"
-- [ ] Allow creating if:
+- [x] Add uniqueness validation to Sponsorship model (custom validation `no_duplicate_active_sponsorships`)
+- [x] Return 422 error with message: "#{child.name} is already actively sponsored by #{donor.name}"
+- [x] Allow creating if:
   - Different donor/child/amount
   - Previous sponsorship with same details is ended (`end_date` not nil)
-- [ ] Model tests: 4 tests
+- [x] Model tests: 4 tests
   - Cannot create duplicate active sponsorship
   - Can create if different donor
   - Can create if different child
   - Can create if previous sponsorship ended
 
 **Frontend Handling:**
-- [ ] Update `SponsorshipsPage` to show error message from API
-- [ ] Display: Alert/Snackbar with "This sponsorship already exists"
-- [ ] Test: shows error when API returns 422
+- [x] Update `SponsorshipsPage` to show error message from API
+- [x] Display: Alert/Snackbar with error message from `errors.base[0]`
+- [x] Test: shows error when API returns 422
 
 #### 2. One Project Per Child (Reuse Existing)
 
 **Backend Logic:**
-- [ ] Update `Sponsorship#create_sponsorship_project` callback:
-  ```ruby
-  def create_sponsorship_project
-    return if project_id.present?
-    return unless child
-
-    # Find existing project for child or create new one
-    existing_project = child.sponsorships.joins(:project)
-                           .where.not(project_id: nil)
-                           .first&.project
-
-    if existing_project
-      self.project_id = existing_project.id
-    else
-      new_project = Project.create!(
-        project_type: :sponsorship,
-        title: "Sponsor #{child.name}",
-        system: false
-      )
-      self.project_id = new_project.id
-    end
-  end
-  ```
-- [ ] Model tests: 3 tests
+- [x] Update `Sponsorship#create_sponsorship_project` callback (implemented project reuse logic)
+- [x] Model tests: 3 tests
   - First sponsorship creates new project
   - Second sponsorship reuses existing project
   - Multiple sponsorships share same project
@@ -84,26 +56,20 @@ Current implementation allows data integrity issues:
 #### 3. Add Start Date Field
 
 **Migration:**
-- [ ] Create migration: `add_start_date_to_sponsorships`
-  ```ruby
-  add_column :sponsorships, :start_date, :date
-  ```
-- [ ] No default value (can be null if no donations yet)
-- [ ] Run migration
+- [x] Create migration: `20251022180001_add_start_date_to_sponsorships.rb`
+- [x] No default value (can be null if no donations yet)
+- [x] Run migration
 
 **Backend Updates:**
-- [ ] Add `start_date` to permitted params in controller
-- [ ] Include in JSON responses
-- [ ] Optional: Add callback to set start_date when first donation created
-  - Alternative: Compute on-demand (slower but simpler for MVP)
-- [ ] For now: Display as computed value in frontend
-  - `sponsorship.project.donations.minimum(:date)`
+- [x] Add `start_date` to permitted params in controller
+- [x] Include in JSON responses (SponsorshipPresenter)
+- [x] Stored as database column (not computed)
 
 **Frontend Updates:**
-- [ ] Add `start_date?: string` to Sponsorship TypeScript type
-- [ ] Display start_date in SponsorshipList table
-- [ ] Column: "Start Date" shows date or "No donations yet"
-- [ ] Edit form allows updating start_date (TICKET-055)
+- [x] Add `start_date?: string` to Sponsorship TypeScript type
+- [x] Display start_date in SponsorshipList table
+- [x] Column: "Start Date" shows date or "Not set"
+- [ ] Edit form allows updating start_date (TICKET-055 - future work)
 
 ### Technical Approach
 

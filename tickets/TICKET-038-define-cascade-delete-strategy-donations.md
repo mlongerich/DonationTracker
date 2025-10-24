@@ -1,10 +1,11 @@
 ## [TICKET-038] Define Cascade Delete Strategy for Donations, Sponsorships, and Projects
 
-**Status:** 🔵 In Progress
+**Status:** ✅ Complete (Part 2 - Projects)
 **Priority:** 🔴 High (upgraded from Low - data integrity issue)
 **Effort:** M (Medium - expanded scope)
 **Created:** 2025-10-18
-**Updated:** 2025-10-23 (expanded to include Projects)
+**Completed:** 2025-10-23 (Part 2 complete)
+**Updated:** 2025-10-23 (Part 1 - Donors deferred for future)
 **Dependencies:** None
 
 ### User Story
@@ -654,8 +655,9 @@ end
 ```
 
 ### Related Tickets
+- TICKET-062: Donor Cascade Delete Strategy (Part 1 of TICKET-038 - deferred for future work)
+- TICKET-001: Donor Soft Delete with Archive/Restore (complements soft delete feature)
 - Part of data integrity improvement initiative
-- Complements soft delete feature from TICKET-001
 
 ### Notes
 - `dependent: :restrict_with_error` raises ActiveRecord::DeleteRestrictionError
