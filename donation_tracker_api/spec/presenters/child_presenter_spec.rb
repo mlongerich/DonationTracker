@@ -39,5 +39,15 @@ RSpec.describe ChildPresenter do
 
       expect(json[:can_be_deleted]).to be false
     end
+
+    it "includes discarded_at field" do
+      child = create(:child)
+      child.discard
+      presenter = described_class.new(child)
+
+      json = presenter.as_json
+
+      expect(json[:discarded_at]).not_to be_nil
+    end
   end
 end
