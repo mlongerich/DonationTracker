@@ -13,14 +13,9 @@ class Api::ChildrenController < ApplicationController
     filtered_scope = apply_ransack_filters(scope)
     children = paginate_collection(filtered_scope.order(name: :asc))
 
-    # Build children data with optional sponsorships
+    # Build children data with optional sponsorships using presenter
     children_data = children.map do |child|
-      child_json = {
-        id: child.id,
-        name: child.name,
-        created_at: child.created_at,
-        updated_at: child.updated_at
-      }
+      child_json = ChildPresenter.new(child).as_json
 
       if params[:include_sponsorships] == "true"
         child_json[:sponsorships] = child.sponsorships.map do |s|

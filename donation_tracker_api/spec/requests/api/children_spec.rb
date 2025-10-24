@@ -18,6 +18,22 @@ RSpec.describe "/api/children", type: :request do
       expect(json["meta"]).to include("total_count", "total_pages", "current_page", "per_page")
     end
 
+    it "includes can_be_deleted field in response" do
+      child_with_sponsorship = create(:child)
+      child_without_sponsorship = create(:child)
+      donor = create(:donor)
+      create(:sponsorship, child: child_with_sponsorship, donor: donor)
+
+      get "/api/children"
+
+      json = JSON.parse(response.body)
+      child1 = json["children"].find { |c| c["id"] == child_with_sponsorship.id }
+      child2 = json["children"].find { |c| c["id"] == child_without_sponsorship.id }
+
+      expect(child1["can_be_deleted"]).to be false
+      expect(child2["can_be_deleted"]).to be true
+    end
+
     it "paginates results with default page size of 25" do
       create_list(:child, 30)
 
