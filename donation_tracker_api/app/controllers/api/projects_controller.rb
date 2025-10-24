@@ -8,21 +8,21 @@ class Api::ProjectsController < ApplicationController
     projects = paginate_collection(filtered_scope.order(title: :asc))
 
     render json: {
-      projects: projects,
+      projects: CollectionPresenter.new(projects, ProjectPresenter).as_json,
       meta: pagination_meta(projects)
     }
   end
 
   def show
     project = Project.find(params[:id])
-    render json: { project: project }
+    render json: { project: ProjectPresenter.new(project).as_json }
   end
 
   def create
     project = Project.new(project_params)
 
     if project.save
-      render json: { project: project }, status: :created
+      render json: { project: ProjectPresenter.new(project).as_json }, status: :created
     else
       render json: { errors: project.errors }, status: :unprocessable_entity
     end
@@ -37,7 +37,7 @@ class Api::ProjectsController < ApplicationController
     end
 
     if project.update(project_params)
-      render json: { project: project }
+      render json: { project: ProjectPresenter.new(project).as_json }
     else
       render json: { errors: project.errors }, status: :unprocessable_entity
     end
