@@ -9,8 +9,22 @@ describe('ChildList', () => {
     { id: 2, name: 'Juan', created_at: '2025-01-02', updated_at: '2025-01-02', can_be_deleted: true }
   ];
 
+  it('renders children as cards', () => {
+    render(<ChildList children={mockChildren} onEdit={jest.fn()} onArchive={jest.fn()} />);
+
+    const cards = screen.getAllByTestId('child-card');
+    expect(cards).toHaveLength(2);
+  });
+
+  it('shows add sponsor icon for active children', () => {
+    render(<ChildList children={mockChildren} onEdit={jest.fn()} onArchive={jest.fn()} onAddSponsor={jest.fn()} />);
+
+    const addSponsorButtons = screen.getAllByRole('button', { name: /add sponsor/i });
+    expect(addSponsorButtons).toHaveLength(2);
+  });
+
   it('renders list of children', () => {
-    render(<ChildList children={mockChildren} onEdit={jest.fn()} onDelete={jest.fn()} />);
+    render(<ChildList children={mockChildren} onEdit={jest.fn()} onArchive={jest.fn()} />);
 
     expect(screen.getByText('Maria')).toBeInTheDocument();
     expect(screen.getByText('Juan')).toBeInTheDocument();
@@ -20,7 +34,7 @@ describe('ChildList', () => {
     const mockEdit = jest.fn();
     const user = userEvent.setup();
 
-    render(<ChildList children={mockChildren} onEdit={mockEdit} onDelete={jest.fn()} />);
+    render(<ChildList children={mockChildren} onEdit={mockEdit} onArchive={jest.fn()} />);
 
     const editButtons = screen.getAllByRole('button', { name: /edit/i });
     await user.click(editButtons[0]);
@@ -28,20 +42,23 @@ describe('ChildList', () => {
     expect(mockEdit).toHaveBeenCalledWith(mockChildren[0]);
   });
 
-  it('calls onDelete when delete button is clicked', async () => {
-    const mockDelete = jest.fn();
+  it('calls onArchive when archive button is clicked', async () => {
+    const childrenCannotDelete: Child[] = [
+      { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', can_be_deleted: false }
+    ];
+    const mockArchive = jest.fn();
     const user = userEvent.setup();
 
-    render(<ChildList children={mockChildren} onEdit={jest.fn()} onDelete={mockDelete} />);
+    render(<ChildList children={childrenCannotDelete} onEdit={jest.fn()} onArchive={mockArchive} onDelete={jest.fn()} />);
 
-    const deleteButtons = screen.getAllByRole('button', { name: /delete/i });
-    await user.click(deleteButtons[0]);
+    const archiveButton = screen.getByRole('button', { name: /archive/i });
+    await user.click(archiveButton);
 
-    expect(mockDelete).toHaveBeenCalledWith(mockChildren[0].id);
+    expect(mockArchive).toHaveBeenCalledWith(childrenCannotDelete[0].id);
   });
 
   it('shows empty state message when no children', () => {
-    render(<ChildList children={[]} onEdit={jest.fn()} onDelete={jest.fn()} />);
+    render(<ChildList children={[]} onEdit={jest.fn()} onArchive={jest.fn()} />);
 
     expect(screen.getByText(/no children found/i)).toBeInTheDocument();
   });
@@ -69,7 +86,7 @@ describe('ChildList', () => {
     const mockSponsorships = new Map();
     const user = userEvent.setup();
 
-    render(<ChildList children={mockChildren} onEdit={jest.fn()} onDelete={jest.fn()} sponsorships={mockSponsorships} onAddSponsor={mockAddSponsor} />);
+    render(<ChildList children={mockChildren} onEdit={jest.fn()} onArchive={jest.fn()} sponsorships={mockSponsorships} onAddSponsor={mockAddSponsor} />);
 
     const addSponsorButtons = screen.getAllByRole('button', { name: /add sponsor/i });
     await user.click(addSponsorButtons[0]);
@@ -84,7 +101,7 @@ describe('ChildList', () => {
       ]]
     ]);
 
-    render(<ChildList children={mockChildren} onEdit={jest.fn()} onDelete={jest.fn()} sponsorships={mockSponsorships} />);
+    render(<ChildList children={mockChildren} onEdit={jest.fn()} onArchive={jest.fn()} sponsorships={mockSponsorships} />);
 
     expect(screen.getByText(/sponsored by: john doe \(\$50\/mo\)/i)).toBeInTheDocument();
   });
@@ -98,7 +115,7 @@ describe('ChildList', () => {
       ]]
     ]);
 
-    render(<ChildList children={mockChildren} onEdit={jest.fn()} onDelete={jest.fn()} sponsorships={mockSponsorships} />);
+    render(<ChildList children={mockChildren} onEdit={jest.fn()} onArchive={jest.fn()} sponsorships={mockSponsorships} />);
 
     expect(screen.getByText(/sponsored by: john doe \(\$50\/mo\), jane smith \(\$75\/mo\), bob johnson \(\$100\/mo\)/i)).toBeInTheDocument();
   });
@@ -111,7 +128,7 @@ describe('ChildList', () => {
       ]]
     ]);
 
-    render(<ChildList children={mockChildren} onEdit={jest.fn()} onDelete={jest.fn()} sponsorships={mockSponsorships} />);
+    render(<ChildList children={mockChildren} onEdit={jest.fn()} onArchive={jest.fn()} sponsorships={mockSponsorships} />);
 
     const noSponsorMessages = screen.getAllByText(/no active sponsors/i);
     expect(noSponsorMessages).toHaveLength(2); // Both children have no active sponsors
@@ -120,31 +137,31 @@ describe('ChildList', () => {
   it('shows "No active sponsors" when no sponsorships exist', () => {
     const mockSponsorships = new Map();
 
-    render(<ChildList children={mockChildren} onEdit={jest.fn()} onDelete={jest.fn()} sponsorships={mockSponsorships} />);
+    render(<ChildList children={mockChildren} onEdit={jest.fn()} onArchive={jest.fn()} sponsorships={mockSponsorships} />);
 
     const noSponsorMessages = screen.getAllByText(/no active sponsors/i);
     expect(noSponsorMessages).toHaveLength(2); // Both children have no sponsors
   });
 
-  it('shows enabled delete button when can_be_deleted is true', () => {
+  it('shows delete button when can_be_deleted is true', () => {
     const childCanDelete: Child[] = [
       { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', can_be_deleted: true }
     ];
 
-    render(<ChildList children={childCanDelete} onEdit={jest.fn()} onDelete={jest.fn()} />);
+    render(<ChildList children={childCanDelete} onEdit={jest.fn()} onDelete={jest.fn()} onArchive={jest.fn()} />);
 
     const deleteButton = screen.getByRole('button', { name: /delete/i });
-    expect(deleteButton).toBeEnabled();
+    expect(deleteButton).toBeInTheDocument();
   });
 
-  it('shows disabled delete button when can_be_deleted is false', () => {
+  it('shows archive button when can_be_deleted is false', () => {
     const childCannotDelete: Child[] = [
       { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', can_be_deleted: false }
     ];
 
-    render(<ChildList children={childCannotDelete} onEdit={jest.fn()} onDelete={jest.fn()} />);
+    render(<ChildList children={childCannotDelete} onEdit={jest.fn()} onDelete={jest.fn()} onArchive={jest.fn()} />);
 
-    const deleteButton = screen.getByRole('button', { name: /delete/i });
-    expect(deleteButton).toBeDisabled();
+    const archiveButton = screen.getByRole('button', { name: /archive/i });
+    expect(archiveButton).toBeInTheDocument();
   });
 });

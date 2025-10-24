@@ -60,14 +60,65 @@ const ChildrenPage = () => {
 
   const handleDelete = async (id: number) => {
     await apiClient.delete(`/api/children/${id}`);
-    const response = await apiClient.get('/api/children', { params: undefined });
+    const params: { include_sponsorships: boolean; include_discarded?: string } = {
+      include_sponsorships: true
+    };
+    if (showArchived) {
+      params.include_discarded = 'true';
+    }
+    const response = await apiClient.get('/api/children', { params });
     setChildren(response.data.children);
+
+    // Rebuild sponsorship map
+    const sponsorshipMap = new Map<number, Sponsorship[]>();
+    response.data.children.forEach((child: Child & { sponsorships?: Sponsorship[] }) => {
+      if (child.sponsorships) {
+        sponsorshipMap.set(child.id, child.sponsorships);
+      }
+    });
+    setSponsorships(sponsorshipMap);
+  };
+
+  const handleArchive = async (id: number) => {
+    await apiClient.post(`/api/children/${id}/archive`);
+    const params: { include_sponsorships: boolean; include_discarded?: string } = {
+      include_sponsorships: true
+    };
+    if (showArchived) {
+      params.include_discarded = 'true';
+    }
+    const response = await apiClient.get('/api/children', { params });
+    setChildren(response.data.children);
+
+    // Rebuild sponsorship map
+    const sponsorshipMap = new Map<number, Sponsorship[]>();
+    response.data.children.forEach((child: Child & { sponsorships?: Sponsorship[] }) => {
+      if (child.sponsorships) {
+        sponsorshipMap.set(child.id, child.sponsorships);
+      }
+    });
+    setSponsorships(sponsorshipMap);
   };
 
   const handleRestore = async (id: number) => {
     await apiClient.post(`/api/children/${id}/restore`);
-    const response = await apiClient.get('/api/children', { params: undefined });
+    const params: { include_sponsorships: boolean; include_discarded?: string } = {
+      include_sponsorships: true
+    };
+    if (showArchived) {
+      params.include_discarded = 'true';
+    }
+    const response = await apiClient.get('/api/children', { params });
     setChildren(response.data.children);
+
+    // Rebuild sponsorship map
+    const sponsorshipMap = new Map<number, Sponsorship[]>();
+    response.data.children.forEach((child: Child & { sponsorships?: Sponsorship[] }) => {
+      if (child.sponsorships) {
+        sponsorshipMap.set(child.id, child.sponsorships);
+      }
+    });
+    setSponsorships(sponsorshipMap);
   };
 
   const handleAddSponsor = (child: Child) => {
@@ -94,49 +145,58 @@ const ChildrenPage = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom>
         Children Management
       </Typography>
 
-      {!showForm && !editingChild && (
-        <Button variant="contained" onClick={() => setShowForm(true)}>
-          Add Child
-        </Button>
-      )}
-
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={showArchived}
-            onChange={(e) => setShowArchived(e.target.checked)}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" component="h2" gutterBottom>
+          {editingChild ? 'Edit Child' : 'Add Child'}
+        </Typography>
+        {!showForm && !editingChild && (
+          <Button variant="contained" onClick={() => setShowForm(true)}>
+            Add Child
+          </Button>
+        )}
+        {showForm && (
+          <ChildForm
+            onSubmit={handleCreate}
+            onCancel={() => setShowForm(false)}
           />
-        }
-        label="Show Archived Children"
-      />
+        )}
+        {editingChild && (
+          <ChildForm
+            onSubmit={handleUpdate}
+            onCancel={() => setEditingChild(null)}
+            initialData={{ name: editingChild.name }}
+          />
+        )}
+      </Box>
 
-      {showForm && (
-        <ChildForm
-          onSubmit={handleCreate}
-          onCancel={() => setShowForm(false)}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" component="h2" gutterBottom>
+          List Children
+        </Typography>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={showArchived}
+              onChange={(e) => setShowArchived(e.target.checked)}
+            />
+          }
+          label="Show Archived Children"
+          sx={{ mb: 2 }}
         />
-      )}
-
-      {editingChild && (
-        <ChildForm
-          onSubmit={handleUpdate}
-          onCancel={() => setEditingChild(null)}
-          initialData={{ name: editingChild.name }}
+        <ChildList
+          children={children}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          onArchive={handleArchive}
+          onRestore={handleRestore}
+          onAddSponsor={handleAddSponsor}
+          sponsorships={sponsorships}
         />
-      )}
-
-      <ChildList
-        children={children}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        sponsorships={sponsorships}
-        onAddSponsor={handleAddSponsor}
-        onRestore={handleRestore}
-      />
+      </Box>
 
       <SponsorshipModal
         open={!!selectedChildForSponsorship}
