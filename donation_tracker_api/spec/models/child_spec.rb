@@ -55,4 +55,25 @@ RSpec.describe Child, type: :model do
       expect(child.can_be_deleted?).to be true
     end
   end
+
+  describe "soft delete" do
+    it "sets discarded_at timestamp when discarded" do
+      child = create(:child)
+
+      child.discard
+
+      expect(child.discarded_at).not_to be_nil
+    end
+
+    it "kept scope excludes discarded children" do
+      active_child = create(:child, name: "Active")
+      discarded_child = create(:child, name: "Discarded")
+      discarded_child.discard
+
+      children = Child.kept
+
+      expect(children).to include(active_child)
+      expect(children).not_to include(discarded_child)
+    end
+  end
 end

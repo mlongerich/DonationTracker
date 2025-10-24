@@ -18,6 +18,7 @@ Rails.application.routes.draw do
     resources :projects, only: [ :index, :show, :create, :update, :destroy ]
 
     resources :children, only: [ :index, :show, :create, :update, :destroy ] do
+      post "restore", action: :restore, on: :member
       resources :sponsorships, only: [ :index ]
     end
 

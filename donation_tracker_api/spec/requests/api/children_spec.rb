@@ -164,13 +164,27 @@ RSpec.describe "/api/children", type: :request do
   end
 
   describe "DELETE /api/children/:id" do
-    it "deletes a child" do
+    it "soft deletes a child (archives)" do
       child = create(:child)
 
       delete "/api/children/#{child.id}"
 
       expect(response).to have_http_status(:no_content)
-      expect(Child.exists?(child.id)).to be false
+      child.reload
+      expect(child.discarded_at).not_to be_nil
+    end
+  end
+
+  describe "POST /api/children/:id/restore" do
+    it "restores a discarded child" do
+      child = create(:child)
+      child.discard
+
+      post "/api/children/#{child.id}/restore"
+
+      expect(response).to have_http_status(:success)
+      child.reload
+      expect(child.discarded_at).to be_nil
     end
   end
 end

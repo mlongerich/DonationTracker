@@ -67,9 +67,16 @@ class Api::ChildrenController < ApplicationController
 
   def destroy
     child = Child.find(params[:id])
-    child.destroy
+    child.discard
 
     head :no_content
+  end
+
+  def restore
+    child = Child.with_discarded.find(params[:id])
+    child.undiscard
+
+    render json: { child: ChildPresenter.new(child).as_json }
   end
 
   private
