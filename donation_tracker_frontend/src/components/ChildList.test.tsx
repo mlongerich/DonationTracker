@@ -51,8 +51,8 @@ describe('ChildList', () => {
 
     render(<ChildList children={mockChildren} onEdit={jest.fn()} onDelete={jest.fn()} sponsorships={mockSponsorships} onAddSponsor={jest.fn()} />);
 
-    expect(screen.getByText(/sponsored by john doe/i)).toBeInTheDocument();
-    expect(screen.getByText(/\$50/i)).toBeInTheDocument();
+    expect(screen.getByText(/sponsored by: john doe/i)).toBeInTheDocument();
+    expect(screen.getByText(/\$50\/mo/i)).toBeInTheDocument();
   });
 
   it('shows no active sponsor message when child has no sponsorships', () => {
@@ -75,5 +75,54 @@ describe('ChildList', () => {
     await user.click(addSponsorButtons[0]);
 
     expect(mockAddSponsor).toHaveBeenCalledWith(mockChildren[0]);
+  });
+
+  it('displays single active sponsor correctly', () => {
+    const mockSponsorships = new Map([
+      [1, [
+        { id: 1, donor_id: 1, donor_name: 'John Doe', child_id: 1, child_name: 'Maria', monthly_amount: '50.0', active: true, end_date: null }
+      ]]
+    ]);
+
+    render(<ChildList children={mockChildren} onEdit={jest.fn()} onDelete={jest.fn()} sponsorships={mockSponsorships} />);
+
+    expect(screen.getByText(/sponsored by: john doe \(\$50\/mo\)/i)).toBeInTheDocument();
+  });
+
+  it('displays multiple active sponsors comma-separated', () => {
+    const mockSponsorships = new Map([
+      [1, [
+        { id: 1, donor_id: 1, donor_name: 'John Doe', child_id: 1, child_name: 'Maria', monthly_amount: '50.0', active: true, end_date: null },
+        { id: 2, donor_id: 2, donor_name: 'Jane Smith', child_id: 1, child_name: 'Maria', monthly_amount: '75.0', active: true, end_date: null },
+        { id: 3, donor_id: 3, donor_name: 'Bob Johnson', child_id: 1, child_name: 'Maria', monthly_amount: '100.0', active: true, end_date: null }
+      ]]
+    ]);
+
+    render(<ChildList children={mockChildren} onEdit={jest.fn()} onDelete={jest.fn()} sponsorships={mockSponsorships} />);
+
+    expect(screen.getByText(/sponsored by: john doe \(\$50\/mo\), jane smith \(\$75\/mo\), bob johnson \(\$100\/mo\)/i)).toBeInTheDocument();
+  });
+
+  it('shows "No active sponsors" when all sponsorships have ended', () => {
+    const mockSponsorships = new Map([
+      [1, [
+        { id: 1, donor_id: 1, donor_name: 'John Doe', child_id: 1, child_name: 'Maria', monthly_amount: '50.0', active: false, end_date: '2024-12-31' },
+        { id: 2, donor_id: 2, donor_name: 'Jane Smith', child_id: 1, child_name: 'Maria', monthly_amount: '75.0', active: false, end_date: '2024-11-30' }
+      ]]
+    ]);
+
+    render(<ChildList children={mockChildren} onEdit={jest.fn()} onDelete={jest.fn()} sponsorships={mockSponsorships} />);
+
+    const noSponsorMessages = screen.getAllByText(/no active sponsors/i);
+    expect(noSponsorMessages).toHaveLength(2); // Both children have no active sponsors
+  });
+
+  it('shows "No active sponsors" when no sponsorships exist', () => {
+    const mockSponsorships = new Map();
+
+    render(<ChildList children={mockChildren} onEdit={jest.fn()} onDelete={jest.fn()} sponsorships={mockSponsorships} />);
+
+    const noSponsorMessages = screen.getAllByText(/no active sponsors/i);
+    expect(noSponsorMessages).toHaveLength(2); // Both children have no sponsors
   });
 });
