@@ -10,7 +10,11 @@ interface SponsorshipFormProps {
   childId?: number;
 }
 
-const SponsorshipForm: React.FC<SponsorshipFormProps> = ({ onSubmit, onCancel, childId }) => {
+const SponsorshipForm: React.FC<SponsorshipFormProps> = ({
+  onSubmit,
+  onCancel,
+  childId,
+}) => {
   const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
   const [selectedChild, setSelectedChild] = useState<Child | null>(null);
   const [monthlyAmount, setMonthlyAmount] = useState<number>(100);
@@ -25,7 +29,7 @@ const SponsorshipForm: React.FC<SponsorshipFormProps> = ({ onSubmit, onCancel, c
     onSubmit({
       donor_id: selectedDonor.id,
       child_id: finalChildId,
-      monthly_amount: monthlyAmount
+      monthly_amount: monthlyAmount,
     });
   };
 
@@ -36,6 +40,7 @@ const SponsorshipForm: React.FC<SponsorshipFormProps> = ({ onSubmit, onCancel, c
         onChange={setSelectedDonor}
         label="Donor"
         required
+        size="small"
       />
       {!childId && (
         <ChildAutocomplete
@@ -43,6 +48,7 @@ const SponsorshipForm: React.FC<SponsorshipFormProps> = ({ onSubmit, onCancel, c
           onChange={setSelectedChild}
           label="Child"
           required
+          size="small"
         />
       )}
       <TextField
@@ -51,10 +57,15 @@ const SponsorshipForm: React.FC<SponsorshipFormProps> = ({ onSubmit, onCancel, c
         value={monthlyAmount}
         onChange={(e) => setMonthlyAmount(Number(e.target.value))}
         required
+        size="small"
       />
       <Stack direction="row" spacing={2}>
-        <Button variant="contained" onClick={handleSubmit}>Submit</Button>
-        <Button variant="outlined" onClick={onCancel}>Cancel</Button>
+        <Button variant="contained" onClick={handleSubmit}>
+          Submit
+        </Button>
+        <Button variant="outlined" onClick={onCancel}>
+          Cancel
+        </Button>
       </Stack>
     </Stack>
   );

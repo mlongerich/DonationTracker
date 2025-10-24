@@ -20,11 +20,12 @@
 **Last Updated:** 2025-10-24
 
 **Latest Milestones:**
+- TICKET-025 - Standardize Form Input Sizing ✅
 - TICKET-062 - Donor Deletion Cascade Strategy ✅
 - TICKET-038 - Project Deletion Cascade Strategy ✅
 - TICKET-057 - Children Page Multi-Sponsor Display ✅
 
-**Current Focus:** Sponsorship & children feature improvements
+**Current Focus:** UI/UX improvements and children feature enhancements
 
 **See [docs/project/README.md](docs/project/README.md#current-status) for detailed status**
 

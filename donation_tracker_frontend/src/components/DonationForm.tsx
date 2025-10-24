@@ -65,13 +65,18 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
   return (
     <form onSubmit={handleSubmit}>
       <Stack spacing={2}>
-        {success && <Alert severity="success">Donation created successfully!</Alert>}
+        {success && (
+          <Alert severity="success">Donation created successfully!</Alert>
+        )}
         <TextField
           select
           label="Project"
           value={projectId || ''}
-          onChange={(e) => setProjectId(e.target.value ? parseInt(e.target.value) : null)}
+          onChange={(e) =>
+            setProjectId(e.target.value ? parseInt(e.target.value) : null)
+          }
           fullWidth
+          size="small"
         >
           <MenuItem value="">General Donation</MenuItem>
           {projects.map((project) => (
@@ -84,6 +89,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
           value={selectedDonor}
           onChange={setSelectedDonor}
           required={!selectedDonor}
+          size="small"
         />
         <TextField
           label="Amount"
@@ -93,6 +99,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
           inputProps={{ step: 0.01 }}
           fullWidth
           required
+          size="small"
         />
         <TextField
           label="Date"
@@ -101,13 +108,20 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
           onChange={(e) => setDate(e.target.value)}
           fullWidth
           required
+          size="small"
           slotProps={{
             inputLabel: {
               shrink: true,
             },
           }}
         />
-        <Button type="submit" variant="contained" color="primary" fullWidth disabled={isSubmitting}>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          disabled={isSubmitting}
+        >
           {isSubmitting ? 'Creating...' : 'Create Donation'}
         </Button>
       </Stack>

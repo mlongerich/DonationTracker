@@ -74,6 +74,7 @@ function DonorForm({ donor, onSubmit, onCancel }: DonorFormProps) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           fullWidth
+          size="small"
         />
         <TextField
           label="Email"
@@ -81,6 +82,7 @@ function DonorForm({ donor, onSubmit, onCancel }: DonorFormProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           fullWidth
+          size="small"
         />
         <Button type="submit" variant="contained" color="primary" fullWidth>
           {donor ? 'Update' : 'Submit'}

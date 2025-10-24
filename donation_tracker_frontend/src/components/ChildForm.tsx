@@ -8,7 +8,11 @@ interface ChildFormProps {
   initialData?: ChildFormData;
 }
 
-const ChildForm: React.FC<ChildFormProps> = ({ onSubmit, onCancel, initialData }) => {
+const ChildForm: React.FC<ChildFormProps> = ({
+  onSubmit,
+  onCancel,
+  initialData,
+}) => {
   const [name, setName] = useState(initialData?.name || '');
   const [error, setError] = useState('');
 
@@ -34,6 +38,7 @@ const ChildForm: React.FC<ChildFormProps> = ({ onSubmit, onCancel, initialData }
         helperText={error}
         required
         fullWidth
+        size="small"
       />
       <Stack direction="row" spacing={2}>
         <Button variant="contained" onClick={handleSubmit}>

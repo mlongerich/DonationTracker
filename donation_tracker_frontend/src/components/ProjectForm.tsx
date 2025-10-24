@@ -40,6 +40,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSubmit, project }) => {
           fullWidth
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          size="small"
         />
         <TextField
           label="Description"
@@ -48,6 +49,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSubmit, project }) => {
           rows={3}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          size="small"
         />
         <TextField
           select
@@ -55,6 +57,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSubmit, project }) => {
           fullWidth
           value={projectType}
           onChange={(e) => setProjectType(e.target.value)}
+          size="small"
         >
           <MenuItem value="general">General</MenuItem>
           <MenuItem value="campaign">Campaign</MenuItem>

@@ -427,6 +427,19 @@ import { Donor } from '../types';
 />
 ```
 
+#### MUI Component Sizing
+
+**Standard:** All form inputs use `size="small"` (40px height vs 56px default)
+
+**Applies to:** TextField, Autocomplete, DatePicker, Select
+
+```tsx
+<TextField label="Name" size="small" />
+<DonorAutocomplete value={donor} onChange={setDonor} size="small" />
+```
+
+**See:** TICKET-025
+
 #### React Router Multi-Page Architecture
 
 **File Structure:**
