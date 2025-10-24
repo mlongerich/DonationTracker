@@ -135,7 +135,7 @@ describe('ChildrenPage', () => {
   it('deletes a child', async () => {
     const user = userEvent.setup();
     const mockChildren = [
-      { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [] }
+      { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [], can_be_deleted: true }
     ];
     mockedApiClient.get
       .mockResolvedValueOnce({
@@ -210,6 +210,7 @@ describe('ChildrenPage', () => {
         name: 'Maria',
         created_at: '2025-01-01',
         updated_at: '2025-01-01',
+        can_be_deleted: false,
         sponsorships: [
           { id: 1, donor_id: 10, donor_name: 'John Doe', child_id: 1, monthly_amount: '50.0', active: true }
         ]
@@ -219,6 +220,7 @@ describe('ChildrenPage', () => {
         name: 'Juan',
         created_at: '2025-01-02',
         updated_at: '2025-01-02',
+        can_be_deleted: false,
         sponsorships: [
           { id: 2, donor_id: 20, donor_name: 'Jane Smith', child_id: 2, monthly_amount: '75.0', active: true }
         ]
@@ -236,12 +238,10 @@ describe('ChildrenPage', () => {
 
     await waitFor(() => {
       // Verify Maria's sponsorship is displayed
-      expect(screen.getByText(/Sponsored by John Doe/i)).toBeInTheDocument();
-      expect(screen.getByText(/\$50\/month/i)).toBeInTheDocument();
+      expect(screen.getByText(/Sponsored by.*John Doe.*\$50/i)).toBeInTheDocument();
 
       // Verify Juan's sponsorship is displayed
-      expect(screen.getByText(/Sponsored by Jane Smith/i)).toBeInTheDocument();
-      expect(screen.getByText(/\$75\/month/i)).toBeInTheDocument();
+      expect(screen.getByText(/Sponsored by.*Jane Smith.*\$75/i)).toBeInTheDocument();
     });
   });
 
@@ -288,5 +288,103 @@ describe('ChildrenPage', () => {
     await user.click(addSponsorButton);
 
     expect(screen.getByText(/add sponsor for maria/i)).toBeInTheDocument();
+  });
+
+  it('renders Show Archived Children checkbox', async () => {
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        children: [],
+        meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+      },
+    });
+
+    render(<ChildrenPage />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/show archived children/i)).toBeInTheDocument();
+    });
+  });
+
+  it('fetches children with include_discarded param when checkbox is checked', async () => {
+    const user = userEvent.setup();
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        children: [],
+        meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+      },
+    });
+
+    render(<ChildrenPage />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/show archived children/i)).toBeInTheDocument();
+    });
+
+    const checkbox = screen.getByLabelText(/show archived children/i);
+    await user.click(checkbox);
+
+    await waitFor(() => {
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/api/children', {
+        params: { include_sponsorships: true, include_discarded: 'true' }
+      });
+    });
+  });
+
+  it('displays archived child with "Archived" chip', async () => {
+    const mockChildren = [
+      {
+        id: 1,
+        name: 'Maria',
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+        sponsorships: [],
+        can_be_deleted: true,
+        discarded_at: '2025-01-15T10:00:00Z'
+      }
+    ];
+
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        children: mockChildren,
+        meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+      },
+    });
+
+    render(<ChildrenPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Maria')).toBeInTheDocument();
+    });
+
+    // Look for Archived chip specifically (not just the word "archived" anywhere)
+    const chips = screen.queryAllByText('Archived');
+    expect(chips.length).toBeGreaterThan(0);
+  });
+
+  it('shows restore button for archived children', async () => {
+    const mockChildren = [
+      {
+        id: 1,
+        name: 'Maria',
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+        sponsorships: [],
+        can_be_deleted: true,
+        discarded_at: '2025-01-15T10:00:00Z'
+      }
+    ];
+
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        children: mockChildren,
+        meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+      },
+    });
+
+    render(<ChildrenPage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /restore/i })).toBeInTheDocument();
+    });
   });
 });

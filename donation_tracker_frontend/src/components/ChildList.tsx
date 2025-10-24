@@ -1,5 +1,5 @@
-import { List, ListItem, ListItemText, IconButton, Stack, Typography, Button, Tooltip } from '@mui/material';
-import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { List, ListItem, ListItemText, IconButton, Stack, Typography, Button, Tooltip, Chip } from '@mui/material';
+import { Edit as EditIcon, Delete as DeleteIcon, Restore as RestoreIcon, Archive as ArchiveIcon } from '@mui/icons-material';
 import { Child, Sponsorship } from '../types';
 
 interface ChildListProps {
@@ -8,9 +8,11 @@ interface ChildListProps {
   onDelete: (id: number) => void;
   sponsorships?: Map<number, Sponsorship[]>;
   onAddSponsor?: (child: Child) => void;
+  onArchive?: (id: number) => void;
+  onRestore?: (id: number) => void;
 }
 
-const ChildList: React.FC<ChildListProps> = ({ children, onEdit, onDelete, sponsorships, onAddSponsor }) => {
+const ChildList: React.FC<ChildListProps> = ({ children, onEdit, onDelete, sponsorships, onAddSponsor, onArchive, onRestore }) => {
   if (children.length === 0) {
     return <Typography variant="body1" color="text.secondary">No children found</Typography>;
   }
@@ -32,36 +34,50 @@ const ChildList: React.FC<ChildListProps> = ({ children, onEdit, onDelete, spons
           <ListItem
             key={child.id}
             secondaryAction={
-              <Stack direction="row" spacing={1}>
-                {activeSponsors.length === 0 && onAddSponsor && (
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => onAddSponsor(child)}
-                  >
-                    Add Sponsor
-                  </Button>
-                )}
-                <IconButton edge="end" aria-label="edit" onClick={() => onEdit(child)}>
-                  <EditIcon />
+              child.discarded_at ? (
+                <IconButton edge="end" aria-label="restore" onClick={() => onRestore?.(child.id)}>
+                  <RestoreIcon />
                 </IconButton>
-                {child.can_be_deleted ? (
-                  <IconButton edge="end" aria-label="delete" onClick={() => onDelete(child.id)}>
-                    <DeleteIcon />
+              ) : (
+                <Stack direction="row" spacing={1}>
+                  {activeSponsors.length === 0 && onAddSponsor && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => onAddSponsor(child)}
+                    >
+                      Add Sponsor
+                    </Button>
+                  )}
+                  <IconButton edge="end" aria-label="edit" onClick={() => onEdit(child)}>
+                    <EditIcon />
                   </IconButton>
-                ) : (
-                  <Tooltip title="Cannot delete child with sponsorships">
-                    <span>
-                      <IconButton edge="end" aria-label="delete" disabled>
-                        <DeleteIcon />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                )}
-              </Stack>
+                  {child.can_be_deleted ? (
+                    <IconButton edge="end" aria-label="delete" onClick={() => onDelete(child.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  ) : (
+                    <Tooltip title="Cannot delete child with sponsorships">
+                      <span>
+                        <IconButton edge="end" aria-label="delete" disabled>
+                          <DeleteIcon />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  )}
+                </Stack>
+              )
             }
           >
-            <ListItemText primary={child.name} secondary={secondaryText} />
+            <ListItemText
+              primary={
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <span>{child.name}</span>
+                  {child.discarded_at && <Chip label="Archived" size="small" color="default" />}
+                </Stack>
+              }
+              secondary={secondaryText}
+            />
           </ListItem>
         );
       })}

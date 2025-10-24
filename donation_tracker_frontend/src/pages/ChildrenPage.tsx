@@ -1,4 +1,4 @@
-import { Typography, Box, Button } from '@mui/material';
+import { Typography, Box, Button, FormControlLabel, Checkbox } from '@mui/material';
 import { useState, useEffect } from 'react';
 import apiClient from '../api/client';
 import { Child, ChildFormData, Sponsorship } from '../types';
@@ -12,12 +12,18 @@ const ChildrenPage = () => {
   const [editingChild, setEditingChild] = useState<Child | null>(null);
   const [sponsorships, setSponsorships] = useState<Map<number, Sponsorship[]>>(new Map());
   const [selectedChildForSponsorship, setSelectedChildForSponsorship] = useState<Child | null>(null);
+  const [showArchived, setShowArchived] = useState(false);
 
   useEffect(() => {
     const loadChildren = async () => {
-      const response = await apiClient.get('/api/children', {
-        params: { include_sponsorships: true }
-      });
+      const params: { include_sponsorships: boolean; include_discarded?: string } = {
+        include_sponsorships: true
+      };
+      if (showArchived) {
+        params.include_discarded = 'true';
+      }
+
+      const response = await apiClient.get('/api/children', { params });
       setChildren(response.data.children);
 
       // Build sponsorship map from nested data (no extra requests)
@@ -30,7 +36,7 @@ const ChildrenPage = () => {
       setSponsorships(sponsorshipMap);
     };
     loadChildren();
-  }, []);
+  }, [showArchived]);
 
   const handleCreate = async (data: ChildFormData) => {
     await apiClient.post('/api/children', { child: data });
@@ -54,6 +60,12 @@ const ChildrenPage = () => {
 
   const handleDelete = async (id: number) => {
     await apiClient.delete(`/api/children/${id}`);
+    const response = await apiClient.get('/api/children', { params: undefined });
+    setChildren(response.data.children);
+  };
+
+  const handleRestore = async (id: number) => {
+    await apiClient.post(`/api/children/${id}/restore`);
     const response = await apiClient.get('/api/children', { params: undefined });
     setChildren(response.data.children);
   };
@@ -92,6 +104,16 @@ const ChildrenPage = () => {
         </Button>
       )}
 
+      <FormControlLabel
+        control={
+          <Checkbox
+            checked={showArchived}
+            onChange={(e) => setShowArchived(e.target.checked)}
+          />
+        }
+        label="Show Archived Children"
+      />
+
       {showForm && (
         <ChildForm
           onSubmit={handleCreate}
@@ -113,6 +135,7 @@ const ChildrenPage = () => {
         onDelete={handleDelete}
         sponsorships={sponsorships}
         onAddSponsor={handleAddSponsor}
+        onRestore={handleRestore}
       />
 
       <SponsorshipModal
