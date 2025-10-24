@@ -43,15 +43,17 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDelete })
                       <EditIcon />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="Delete project">
-                    <IconButton
-                      aria-label="delete"
-                      size="small"
-                      onClick={() => onDelete?.(project)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
+                  {project.can_be_deleted && (
+                    <Tooltip title="Delete project">
+                      <IconButton
+                        aria-label="delete"
+                        size="small"
+                        onClick={() => onDelete?.(project)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 </Box>
               )}
             </Box>

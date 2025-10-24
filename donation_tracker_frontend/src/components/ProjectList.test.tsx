@@ -28,6 +28,9 @@ describe('ProjectList', () => {
         description: 'A summer fundraising campaign',
         project_type: 'campaign' as const,
         system: false,
+        donations_count: 0,
+        sponsorships_count: 0,
+        can_be_deleted: true,
       },
     ];
 
@@ -43,6 +46,9 @@ describe('ProjectList', () => {
         title: 'Summer Campaign',
         project_type: 'campaign' as const,
         system: false,
+        donations_count: 0,
+        sponsorships_count: 0,
+        can_be_deleted: true,
       },
     ];
 
@@ -59,6 +65,9 @@ describe('ProjectList', () => {
         title: 'Summer Campaign',
         project_type: 'campaign' as const,
         system: false,
+        donations_count: 0,
+        sponsorships_count: 0,
+        can_be_deleted: true,
       },
     ];
 
@@ -74,6 +83,9 @@ describe('ProjectList', () => {
         title: 'Summer Campaign',
         project_type: 'campaign' as const,
         system: false,
+        donations_count: 0,
+        sponsorships_count: 0,
+        can_be_deleted: true,
       },
     ];
 
@@ -90,6 +102,9 @@ describe('ProjectList', () => {
         title: 'Summer Campaign',
         project_type: 'campaign' as const,
         system: false,
+        donations_count: 0,
+        sponsorships_count: 0,
+        can_be_deleted: true,
       },
     ];
 
@@ -105,6 +120,9 @@ describe('ProjectList', () => {
         title: 'General Donation',
         project_type: 'general' as const,
         system: true,
+        donations_count: 0,
+        sponsorships_count: 0,
+        can_be_deleted: false,
       },
     ];
 
@@ -127,6 +145,9 @@ describe('ProjectList', () => {
         title: 'Summer Campaign',
         project_type: 'campaign' as const,
         system: false,
+        donations_count: 0,
+        sponsorships_count: 0,
+        can_be_deleted: true,
       },
     ];
 
@@ -147,6 +168,9 @@ describe('ProjectList', () => {
         title: 'Summer Campaign',
         project_type: 'campaign' as const,
         system: false,
+        donations_count: 0,
+        sponsorships_count: 0,
+        can_be_deleted: true,
       },
     ];
 
@@ -156,5 +180,59 @@ describe('ProjectList', () => {
     await user.click(deleteButton);
 
     expect(mockOnDelete).toHaveBeenCalledWith(projects[0]);
+  });
+
+  it('hides delete button when can_be_deleted is false', () => {
+    const projects = [
+      {
+        id: 1,
+        title: 'Summer Campaign',
+        project_type: 'campaign' as const,
+        system: false,
+        donations_count: 5,
+        sponsorships_count: 0,
+        can_be_deleted: false,
+      },
+    ];
+
+    render(<ProjectList projects={projects} />);
+
+    expect(screen.queryByLabelText(/delete/i)).not.toBeInTheDocument();
+  });
+
+  it('shows delete button when can_be_deleted is true', () => {
+    const projects = [
+      {
+        id: 1,
+        title: 'Empty Project',
+        project_type: 'general' as const,
+        system: false,
+        donations_count: 0,
+        sponsorships_count: 0,
+        can_be_deleted: true,
+      },
+    ];
+
+    render(<ProjectList projects={projects} />);
+
+    expect(screen.getByLabelText(/delete/i)).toBeInTheDocument();
+  });
+
+  it('hides delete button when sponsorships exist', () => {
+    const projects = [
+      {
+        id: 1,
+        title: 'Sponsor Maria',
+        project_type: 'sponsorship' as const,
+        system: false,
+        donations_count: 0,
+        sponsorships_count: 1,
+        can_be_deleted: false,
+      },
+    ];
+
+    render(<ProjectList projects={projects} />);
+
+    expect(screen.queryByLabelText(/delete/i)).not.toBeInTheDocument();
   });
 });

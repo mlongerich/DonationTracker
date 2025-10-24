@@ -12,6 +12,9 @@ export interface Project {
   description?: string;
   project_type: ProjectType;
   system: boolean;
+  donations_count: number;
+  sponsorships_count: number;
+  can_be_deleted: boolean;
 }
 
 /**
