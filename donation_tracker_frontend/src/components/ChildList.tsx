@@ -1,4 +1,4 @@
-import { List, ListItem, ListItemText, IconButton, Stack, Typography, Button } from '@mui/material';
+import { List, ListItem, ListItemText, IconButton, Stack, Typography, Button, Tooltip } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { Child, Sponsorship } from '../types';
 
@@ -45,9 +45,19 @@ const ChildList: React.FC<ChildListProps> = ({ children, onEdit, onDelete, spons
                 <IconButton edge="end" aria-label="edit" onClick={() => onEdit(child)}>
                   <EditIcon />
                 </IconButton>
-                <IconButton edge="end" aria-label="delete" onClick={() => onDelete(child.id)}>
-                  <DeleteIcon />
-                </IconButton>
+                {child.can_be_deleted ? (
+                  <IconButton edge="end" aria-label="delete" onClick={() => onDelete(child.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                ) : (
+                  <Tooltip title="Cannot delete child with sponsorships">
+                    <span>
+                      <IconButton edge="end" aria-label="delete" disabled>
+                        <DeleteIcon />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                )}
               </Stack>
             }
           >

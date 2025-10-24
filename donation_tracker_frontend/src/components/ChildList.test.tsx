@@ -5,8 +5,8 @@ import { Child } from '../types';
 
 describe('ChildList', () => {
   const mockChildren: Child[] = [
-    { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01' },
-    { id: 2, name: 'Juan', created_at: '2025-01-02', updated_at: '2025-01-02' }
+    { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', can_be_deleted: true },
+    { id: 2, name: 'Juan', created_at: '2025-01-02', updated_at: '2025-01-02', can_be_deleted: true }
   ];
 
   it('renders list of children', () => {
@@ -124,5 +124,27 @@ describe('ChildList', () => {
 
     const noSponsorMessages = screen.getAllByText(/no active sponsors/i);
     expect(noSponsorMessages).toHaveLength(2); // Both children have no sponsors
+  });
+
+  it('shows enabled delete button when can_be_deleted is true', () => {
+    const childCanDelete: Child[] = [
+      { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', can_be_deleted: true }
+    ];
+
+    render(<ChildList children={childCanDelete} onEdit={jest.fn()} onDelete={jest.fn()} />);
+
+    const deleteButton = screen.getByRole('button', { name: /delete/i });
+    expect(deleteButton).toBeEnabled();
+  });
+
+  it('shows disabled delete button when can_be_deleted is false', () => {
+    const childCannotDelete: Child[] = [
+      { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', can_be_deleted: false }
+    ];
+
+    render(<ChildList children={childCannotDelete} onEdit={jest.fn()} onDelete={jest.fn()} />);
+
+    const deleteButton = screen.getByRole('button', { name: /delete/i });
+    expect(deleteButton).toBeDisabled();
   });
 });

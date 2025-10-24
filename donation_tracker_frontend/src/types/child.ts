@@ -6,6 +6,7 @@ export interface Child {
   name: string;
   created_at: string;
   updated_at: string;
+  can_be_deleted: boolean;
 }
 
 /**
