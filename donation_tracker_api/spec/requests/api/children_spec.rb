@@ -60,6 +60,19 @@ RSpec.describe "/api/children", type: :request do
       expect(json["children"].map { |c| c["name"] }).to contain_exactly("Maria", "Mariana")
     end
 
+    it "excludes archived children by default" do
+      create(:child, name: "Active")
+      archived_child = create(:child, name: "Archived")
+      archived_child.discard
+
+      get "/api/children"
+
+      json = JSON.parse(response.body)
+      names = json["children"].map { |c| c["name"] }
+      expect(names).to include("Active")
+      expect(names).not_to include("Archived")
+    end
+
     context "with include_sponsorships param" do
       it "returns children without sponsorships by default" do
         child = create(:child, name: "Maria")
@@ -164,10 +177,21 @@ RSpec.describe "/api/children", type: :request do
   end
 
   describe "DELETE /api/children/:id" do
-    it "soft deletes a child (archives)" do
+    it "hard deletes a child when can_be_deleted is true" do
       child = create(:child)
 
       delete "/api/children/#{child.id}"
+
+      expect(response).to have_http_status(:no_content)
+      expect(Child.exists?(child.id)).to be false
+    end
+  end
+
+  describe "POST /api/children/:id/archive" do
+    it "soft deletes a child (sets discarded_at)" do
+      child = create(:child)
+
+      post "/api/children/#{child.id}/archive"
 
       expect(response).to have_http_status(:no_content)
       child.reload

@@ -3,7 +3,7 @@ class Api::ChildrenController < ApplicationController
   include RansackFilterable
 
   def index
-    scope = Child.all
+    scope = params[:include_discarded] == "true" ? Child.with_discarded : Child.kept
 
     # Conditionally eager load sponsorships to avoid N+1 queries
     if params[:include_sponsorships] == "true"
@@ -66,6 +66,13 @@ class Api::ChildrenController < ApplicationController
   end
 
   def destroy
+    child = Child.find(params[:id])
+    child.destroy
+
+    head :no_content
+  end
+
+  def archive
     child = Child.find(params[:id])
     child.discard
 
