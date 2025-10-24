@@ -26,6 +26,8 @@ As a user, I want the Children page to have the same consistent layout and funct
 - [ ] **Display ALL sponsors per child** (not just first active)
 - [ ] Show comma-separated list of sponsors with amounts
 - [ ] Handle children with multiple active sponsorships
+- [ ] **"Add Sponsor" button always visible** (not just when no sponsors exist)
+- [ ] Remove `activeSponsors.length === 0` condition from button visibility
 - [ ] Jest unit tests pass for all new functionality
 - [ ] Cypress E2E tests validate archive/restore workflow
 
@@ -72,6 +74,8 @@ As a user, I want the Children page to have the same consistent layout and funct
   - [ ] Show sponsor list in secondary text (e.g., "Sponsored by: John ($50/mo), Jane ($75/mo)")
   - [ ] Handle multiple active sponsorships per child
   - [ ] Update "No active sponsor" to "No sponsors" when none exist
+  - [ ] **Remove condition**: `activeSponsors.length === 0` from "Add Sponsor" button (line 36)
+  - [ ] "Add Sponsor" button should always be visible regardless of sponsor count
 
 - [ ] **API Client Updates** (if needed):
   - [ ] Verify `DELETE /api/children/:id` returns success
@@ -141,6 +145,9 @@ As a user, I want the Children page to have the same consistent layout and funct
 - [ ] Displays all active sponsors (multiple) correctly
 - [ ] Shows "No sponsors" when child has no sponsorships
 - [ ] Formats multiple sponsors as comma-separated list
+- [ ] "Add Sponsor" button visible when child has no sponsors
+- [ ] "Add Sponsor" button visible when child has one sponsor
+- [ ] "Add Sponsor" button visible when child has multiple sponsors
 
 **Cypress E2E Tests** (`children-page.cy.ts` - new file):
 - [ ] Navigate to /children page
@@ -180,3 +187,29 @@ As a user, I want the Children page to have the same consistent layout and funct
 ### Reference Files
 - `donation_tracker_frontend/src/pages/DonorsPage.tsx` (primary pattern reference)
 - `donation_tracker_frontend/src/components/DonorList.tsx` (archive UI pattern)
+
+---
+
+## Summary of Updates (2025-10-24)
+
+**New Requirement Added:**
+
+1. **"Add Sponsor" Button Always Visible**:
+   - Current behavior: Button only shows when `activeSponsors.length === 0` (ChildList.tsx:36)
+   - Problem: Cannot add additional sponsors from Children page (must go to Sponsorships page)
+   - Solution: Remove conditional, always show "Add Sponsor" button
+   - User benefit: Can add multiple sponsors for a child without navigating away
+
+**Acceptance Criteria Added:**
+- "Add Sponsor" button always visible (not just when no sponsors exist)
+- Remove `activeSponsors.length === 0` condition from button visibility
+
+**Implementation Checklist Added:**
+- Remove condition from ChildList.tsx line 36
+- Add 3 new Jest tests for button visibility in all sponsor count scenarios
+
+**Rationale:**
+- Integrated into TICKET-050 (UI standardization ticket)
+- Small change (1 line removal)
+- Logically grouped with other ChildList UI improvements
+- Prevents fragmentation of related UI fixes
