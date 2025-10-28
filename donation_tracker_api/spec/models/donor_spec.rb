@@ -66,4 +66,84 @@ RSpec.describe Donor, type: :model do
   it "has many children through sponsorships" do
     expect(Donor.new).to respond_to(:children)
   end
+
+  describe "cascade delete restrictions" do
+    it "restricts deletion when donations exist" do
+      donor = create(:donor)
+      create(:donation, donor: donor)
+
+      expect { donor.destroy }.to raise_error(ActiveRecord::DeleteRestrictionError)
+    end
+
+    it "restricts deletion when sponsorships exist" do
+      donor = create(:donor)
+      child = create(:child)
+      create(:sponsorship, donor: donor, child: child, monthly_amount: 100)
+
+      expect { donor.destroy }.to raise_error(ActiveRecord::DeleteRestrictionError)
+    end
+
+    it "allows deletion when no associations exist" do
+      donor = create(:donor)
+
+      expect { donor.destroy }.to change(Donor, :count).by(-1)
+    end
+  end
+
+  describe "#can_be_deleted?" do
+    it "returns false when donor has donations" do
+      donor = create(:donor)
+      create(:donation, donor: donor)
+
+      expect(donor.can_be_deleted?).to be false
+    end
+
+    it "returns false when donor has sponsorships" do
+      donor = create(:donor)
+      child = create(:child)
+      create(:sponsorship, donor: donor, child: child, monthly_amount: 100)
+
+      expect(donor.can_be_deleted?).to be false
+    end
+
+    it "returns true when donor has no associations" do
+      donor = create(:donor)
+
+      expect(donor.can_be_deleted?).to be true
+    end
+  end
+
+  describe "soft delete with associations" do
+    it "preserves donations when donor is discarded" do
+      donor = create(:donor)
+      donation = create(:donation, donor: donor)
+
+      donor.discard
+
+      expect(donor.discarded?).to be true
+      expect(donation.reload.donor).to eq(donor)
+    end
+
+    it "preserves sponsorships when donor is discarded" do
+      donor = create(:donor)
+      child = create(:child)
+      sponsorship = create(:sponsorship, donor: donor, child: child, monthly_amount: 100)
+
+      donor.discard
+
+      expect(donor.discarded?).to be true
+      expect(sponsorship.reload.donor).to eq(donor)
+    end
+
+    it "restores access to donations when donor is restored" do
+      donor = create(:donor)
+      donation = create(:donation, donor: donor)
+
+      donor.discard
+      donor.undiscard
+
+      expect(donor.discarded?).to be false
+      expect(donation.reload.donor).to eq(donor)
+    end
+  end
 end

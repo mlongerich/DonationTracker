@@ -2,8 +2,8 @@ class Donor < ApplicationRecord
   include Discard::Model
 
   has_paper_trail
-  has_many :donations
-  has_many :sponsorships
+  has_many :donations, dependent: :restrict_with_exception
+  has_many :sponsorships, dependent: :restrict_with_exception
   has_many :children, through: :sponsorships
 
   before_validation :set_defaults
@@ -19,6 +19,10 @@ class Donor < ApplicationRecord
   # Custom Ransack searcher for name OR email
   ransacker :name_or_email do
     Arel.sql("CONCAT(name, ' ', email)")
+  end
+
+  def can_be_deleted?
+    donations.empty? && sponsorships.empty?
   end
 
   private

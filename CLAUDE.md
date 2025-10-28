@@ -340,7 +340,19 @@ CollectionPresenter.new(donations, DonationPresenter).as_json
 
 **Policy:** Prevent accidental data loss
 
+**Pattern (Applied to Donor, Child, Project models):**
 ```ruby
+class Donor < ApplicationRecord
+  include Discard::Model  # Soft delete support
+
+  has_many :donations, dependent: :restrict_with_exception
+  has_many :sponsorships, dependent: :restrict_with_exception
+
+  def can_be_deleted?
+    donations.empty? && sponsorships.empty?
+  end
+end
+
 class Project < ApplicationRecord
   has_many :donations, dependent: :restrict_with_exception
   has_many :sponsorships, dependent: :restrict_with_exception
@@ -351,9 +363,13 @@ class Project < ApplicationRecord
 end
 ```
 
-**Rails 8:** Use `dependent: :restrict_with_exception` (not `restrict_with_error`)
+**Implementation Details:**
+- **Soft Delete (Archive)**: Donor is marked as discarded (`discarded_at` timestamp), all associations preserved
+- **Hard Delete (Permanent)**: Prevented if any donations or sponsorships exist (raises `DeleteRestrictionError`)
+- **Rails 8**: Use `dependent: :restrict_with_exception` (not `restrict_with_error`)
+- **Frontend Integration**: API returns `can_be_deleted` field via Presenter
 
-**Frontend Integration:** API returns `can_be_deleted` field via Presenter
+**See:** TICKET-062 (Donor), TICKET-038 (Project), TICKET-049 (Child)
 
 ### Frontend (React)
 
