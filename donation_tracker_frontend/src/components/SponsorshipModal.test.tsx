@@ -99,8 +99,9 @@ describe('SponsorshipModal', () => {
     const donorInput = screen.getByLabelText(/donor/i);
     await user.type(donorInput, 'John');
 
-    // Fill in amount
+    // Fill in amount (clear default value first)
     const amountInput = screen.getByLabelText(/monthly amount/i);
+    await user.clear(amountInput);
     await user.type(amountInput, '50');
 
     // Submit
@@ -116,6 +117,80 @@ describe('SponsorshipModal', () => {
         },
       });
       expect(mockOnSuccess).toHaveBeenCalled();
+    });
+  });
+
+  it('closes modal after successful sponsorship submission', async () => {
+    const mockOnClose = jest.fn();
+    const mockOnSuccess = jest.fn();
+    const user = userEvent.setup();
+
+    mockedApiClient.post.mockResolvedValue({
+      data: { sponsorship: { id: 1 } }
+    });
+
+    render(
+      <SponsorshipModal
+        open={true}
+        childId={1}
+        childName="Maria"
+        onClose={mockOnClose}
+        onSuccess={mockOnSuccess}
+      />
+    );
+
+    // Fill in donor
+    const donorInput = screen.getByLabelText(/donor/i);
+    await user.type(donorInput, 'John');
+
+    // Fill in amount
+    const amountInput = screen.getByLabelText(/monthly amount/i);
+    await user.type(amountInput, '50');
+
+    // Submit
+    const submitButton = screen.getByRole('button', { name: /submit/i });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(mockOnSuccess).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+  });
+
+  it('displays error message when sponsorship creation fails with 422', async () => {
+    const user = userEvent.setup();
+
+    mockedApiClient.post.mockRejectedValue({
+      response: {
+        status: 422,
+        data: { errors: ['Sponsorship already exists for this donor and child'] }
+      }
+    });
+
+    render(
+      <SponsorshipModal
+        open={true}
+        childId={1}
+        childName="Maria"
+        onClose={jest.fn()}
+        onSuccess={jest.fn()}
+      />
+    );
+
+    // Fill in donor
+    const donorInput = screen.getByLabelText(/donor/i);
+    await user.type(donorInput, 'John');
+
+    // Fill in amount
+    const amountInput = screen.getByLabelText(/monthly amount/i);
+    await user.type(amountInput, '50');
+
+    // Submit
+    const submitButton = screen.getByRole('button', { name: /submit/i });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/Sponsorship already exists/i)).toBeInTheDocument();
     });
   });
 });

@@ -235,4 +235,119 @@ describe('ProjectList', () => {
 
     expect(screen.queryByLabelText(/delete/i)).not.toBeInTheDocument();
   });
+
+  it('accepts onArchive prop', () => {
+    const mockOnArchive = jest.fn();
+    const projects = [
+      {
+        id: 1,
+        title: 'Summer Campaign',
+        project_type: 'campaign' as const,
+        system: false,
+        donations_count: 0,
+        sponsorships_count: 0,
+        can_be_deleted: true,
+      },
+    ];
+
+    render(<ProjectList projects={projects} onArchive={mockOnArchive} />);
+
+    expect(screen.getByText('Summer Campaign')).toBeInTheDocument();
+  });
+
+  it('shows Archive button for active projects when onArchive provided', () => {
+    const mockOnArchive = jest.fn();
+    const projects = [
+      {
+        id: 1,
+        title: 'Summer Campaign',
+        project_type: 'campaign' as const,
+        system: false,
+        donations_count: 5,
+        sponsorships_count: 0,
+        can_be_deleted: false,
+        discarded_at: null,
+      },
+    ];
+
+    render(<ProjectList projects={projects} onArchive={mockOnArchive} />);
+
+    expect(screen.getByRole('button', { name: /archive/i })).toBeInTheDocument();
+  });
+
+  it('shows Restore button for archived projects when onRestore provided', () => {
+    const mockOnRestore = jest.fn();
+    const projects = [
+      {
+        id: 1,
+        title: 'Archived Campaign',
+        project_type: 'campaign' as const,
+        system: false,
+        donations_count: 0,
+        sponsorships_count: 0,
+        can_be_deleted: false,
+        discarded_at: '2025-01-01T00:00:00Z',
+      },
+    ];
+
+    render(<ProjectList projects={projects} onRestore={mockOnRestore} />);
+
+    expect(screen.getByRole('button', { name: /restore/i })).toBeInTheDocument();
+  });
+
+  it('shows Delete button (not Archive) when project is deletable', () => {
+    const mockOnDelete = jest.fn();
+    const mockOnArchive = jest.fn();
+    const projects = [
+      {
+        id: 1,
+        title: 'Empty Project',
+        project_type: 'general' as const,
+        system: false,
+        donations_count: 0,
+        sponsorships_count: 0,
+        can_be_deleted: true,
+        discarded_at: null,
+      },
+    ];
+
+    render(
+      <ProjectList
+        projects={projects}
+        onDelete={mockOnDelete}
+        onArchive={mockOnArchive}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /archive/i })).not.toBeInTheDocument();
+  });
+
+  it('shows Archive button (not Delete) when project is not deletable', () => {
+    const mockOnDelete = jest.fn();
+    const mockOnArchive = jest.fn();
+    const projects = [
+      {
+        id: 1,
+        title: 'Project With Data',
+        project_type: 'campaign' as const,
+        system: false,
+        donations_count: 5,
+        sponsorships_count: 0,
+        can_be_deleted: false,
+        discarded_at: null,
+      },
+    ];
+
+    render(
+      <ProjectList
+        projects={projects}
+        onDelete={mockOnDelete}
+        onArchive={mockOnArchive}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: /archive/i })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument();
+  });
 });

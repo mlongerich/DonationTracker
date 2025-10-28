@@ -1,4 +1,5 @@
-import { Dialog, DialogTitle, DialogContent } from '@mui/material';
+import { useState } from 'react';
+import { Dialog, DialogTitle, DialogContent, Snackbar, Alert } from '@mui/material';
 import SponsorshipForm from './SponsorshipForm';
 import { SponsorshipFormData } from '../types';
 import apiClient from '../api/client';
@@ -18,22 +19,45 @@ const SponsorshipModal: React.FC<SponsorshipModalProps> = ({
   onClose,
   onSuccess,
 }) => {
+  const [error, setError] = useState<string | null>(null);
+
   const handleSubmit = async (data: SponsorshipFormData) => {
-    await apiClient.post('/api/sponsorships', { sponsorship: data });
-    onSuccess();
+    try {
+      await apiClient.post('/api/sponsorships', { sponsorship: data });
+      onSuccess();
+      onClose();
+    } catch (err: any) {
+      if (err.response?.status === 422) {
+        const errorMessage = err.response.data.errors?.[0] || 'Validation error';
+        setError(errorMessage);
+      } else {
+        setError('An unexpected error occurred');
+      }
+    }
+  };
+
+  const handleCloseError = () => {
+    setError(null);
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Add Sponsor for {childName}</DialogTitle>
-      <DialogContent>
-        <SponsorshipForm
-          childId={childId}
-          onSubmit={handleSubmit}
-          onCancel={onClose}
-        />
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onClose={onClose}>
+        <DialogTitle>Add Sponsor for {childName}</DialogTitle>
+        <DialogContent>
+          <SponsorshipForm
+            childId={childId}
+            onSubmit={handleSubmit}
+            onCancel={onClose}
+          />
+        </DialogContent>
+      </Dialog>
+      <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseError}>
+        <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 

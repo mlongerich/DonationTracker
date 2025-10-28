@@ -8,15 +8,19 @@ import IconButton from '@mui/material/IconButton';
 import Tooltip from '@mui/material/Tooltip';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ArchiveIcon from '@mui/icons-material/Archive';
+import RestoreIcon from '@mui/icons-material/Restore';
 import { Project } from '../types';
 
 interface ProjectListProps {
   projects: Project[];
   onEdit?: (project: Project) => void;
   onDelete?: (project: Project) => void;
+  onArchive?: (id: number) => void;
+  onRestore?: (id: number) => void;
 }
 
-const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDelete }) => {
+const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDelete, onArchive, onRestore }) => {
   if (projects.length === 0) {
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -43,7 +47,7 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDelete })
                       <EditIcon />
                     </IconButton>
                   </Tooltip>
-                  {project.can_be_deleted && (
+                  {project.can_be_deleted && !project.discarded_at && (
                     <Tooltip title="Delete project">
                       <IconButton
                         aria-label="delete"
@@ -51,6 +55,28 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDelete })
                         onClick={() => onDelete?.(project)}
                       >
                         <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {!project.can_be_deleted && onArchive && !project.discarded_at && (
+                    <Tooltip title="Archive project">
+                      <IconButton
+                        aria-label="archive"
+                        size="small"
+                        onClick={() => onArchive(project.id)}
+                      >
+                        <ArchiveIcon />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {onRestore && project.discarded_at && (
+                    <Tooltip title="Restore project">
+                      <IconButton
+                        aria-label="restore"
+                        size="small"
+                        onClick={() => onRestore(project.id)}
+                      >
+                        <RestoreIcon />
                       </IconButton>
                     </Tooltip>
                   )}
