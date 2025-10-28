@@ -55,5 +55,16 @@ RSpec.describe ProjectPresenter do
 
       expect(json[:can_be_deleted]).to be false
     end
+
+    it "includes discarded_at field when project is archived" do
+      project = create(:project)
+      project.discard
+
+      presenter = described_class.new(project)
+      json = presenter.as_json
+
+      expect(json).to have_key(:discarded_at)
+      expect(json[:discarded_at]).to be_present
+    end
   end
 end

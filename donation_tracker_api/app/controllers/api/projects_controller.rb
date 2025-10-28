@@ -3,7 +3,7 @@ class Api::ProjectsController < ApplicationController
   include RansackFilterable
 
   def index
-    scope = Project.all
+    scope = params[:include_discarded] == "true" ? Project.with_discarded : Project.kept
     filtered_scope = apply_ransack_filters(scope)
     projects = paginate_collection(filtered_scope.order(title: :asc))
 
@@ -53,6 +53,23 @@ class Api::ProjectsController < ApplicationController
 
     project.destroy
     head :no_content
+  end
+
+  def archive
+    project = Project.find(params[:id])
+
+    if project.discard
+      head :no_content
+    else
+      render json: { errors: project.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def restore
+    project = Project.with_discarded.find(params[:id])
+    project.undiscard
+
+    render json: { project: ProjectPresenter.new(project).as_json }, status: :ok
   end
 
   private

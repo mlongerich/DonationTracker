@@ -8,7 +8,8 @@ class ProjectPresenter < BasePresenter
       system: object.system,
       donations_count: object.donations.count,
       sponsorships_count: object.sponsorships.count,
-      can_be_deleted: object.can_be_deleted?  # UNCOMMENTED - test passed!
+      can_be_deleted: object.can_be_deleted?,
+      discarded_at: object.discarded_at
     }
   end
 end

@@ -28,7 +28,7 @@ class Api::SponsorshipsController < ApplicationController
     if sponsorship.save
       render json: { sponsorship: SponsorshipPresenter.new(sponsorship).as_json }, status: :created
     else
-      render json: { errors: sponsorship.errors }, status: :unprocessable_entity
+      render json: { errors: sponsorship.errors.full_messages }, status: :unprocessable_entity
     end
   end
 

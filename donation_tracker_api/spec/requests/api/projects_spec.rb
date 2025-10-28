@@ -12,6 +12,33 @@ RSpec.describe "Api::Projects", type: :request do
       expect(response.parsed_body["projects"].length).to eq(2)
       expect(response.parsed_body["projects"].first).to have_key("title")
     end
+
+    it "excludes archived projects by default" do
+      active_project = create(:project, title: "Active")
+      archived_project = create(:project, title: "Archived")
+      archived_project.discard
+
+      get "/api/projects"
+
+      expect(response).to have_http_status(:ok)
+      projects = response.parsed_body["projects"]
+      expect(projects.length).to eq(1)
+      expect(projects.first["title"]).to eq("Active")
+    end
+
+    it "includes archived projects when include_discarded=true" do
+      active_project = create(:project, title: "Active")
+      archived_project = create(:project, title: "Archived")
+      archived_project.discard
+
+      get "/api/projects", params: { include_discarded: "true" }
+
+      expect(response).to have_http_status(:ok)
+      projects = response.parsed_body["projects"]
+      expect(projects.length).to eq(2)
+      titles = projects.map { |p| p["title"] }
+      expect(titles).to include("Active", "Archived")
+    end
   end
 
   describe "GET /api/projects/:id" do

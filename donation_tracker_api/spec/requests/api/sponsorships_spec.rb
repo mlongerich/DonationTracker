@@ -126,4 +126,30 @@ RSpec.describe "/api/sponsorships", type: :request do
       expect(json["sponsorships"][0]["donor_name"]).to eq("John Doe")
     end
   end
+
+  describe "POST /api/sponsorships - duplicate validation" do
+    it "returns descriptive error message for duplicate active sponsorship" do
+      donor = create(:donor, name: "Michael")
+      child = create(:child, name: "Maria")
+
+      # Create first sponsorship
+      create(:sponsorship, donor: donor, child: child, monthly_amount: 50, end_date: nil)
+
+      # Attempt duplicate
+      duplicate_params = {
+        sponsorship: {
+          donor_id: donor.id,
+          child_id: child.id,
+          monthly_amount: 50
+        }
+      }
+
+      post "/api/sponsorships", params: duplicate_params
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      json = JSON.parse(response.body)
+      expect(json["errors"]).to be_an(Array)
+      expect(json["errors"][0]).to eq("Maria is already actively sponsored by Michael")
+    end
+  end
 end
