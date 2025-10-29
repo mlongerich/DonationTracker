@@ -12,6 +12,10 @@ class Child < ApplicationRecord
     [ "name", "discarded_at" ]
   end
 
+  def self.ransackable_associations(auth_object = nil)
+    %w[sponsorships donors]
+  end
+
   def can_be_deleted?
     sponsorships.empty?
   end

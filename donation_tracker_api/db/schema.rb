@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_28_065503) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_29_021534) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -31,10 +31,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_28_065503) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "project_id"
+    t.bigint "sponsorship_id"
     t.index ["date"], name: "index_donations_on_date"
     t.index ["donor_id"], name: "index_donations_on_donor_id"
     t.index ["project_id", "date"], name: "index_donations_on_project_id_and_date"
     t.index ["project_id"], name: "index_donations_on_project_id"
+    t.index ["sponsorship_id"], name: "index_donations_on_sponsorship_id"
     t.index ["status"], name: "index_donations_on_status"
   end
 
@@ -99,6 +101,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_28_065503) do
 
   add_foreign_key "donations", "donors"
   add_foreign_key "donations", "projects"
+  add_foreign_key "donations", "sponsorships"
   add_foreign_key "sponsorships", "children"
   add_foreign_key "sponsorships", "donors"
   add_foreign_key "sponsorships", "projects"

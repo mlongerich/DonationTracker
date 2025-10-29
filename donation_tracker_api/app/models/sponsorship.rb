@@ -2,6 +2,7 @@ class Sponsorship < ApplicationRecord
   belongs_to :donor
   belongs_to :child
   belongs_to :project, optional: true
+  has_many :donations, dependent: :restrict_with_exception
 
   validates :monthly_amount, presence: true, numericality: { greater_than: 0 }
   validate :no_duplicate_active_sponsorships
@@ -11,8 +12,20 @@ class Sponsorship < ApplicationRecord
   before_validation :create_sponsorship_project, on: :create
   before_create :restore_archived_associations
 
+  def self.ransackable_attributes(_auth_object = nil)
+    %w[donor_id child_id monthly_amount end_date start_date created_at]
+  end
+
+  def self.ransackable_associations(_auth_object = nil)
+    %w[donor child project]
+  end
+
   def active?
     end_date.nil?
+  end
+
+  def calculated_start_date
+    donations.minimum(:date) || start_date || created_at&.to_date
   end
 
   private

@@ -125,6 +125,46 @@ RSpec.describe "/api/sponsorships", type: :request do
       expect(json["sponsorships"][0]["child_name"]).to eq("Maria")
       expect(json["sponsorships"][0]["donor_name"]).to eq("John Doe")
     end
+
+    it "filters sponsorships by donor name using OR query" do
+      donor_john = create(:donor, name: "John Doe")
+      donor_jane = create(:donor, name: "Jane Smith")
+      child_maria = create(:child, name: "Maria")
+      child_carlos = create(:child, name: "Carlos")
+
+      sponsorship1 = create(:sponsorship, donor: donor_john, child: child_maria)
+      sponsorship2 = create(:sponsorship, donor: donor_jane, child: child_carlos)
+
+      get "/api/sponsorships", params: {
+        q: { donor_name_or_child_name_cont: "John" }
+      }
+
+      expect(response).to have_http_status(:success)
+      json = JSON.parse(response.body)
+      ids = json["sponsorships"].map { |s| s["id"] }
+      expect(ids).to include(sponsorship1.id)
+      expect(ids).not_to include(sponsorship2.id)
+    end
+
+    it "filters sponsorships by child name using OR query" do
+      donor_john = create(:donor, name: "John Doe")
+      donor_jane = create(:donor, name: "Jane Smith")
+      child_maria = create(:child, name: "Maria")
+      child_carlos = create(:child, name: "Carlos")
+
+      sponsorship1 = create(:sponsorship, donor: donor_john, child: child_maria)
+      sponsorship2 = create(:sponsorship, donor: donor_jane, child: child_carlos)
+
+      get "/api/sponsorships", params: {
+        q: { donor_name_or_child_name_cont: "Maria" }
+      }
+
+      expect(response).to have_http_status(:success)
+      json = JSON.parse(response.body)
+      ids = json["sponsorships"].map { |s| s["id"] }
+      expect(ids).to include(sponsorship1.id)
+      expect(ids).not_to include(sponsorship2.id)
+    end
   end
 
   describe "POST /api/sponsorships - duplicate validation" do

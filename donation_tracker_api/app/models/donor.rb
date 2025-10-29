@@ -17,6 +17,10 @@ class Donor < ApplicationRecord
     [ "name", "email", "created_at", "updated_at", "last_updated_at", "name_or_email", "discarded_at" ]
   end
 
+  def self.ransackable_associations(auth_object = nil)
+    %w[donations sponsorships children]
+  end
+
   # Custom Ransack searcher for name OR email
   ransacker :name_or_email do
     Arel.sql("CONCAT(name, ' ', email)")

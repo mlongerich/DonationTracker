@@ -13,6 +13,15 @@ RSpec.describe Sponsorship, type: :model do
     it "belongs to project" do
       expect(Sponsorship.new).to respond_to(:project)
     end
+
+    it "has many donations" do
+      donor = create(:donor)
+      child = create(:child)
+      sponsorship = create(:sponsorship, donor: donor, child: child)
+      donation = create(:donation, donor: donor, sponsorship: sponsorship)
+
+      expect(sponsorship.donations).to include(donation)
+    end
   end
 
   describe "validations" do
@@ -172,6 +181,36 @@ RSpec.describe Sponsorship, type: :model do
         expect(sponsorship2.project_id).to eq(sponsorship3.project_id)
         expect(Project.where(project_type: :sponsorship, title: "Sponsor Ana").count).to eq(1)
       end
+    end
+  end
+
+  describe "#calculated_start_date" do
+    it "returns earliest donation date when donations exist" do
+      donor = create(:donor)
+      child = create(:child)
+      sponsorship = create(:sponsorship, donor: donor, child: child, start_date: nil)
+
+      create(:donation, donor: donor, sponsorship: sponsorship, date: Date.new(2025, 3, 15))
+      create(:donation, donor: donor, sponsorship: sponsorship, date: Date.new(2025, 1, 10))
+      create(:donation, donor: donor, sponsorship: sponsorship, date: Date.new(2025, 2, 20))
+
+      expect(sponsorship.calculated_start_date).to eq(Date.new(2025, 1, 10))
+    end
+
+    it "returns start_date when no donations exist" do
+      donor = create(:donor)
+      child = create(:child)
+      sponsorship = create(:sponsorship, donor: donor, child: child, start_date: Date.new(2025, 5, 1))
+
+      expect(sponsorship.calculated_start_date).to eq(Date.new(2025, 5, 1))
+    end
+
+    it "returns created_at date when no donations and no start_date" do
+      donor = create(:donor)
+      child = create(:child)
+      sponsorship = create(:sponsorship, donor: donor, child: child, start_date: nil)
+
+      expect(sponsorship.calculated_start_date).to eq(sponsorship.created_at.to_date)
     end
   end
 

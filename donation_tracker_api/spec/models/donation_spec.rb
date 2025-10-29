@@ -27,6 +27,40 @@ RSpec.describe Donation, type: :model do
     end
   end
 
+  describe "associations" do
+    it "can belong to a sponsorship" do
+      donor = create(:donor)
+      child = create(:child)
+      sponsorship = create(:sponsorship, donor: donor, child: child)
+      donation = create(:donation, donor: donor, sponsorship: sponsorship)
+
+      expect(donation.sponsorship).to eq(sponsorship)
+    end
+  end
+
+  describe "sponsorship project validation" do
+    it "requires sponsorship_id for donations to sponsorship projects" do
+      donor = create(:donor)
+      child = create(:child)
+      sponsorship = create(:sponsorship, donor: donor, child: child)
+
+      # Donation to sponsorship project without sponsorship_id
+      donation = build(:donation, donor: donor, project: sponsorship.project, sponsorship_id: nil)
+
+      expect(donation).not_to be_valid
+      expect(donation.errors[:sponsorship_id]).to include("must be present for sponsorship projects")
+    end
+
+    it "allows donations to general projects without sponsorship_id" do
+      donor = create(:donor)
+      general_project = create(:project, project_type: :general)
+
+      donation = build(:donation, donor: donor, project: general_project, sponsorship_id: nil)
+
+      expect(donation).to be_valid
+    end
+  end
+
   describe "auto-unarchive associations" do
     it "restores archived donor when creating donation" do
       donor = create(:donor)
