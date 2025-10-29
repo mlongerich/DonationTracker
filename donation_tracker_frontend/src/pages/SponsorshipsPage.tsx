@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Card, CardContent, Box, Alert } from '@mui/material';
+import {
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Box,
+  Alert,
+  TextField,
+  Checkbox,
+  FormControlLabel,
+} from '@mui/material';
 import apiClient from '../api/client';
 import { Sponsorship, SponsorshipFormData } from '../types';
 import SponsorshipList from '../components/SponsorshipList';
@@ -9,15 +19,34 @@ const SponsorshipsPage: React.FC = () => {
   const [sponsorships, setSponsorships] = useState<Sponsorship[]>([]);
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [showEnded, setShowEnded] = useState(false);
+
+  // Debounce search query
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     fetchSponsorships();
-  }, [page]);
+  }, [page, debouncedQuery, showEnded]);
 
   const fetchSponsorships = async () => {
-    const response = await apiClient.get('/api/sponsorships', {
-      params: { page, per_page: 25 },
-    });
+    const params: any = { page, per_page: 25 };
+
+    if (debouncedQuery.trim()) {
+      params.q = { ...params.q, donor_name_or_child_name_cont: debouncedQuery };
+    }
+    if (!showEnded) {
+      params.q = { ...params.q, end_date_null: true };
+    }
+
+    const response = await apiClient.get('/api/sponsorships', { params });
     setSponsorships(response.data.sponsorships);
   };
 
@@ -67,6 +96,26 @@ const SponsorshipsPage: React.FC = () => {
           />
         </CardContent>
       </Card>
+
+      <Box sx={{ mb: 3 }}>
+        <TextField
+          fullWidth
+          size="small"
+          placeholder="Search donor or child name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          sx={{ mb: 2 }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={showEnded}
+              onChange={(e) => setShowEnded(e.target.checked)}
+            />
+          }
+          label="Show Ended Sponsorships"
+        />
+      </Box>
 
       <SponsorshipList
         sponsorships={sponsorships}

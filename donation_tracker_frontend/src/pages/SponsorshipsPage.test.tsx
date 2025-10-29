@@ -39,7 +39,13 @@ describe('SponsorshipsPage', () => {
     });
     render(<SponsorshipsPage />);
     await waitFor(() => {
-      expect(mockedApiClient.get).toHaveBeenCalledWith('/api/sponsorships', { params: { page: 1, per_page: 25 } });
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/api/sponsorships', {
+        params: {
+          page: 1,
+          per_page: 25,
+          q: { end_date_null: true },
+        },
+      });
     });
   });
 
@@ -133,6 +139,83 @@ describe('SponsorshipsPage', () => {
     // For this test, we verify the error display mechanism exists
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: /sponsorships/i })).toBeInTheDocument();
+    });
+  });
+
+  it('renders omni-search text field for donor or child', async () => {
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        sponsorships: [],
+        meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+      },
+    });
+
+    render(<SponsorshipsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText(/search donor or child/i)).toBeInTheDocument();
+    });
+  });
+
+  it('sends OR query parameter when searching for donor or child', async () => {
+    const user = userEvent.setup();
+
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        sponsorships: [],
+        meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+      },
+    });
+
+    render(<SponsorshipsPage />);
+
+    const searchInput = await screen.findByPlaceholderText(/search donor or child/i);
+    await user.type(searchInput, 'John');
+
+    await waitFor(() => {
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/api/sponsorships', {
+        params: {
+          page: 1,
+          per_page: 25,
+          q: { donor_name_or_child_name_cont: 'John', end_date_null: true },
+        },
+      });
+    });
+  });
+
+  it('renders show ended sponsorships checkbox', async () => {
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        sponsorships: [],
+        meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+      },
+    });
+
+    render(<SponsorshipsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/show ended sponsorships/i)).toBeInTheDocument();
+    });
+  });
+
+  it('sends end_date_null parameter when show ended is unchecked', async () => {
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        sponsorships: [],
+        meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+      },
+    });
+
+    render(<SponsorshipsPage />);
+
+    await waitFor(() => {
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/api/sponsorships', {
+        params: {
+          page: 1,
+          per_page: 25,
+          q: { end_date_null: true },
+        },
+      });
     });
   });
 });
