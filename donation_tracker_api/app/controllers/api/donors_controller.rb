@@ -41,9 +41,12 @@ class Api::DonorsController < ApplicationController
 
   def destroy
     donor = Donor.find(params[:id])
-    donor.discard
 
-    head :no_content
+    if donor.discard
+      head :no_content
+    else
+      render json: { errors: donor.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   def restore

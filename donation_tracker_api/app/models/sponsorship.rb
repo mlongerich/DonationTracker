@@ -9,12 +9,19 @@ class Sponsorship < ApplicationRecord
   scope :active, -> { where(end_date: nil) }
 
   before_validation :create_sponsorship_project, on: :create
+  before_create :restore_archived_associations
 
   def active?
     end_date.nil?
   end
 
   private
+
+  def restore_archived_associations
+    donor.undiscard if donor&.discarded?
+    child.undiscard if child&.discarded?
+    project.undiscard if project&.discarded?
+  end
 
   def no_duplicate_active_sponsorships
     return unless donor && child && monthly_amount

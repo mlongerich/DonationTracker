@@ -76,4 +76,23 @@ RSpec.describe Child, type: :model do
       expect(children).not_to include(discarded_child)
     end
   end
+
+  describe "archive restrictions for active sponsorships" do
+    it "cannot archive child with active sponsorship" do
+      child = create(:child)
+      donor = create(:donor)
+      create(:sponsorship, child: child, donor: donor, monthly_amount: 100, end_date: nil)
+
+      expect(child.discard).to be false
+      expect(child.errors[:base]).to include("Cannot archive child with active sponsorships")
+      expect(child.discarded?).to be false
+    end
+
+    it "can archive child with no active sponsorships" do
+      child = create(:child)
+
+      expect(child.discard).to be true
+      expect(child.discarded?).to be true
+    end
+  end
 end

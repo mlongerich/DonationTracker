@@ -26,4 +26,44 @@ RSpec.describe Donation, type: :model do
       expect(donation.errors[:date]).to include("cannot be in the future")
     end
   end
+
+  describe "auto-unarchive associations" do
+    it "restores archived donor when creating donation" do
+      donor = create(:donor)
+      donor.discard
+
+      expect(donor.discarded?).to be true
+
+      donation = create(:donation, donor: donor)
+
+      expect(donor.reload.discarded?).to be false
+      expect(donation.donor).to eq(donor)
+    end
+
+    it "restores archived project when creating donation" do
+      donor = create(:donor)
+      project = create(:project)
+      project.discard
+
+      expect(project.discarded?).to be true
+
+      donation = create(:donation, donor: donor, project: project)
+
+      expect(project.reload.discarded?).to be false
+      expect(donation.project).to eq(project)
+    end
+
+    it "does not modify active donor and project" do
+      donor = create(:donor)
+      project = create(:project)
+
+      expect(donor.discarded?).to be false
+      expect(project.discarded?).to be false
+
+      donation = create(:donation, donor: donor, project: project)
+
+      expect(donor.reload.discarded?).to be false
+      expect(project.reload.discarded?).to be false
+    end
+  end
 end

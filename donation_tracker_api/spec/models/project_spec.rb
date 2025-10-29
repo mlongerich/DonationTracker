@@ -79,4 +79,24 @@ RSpec.describe Project, type: :model do
       expect(project.can_be_deleted?).to be false
     end
   end
+
+  describe "archive restrictions for active sponsorships" do
+    it "cannot archive project with active sponsorships" do
+      project = create(:project, project_type: :sponsorship)
+      child = create(:child)
+      donor = create(:donor)
+      create(:sponsorship, project: project, child: child, donor: donor, monthly_amount: 100, end_date: nil)
+
+      expect(project.discard).to be false
+      expect(project.errors[:base]).to include("Cannot archive project with active sponsorships")
+      expect(project.discarded?).to be false
+    end
+
+    it "can archive project with no active sponsorships" do
+      project = create(:project)
+
+      expect(project.discard).to be true
+      expect(project.discarded?).to be true
+    end
+  end
 end

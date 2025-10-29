@@ -7,6 +7,7 @@ class Donor < ApplicationRecord
   has_many :children, through: :sponsorships
 
   before_validation :set_defaults
+  before_discard :check_active_sponsorships
 
   validates :name, presence: true
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }, uniqueness: { case_sensitive: false, conditions: -> { kept } }
@@ -26,6 +27,13 @@ class Donor < ApplicationRecord
   end
 
   private
+
+  def check_active_sponsorships
+    if sponsorships.active.exists?
+      errors.add(:base, "Cannot archive donor with active sponsorships")
+      throw :abort
+    end
+  end
 
   def set_defaults
     self.name = "Anonymous" if name.blank?

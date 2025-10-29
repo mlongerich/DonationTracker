@@ -74,9 +74,12 @@ class Api::ChildrenController < ApplicationController
 
   def archive
     child = Child.find(params[:id])
-    child.discard
 
-    head :no_content
+    if child.discard
+      head :no_content
+    else
+      render json: { errors: child.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   def restore

@@ -127,7 +127,7 @@ RSpec.describe Donor, type: :model do
     it "preserves sponsorships when donor is discarded" do
       donor = create(:donor)
       child = create(:child)
-      sponsorship = create(:sponsorship, donor: donor, child: child, monthly_amount: 100)
+      sponsorship = create(:sponsorship, donor: donor, child: child, monthly_amount: 100, end_date: 1.month.ago)
 
       donor.discard
 
@@ -144,6 +144,34 @@ RSpec.describe Donor, type: :model do
 
       expect(donor.discarded?).to be false
       expect(donation.reload.donor).to eq(donor)
+    end
+  end
+
+  describe "archive restrictions for active sponsorships" do
+    it "cannot archive donor with active sponsorship" do
+      donor = create(:donor)
+      child = create(:child)
+      create(:sponsorship, donor: donor, child: child, monthly_amount: 100, end_date: nil)
+
+      expect(donor.discard).to be false
+      expect(donor.errors[:base]).to include("Cannot archive donor with active sponsorships")
+      expect(donor.discarded?).to be false
+    end
+
+    it "can archive donor with only ended sponsorships" do
+      donor = create(:donor)
+      child = create(:child)
+      create(:sponsorship, donor: donor, child: child, monthly_amount: 100, end_date: 1.month.ago)
+
+      expect(donor.discard).to be true
+      expect(donor.discarded?).to be true
+    end
+
+    it "can archive donor with no sponsorships" do
+      donor = create(:donor)
+
+      expect(donor.discard).to be true
+      expect(donor.discarded?).to be true
     end
   end
 end

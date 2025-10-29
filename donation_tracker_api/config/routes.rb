@@ -15,7 +15,10 @@ Rails.application.routes.draw do
 
     resources :donations, only: [ :index, :create, :show ]
 
-    resources :projects, only: [ :index, :show, :create, :update, :destroy ]
+    resources :projects, only: [ :index, :show, :create, :update, :destroy ] do
+      post "archive", action: :archive, on: :member
+      post "restore", action: :restore, on: :member
+    end
 
     resources :children, only: [ :index, :show, :create, :update, :destroy ] do
       post "archive", action: :archive, on: :member

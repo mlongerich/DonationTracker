@@ -174,4 +174,34 @@ RSpec.describe Sponsorship, type: :model do
       end
     end
   end
+
+  describe "auto-unarchive associations" do
+    it "restores archived donor, child, and project when creating sponsorship" do
+      donor = create(:donor)
+      child = create(:child)
+      project = create(:project, project_type: :sponsorship)
+
+      donor.discard
+      child.discard
+      project.discard
+
+      expect(donor.discarded?).to be true
+      expect(child.discarded?).to be true
+      expect(project.discarded?).to be true
+
+      sponsorship = Sponsorship.create!(
+        donor: donor,
+        child: child,
+        project: project,
+        monthly_amount: 100
+      )
+
+      expect(donor.reload.discarded?).to be false
+      expect(child.reload.discarded?).to be false
+      expect(project.reload.discarded?).to be false
+      expect(sponsorship.donor).to eq(donor)
+      expect(sponsorship.child).to eq(child)
+      expect(sponsorship.project).to eq(project)
+    end
+  end
 end
