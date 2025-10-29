@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { DonationFormData, ProjectFormData } from '../types';
+import { DonationFormData, ProjectFormData, SponsorshipFormData, Sponsorship } from '../types';
 
 // Create axios instance with base configuration
 export const apiClient = axios.create({
@@ -86,6 +86,55 @@ export const updateProject = async (id: number, project: Partial<ProjectFormData
 export const deleteProject = async (id: number) => {
   const response = await apiClient.delete(`/api/projects/${id}`);
   return response.data;
+};
+
+// Children API methods
+export const fetchChildren = async (searchQuery: string) => {
+  const response = await apiClient.get('/api/children', {
+    params: {
+      q: { name_cont: searchQuery },
+      per_page: 10
+    }
+  });
+  return response.data.children || [];
+};
+
+// Sponsorship API methods
+export const fetchSponsorshipsForDonation = async (
+  donorId: number,
+  childId: number
+): Promise<Sponsorship[]> => {
+  const response = await apiClient.get('/api/sponsorships', {
+    params: {
+      per_page: 100,
+      q: {
+        child_id_eq: childId,
+        donor_id_eq: donorId,
+        end_date_null: true
+      }
+    }
+  });
+  return response.data.sponsorships || [];
+};
+
+export const createSponsorship = async (data: SponsorshipFormData): Promise<Sponsorship> => {
+  const response = await apiClient.post('/api/sponsorships', { sponsorship: data });
+  return response.data.sponsorship;
+};
+
+export const findProjectForChild = async (childId: number): Promise<number | null> => {
+  const response = await apiClient.get('/api/sponsorships', {
+    params: {
+      q: { child_id_eq: childId },
+      per_page: 1
+    }
+  });
+
+  if (response.data.sponsorships.length > 0) {
+    return response.data.sponsorships[0].project_id;
+  }
+
+  return null;
 };
 
 export default apiClient;
