@@ -3,6 +3,7 @@ import { Autocomplete, TextField, CircularProgress } from '@mui/material';
 import apiClient from '../api/client';
 import { shouldDisplayEmail } from '../utils/emailUtils';
 import { Donor } from '../types';
+import { useDebouncedValue } from '../hooks';
 
 export type { Donor };
 
@@ -25,23 +26,19 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
 }) => {
   const [donorOptions, setDonorOptions] = useState<Donor[]>([]);
   const [searchInput, setSearchInput] = useState('');
+  const debouncedSearchInput = useDebouncedValue(searchInput, 300);
   const [loading, setLoading] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
+  const isTyping = searchInput.trim() !== '' && searchInput !== debouncedSearchInput;
 
-  // Debounced search for donors
+  // Search for donors when debounced input changes
   useEffect(() => {
-    if (searchInput.trim()) {
-      setIsTyping(true);
-    }
-
-    const timer = setTimeout(async () => {
-      if (searchInput.trim()) {
-        setIsTyping(false);
+    const searchDonors = async () => {
+      if (debouncedSearchInput.trim()) {
         setLoading(true);
         try {
           const response = await apiClient.get('/api/donors', {
             params: {
-              q: { name_or_email_cont: searchInput },
+              q: { name_or_email_cont: debouncedSearchInput },
               per_page: 10,
             },
           });
@@ -53,13 +50,12 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
           setLoading(false);
         }
       } else {
-        setIsTyping(false);
         setDonorOptions([]);
       }
-    }, 300);
+    };
 
-    return () => clearTimeout(timer);
-  }, [searchInput]);
+    searchDonors();
+  }, [debouncedSearchInput]);
 
   const getOptionLabel = (option: Donor): string => {
     if (shouldDisplayEmail(option.email)) {
@@ -69,7 +65,8 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
   };
 
   const getNoOptionsText = () => {
-    if (isTyping || loading) return 'Searching...';
+    if (isTyping) return 'Searching...';
+    if (loading) return 'Searching...';
     if (searchInput.trim()) return 'No results';
     return 'Type to search';
   };

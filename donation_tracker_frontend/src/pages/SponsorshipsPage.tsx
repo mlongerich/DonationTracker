@@ -14,23 +14,15 @@ import apiClient from '../api/client';
 import { Sponsorship, SponsorshipFormData } from '../types';
 import SponsorshipList from '../components/SponsorshipList';
 import SponsorshipForm from '../components/SponsorshipForm';
+import { useDebouncedValue } from '../hooks';
 
 const SponsorshipsPage: React.FC = () => {
   const [sponsorships, setSponsorships] = useState<Sponsorship[]>([]);
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const debouncedQuery = useDebouncedValue(searchQuery, 300);
   const [showEnded, setShowEnded] = useState(false);
-
-  // Debounce search query
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
 
   useEffect(() => {
     fetchSponsorships();

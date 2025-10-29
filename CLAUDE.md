@@ -456,6 +456,74 @@ import { Donor } from '../types';
 
 **See:** TICKET-025
 
+#### Custom Hooks Library
+
+**Purpose:** Extract and reuse stateful logic across components
+
+**Implemented Hooks:**
+
+**1. `useDebouncedValue<T>(value: T, delay: number = 300): T`**
+- Debounces value changes to prevent excessive API calls
+- Returns debounced value that updates after delay
+- Use case: Search inputs, filter fields
+
+```tsx
+const [searchQuery, setSearchQuery] = useState('');
+const debouncedQuery = useDebouncedValue(searchQuery, 300);
+
+useEffect(() => {
+  // API call only fires after 300ms of no typing
+  fetchResults(debouncedQuery);
+}, [debouncedQuery]);
+```
+
+**2. `usePagination(initialPage: number = 1)`**
+- Manages pagination state and handlers
+- Returns: `currentPage`, `setCurrentPage`, `paginationMeta`, `setPaginationMeta`, `handlePageChange`, `resetToFirstPage`
+- Use case: List pages (DonorsPage, DonationsPage)
+
+```tsx
+const { currentPage, paginationMeta, setPaginationMeta, handlePageChange, resetToFirstPage } = usePagination();
+
+// Reset to page 1 when search changes
+useEffect(() => {
+  resetToFirstPage();
+}, [debouncedQuery, resetToFirstPage]);
+
+// MUI Pagination component
+<Pagination count={paginationMeta.total_pages} page={currentPage} onChange={handlePageChange} />
+```
+
+**3. `useRansackFilters()`**
+- Manages Ransack query filter state
+- Returns: `filters`, `setFilter`, `clearFilters`, `buildQueryParams`
+- Use case: Pages with MULTIPLE filters (DonationsPage with date range + donor filter)
+- **Not recommended** for single-filter scenarios (use direct query building instead)
+
+```tsx
+const { setFilter, buildQueryParams } = useRansackFilters();
+
+// Update filters
+useEffect(() => {
+  setFilter('date_gteq', startDate);
+  setFilter('date_lteq', endDate);
+  setFilter('donor_id_eq', donorId);
+}, [startDate, endDate, donorId, setFilter]);
+
+// Build query params
+const params = { page: currentPage, per_page: 10, ...buildQueryParams() };
+```
+
+**When to Create Custom Hooks:**
+- Logic duplicated in 2+ components
+- Complex stateful logic (useState + useEffect combinations)
+- Would reduce duplication by 20+ lines
+- Clear, reusable interface
+
+**Hook Location:** `src/hooks/` with barrel export in `src/hooks/index.ts`
+
+**See:** TICKET-032
+
 #### React Router Multi-Page Architecture
 
 **File Structure:**

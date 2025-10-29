@@ -117,6 +117,14 @@ describe('ChildAutocomplete', () => {
     const input = screen.getByRole('combobox');
     await user.type(input, 'NonexistentChild');
 
+    // Wait for API call to complete
+    await waitFor(() => {
+      expect(apiClient.get).toHaveBeenCalledWith('/api/children', {
+        params: { q: { name_cont: 'NonexistentChild' }, per_page: 10 },
+      });
+    });
+
+    // Then wait for "No results" to appear
     await waitFor(() => {
       expect(screen.getByText('No results')).toBeInTheDocument();
     });

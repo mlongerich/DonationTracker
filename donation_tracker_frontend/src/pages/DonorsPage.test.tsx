@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import DonorsPage from './DonorsPage';
@@ -21,6 +21,11 @@ const mockedApiClient = apiClient as jest.Mocked<typeof apiClient>;
 describe('DonorsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it('renders Donor Management heading', () => {
@@ -109,7 +114,6 @@ describe('DonorsPage', () => {
   });
 
   it('debounces search query by 300ms', async () => {
-    jest.useFakeTimers();
     const user = userEvent.setup({ delay: null });
 
     mockedApiClient.get.mockResolvedValue({
@@ -136,8 +140,11 @@ describe('DonorsPage', () => {
     // API should not be called immediately after typing
     expect(mockedApiClient.get).not.toHaveBeenCalled();
 
-    // Fast-forward time by 300ms
-    jest.advanceTimersByTime(300);
+    // Fast-forward time by 300ms to trigger debounce
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve(); // Let useEffect run
+    });
 
     // Now API should be called with search params
     await waitFor(() => {
@@ -150,8 +157,6 @@ describe('DonorsPage', () => {
         })
       );
     });
-
-    jest.useRealTimers();
   });
 
   it('renders Show Archived Donors checkbox', () => {
@@ -218,7 +223,7 @@ describe('DonorsPage', () => {
   });
 
   it('archives donor when archive is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const mockDonors = [
       { id: 1, name: 'John Doe', email: 'john@example.com' },
     ];
@@ -251,7 +256,7 @@ describe('DonorsPage', () => {
   });
 
   it('restores donor when restore is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const mockDonors = [
       { id: 1, name: 'John Doe', email: 'john@example.com', discarded_at: '2024-01-01' },
     ];
@@ -284,7 +289,7 @@ describe('DonorsPage', () => {
   });
 
   it('shows merge button when 2 or more donors selected', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const mockDonors = [
       { id: 1, name: 'John Doe', email: 'john@example.com' },
       { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
@@ -328,7 +333,7 @@ describe('DonorsPage', () => {
   });
 
   it('opens merge modal when merge button clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const mockDonors = [
       { id: 1, name: 'John Doe', email: 'john@example.com' },
       { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
@@ -366,7 +371,7 @@ describe('DonorsPage', () => {
   });
 
   it('merges donors when merge confirmed', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const mockDonors = [
       { id: 1, name: 'John Doe', email: 'john@example.com' },
       { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
@@ -416,7 +421,7 @@ describe('DonorsPage', () => {
   });
 
   it('passes donor to DonorForm when edit button clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const mockDonors = [
       { id: 1, name: 'John Doe', email: 'john@example.com' },
     ];
@@ -450,7 +455,7 @@ describe('DonorsPage', () => {
   });
 
   it('clears editing state when Cancel button is clicked', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const mockDonors = [
       { id: 1, name: 'John Doe', email: 'john@example.com' },
     ];
@@ -489,7 +494,7 @@ describe('DonorsPage', () => {
   });
 
   it('refreshes donor list after successful form submission', async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const initialDonors = [
       { id: 1, name: 'John Doe', email: 'john@example.com' },
     ];
@@ -549,7 +554,7 @@ describe('DonorsPage', () => {
 
   describe('Archive error handling', () => {
     it('shows error snackbar when archive fails with 422', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const mockDonors = [
         { id: 1, name: 'John Doe', email: 'john@example.com' },
       ];
@@ -589,7 +594,7 @@ describe('DonorsPage', () => {
     });
 
     it('displays generic error message when API error has no details', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const mockDonors = [
         { id: 1, name: 'John Doe', email: 'john@example.com' },
       ];
@@ -629,7 +634,7 @@ describe('DonorsPage', () => {
     });
 
     it('error snackbar closes when user clicks close button', async () => {
-      const user = userEvent.setup();
+      const user = userEvent.setup({ delay: null });
       const mockDonors = [
         { id: 1, name: 'John Doe', email: 'john@example.com' },
       ];

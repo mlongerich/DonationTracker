@@ -4,48 +4,45 @@ import apiClient, { mergeDonors } from '../api/client';
 import DonorForm from '../components/DonorForm';
 import DonorList from '../components/DonorList';
 import DonorMergeModal from '../components/DonorMergeModal';
-import { Donor, PaginationMeta } from '../types';
+import { Donor } from '../types';
+import { useDebouncedValue, usePagination } from '../hooks';
 
 const DonorsPage = () => {
   const [donors, setDonors] = useState<Donor[]>([]);
   const [editingDonor, setEditingDonor] = useState<Donor | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const debouncedQuery = useDebouncedValue(searchQuery, 300);
   const [showArchived, setShowArchived] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showMergeModal, setShowMergeModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta>({
-    total_count: 0,
-    total_pages: 0,
-    current_page: 1,
-    per_page: 10,
-  });
 
-  // Debounce search query
+  const {
+    currentPage,
+    paginationMeta,
+    setPaginationMeta,
+    handlePageChange,
+    resetToFirstPage,
+  } = usePagination();
+
+  // Reset to page 1 when search changes
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
-      setCurrentPage(1); // Reset to page 1 when search changes
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchQuery]);
+    resetToFirstPage();
+  }, [debouncedQuery, resetToFirstPage]);
 
   const fetchDonors = async () => {
     try {
+      // Build query params - add search filter if debounced query exists
+      const queryParams: Record<string, unknown> = {};
+      if (debouncedQuery) {
+        queryParams.q = { name_or_email_cont: debouncedQuery };
+      }
+
       const params: Record<string, unknown> = {
         page: currentPage,
         per_page: 10,
+        ...queryParams,
       };
-
-      // Add Ransack search params if query exists
-      if (debouncedQuery) {
-        params.q = {
-          name_or_email_cont: debouncedQuery,
-        };
-      }
 
       // Include archived donors if toggle is on
       if (showArchived) {
@@ -84,10 +81,6 @@ const DonorsPage = () => {
     }
   };
 
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, page: number) => {
-    setCurrentPage(page);
-  };
-
   const handleDonorSubmit = () => {
     fetchDonors();
     setEditingDonor(null);
@@ -100,7 +93,7 @@ const DonorsPage = () => {
   useEffect(() => {
     fetchDonors();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedQuery, currentPage, showArchived]);
+  }, [currentPage, showArchived, debouncedQuery]);
 
   return (
     <Box>
@@ -161,7 +154,7 @@ const DonorsPage = () => {
           onSelectionChange={setSelectedIds}
         />
       </Box>
-      {paginationMeta.total_pages > 1 && (
+      {paginationMeta && paginationMeta.total_pages > 1 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
           <Pagination
             count={paginationMeta.total_pages}

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Autocomplete, TextField, CircularProgress } from '@mui/material';
 import apiClient from '../api/client';
 import { Child } from '../types';
+import { useDebouncedValue } from '../hooks';
 
 interface ChildAutocompleteProps {
   value: Child | null;
@@ -22,23 +23,19 @@ const ChildAutocomplete: React.FC<ChildAutocompleteProps> = ({
 }) => {
   const [childOptions, setChildOptions] = useState<Child[]>([]);
   const [searchInput, setSearchInput] = useState('');
+  const debouncedSearchInput = useDebouncedValue(searchInput, 300);
   const [loading, setLoading] = useState(false);
-  const [isTyping, setIsTyping] = useState(false);
+  const isTyping = searchInput.trim() !== '' && searchInput !== debouncedSearchInput;
 
-  // Debounced search for children
+  // Search for children when debounced input changes
   useEffect(() => {
-    if (searchInput.trim()) {
-      setIsTyping(true);
-    }
-
-    const timer = setTimeout(async () => {
-      if (searchInput.trim()) {
-        setIsTyping(false);
+    const searchChildren = async () => {
+      if (debouncedSearchInput.trim()) {
         setLoading(true);
         try {
           const response = await apiClient.get('/api/children', {
             params: {
-              q: { name_cont: searchInput },
+              q: { name_cont: debouncedSearchInput },
               per_page: 10,
             },
           });
@@ -50,16 +47,16 @@ const ChildAutocomplete: React.FC<ChildAutocompleteProps> = ({
           setLoading(false);
         }
       } else {
-        setIsTyping(false);
         setChildOptions([]);
       }
-    }, 300);
+    };
 
-    return () => clearTimeout(timer);
-  }, [searchInput]);
+    searchChildren();
+  }, [debouncedSearchInput]);
 
   const getNoOptionsText = () => {
-    if (isTyping || loading) return 'Searching...';
+    if (isTyping) return 'Searching...';
+    if (loading) return 'Searching...';
     if (searchInput.trim()) return 'No results';
     return 'Type to search';
   };

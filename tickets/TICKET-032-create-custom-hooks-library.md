@@ -1,9 +1,10 @@
 ## [TICKET-032] Create Custom Hooks Library
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 **Priority:** 🟡 Medium
 **Effort:** M (Medium)
 **Created:** 2025-10-18
+**Completed:** 2025-10-29
 **Dependencies:** None
 
 ### User Story
@@ -11,9 +12,17 @@ As a developer, I want to extract repeated React patterns into custom hooks so t
 
 ### Problem Statement
 Several common patterns are duplicated across components:
-1. **Debounce logic** - Duplicated in `App.tsx:70-78`, `DonationList.tsx:63-87`, `DonationForm.tsx:30-54`
-2. **Pagination state** - Repeated in multiple components managing pagination
-3. **Ransack filters** - Query building logic scattered across components
+1. **Debounce logic** - Duplicated in:
+   - `DonorsPage.tsx:27-34` (search query debounce)
+   - `DonorAutocomplete.tsx:32-62` (donor search debounce)
+   - `ChildAutocomplete.tsx:29-59` (child search debounce)
+   - `SponsorshipsPage.tsx:27-33` (search query debounce)
+2. **Pagination state** - Repeated in:
+   - `DonorsPage.tsx` (currentPage, handlePageChange, paginationMeta)
+   - `DonationsPage.tsx` (currentPage, handlePageChange, paginationMeta)
+3. **Ransack filters** - Query building logic scattered in:
+   - `DonorsPage.tsx:44-48` (name_or_email_cont filter)
+   - `DonationsPage.tsx:34-46` (date range + donor filters)
 
 **Code Smell:** Logic duplication, missed abstraction opportunities
 **Issue:** Changes to common patterns require updates in multiple files
@@ -23,9 +32,11 @@ Several common patterns are duplicated across components:
 - [ ] Implement `useDebouncedValue` hook with configurable delay
 - [ ] Implement `usePagination` hook for pagination state management
 - [ ] Implement `useRansackFilters` hook for query building
-- [ ] Refactor `App.tsx` to use new hooks
-- [ ] Refactor `DonationList.tsx` to use new hooks
-- [ ] Refactor `DonationForm.tsx` to use new hooks (if applicable)
+- [ ] Refactor `DonorsPage.tsx` to use all three hooks
+- [ ] Refactor `DonationsPage.tsx` to use pagination + ransack hooks
+- [ ] Refactor `DonorAutocomplete.tsx` to use debounce hook
+- [ ] Refactor `ChildAutocomplete.tsx` to use debounce hook
+- [ ] Refactor `SponsorshipsPage.tsx` to use debounce hook
 - [ ] Add comprehensive hook tests
 - [ ] All existing tests pass
 - [ ] Update CLAUDE.md with custom hooks pattern
@@ -186,15 +197,13 @@ export function useRansackFilters(): UseRansackFiltersReturn {
 }
 ```
 
-#### 4. Refactor App.tsx
+#### 4. Refactor DonorsPage.tsx
 
 ```tsx
-// src/App.tsx (using new hooks)
-import { useDebouncedValue } from './hooks/useDebouncedValue';
-import { usePagination } from './hooks/usePagination';
-import { useRansackFilters } from './hooks/useRansackFilters';
+// src/pages/DonorsPage.tsx (using all three hooks)
+import { useDebouncedValue, usePagination, useRansackFilters } from '../hooks';
 
-function App() {
+function DonorsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
 
@@ -206,12 +215,17 @@ function App() {
     resetToFirstPage,
   } = usePagination();
 
-  const { setFilter, buildQueryParams, clearFilters } = useRansackFilters();
+  const { setFilter, buildQueryParams } = useRansackFilters();
 
   // Effect triggers when debounced value changes
   useEffect(() => {
     resetToFirstPage(); // Reset to page 1 when search changes
   }, [debouncedQuery, resetToFirstPage]);
+
+  // Update filter when search query changes
+  useEffect(() => {
+    setFilter('name_or_email_cont', debouncedQuery || null);
+  }, [debouncedQuery, setFilter]);
 
   const fetchDonors = async () => {
     try {
@@ -403,9 +417,11 @@ describe('useRansackFilters', () => {
 - `src/hooks/useRansackFilters.test.ts` (NEW)
 
 ### Files to Modify
-- `src/App.tsx` (REFACTOR)
-- `src/components/DonationList.tsx` (REFACTOR)
-- `src/components/DonationForm.tsx` (REFACTOR)
+- `src/pages/DonorsPage.tsx` (REFACTOR - all 3 hooks)
+- `src/pages/DonationsPage.tsx` (REFACTOR - pagination + ransack)
+- `src/components/DonorAutocomplete.tsx` (REFACTOR - debounce)
+- `src/components/ChildAutocomplete.tsx` (REFACTOR - debounce)
+- `src/pages/SponsorshipsPage.tsx` (REFACTOR - debounce)
 - `CLAUDE.md` (UPDATE - add custom hooks pattern)
 
 ### Barrel Export Pattern

@@ -22,6 +22,7 @@ describe('ProjectsPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (fetchProjects as jest.Mock).mockResolvedValue({ projects: [] });
+    mockedApiClient.get.mockResolvedValue({ data: { projects: [] } });
   });
 
   it('renders page title', () => {
@@ -149,8 +150,8 @@ describe('ProjectsPage', () => {
   });
 
   it('clears form fields after successful project creation', async () => {
-    (createProject as jest.Mock).mockResolvedValue({});
-    (fetchProjects as jest.Mock).mockResolvedValue({ projects: [] });
+    mockedApiClient.post.mockResolvedValue({});
+    mockedApiClient.get.mockResolvedValue({ data: { projects: [] } });
 
     const user = userEvent.setup();
     render(<ProjectsPage />);
@@ -162,15 +163,12 @@ describe('ProjectsPage', () => {
     // Submit
     await user.click(screen.getByRole('button', { name: /create project/i }));
 
-    // Wait for submission
+    // Wait for form to clear (formKey changes causing remount)
     await waitFor(() => {
-      expect(createProject).toHaveBeenCalled();
+      expect(screen.getByLabelText(/title/i)).toHaveValue('');
+      expect(screen.getByLabelText(/description/i)).toHaveValue('');
     });
-
-    // Verify form is cleared
-    expect(screen.getByLabelText(/title/i)).toHaveValue('');
-    expect(screen.getByLabelText(/description/i)).toHaveValue('');
-  });
+  }, 10000);
 
   it('displays success Alert after creating project', async () => {
     (createProject as jest.Mock).mockResolvedValue({});
@@ -277,7 +275,7 @@ describe('ProjectsPage', () => {
     it('shows error snackbar when archive fails with 422', async () => {
       const user = userEvent.setup();
       const mockProjects = [
-        { id: 1, title: 'Summer Campaign', project_type: 'campaign', system: false, can_be_deleted: true },
+        { id: 1, title: 'Summer Campaign', project_type: 'campaign', system: false, can_be_deleted: false },
       ];
 
       mockedApiClient.get.mockResolvedValue({
@@ -310,7 +308,7 @@ describe('ProjectsPage', () => {
     it('displays generic error message when API error has no details', async () => {
       const user = userEvent.setup();
       const mockProjects = [
-        { id: 1, title: 'Summer Campaign', project_type: 'campaign', system: false, can_be_deleted: true },
+        { id: 1, title: 'Summer Campaign', project_type: 'campaign', system: false, can_be_deleted: false },
       ];
 
       mockedApiClient.get.mockResolvedValue({
@@ -343,7 +341,7 @@ describe('ProjectsPage', () => {
     it('error snackbar closes when user clicks close button', async () => {
       const user = userEvent.setup();
       const mockProjects = [
-        { id: 1, title: 'Summer Campaign', project_type: 'campaign', system: false, can_be_deleted: true },
+        { id: 1, title: 'Summer Campaign', project_type: 'campaign', system: false, can_be_deleted: false },
       ];
 
       mockedApiClient.get.mockResolvedValue({

@@ -172,6 +172,17 @@ describe('DonorAutocomplete', () => {
     const input = screen.getByRole('combobox');
     await user.type(input, 'NonexistentDonor');
 
+    // Wait for API call to complete
+    await waitFor(() => {
+      expect(apiClient.get).toHaveBeenCalledWith('/api/donors', {
+        params: {
+          q: { name_or_email_cont: 'NonexistentDonor' },
+          per_page: 10,
+        },
+      });
+    });
+
+    // Then wait for "No results" to appear
     await waitFor(() => {
       expect(screen.getByText('No results')).toBeInTheDocument();
     });
