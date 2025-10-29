@@ -15,14 +15,14 @@ const Navigation = () => {
           <Button color="inherit" component={RouterLink} to="/donors">
             Donors
           </Button>
-          <Button color="inherit" component={RouterLink} to="/projects">
-            Projects
-          </Button>
           <Button color="inherit" component={RouterLink} to="/children">
             Children
           </Button>
           <Button color="inherit" component={RouterLink} to="/sponsorships">
             Sponsorships
+          </Button>
+          <Button color="inherit" component={RouterLink} to="/projects">
+            Projects
           </Button>
         </Box>
       </Toolbar>

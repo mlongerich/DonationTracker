@@ -546,4 +546,135 @@ describe('DonorsPage', () => {
       expect(screen.getByText('New Donor')).toBeInTheDocument();
     });
   });
+
+  describe('Archive error handling', () => {
+    it('shows error snackbar when archive fails with 422', async () => {
+      const user = userEvent.setup();
+      const mockDonors = [
+        { id: 1, name: 'John Doe', email: 'john@example.com' },
+      ];
+
+      mockedApiClient.get.mockResolvedValue({
+        data: {
+          donors: mockDonors,
+          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 10 },
+        },
+      });
+
+      mockedApiClient.delete.mockRejectedValue({
+        response: {
+          status: 422,
+          data: { errors: ['Cannot archive donor with active sponsorships'] },
+        },
+      });
+
+      render(
+        <BrowserRouter>
+          <DonorsPage />
+        </BrowserRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
+
+      // Click archive button
+      const archiveButton = screen.getByRole('button', { name: /archive/i });
+      await user.click(archiveButton);
+
+      // Error snackbar should appear with message
+      await waitFor(() => {
+        expect(screen.getByText('Cannot archive donor with active sponsorships')).toBeInTheDocument();
+      });
+    });
+
+    it('displays generic error message when API error has no details', async () => {
+      const user = userEvent.setup();
+      const mockDonors = [
+        { id: 1, name: 'John Doe', email: 'john@example.com' },
+      ];
+
+      mockedApiClient.get.mockResolvedValue({
+        data: {
+          donors: mockDonors,
+          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 10 },
+        },
+      });
+
+      mockedApiClient.delete.mockRejectedValue({
+        response: {
+          status: 422,
+          data: {},
+        },
+      });
+
+      render(
+        <BrowserRouter>
+          <DonorsPage />
+        </BrowserRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
+
+      // Click archive button
+      const archiveButton = screen.getByRole('button', { name: /archive/i });
+      await user.click(archiveButton);
+
+      // Error snackbar should appear with generic message
+      await waitFor(() => {
+        expect(screen.getByText('Failed to archive donor')).toBeInTheDocument();
+      });
+    });
+
+    it('error snackbar closes when user clicks close button', async () => {
+      const user = userEvent.setup();
+      const mockDonors = [
+        { id: 1, name: 'John Doe', email: 'john@example.com' },
+      ];
+
+      mockedApiClient.get.mockResolvedValue({
+        data: {
+          donors: mockDonors,
+          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 10 },
+        },
+      });
+
+      mockedApiClient.delete.mockRejectedValue({
+        response: {
+          status: 422,
+          data: { errors: ['Cannot archive donor with active sponsorships'] },
+        },
+      });
+
+      render(
+        <BrowserRouter>
+          <DonorsPage />
+        </BrowserRouter>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByText('John Doe')).toBeInTheDocument();
+      });
+
+      // Click archive button
+      const archiveButton = screen.getByRole('button', { name: /archive/i });
+      await user.click(archiveButton);
+
+      // Wait for error to appear
+      await waitFor(() => {
+        expect(screen.getByText('Cannot archive donor with active sponsorships')).toBeInTheDocument();
+      });
+
+      // Click close button on alert
+      const closeButton = screen.getByRole('button', { name: /close/i });
+      await user.click(closeButton);
+
+      // Error should be gone
+      await waitFor(() => {
+        expect(screen.queryByText('Cannot archive donor with active sponsorships')).not.toBeInTheDocument();
+      });
+    });
+  });
 });

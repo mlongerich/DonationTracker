@@ -1,4 +1,4 @@
-import { Typography, Box, Button, FormControlLabel, Checkbox } from '@mui/material';
+import { Typography, Box, Button, FormControlLabel, Checkbox, Snackbar, Alert } from '@mui/material';
 import { useState, useEffect } from 'react';
 import apiClient from '../api/client';
 import { Child, ChildFormData, Sponsorship } from '../types';
@@ -13,6 +13,7 @@ const ChildrenPage = () => {
   const [sponsorships, setSponsorships] = useState<Map<number, Sponsorship[]>>(new Map());
   const [selectedChildForSponsorship, setSelectedChildForSponsorship] = useState<Child | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadChildren = async () => {
@@ -80,24 +81,34 @@ const ChildrenPage = () => {
   };
 
   const handleArchive = async (id: number) => {
-    await apiClient.post(`/api/children/${id}/archive`);
-    const params: { include_sponsorships: boolean; include_discarded?: string } = {
-      include_sponsorships: true
-    };
-    if (showArchived) {
-      params.include_discarded = 'true';
-    }
-    const response = await apiClient.get('/api/children', { params });
-    setChildren(response.data.children);
-
-    // Rebuild sponsorship map
-    const sponsorshipMap = new Map<number, Sponsorship[]>();
-    response.data.children.forEach((child: Child & { sponsorships?: Sponsorship[] }) => {
-      if (child.sponsorships) {
-        sponsorshipMap.set(child.id, child.sponsorships);
+    try {
+      await apiClient.post(`/api/children/${id}/archive`);
+      const params: { include_sponsorships: boolean; include_discarded?: string } = {
+        include_sponsorships: true
+      };
+      if (showArchived) {
+        params.include_discarded = 'true';
       }
-    });
-    setSponsorships(sponsorshipMap);
+      const response = await apiClient.get('/api/children', { params });
+      setChildren(response.data.children);
+
+      // Rebuild sponsorship map
+      const sponsorshipMap = new Map<number, Sponsorship[]>();
+      response.data.children.forEach((child: Child & { sponsorships?: Sponsorship[] }) => {
+        if (child.sponsorships) {
+          sponsorshipMap.set(child.id, child.sponsorships);
+        }
+      });
+      setSponsorships(sponsorshipMap);
+      setError(null);
+    } catch (err: any) {
+      if (err.response?.status === 422) {
+        setError(err.response.data.errors?.join(', ') || 'Failed to archive child');
+      } else {
+        setError('Failed to archive child');
+      }
+      console.error('Failed to archive child:', err);
+    }
   };
 
   const handleRestore = async (id: number) => {
@@ -205,6 +216,16 @@ const ChildrenPage = () => {
         onClose={() => setSelectedChildForSponsorship(null)}
         onSuccess={handleSponsorshipSuccess}
       />
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

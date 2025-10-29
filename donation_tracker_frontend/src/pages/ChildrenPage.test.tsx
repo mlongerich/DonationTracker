@@ -387,4 +387,144 @@ describe('ChildrenPage', () => {
       expect(screen.getByRole('button', { name: /restore/i })).toBeInTheDocument();
     });
   });
+
+  describe('Archive error handling', () => {
+    it('shows error snackbar when archive fails with 422', async () => {
+      const user = userEvent.setup();
+      const mockChildren = [
+        {
+          id: 1,
+          name: 'Maria',
+          created_at: '2025-01-01',
+          updated_at: '2025-01-01',
+          sponsorships: [],
+          can_be_deleted: false
+        }
+      ];
+
+      mockedApiClient.get.mockResolvedValue({
+        data: {
+          children: mockChildren,
+          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+        },
+      });
+
+      mockedApiClient.post.mockRejectedValue({
+        response: {
+          status: 422,
+          data: { errors: ['Cannot archive child with active sponsorships'] },
+        },
+      });
+
+      render(<ChildrenPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Maria')).toBeInTheDocument();
+      });
+
+      // Click archive button
+      const archiveButton = screen.getByRole('button', { name: /archive/i });
+      await user.click(archiveButton);
+
+      // Error snackbar should appear with message
+      await waitFor(() => {
+        expect(screen.getByText('Cannot archive child with active sponsorships')).toBeInTheDocument();
+      });
+    });
+
+    it('displays generic error message when API error has no details', async () => {
+      const user = userEvent.setup();
+      const mockChildren = [
+        {
+          id: 1,
+          name: 'Maria',
+          created_at: '2025-01-01',
+          updated_at: '2025-01-01',
+          sponsorships: [],
+          can_be_deleted: false
+        }
+      ];
+
+      mockedApiClient.get.mockResolvedValue({
+        data: {
+          children: mockChildren,
+          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+        },
+      });
+
+      mockedApiClient.post.mockRejectedValue({
+        response: {
+          status: 422,
+          data: {},
+        },
+      });
+
+      render(<ChildrenPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Maria')).toBeInTheDocument();
+      });
+
+      // Click archive button
+      const archiveButton = screen.getByRole('button', { name: /archive/i });
+      await user.click(archiveButton);
+
+      // Error snackbar should appear with generic message
+      await waitFor(() => {
+        expect(screen.getByText('Failed to archive child')).toBeInTheDocument();
+      });
+    });
+
+    it('error snackbar closes when user clicks close button', async () => {
+      const user = userEvent.setup();
+      const mockChildren = [
+        {
+          id: 1,
+          name: 'Maria',
+          created_at: '2025-01-01',
+          updated_at: '2025-01-01',
+          sponsorships: [],
+          can_be_deleted: false
+        }
+      ];
+
+      mockedApiClient.get.mockResolvedValue({
+        data: {
+          children: mockChildren,
+          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+        },
+      });
+
+      mockedApiClient.post.mockRejectedValue({
+        response: {
+          status: 422,
+          data: { errors: ['Cannot archive child with active sponsorships'] },
+        },
+      });
+
+      render(<ChildrenPage />);
+
+      await waitFor(() => {
+        expect(screen.getByText('Maria')).toBeInTheDocument();
+      });
+
+      // Click archive button
+      const archiveButton = screen.getByRole('button', { name: /archive/i });
+      await user.click(archiveButton);
+
+      // Wait for error to appear
+      await waitFor(() => {
+        expect(screen.getByText('Cannot archive child with active sponsorships')).toBeInTheDocument();
+      });
+
+      // Click close button on alert
+      const closeButton = screen.getByRole('button', { name: /close/i });
+      await user.click(closeButton);
+
+      // Error should be gone
+      await waitFor(() => {
+        expect(screen.queryByText('Cannot archive child with active sponsorships')).not.toBeInTheDocument();
+      });
+    });
+  });
 });

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Typography, Box, TextField, Checkbox, FormControlLabel, Pagination, Button } from '@mui/material';
+import { Typography, Box, TextField, Checkbox, FormControlLabel, Pagination, Button, Alert, Snackbar } from '@mui/material';
 import apiClient, { mergeDonors } from '../api/client';
 import DonorForm from '../components/DonorForm';
 import DonorList from '../components/DonorList';
@@ -15,6 +15,7 @@ const DonorsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [showMergeModal, setShowMergeModal] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [paginationMeta, setPaginationMeta] = useState<PaginationMeta>({
     total_count: 0,
     total_pages: 0,
@@ -63,8 +64,14 @@ const DonorsPage = () => {
     try {
       await apiClient.delete(`/api/donors/${id}`);
       fetchDonors();
-    } catch (error) {
-      console.error('Failed to archive donor:', error);
+      setError(null);
+    } catch (err: any) {
+      if (err.response?.status === 422) {
+        setError(err.response.data.errors?.join(', ') || 'Failed to archive donor');
+      } else {
+        setError('Failed to archive donor');
+      }
+      console.error('Failed to archive donor:', err);
     }
   };
 
@@ -175,6 +182,16 @@ const DonorsPage = () => {
           fetchDonors();
         }}
       />
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

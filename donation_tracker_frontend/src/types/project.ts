@@ -15,6 +15,7 @@ export interface Project {
   donations_count: number;
   sponsorships_count: number;
   can_be_deleted: boolean;
+  discarded_at?: string | null;
 }
 
 /**
