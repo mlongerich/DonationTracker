@@ -1,10 +1,12 @@
 ## [TICKET-053] Sponsorships Page Filters & Pagination UI
 
-**Status:** 📋 Planned
+**Status:** 🟡 Blocked
 **Priority:** 🟡 Medium
 **Effort:** M (Medium - 3-4 hours)
 **Created:** 2025-10-21
-**Dependencies:** TICKET-010 (Sponsorships page exists) ✅
+**Started:** 2025-10-29
+**Blocked By:** TICKET-064 (Smart Sponsorship Detection - required for testing)
+**Dependencies:** TICKET-010 (Sponsorships page exists) ✅, TICKET-054 (Create form on page) ✅
 
 ### User Story
 As a user, I want to filter sponsorships by donor or child and toggle showing ended sponsorships, and navigate through pages of results, so that I can quickly find specific sponsorship relationships in a large dataset.
@@ -156,3 +158,57 @@ const fetchSponsorships = async () => {
 - Pagination metadata already returned in API responses
 - DonorAutocomplete and ChildAutocomplete components already exist
 - This ticket is **frontend-only** (pure UI enhancement)
+
+### Completed Work (2025-10-29)
+
+**✅ Omni-Search Filter:**
+- Replaced separate donor/child autocompletes with single search bar
+- Searches both donor name AND child name using Ransack OR predicate
+- Debounced input (300ms) to reduce API calls
+- Added `donor_name_or_child_name_cont` Ransack query parameter
+- Backend: Added `ransackable_attributes` and `ransackable_associations` to Sponsorship, Donor, and Child models
+- Tests: 10 frontend unit tests, 2 backend integration tests
+
+**✅ Show Ended Sponsorships Checkbox:**
+- Toggle between active-only and all sponsorships
+- Default: unchecked (shows only active with `end_date_null: true`)
+- Checked: shows all sponsorships (removes `end_date_null` filter)
+- Tests: Frontend checkbox renders and toggles parameter
+
+**✅ Backend Start Date Calculation:**
+- Fixed `SponsorshipPresenter` to use `calculated_start_date` method
+- `Sponsorship#calculated_start_date`: Returns earliest donation date → manual start_date → created_at
+- Added `sponsorship_id` foreign key to donations table
+- `Donation` belongs_to `sponsorship` (optional)
+- `Sponsorship` has_many `donations` with restrict_with_exception
+- Validation: Donations to sponsorship projects MUST have sponsorship_id
+- Fixed sponsorship factory to allow model auto-project creation
+- Tests: 7 new backend model tests (all 201 tests passing)
+
+**❌ Remaining Work:**
+- Pagination UI (display metadata, MUI Pagination component)
+- Cypress E2E test
+- Documentation update
+
+**🟡 Blocked:** Cannot test sponsorship-related features without smart sponsorship detection in DonationForm (TICKET-064). When creating a donation to a sponsorship project, the system now requires a `sponsorship_id`, but the DonationForm has no way to detect/create/select sponsorships yet.
+
+### Implementation Notes (2025-10-29)
+
+**Current Codebase Status:**
+- ✅ SponsorshipsPage exists with basic pagination (`page` state on line 10)
+- ✅ Create form already on page (TICKET-054 was merged into TICKET-010)
+- ✅ Backend Ransack filtering fully implemented (`RansackFilterable` concern)
+- ✅ Backend returns `meta` object with pagination data
+- ⚠️ Frontend ignores `meta` object (line 21 doesn't extract metadata)
+- ❌ No filter states (donorFilter, childFilter, showEnded) exist yet
+- ❌ No filter UI components rendered
+- ❌ No pagination UI component rendered
+
+**What Needs to Be Added:**
+1. Import Donor, Child types and autocomplete components
+2. Add 5 state variables: donorFilter, childFilter, showEnded, totalPages, totalCount
+3. Update fetchSponsorships to build Ransack query and extract metadata
+4. Add useEffect to reset page when filters change
+5. Add filter UI (2 autocompletes + 1 checkbox) above SponsorshipList
+6. Add pagination UI (metadata text + Pagination component) below SponsorshipList
+7. Update tests to cover filtering and pagination
