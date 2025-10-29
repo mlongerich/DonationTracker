@@ -54,6 +54,29 @@ RSpec.describe "/api/donations", type: :request do
       donation = Donation.last
       expect(donation.project_id).to eq(project.id)
     end
+
+    it "accepts sponsorship_id parameter for sponsorship donations" do
+      donor = create(:donor)
+      child = create(:child)
+      project = create(:project, project_type: :sponsorship, title: "Sponsor #{child.name}")
+      sponsorship = create(:sponsorship, donor: donor, child: child, project: project)
+
+      post "/api/donations", params: {
+        donation: {
+          amount: 50.00,
+          date: Date.today,
+          donor_id: donor.id,
+          project_id: project.id,
+          sponsorship_id: sponsorship.id
+        }
+      }
+
+      expect(response).to have_http_status(:created)
+
+      # Verify sponsorship_id was saved to database
+      donation = Donation.last
+      expect(donation.sponsorship_id).to eq(sponsorship.id)
+    end
   end
 
   describe "GET /api/donations" do

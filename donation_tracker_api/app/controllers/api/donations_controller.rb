@@ -33,7 +33,7 @@ module Api
     private
 
     def donation_params
-      params.require(:donation).permit(:amount, :date, :donor_id, :project_id, :status, :description)
+      params.require(:donation).permit(:amount, :date, :donor_id, :project_id, :sponsorship_id, :status, :description)
     end
   end
 end
