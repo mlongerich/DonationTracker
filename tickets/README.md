@@ -40,6 +40,8 @@ Current work items and user stories being actively developed.
 - [TICKET-035: Add Database Indexes for Query Performance](completed/TICKET-035-add-database-indexes-query-performance.md) - ✅ Complete (2025-10-22)
 - [TICKET-060: Extract SponsorshipPresenter Pattern](TICKET-060-sponsorship-presenter-pattern.md) - ✅ Complete (2025-10-22)
 - [TICKET-061: Fix Children Page N+1 Query Problem](completed/TICKET-061-fix-children-page-n-plus-1-query.md) - ✅ Complete (2025-10-22)
+- [TICKET-062: Donor Cascade Delete Strategy](completed/TICKET-062-donor-cascade-delete-strategy.md) - ✅ Complete (2025-10-28)
+- [TICKET-063: Archive Business Logic for Active Sponsorships](TICKET-063-archive-business-logic-active-sponsorships.md) - ✅ Complete (2025-10-29)
 
 ### 🔵 In Progress Tickets
 
@@ -85,7 +87,6 @@ Current work items and user stories being actively developed.
 - [TICKET-037: Standardize Service Object Patterns](TICKET-037-standardize-service-object-patterns.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-038: Define Cascade Delete Strategy for Donations](TICKET-038-define-cascade-delete-strategy-donations.md) - ✅ Complete (🔴 High, M) - Part 2 (Projects)
 - [TICKET-039: Add Donation Status Enum Validation](TICKET-039-add-donation-status-enum-validation.md) - 📋 Planned (🟢 Low, S)
-- [TICKET-062: Donor Cascade Delete Strategy](TICKET-062-donor-cascade-delete-strategy.md) - 📋 Planned (🟡 Medium, S) - Part 1 of TICKET-038
 - [TICKET-040: Implement Context API for Donor/Donation State](TICKET-040-implement-context-api-donor-donation-state.md) - 📋 Planned (🟢 Low, L)
 - [TICKET-041: Add Test Coverage for API Client Methods](TICKET-041-api-client-test-coverage.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-042: Add Class-Level Documentation Comments](TICKET-042-add-class-documentation-comments.md) - 📋 Planned (🟡 Medium, S) - Updated with Reek findings
@@ -96,17 +97,17 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 62
-- **Completed:** 24
+- **Total Tickets:** 63
+- **Completed:** 26
 - **In Progress:** 0
-- **Planned:** 37
+- **Planned:** 36
 - **Blocked:** 1
 
 ### By Category
 - **Feature Development:** 12 planned
-- **Sponsorship & Children Features:** 10 planned
-- **Code Quality & Architecture:** 15 planned (4 completed: TICKET-035, TICKET-038, TICKET-060, TICKET-061)
-- **Completed:** 24
+- **Sponsorship & Children Features:** 9 planned (1 completed: TICKET-063)
+- **Code Quality & Architecture:** 14 planned (5 completed: TICKET-035, TICKET-038, TICKET-060, TICKET-061, TICKET-062)
+- **Completed:** 26
 - **In Progress:** 0
 - **Blocked:** 1 (TICKET-005)
 

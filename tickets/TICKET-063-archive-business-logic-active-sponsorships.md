@@ -1,9 +1,10 @@
 ## [TICKET-063] Archive/Unarchive Business Logic for Active Sponsorships
 
-**Status:** 🔵 Pending
+**Status:** ✅ Complete
 **Priority:** 🔴 High
 **Type:** Feature
 **Component:** Backend, Frontend
+**Completed:** 2025-10-29
 
 ---
 
@@ -49,69 +50,69 @@ As a system administrator, I need to ensure data integrity when archiving donors
 
 #### Backend Validation
 
-- [ ] **Donor Model**
-  - [ ] Add validation: cannot discard if `sponsorships.active.exists?`
-  - [ ] Custom error message: "Cannot archive donor with active sponsorships"
-  - [ ] Test: attempting to archive donor with active sponsorship fails
-  - [ ] Test: archiving donor with no active sponsorships succeeds
-  - [ ] Test: archiving donor with only ended sponsorships succeeds
+- [x] **Donor Model**
+  - [x] Add validation: cannot discard if `sponsorships.active.exists?`
+  - [x] Custom error message: "Cannot archive donor with active sponsorships"
+  - [x] Test: attempting to archive donor with active sponsorship fails
+  - [x] Test: archiving donor with no active sponsorships succeeds
+  - [x] Test: archiving donor with only ended sponsorships succeeds
 
-- [ ] **Child Model**
-  - [ ] Add validation: cannot discard if `sponsorships.active.exists?`
-  - [ ] Custom error message: "Cannot archive child with active sponsorships"
-  - [ ] Test: attempting to archive child with active sponsorship fails
-  - [ ] Test: archiving child with no active sponsorships succeeds
+- [x] **Child Model**
+  - [x] Add validation: cannot discard if `sponsorships.active.exists?`
+  - [x] Custom error message: "Cannot archive child with active sponsorships"
+  - [x] Test: attempting to archive child with active sponsorship fails
+  - [x] Test: archiving child with no active sponsorships succeeds
 
-- [ ] **Project Model**
-  - [ ] Add validation: cannot discard if has active sponsorships through children
-  - [ ] Custom error message: "Cannot archive project with active sponsorships"
-  - [ ] Test: attempting to archive project with active sponsorships fails
-  - [ ] Test: archiving project with no active sponsorships succeeds
+- [x] **Project Model**
+  - [x] Add validation: cannot discard if has active sponsorships through children
+  - [x] Custom error message: "Cannot archive project with active sponsorships"
+  - [x] Test: attempting to archive project with active sponsorships fails
+  - [x] Test: archiving project with no active sponsorships succeeds
 
 #### Auto-Unarchive Logic
 
-- [ ] **Donation Creation**
-  - [ ] Before create callback: if `donor.discarded?` → `donor.undiscard`
-  - [ ] Before create callback: if `project.discarded?` → `project.undiscard`
-  - [ ] Test: creating donation with archived donor auto-restores donor
-  - [ ] Test: creating donation with archived project auto-restores project
-  - [ ] Test: creating donation with active donor does not modify state
+- [x] **Donation Creation**
+  - [x] Before create callback: if `donor.discarded?` → `donor.undiscard`
+  - [x] Before create callback: if `project.discarded?` → `project.undiscard`
+  - [x] Test: creating donation with archived donor auto-restores donor
+  - [x] Test: creating donation with archived project auto-restores project
+  - [x] Test: creating donation with active donor does not modify state
 
-- [ ] **Sponsorship Creation**
-  - [ ] Before create callback: if `donor.discarded?` → `donor.undiscard`
-  - [ ] Before create callback: if `child.discarded?` → `child.undiscard`
-  - [ ] Before create callback: if `project.discarded?` → `project.undiscard`
-  - [ ] Test: creating sponsorship with archived entities auto-restores all
-  - [ ] Test: webhook scenario - Stripe creates sponsorship with archived child
+- [x] **Sponsorship Creation**
+  - [x] Before create callback: if `donor.discarded?` → `donor.undiscard`
+  - [x] Before create callback: if `child.discarded?` → `child.undiscard`
+  - [x] Before create callback: if `project.discarded?` → `project.undiscard`
+  - [x] Test: creating sponsorship with archived entities auto-restores all
+  - [x] Test: webhook scenario - Stripe creates sponsorship with archived child
 
 #### API Error Handling
 
-- [ ] **Archive Endpoint (POST /api/:resource/:id/archive)**
-  - [ ] Returns 422 Unprocessable Entity if validation fails
-  - [ ] Returns JSON error: `{ errors: ["Cannot archive X with active sponsorships"] }`
-  - [ ] Test: POST /api/donors/1/archive with active sponsorship returns 422
-  - [ ] Test: POST /api/children/1/archive with active sponsorship returns 422
-  - [ ] Test: POST /api/projects/1/archive with active sponsorship returns 422
+- [x] **Archive Endpoint (POST /api/:resource/:id/archive)**
+  - [x] Returns 422 Unprocessable Entity if validation fails
+  - [x] Returns JSON error: `{ errors: ["Cannot archive X with active sponsorships"] }`
+  - [x] Test: POST /api/donors/1/archive with active sponsorship returns 422
+  - [x] Test: POST /api/children/1/archive with active sponsorship returns 422
+  - [x] Test: POST /api/projects/1/archive with active sponsorship returns 422
 
 #### Frontend Error Handling
 
-- [ ] **DonorsPage.tsx**
-  - [ ] Catch 422 error on archive
-  - [ ] Display error message in snackbar/alert
-  - [ ] Do not remove donor from list
-  - [ ] Test: attempting to archive donor with active sponsorship shows error
+- [x] **DonorsPage.tsx**
+  - [x] Catch 422 error on archive
+  - [x] Display error message in snackbar/alert
+  - [x] Do not remove donor from list
+  - [x] Test: attempting to archive donor with active sponsorship shows error
 
-- [ ] **ChildrenPage.tsx**
-  - [ ] Catch 422 error on archive
-  - [ ] Display error message in snackbar/alert
-  - [ ] Do not remove child from list
-  - [ ] Test: attempting to archive child with active sponsorship shows error
+- [x] **ChildrenPage.tsx**
+  - [x] Catch 422 error on archive
+  - [x] Display error message in snackbar/alert
+  - [x] Do not remove child from list
+  - [x] Test: attempting to archive child with active sponsorship shows error
 
-- [ ] **ProjectsPage.tsx**
-  - [ ] Catch 422 error on archive
-  - [ ] Display error message in snackbar/alert
-  - [ ] Do not remove project from list
-  - [ ] Test: attempting to archive project with active sponsorship shows error
+- [x] **ProjectsPage.tsx**
+  - [x] Catch 422 error on archive
+  - [x] Display error message in snackbar/alert
+  - [x] Do not remove project from list
+  - [x] Test: attempting to archive project with active sponsorship shows error
 
 ---
 
@@ -334,3 +335,44 @@ const handleArchive = async (id: number) => {
 
 **Created:** 2025-10-24
 **Last Updated:** 2025-10-24
+
+---
+
+## Completion Notes
+
+**Completed:** 2025-10-29
+
+### Implementation Summary
+
+All acceptance criteria met through strict TDD methodology:
+
+**Backend:**
+- Added `before_discard` validation callbacks to Donor, Child, and Project models
+- Added `before_create` restore callbacks to Donation and Sponsorship models
+- Archive endpoints return 422 with descriptive error messages
+- 30+ tests added for validation and auto-restore logic
+- All 192 backend tests passing
+
+**Frontend:**
+- Added error Snackbar handling for 422 archive failures in all pages
+- Tests for error display and dismissal
+- All frontend tests passing
+
+### Bug Fixes Discovered During Implementation
+
+While implementing and testing TICKET-063, discovered and fixed 4 bugs:
+
+1. **Project Archive UI Not Updating** - Backend now includes `discarded_at` in response, frontend refreshes with correct params
+2. **New Projects Don't Appear** - Frontend now refreshes with `include_discarded` param
+3. **Sponsorship Validation Generic Error** - Backend uses `.full_messages` for array format
+4. **Delete/Archive Buttons Both Showing** - Made mutually exclusive based on `can_be_deleted`
+
+All bug fixes committed separately with full TDD coverage.
+
+### Related Commits
+
+- `aeac15b` - backend: implement archive business logic (TICKET-063)
+- `2540317` - frontend: add archive error handling (TICKET-063)
+- `d923a52` - backend: fix project archive UI updates (bug fix)
+- `d4bcfcf` - frontend: fix project archive UI updates (bug fix)
+
