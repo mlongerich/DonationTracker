@@ -1,12 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
-import MenuItem from '@mui/material/MenuItem';
-import { createDonation, fetchProjects } from '../api/client';
+import { createDonation } from '../api/client';
 import DonorAutocomplete, { Donor } from './DonorAutocomplete';
-import { Project } from '../types';
+import ProjectOrChildAutocomplete from './ProjectOrChildAutocomplete';
+
+interface Option {
+  id: number;
+  name: string;
+  type: 'project' | 'child';
+}
 
 interface DonationFormProps {
   onSuccess?: () => void;
@@ -16,22 +21,14 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
-  const [projectId, setProjectId] = useState<number | null>(null);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProjectOrChild, setSelectedProjectOrChild] =
+    useState<Option | null>({
+      id: 0,
+      name: 'General Donation',
+      type: 'project',
+    });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
-
-  useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        const data = await fetchProjects();
-        setProjects(data.projects);
-      } catch (err) {
-        console.error('Failed to fetch projects:', err);
-      }
-    };
-    loadProjects();
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,6 +38,13 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
     if (!selectedDonor) {
       return;
     }
+
+    // Extract project_id from selection (only if type is 'project' and id > 0)
+    // id: 0 represents "General Donation" which should be null
+    const projectId =
+      selectedProjectOrChild?.type === 'project' && selectedProjectOrChild.id > 0
+        ? selectedProjectOrChild.id
+        : null;
 
     try {
       await createDonation({
@@ -53,6 +57,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
       setSuccess(true);
       setAmount('');
       setSelectedDonor(null);
+      setSelectedProjectOrChild({ id: 0, name: 'General Donation', type: 'project' });
       setDate(new Date().toISOString().split('T')[0]);
       onSuccess?.(); // Notify parent to refresh donation list
     } catch (err) {
@@ -68,23 +73,11 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
         {success && (
           <Alert severity="success">Donation created successfully!</Alert>
         )}
-        <TextField
-          select
-          label="Project"
-          value={projectId || ''}
-          onChange={(e) =>
-            setProjectId(e.target.value ? parseInt(e.target.value) : null)
-          }
-          fullWidth
+        <ProjectOrChildAutocomplete
+          value={selectedProjectOrChild}
+          onChange={setSelectedProjectOrChild}
           size="small"
-        >
-          <MenuItem value="">General Donation</MenuItem>
-          {projects.map((project) => (
-            <MenuItem key={project.id} value={project.id}>
-              {project.title}
-            </MenuItem>
-          ))}
-        </TextField>
+        />
         <DonorAutocomplete
           value={selectedDonor}
           onChange={setSelectedDonor}

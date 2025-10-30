@@ -1,21 +1,20 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DonationForm from './DonationForm';
-import apiClient, { fetchProjects, createDonation } from '../api/client';
+import apiClient, { searchProjectOrChild, createDonation } from '../api/client';
 
 jest.mock('../api/client', () => ({
   __esModule: true,
   default: {
     get: jest.fn(),
   },
-  fetchProjects: jest.fn(),
+  searchProjectOrChild: jest.fn(),
   createDonation: jest.fn(),
 }));
 
 describe('DonationForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (fetchProjects as jest.Mock).mockResolvedValue({ projects: [] });
   });
   it('renders donation form fields', () => {
     render(<DonationForm />);
@@ -134,37 +133,17 @@ describe('DonationForm', () => {
     );
   });
 
-  it('renders project select field', () => {
+  it('renders project or child autocomplete field', () => {
     render(<DonationForm />);
 
-    expect(screen.getByLabelText(/project/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/project or child/i)).toBeInTheDocument();
   });
 
-  it('fetches and displays projects in dropdown', async () => {
-    const mockProjects = [
-      { id: 1, title: 'Summer Campaign', project_type: 'campaign', system: false },
-      { id: 2, title: 'General Donation', project_type: 'general', system: true },
-    ];
-
-    (fetchProjects as jest.Mock).mockResolvedValue({
-      projects: mockProjects,
-    });
-
+  it('defaults to General Donation on load', () => {
     render(<DonationForm />);
 
-    // Verify fetchProjects was called
-    await waitFor(() => {
-      expect(fetchProjects).toHaveBeenCalled();
-    });
-
-    // Verify the select field is rendered
-    expect(screen.getByLabelText(/project/i)).toBeInTheDocument();
-  });
-
-  it('displays project autocomplete field', () => {
-    render(<DonationForm />);
-
-    expect(screen.getByLabelText(/project/i)).toBeInTheDocument();
+    const field = screen.getByLabelText(/project or child/i);
+    expect(field).toHaveValue('General Donation');
   });
 
   it('amount field should be a Material-UI TextField', () => {
@@ -182,11 +161,11 @@ describe('DonationForm', () => {
     expect(dateField).toHaveClass('MuiInputBase-input');
   });
 
-  it('project field should be a Material-UI Select', () => {
+  it('project or child field should be a Material-UI Autocomplete', () => {
     render(<DonationForm />);
 
-    const projectField = screen.getByLabelText(/project/i);
-    expect(projectField).toHaveClass('MuiInputBase-input');
+    const projectOrChildField = screen.getByLabelText(/project or child/i);
+    expect(projectOrChildField).toHaveClass('MuiInputBase-input');
   });
 
   it('submit button should be a Material-UI Button', () => {
