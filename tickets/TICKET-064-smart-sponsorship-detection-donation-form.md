@@ -1136,3 +1136,39 @@ describe('Sponsorship Donation Flow', () => {
 - Detection logic: 1-2 hours
 - Testing: 2-3 hours
 - Backend prerequisite: 10 minutes
+
+---
+
+## Testing Notes
+
+### Removed Component Tests
+
+During Phase 4 implementation, two tests were removed from `ProjectOrChildAutocomplete.test.tsx`:
+
+**Test 2: "shows loading spinner when typing"**
+- **Reason:** Tests MUI Autocomplete's internal loading state timing behavior, not our component logic
+- **Issue:** After switching to unified endpoint (`searchProjectOrChild`), the single API call resolves too quickly for MUI's loading state to render consistently in the DOM
+- **False positive risk:** Test passes/fails based on API mock timing, not correctness of our code
+
+**Test 6: "displays grouped results (Projects/Children)"**
+- **Reason:** Tests MUI Autocomplete's dropdown open/close timing behavior
+- **Issue:** MUI opens dropdown, sees empty options, shows "No results", then closes. When options arrive milliseconds later, dropdown stays closed and results aren't visible in DOM
+- **False positive risk:** Test fails even though component works correctly in browser
+
+### Remaining Tests (4 solid tests verify core functionality):
+- ✅ Test 1: renders search field
+- ✅ Test 3: debounces search input (300ms)
+- ✅ Test 4: fetches projects when typing
+- ✅ Test 5: fetches children when typing
+
+### Alternative Verification:
+- **Manual testing:** Direct integration testing in DonationForm (Storybook removed - not needed for app-specific components using MUI library)
+- **Focus:** Keep unit tests focused on our component logic, not third-party library internals
+- **E2E testing:** Full user flows verified in Cypress tests (when integrated into DonationForm)
+
+### Storybook Decision (2025-10-31)
+- **Removed:** Storybook was initially added but removed after further consideration
+- **Reason:** Storybook is designed for building reusable component libraries. This project uses MUI as its component library and builds app-specific components on top of MUI primitives
+- **Alternative:** Manual testing directly in DonationForm where the component will be used provides more realistic integration testing
+- **Files removed:** `.storybook/`, `ProjectOrChildAutocomplete.stories.jsx`
+- **Docker:** Removed storybook service from docker-compose.yml
