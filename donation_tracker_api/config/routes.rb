@@ -28,6 +28,9 @@ Rails.application.routes.draw do
 
     resources :sponsorships, only: [ :index, :create, :destroy ]
 
+    # Search endpoint
+    get "search/project_or_child", to: "search#project_or_child"
+
     # Test-only routes (development/test environments only)
     namespace :test do
       delete "cleanup", action: :cleanup
