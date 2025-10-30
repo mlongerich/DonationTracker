@@ -154,3 +154,24 @@ describe('findProjectForChild', () => {
     expect(result).toBeNull();
   });
 });
+
+describe('fetchProjectsBySearch', () => {
+  it('calls apiClient.get with correct endpoint and search query', async () => {
+    const mockProjects = [
+      { id: 1, title: 'Project Alpha', project_type: 'general' },
+      { id: 2, title: 'Project Beta', project_type: 'general' }
+    ];
+
+    (apiClient.get as jest.Mock).mockResolvedValue({ data: { projects: mockProjects } });
+
+    const result = await actualModule.fetchProjectsBySearch('Alpha');
+
+    expect(apiClient.get).toHaveBeenCalledWith('/api/projects', {
+      params: {
+        q: { title_cont: 'Alpha' },
+        per_page: 10
+      }
+    });
+    expect(result).toEqual(mockProjects);
+  });
+});

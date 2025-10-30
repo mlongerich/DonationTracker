@@ -68,6 +68,23 @@ export const fetchProjects = async (params?: { page?: number; per_page?: number 
   return response.data;
 };
 
+export const fetchProjectsBySearch = async (searchQuery: string) => {
+  const response = await apiClient.get('/api/projects', {
+    params: {
+      q: { title_cont: searchQuery },
+      per_page: 10
+    }
+  });
+  return response.data.projects || [];
+};
+
+export const searchProjectOrChild = async (query: string) => {
+  const response = await apiClient.get('/api/search/project_or_child', {
+    params: { q: query }
+  });
+  return response.data;
+};
+
 export const fetchProject = async (id: number) => {
   const response = await apiClient.get(`/api/projects/${id}`);
   return response.data;

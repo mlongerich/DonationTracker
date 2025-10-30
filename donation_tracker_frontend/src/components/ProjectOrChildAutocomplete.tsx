@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Autocomplete, TextField } from '@mui/material';
 import { useDebouncedValue } from '../hooks';
-import { fetchProjects, fetchChildren } from '../api/client';
+import { searchProjectOrChild } from '../api/client';
 import { Project, Child } from '../types';
 
 interface Option {
@@ -31,47 +31,53 @@ const ProjectOrChildAutocomplete = ({
   const debouncedInputValue = useDebouncedValue(inputValue, 300);
 
   useEffect(() => {
-    if (debouncedInputValue.length > 0) {
-      Promise.all([
-        fetchProjects(debouncedInputValue),
-        fetchChildren(debouncedInputValue),
-      ]).then(([projects, children]) => {
-        const projectOptions: Option[] = (projects || []).map((p: Project) => ({
-          id: p.id,
-          name: p.title,
-          type: 'project' as const,
-        }));
-        const childOptions: Option[] = (children || []).map((c: Child) => ({
-          id: c.id,
-          name: c.name,
-          type: 'child' as const,
-        }));
-        setOptions([...projectOptions, ...childOptions]);
-        setLoading(false);
-      });
-    }
+    const searchOptions = async () => {
+      if (debouncedInputValue.trim()) {
+        setLoading(true);
+        try {
+          const { projects, children } = await searchProjectOrChild(debouncedInputValue);
+
+          const projectOptions: Option[] = (projects || []).map((p: Project) => ({
+            id: p.id,
+            name: p.title,
+            type: 'project' as const,
+          }));
+          const childOptions: Option[] = (children || []).map((c: Child) => ({
+            id: c.id,
+            name: c.name,
+            type: 'child' as const,
+          }));
+          setOptions([...projectOptions, ...childOptions]);
+        } catch (error) {
+          console.error('Failed to search:', error);
+          setOptions([]);
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setOptions([]);
+      }
+    };
+
+    searchOptions();
   }, [debouncedInputValue]);
 
-  const handleInputChange = (
-    _event: React.SyntheticEvent,
-    newInputValue: string
-  ) => {
-    setInputValue(newInputValue);
-    if (newInputValue.length > 0) {
-      setLoading(true);
-    } else {
-      setLoading(false);
-      setOptions([]);
-    }
+  const getNoOptionsText = () => {
+    if (loading) return 'Loading...';
+    if (inputValue.trim()) return 'No results';
+    return 'Type to search';
   };
 
   return (
     <Autocomplete
       value={value}
       onChange={(_event, newValue) => onChange(newValue)}
-      onInputChange={handleInputChange}
+      inputValue={inputValue}
+      onInputChange={(_event, newInputValue) => setInputValue(newInputValue)}
       options={options}
       loading={loading}
+      noOptionsText={getNoOptionsText()}
+      loadingText="Loading..."
       groupBy={(option) =>
         option.type === 'project' ? 'Projects' : 'Children'
       }
