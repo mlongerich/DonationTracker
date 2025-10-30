@@ -1,7 +1,12 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DonationForm from './DonationForm';
-import apiClient, { searchProjectOrChild, createDonation } from '../api/client';
+import apiClient, {
+  searchProjectOrChild,
+  createDonation,
+  fetchSponsorshipsForDonation,
+  createSponsorship,
+} from '../api/client';
 
 jest.mock('../api/client', () => ({
   __esModule: true,
@@ -10,6 +15,8 @@ jest.mock('../api/client', () => ({
   },
   searchProjectOrChild: jest.fn(),
   createDonation: jest.fn(),
+  fetchSponsorshipsForDonation: jest.fn(),
+  createSponsorship: jest.fn(),
 }));
 
 describe('DonationForm', () => {
@@ -201,6 +208,64 @@ describe('DonationForm', () => {
     await waitFor(() => {
       const alert = screen.getByRole('alert');
       expect(alert).toHaveClass('MuiAlert-root');
+    });
+  });
+
+  it('auto-creates sponsorship when child selected with no existing sponsorship', async () => {
+    const mockDonor = { id: 1, name: 'John Doe', email: 'john@example.com' };
+    const mockSponsorship = { id: 10, donor_id: 1, child_id: 5, monthly_amount: 0 };
+
+    // Mock API responses
+    (searchProjectOrChild as jest.Mock).mockResolvedValue({
+      projects: [],
+      children: [{ id: 5, name: 'Eli' }],
+    });
+    (apiClient.get as jest.Mock).mockResolvedValue({
+      data: { donors: [mockDonor] },
+    });
+    (fetchSponsorshipsForDonation as jest.Mock).mockResolvedValue([]);
+    (createSponsorship as jest.Mock).mockResolvedValue(mockSponsorship);
+    (createDonation as jest.Mock).mockResolvedValue({});
+
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    // Select child from project/child autocomplete
+    const projectField = screen.getByLabelText(/project or child/i);
+    await user.clear(projectField);
+    await user.type(projectField, 'Eli');
+    await waitFor(() => expect(searchProjectOrChild).toHaveBeenCalledWith('Eli'));
+    const childOption = await screen.findByText(/Eli/);
+    await user.click(childOption);
+
+    // Select donor
+    const donorField = screen.getByLabelText(/donor/i);
+    await user.type(donorField, 'John');
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalled());
+    const donorOption = await screen.findByText(/John Doe/);
+    await user.click(donorOption);
+
+    // Wait for sponsorship detection to complete
+    await waitFor(() => {
+      expect(fetchSponsorshipsForDonation).toHaveBeenCalledWith(1, 5);
+      expect(createSponsorship).toHaveBeenCalledWith({
+        donor_id: 1,
+        child_id: 5,
+        monthly_amount: 0,
+      });
+    });
+
+    // Fill amount and submit
+    await user.type(screen.getByLabelText(/amount/i), '100');
+    await user.click(screen.getByRole('button', { name: /create donation/i }));
+
+    // Verify donation includes sponsorship_id
+    await waitFor(() => {
+      expect(createDonation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          sponsorship_id: 10,
+        })
+      );
     });
   });
 });
