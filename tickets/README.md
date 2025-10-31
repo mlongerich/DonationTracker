@@ -56,6 +56,10 @@ Current work items and user stories being actively developed.
 
 - [TICKET-005: Auto-Reassign Donations After Donor Merge](TICKET-005-auto-reassign-donations-after-merge.md) - ⏸️ Blocked (Depends on TICKET-004 ✅, Donation model required)
 
+### ⏸️ Deferred - Accepted Risk
+
+- [TICKET-049: Child Model Soft Delete with Archive/Restore](TICKET-049-child-soft-delete-archive-restore.md) - ⏸️ Deferred (Frontend protection sufficient, backend API risk accepted)
+
 ### 📋 Planned Tickets
 
 #### Feature Development
@@ -73,8 +77,7 @@ Current work items and user stories being actively developed.
 
 #### Sponsorship & Children Features
 - [TICKET-048: Stripe Sponsorship & Child Extraction](TICKET-048-stripe-sponsorship-child-extraction.md) - 📋 Planned (🟡 Medium, M)
-- [TICKET-049: Child Model Soft Delete with Archive/Restore](TICKET-049-child-soft-delete-archive-restore.md) - 📋 Planned (🟡 Medium, S)
-- [TICKET-050: Children Page UI Standardization](TICKET-050-children-page-ui-standardization.md) - 📋 Planned (🟡 Medium, M) - Blocked by TICKET-049
+- [TICKET-050: Children Page UI Standardization](TICKET-050-children-page-ui-standardization.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-051: Add Project Type Sort/Filter to Projects Page](TICKET-051-project-page-type-sort-filter.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-052: Improve Sponsorship Donation Linking](TICKET-052-improve-sponsorship-donation-linking.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-053: Sponsorships Page Filters & Pagination UI](TICKET-053-sponsorships-page-filters-pagination-ui.md) - 📋 Planned (🟡 Medium, M)
@@ -103,15 +106,19 @@ Current work items and user stories being actively developed.
 - **Total Tickets:** 66
 - **Completed:** 33
 - **In Progress:** 0
-- **Planned:** 32
+- **Planned:** 31
 - **Blocked:** 1
+- **Deferred/Accepted Risk:** 1
 
 ### By Category
+
+
 - **Feature Development:** 11 planned, 10 completed
-- **Sponsorship & Children Features:** 10 planned, 6 completed
+- **Sponsorship & Children Features:** 9 planned, 6 completed
 - **Code Quality & Architecture:** 11 planned, 17 completed
 - **In Progress:** 0
 - **Blocked:** 1 (TICKET-005)
+- **Deferred/Accepted Risk:** 1 (TICKET-049)
 
 ---
 

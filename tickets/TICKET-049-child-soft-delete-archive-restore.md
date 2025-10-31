@@ -1,11 +1,26 @@
 ## [TICKET-049] Child Model Soft Delete with Archive/Restore + Cascade Delete Protection
 
-**Status:** 📋 Planned
-**Priority:** 🔴 High (upgraded from Medium - UX bug causing 500 errors)
-**Started:** TBD
-**Completed:** TBD
+**Status:** ⏸️ Deferred - Accepted Risk
+**Priority:** 🟢 Low (downgraded from High - frontend protection sufficient)
+**Started:** N/A
+**Completed:** N/A
 **Dependencies:** None
 **Blocked by:** None
+**Decision Date:** 2025-10-31
+
+### Risk Acceptance Decision
+
+**Frontend mitigation implemented:** UI prevents deletion of children with sponsorships (can_be_deleted flag).
+
+**Remaining risk:** Direct API endpoint calls could still trigger 500 errors.
+
+**Risk assessment:** Acceptable because:
+- No public API access (internal tool only)
+- Frontend protection covers normal user workflows
+- Low likelihood of direct endpoint usage
+- Backend implementation effort not justified for edge case
+
+**Future consideration:** If API becomes public or multi-client, implement backend cascade delete protection (Phase 1 from original plan).
 
 ### User Story
 As an admin, I want to archive children instead of permanently deleting them so that I can restore them if needed and maintain historical records, consistent with how donor archiving works. Additionally, I want graceful error handling when attempting to delete a child with sponsorships (currently shows HTTP 500 error).

@@ -20,13 +20,14 @@
 **Last Updated:** 2025-10-31
 
 **Latest Milestones:**
+- TICKET-065 - Move Business Logic to Backend (displayable_email) ✅ (2025-10-31)
 - TICKET-064 - Smart Sponsorship Detection & Backend Logic ✅ (2025-10-31)
 - TICKET-032 - Custom Hooks Library (useDebouncedValue, usePagination, useRansackFilters) ✅ (2025-10-29)
 - TICKET-063 - Archive Business Logic for Active Sponsorships ✅ (2025-10-29)
 - TICKET-062 - Donor Cascade Delete Strategy ✅ (2025-10-28)
-- TICKET-025 - Standardize Form Input Sizing ✅
 
-**Current Focus:** TICKET-065 Move Business Logic to Backend (validation, presenter patterns)
+**Current Focus:** Evaluating next feature ticket (TICKET-051, TICKET-055, TICKET-059)
+**Deferred Risk:** TICKET-049 (frontend protection sufficient, backend API risk accepted)
 
 **See [docs/project/README.md](docs/project/README.md#current-status) for detailed status**
 
