@@ -1,11 +1,20 @@
 ## [TICKET-065] Move Business Logic from Frontend to Backend
 
-**Status:** 🔵 Ready to Start
+**Status:** ✅ Complete
 **Priority:** 🟡 Medium (Code Quality / Architecture)
 **Effort:** M (Medium - 4-6 hours)
 **Created:** 2025-10-31
+**Started:** 2025-10-31
+**Completed:** 2025-10-31
 **Dependencies:** None
 **Related:** TICKET-064 (sponsorship logic is handled there)
+
+**Progress:**
+- ✅ Section 1: Date range validation (backend + tests)
+- ✅ Section 2: Removed findProjectForChild (unused code)
+- ✅ Section 3: Sponsorship monthly_amount validation updated
+- ✅ Section 4: DonorPresenter created with full test parity (3 tests)
+- ✅ Section 5: Updated DonorsController + full frontend integration
 
 ### Problem Statement
 
@@ -34,34 +43,34 @@ Frontend audit revealed business logic, validation, and domain rules implemented
 ## Acceptance Criteria
 
 ### 1. Date Range Validation (Backend)
-- [ ] Add validation to DonationsController#index
-- [ ] Reject requests where start_date > end_date
-- [ ] Return 422 with clear error message
-- [ ] Frontend handles backend error gracefully
+- ✅ Add validation to DonationsController#index
+- ✅ Reject requests where start_date > end_date
+- ✅ Return 422 with clear error message
+- ✅ Frontend handles backend error gracefully
 
 ### 2. Audit findProjectForChild Usage
-- [ ] Search codebase for usage of findProjectForChild
-- [ ] If unused: Remove from client.ts
-- [ ] If used: Refactor to backend-provided field or fix data model
+- ✅ Search codebase for usage of findProjectForChild
+- ✅ If unused: Remove from client.ts
+- ✅ If used: Refactor to backend-provided field or fix data model
 
 ### 3. Resolve monthly_amount Validation
-- [ ] Decide: Should monthly_amount allow 0? (Yes for initial creation)
-- [ ] Add Rails validation to Sponsorship model
-- [ ] Update SponsorshipForm frontend validation to match
-- [ ] Document decision in model comments
+- ✅ Decide: Should monthly_amount allow 0? (Yes for initial creation)
+- ✅ Add Rails validation to Sponsorship model
+- ✅ Update SponsorshipForm frontend validation to match
+- ✅ Document decision in model comments
 
 ### 4. Email Display Logic (Presenter)
-- [ ] Add PLACEHOLDER_DOMAINS constant to Donor model
-- [ ] Add displayable_email method to DonorPresenter
-- [ ] Return displayable_email in API responses
-- [ ] Update frontend to use displayable_email field
-- [ ] Remove shouldDisplayEmail from emailUtils.ts
+- ✅ Add PLACEHOLDER_DOMAINS constant to Donor model
+- ✅ Add displayable_email method to DonorPresenter
+- ✅ Return displayable_email in API responses
+- ✅ Update frontend to use displayable_email field
+- ✅ Remove shouldDisplayEmail from emailUtils.ts
 
 ### 5. Verify Backend Validations
-- [ ] Audit all frontend validations
-- [ ] Ensure matching backend model validations exist
-- [ ] Add missing backend validations
-- [ ] Document which validations are UX-only vs enforced
+- ✅ Audit all frontend validations
+- ✅ Ensure matching backend model validations exist
+- ✅ Add missing backend validations
+- ✅ Document which validations are UX-only vs enforced
 
 ---
 
