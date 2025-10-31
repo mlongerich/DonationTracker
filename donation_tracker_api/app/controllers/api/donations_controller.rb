@@ -4,6 +4,8 @@ module Api
     include RansackFilterable
 
     def index
+      return if validate_date_range! == false
+
       scope = Donation.includes(:donor).all
       filtered_scope = apply_ransack_filters(scope)
       donations = paginate_collection(filtered_scope.order(date: :desc))
@@ -34,6 +36,25 @@ module Api
 
     def donation_params
       params.require(:donation).permit(:amount, :date, :donor_id, :project_id, :sponsorship_id, :child_id, :status, :description)
+    end
+
+    def validate_date_range!
+      return true unless params[:q]&.key?(:date_gteq) && params[:q]&.key?(:date_lteq)
+
+      start_date = Date.parse(params[:q][:date_gteq].to_s)
+      end_date = Date.parse(params[:q][:date_lteq].to_s)
+
+      if start_date > end_date
+        render json: {
+          error: "End date must be after or equal to start date"
+        }, status: :unprocessable_entity
+        return false
+      end
+
+      true
+    rescue ArgumentError
+      # Invalid date format - let Ransack handle it
+      true
     end
   end
 end

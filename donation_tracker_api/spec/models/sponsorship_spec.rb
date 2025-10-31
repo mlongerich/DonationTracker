@@ -31,10 +31,17 @@ RSpec.describe Sponsorship, type: :model do
       expect(sponsorship.errors[:monthly_amount]).to include("can't be blank")
     end
 
-    it "requires monthly_amount to be positive" do
+    it "does not allow negative monthly_amount" do
       sponsorship = Sponsorship.new(monthly_amount: -10)
       expect(sponsorship).not_to be_valid
-      expect(sponsorship.errors[:monthly_amount]).to include("must be greater than 0")
+      expect(sponsorship.errors[:monthly_amount]).to include("must be greater than or equal to 0")
+    end
+
+    it "allows monthly_amount of 0 for auto-created sponsorships" do
+      donor = create(:donor)
+      child = create(:child)
+      sponsorship = Sponsorship.new(donor: donor, child: child, monthly_amount: 0)
+      expect(sponsorship).to be_valid
     end
 
     it "allows start_date attribute" do

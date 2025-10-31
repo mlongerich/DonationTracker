@@ -146,6 +146,14 @@ RSpec.describe "/api/donations", type: :request do
       expect(json["donations"].count).to eq(1)
       expect(json["donations"].first["id"]).to eq(recent_donation.id)
     end
+
+    it "returns 422 when start date is after end date" do
+      get "/api/donations", params: { q: { date_gteq: Date.today, date_lteq: 5.days.ago.to_date } }
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      json = JSON.parse(response.body)
+      expect(json["error"]).to eq("End date must be after or equal to start date")
+    end
   end
 
   describe "GET /api/donations/:id" do

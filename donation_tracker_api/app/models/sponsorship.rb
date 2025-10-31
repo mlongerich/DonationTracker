@@ -4,7 +4,9 @@ class Sponsorship < ApplicationRecord
   belongs_to :project, optional: true
   has_many :donations, dependent: :restrict_with_exception
 
-  validates :monthly_amount, presence: true, numericality: { greater_than: 0 }
+  # Note: Allow monthly_amount of 0 for system auto-created sponsorships (TICKET-064)
+  # Frontend forms should still validate > 0 for manual user entry (UX requirement)
+  validates :monthly_amount, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validate :no_duplicate_active_sponsorships
 
   scope :active, -> { where(end_date: nil) }
