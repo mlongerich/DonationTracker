@@ -139,19 +139,4 @@ export const createSponsorship = async (data: SponsorshipFormData): Promise<Spon
   return response.data.sponsorship;
 };
 
-export const findProjectForChild = async (childId: number): Promise<number | null> => {
-  const response = await apiClient.get('/api/sponsorships', {
-    params: {
-      q: { child_id_eq: childId },
-      per_page: 1
-    }
-  });
-
-  if (response.data.sponsorships.length > 0) {
-    return response.data.sponsorships[0].project_id;
-  }
-
-  return null;
-};
-
 export default apiClient;

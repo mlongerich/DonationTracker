@@ -21,8 +21,7 @@ const {
   mergeDonors,
   fetchChildren,
   fetchSponsorshipsForDonation,
-  createSponsorship,
-  findProjectForChild
+  createSponsorship
 } = actualModule;
 
 describe('mergeDonors', () => {
@@ -124,34 +123,6 @@ describe('createSponsorship', () => {
       sponsorship: formData
     });
     expect(result).toEqual(mockSponsorship);
-  });
-});
-
-describe('findProjectForChild', () => {
-  it('returns project_id from child sponsorships', async () => {
-    const mockSponsorships = [
-      { id: 1, child_id: 1, project_id: 20 }
-    ];
-
-    (apiClient.get as jest.Mock).mockResolvedValue({ data: { sponsorships: mockSponsorships } });
-
-    const result = await findProjectForChild(1);
-
-    expect(apiClient.get).toHaveBeenCalledWith('/api/sponsorships', {
-      params: {
-        q: { child_id_eq: 1 },
-        per_page: 1
-      }
-    });
-    expect(result).toBe(20);
-  });
-
-  it('returns null when child has no sponsorships', async () => {
-    (apiClient.get as jest.Mock).mockResolvedValue({ data: { sponsorships: [] } });
-
-    const result = await findProjectForChild(99);
-
-    expect(result).toBeNull();
   });
 });
 
