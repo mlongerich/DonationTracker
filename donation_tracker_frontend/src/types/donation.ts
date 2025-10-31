@@ -22,6 +22,7 @@ export interface DonationFormData {
   donor_id: number;
   project_id?: number | null;
   sponsorship_id?: number | null;
+  child_id?: number | null;
   status?: string;
   description?: string;
 }

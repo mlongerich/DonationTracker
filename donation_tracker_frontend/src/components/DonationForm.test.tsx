@@ -4,8 +4,6 @@ import DonationForm from './DonationForm';
 import apiClient, {
   searchProjectOrChild,
   createDonation,
-  fetchSponsorshipsForDonation,
-  createSponsorship,
 } from '../api/client';
 
 jest.mock('../api/client', () => ({
@@ -15,8 +13,6 @@ jest.mock('../api/client', () => ({
   },
   searchProjectOrChild: jest.fn(),
   createDonation: jest.fn(),
-  fetchSponsorshipsForDonation: jest.fn(),
-  createSponsorship: jest.fn(),
 }));
 
 describe('DonationForm', () => {
@@ -211,9 +207,8 @@ describe('DonationForm', () => {
     });
   });
 
-  it('auto-creates sponsorship when child selected with no existing sponsorship', async () => {
+  it('passes child_id to backend when child selected', async () => {
     const mockDonor = { id: 1, name: 'John Doe', email: 'john@example.com' };
-    const mockSponsorship = { id: 10, donor_id: 1, child_id: 5, monthly_amount: 0 };
 
     // Mock API responses
     (searchProjectOrChild as jest.Mock).mockResolvedValue({
@@ -223,8 +218,6 @@ describe('DonationForm', () => {
     (apiClient.get as jest.Mock).mockResolvedValue({
       data: { donors: [mockDonor] },
     });
-    (fetchSponsorshipsForDonation as jest.Mock).mockResolvedValue([]);
-    (createSponsorship as jest.Mock).mockResolvedValue(mockSponsorship);
     (createDonation as jest.Mock).mockResolvedValue({});
 
     const user = userEvent.setup();
@@ -245,25 +238,17 @@ describe('DonationForm', () => {
     const donorOption = await screen.findByText(/John Doe/);
     await user.click(donorOption);
 
-    // Wait for sponsorship detection to complete
-    await waitFor(() => {
-      expect(fetchSponsorshipsForDonation).toHaveBeenCalledWith(1, 5);
-      expect(createSponsorship).toHaveBeenCalledWith({
-        donor_id: 1,
-        child_id: 5,
-        monthly_amount: 0,
-      });
-    });
-
     // Fill amount and submit
     await user.type(screen.getByLabelText(/amount/i), '100');
     await user.click(screen.getByRole('button', { name: /create donation/i }));
 
-    // Verify donation includes sponsorship_id
+    // Verify donation includes child_id (backend handles sponsorship auto-creation)
     await waitFor(() => {
       expect(createDonation).toHaveBeenCalledWith(
         expect.objectContaining({
-          sponsorship_id: 10,
+          child_id: 5,
+          donor_id: 1,
+          amount: 100,
         })
       );
     });
