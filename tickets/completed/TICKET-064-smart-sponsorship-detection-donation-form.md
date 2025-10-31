@@ -1,12 +1,14 @@
 ## [TICKET-064] Smart Sponsorship Detection & Auto-Creation in Donation Form
 
-**Status:** 🔵 Ready to Start
+**Status:** ✅ Complete
 **Priority:** 🔴 High (Blocks TICKET-053)
-**Effort:** L (Large - 6-8 hours)
+**Effort:** L (Large - 8 hours actual)
 **Created:** 2025-10-29
-**Updated:** 2025-10-29 (Revised with omnibar UX)
-**Dependencies:** Backend sponsorship_id parameter support (NOT YET IMPLEMENTED)
-**Blocks:** TICKET-053 (Sponsorships Page testing)
+**Updated:** 2025-10-31 (Completed with backend-driven approach)
+**Completed:** 2025-10-31
+**Implementation:** Backend-driven (business logic moved to backend, better than original plan)
+**Commits:** a53318e (backend), 7ff38c0 (frontend)
+**Blocks:** TICKET-053 (Sponsorships Page testing) - NOW UNBLOCKED
 
 ### User Story
 As a user creating a donation, I want to easily select either a project OR a child, and have the system automatically handle sponsorship creation/detection, so that I can make sponsorship donations without understanding the technical relationship between donations, sponsorships, projects, and children.
@@ -1172,3 +1174,83 @@ During Phase 4 implementation, two tests were removed from `ProjectOrChildAutoco
 - **Alternative:** Manual testing directly in DonationForm where the component will be used provides more realistic integration testing
 - **Files removed:** `.storybook/`, `ProjectOrChildAutocomplete.stories.jsx`
 - **Docker:** Removed storybook service from docker-compose.yml
+
+---
+
+## ACTUAL IMPLEMENTATION (2025-10-31)
+
+### Architecture Decision: Backend-Driven Approach
+
+After initial implementation, discovered that sponsorship auto-creation logic belonged in the **backend**, not frontend. Refactored to move business logic to backend (TICKET-065 created for other similar issues).
+
+### What Was Built
+
+**Backend (`a53318e`):**
+1. **Migration:** Added `child_id` column to donations table with index
+2. **Donation Model (`donation.rb`):**
+   - Added `attr_accessor :child_id` (virtual attribute)
+   - Added `before_create :auto_create_sponsorship_from_child_id` callback
+   - Sponsorship lookup: `Sponsorship.active.find_or_create_by!(donor_id, child_id, monthly_amount)`
+   - Key behaviors:
+     - Only searches **active** sponsorships (ignores archived/ended ones)
+     - Matches by **amount** (different amounts = separate sponsorships)
+     - Auto-sets both `sponsorship_id` AND `project_id`
+3. **Search Controller:** Filter out `project_type: :sponsorship` from search results
+4. **Donations Controller:** Added `child_id` to params permit list
+5. **Tests:** Added 6 donation model tests + 2 search endpoint tests (all 221 backend tests passing)
+
+**Frontend (`7ff38c0`):**
+1. **ProjectOrChildAutocomplete component:** Unified search for projects and children (already implemented in Phase 4)
+2. **DonationForm simplification:**
+   - Removed ALL frontend sponsorship detection logic (~60 lines removed)
+   - Just passes `child_id` when child selected
+   - Backend handles everything
+3. **Type updates:** Added `child_id` to `DonationFormData`
+4. **Tests:** Updated test to verify `child_id` is passed (all 15 frontend tests passing)
+
+### Key Features Achieved
+
+✅ **User can select child from dropdown** → Backend auto-creates/finds sponsorship
+✅ **Amount-based matching** → $50 donation creates $50/month sponsorship, reuses if exists
+✅ **Active-only lookup** → Archived sponsorships don't block new ones
+✅ **Auto-linked to project** → Donations show correct sponsorship project (not "general donation")
+✅ **Sponsorship projects filtered** → Don't appear in search (only general/campaign projects + children)
+✅ **No modal needed** → Backend logic is deterministic (no ambiguity)
+
+### What Changed From Original Plan
+
+**Original plan (frontend-heavy):**
+- Frontend detects/creates sponsorships
+- Modal for multiple sponsorships
+- Complex state management
+
+**Actual implementation (backend-driven):**
+- Backend handles all business logic
+- Frontend just passes `child_id`
+- Simpler, more secure, single source of truth
+
+### Files Modified
+
+**Backend:**
+- `donation_tracker_api/app/models/donation.rb` (callback added)
+- `donation_tracker_api/app/controllers/api/donations_controller.rb` (child_id param)
+- `donation_tracker_api/app/controllers/api/search_controller.rb` (filter sponsorship projects)
+- `donation_tracker_api/db/migrate/20251030180519_add_child_id_to_donations.rb` (NEW)
+- `donation_tracker_api/db/schema.rb` (child_id column)
+- `donation_tracker_api/spec/models/donation_spec.rb` (+6 tests)
+- `donation_tracker_api/spec/requests/api/search_spec.rb` (NEW, +2 tests)
+
+**Frontend:**
+- `donation_tracker_frontend/src/components/DonationForm.tsx` (simplified, -60 lines)
+- `donation_tracker_frontend/src/components/DonationForm.test.tsx` (updated test)
+- `donation_tracker_frontend/src/types/donation.ts` (child_id added)
+
+### Success Criteria Met
+
+- ✅ User can donate to children without understanding sponsorships
+- ✅ System auto-creates sponsorships with correct amount
+- ✅ Donations linked to correct project
+- ✅ Archived sponsorships don't interfere
+- ✅ Different amounts create separate sponsorships
+- ✅ All tests passing (221 backend, 15 frontend)
+- ✅ TICKET-053 unblocked
