@@ -10,8 +10,12 @@ module Api
         return
       end
 
-      # Search projects by title
-      projects = Project.kept.where("title ILIKE ?", "%#{query}%").order(:title).limit(5)
+      # Search projects by title (exclude sponsorship projects)
+      projects = Project.kept
+                        .where("title ILIKE ?", "%#{query}%")
+                        .where.not(project_type: :sponsorship)
+                        .order(:title)
+                        .limit(5)
 
       # Search children by name
       children = Child.kept.where("name ILIKE ?", "%#{query}%").order(:name).limit(5)

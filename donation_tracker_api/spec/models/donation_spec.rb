@@ -100,4 +100,69 @@ RSpec.describe Donation, type: :model do
       expect(project.reload.discarded?).to be false
     end
   end
+
+  describe "sponsorship auto-creation from child_id" do
+    it "creates sponsorship when child_id provided and no sponsorship exists" do
+      donor = create(:donor)
+      child = create(:child)
+
+      expect do
+        donation = create(:donation, donor: donor, child_id: child.id)
+        expect(donation.sponsorship_id).not_to be_nil
+      end.to change(Sponsorship, :count).by(1)
+    end
+
+    it "uses existing sponsorship when child_id and amount match existing sponsorship" do
+      donor = create(:donor)
+      child = create(:child)
+      existing_sponsorship = create(:sponsorship, donor: donor, child: child, monthly_amount: 100)
+
+      expect do
+        donation = create(:donation, donor: donor, child_id: child.id, amount: 100)
+        expect(donation.sponsorship_id).to eq(existing_sponsorship.id)
+      end.not_to change(Sponsorship, :count)
+    end
+
+    it "creates new sponsorship when amount differs from existing sponsorship" do
+      donor = create(:donor)
+      child = create(:child)
+      existing_sponsorship = create(:sponsorship, donor: donor, child: child, monthly_amount: 50)
+
+      expect do
+        donation = create(:donation, donor: donor, child_id: child.id, amount: 100)
+        expect(donation.sponsorship_id).not_to eq(existing_sponsorship.id)
+        expect(donation.sponsorship.monthly_amount).to eq(100)
+      end.to change(Sponsorship, :count).by(1)
+    end
+
+    it "creates new sponsorship when matching archived sponsorship exists" do
+      donor = create(:donor)
+      child = create(:child)
+      archived_sponsorship = create(:sponsorship, donor: donor, child: child, monthly_amount: 100, end_date: 1.month.ago)
+
+      expect do
+        donation = create(:donation, donor: donor, child_id: child.id, amount: 100)
+        expect(donation.sponsorship_id).not_to eq(archived_sponsorship.id)
+        expect(donation.sponsorship.active?).to be true
+      end.to change(Sponsorship, :count).by(1)
+    end
+
+    it "does not create sponsorship when child_id is nil" do
+      donor = create(:donor)
+
+      expect do
+        donation = create(:donation, donor: donor, child_id: nil)
+        expect(donation.sponsorship_id).to be_nil
+      end.not_to change(Sponsorship, :count)
+    end
+
+    it "sets project_id to sponsorship's project when child_id provided" do
+      donor = create(:donor)
+      child = create(:child)
+
+      donation = create(:donation, donor: donor, child_id: child.id)
+
+      expect(donation.project_id).to eq(donation.sponsorship.project_id)
+    end
+  end
 end

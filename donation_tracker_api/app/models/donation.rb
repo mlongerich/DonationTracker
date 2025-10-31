@@ -3,7 +3,10 @@ class Donation < ApplicationRecord
   belongs_to :project, optional: true
   belongs_to :sponsorship, optional: true
 
+  attr_accessor :child_id
+
   before_create :restore_archived_associations
+  before_create :auto_create_sponsorship_from_child_id
 
   validates :amount, presence: true, numericality: { greater_than: 0 }
   validates :date, presence: true
@@ -19,6 +22,19 @@ class Donation < ApplicationRecord
   def restore_archived_associations
     donor.undiscard if donor&.discarded?
     project.undiscard if project&.discarded?
+  end
+
+  def auto_create_sponsorship_from_child_id
+    return unless child_id.present?
+
+    sponsorship = Sponsorship.active.find_or_create_by!(
+      donor_id: donor_id,
+      child_id: child_id,
+      monthly_amount: amount
+    )
+
+    self.sponsorship_id = sponsorship.id
+    self.project_id = sponsorship.project_id
   end
 
   def date_not_in_future
