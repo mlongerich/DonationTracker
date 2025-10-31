@@ -191,6 +191,7 @@ describe('DonorForm', () => {
       id: 1,
       name: 'Existing Donor',
       email: 'existing@example.com',
+      displayable_email: 'existing@example.com',
     };
 
     render(
@@ -208,6 +209,7 @@ describe('DonorForm', () => {
       id: 1,
       name: 'Existing Donor',
       email: 'existing@example.com',
+      displayable_email: 'existing@example.com',
     };
 
     render(
@@ -227,6 +229,7 @@ describe('DonorForm', () => {
       id: 1,
       name: 'Original Name',
       email: 'original@example.com',
+      displayable_email: 'original@example.com',
     };
     mockedApiClient.patch.mockResolvedValue({
       data: { id: 1, name: 'Updated Name', email: 'original@example.com' },
@@ -264,6 +267,7 @@ describe('DonorForm', () => {
       id: 1,
       name: 'Existing Donor',
       email: 'existing@example.com',
+      displayable_email: 'existing@example.com',
     };
 
     render(
@@ -292,6 +296,7 @@ describe('DonorForm', () => {
       id: 1,
       name: 'Existing Donor',
       email: 'existing@example.com',
+      displayable_email: 'existing@example.com',
     };
     const handleCancel = jest.fn();
     const user = userEvent.setup();
