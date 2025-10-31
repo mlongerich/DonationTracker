@@ -11,7 +11,7 @@ class Api::DonorsController < ApplicationController
     donors = paginate_collection(filtered_scope.order(name: :asc))
 
     render json: {
-      donors: donors,
+      donors: CollectionPresenter.new(donors, DonorPresenter).as_json,
       meta: pagination_meta(donors)
     }
   end

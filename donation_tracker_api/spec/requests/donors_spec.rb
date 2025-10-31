@@ -164,6 +164,17 @@ RSpec.describe "/api/donors", type: :request do
       expect(json_response["meta"]["current_page"]).to eq(2)
       expect(json_response["meta"]["per_page"]).to eq(10)
     end
+
+    it "includes displayable_email from DonorPresenter" do
+      donor = create(:donor, email: "test@mailinator.com")
+
+      get "/api/donors", headers: { "Host" => "api" }
+
+      expect(response).to have_http_status(:ok)
+      json_response = JSON.parse(response.body)
+      donor_json = json_response["donors"].find { |d| d["id"] == donor.id }
+      expect(donor_json["displayable_email"]).to be_nil
+    end
   end
 
   describe "PATCH /api/donors/:id" do
