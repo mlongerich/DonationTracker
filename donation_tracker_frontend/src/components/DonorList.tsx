@@ -13,7 +13,6 @@ import {
 import EditIcon from '@mui/icons-material/Edit';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
-import { shouldDisplayEmail } from '../utils/emailUtils';
 import { Donor } from '../types';
 
 interface DonorListProps {
@@ -101,8 +100,8 @@ const DonorList: React.FC<DonorListProps> = ({
                     )}
                   </Box>
                   <Typography variant="body2" color="text.secondary">
-                    {shouldDisplayEmail(donor.email)
-                      ? donor.email
+                    {donor.displayable_email
+                      ? donor.displayable_email
                       : '(No email provided)'}
                   </Typography>
                 </Box>

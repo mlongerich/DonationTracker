@@ -5,6 +5,7 @@ export interface Donor {
   id: number;
   name: string;
   email: string;
+  displayable_email: string | null; // null for placeholder emails (@mailinator.com)
   discarded_at?: string | null;
   merged_into_id?: number | null;
 }

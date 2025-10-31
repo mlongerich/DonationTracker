@@ -71,8 +71,8 @@ describe('DonorsPage', () => {
 
   it('renders donor list with fetched data', async () => {
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -178,7 +178,7 @@ describe('DonorsPage', () => {
 
   it('renders pagination when multiple pages exist', async () => {
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -225,7 +225,7 @@ describe('DonorsPage', () => {
   it('archives donor when archive is clicked', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -258,7 +258,7 @@ describe('DonorsPage', () => {
   it('restores donor when restore is clicked', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', discarded_at: '2024-01-01' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com', discarded_at: '2024-01-01' },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -291,8 +291,8 @@ describe('DonorsPage', () => {
   it('shows merge button when 2 or more donors selected', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -335,8 +335,8 @@ describe('DonorsPage', () => {
   it('opens merge modal when merge button clicked', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -373,8 +373,8 @@ describe('DonorsPage', () => {
   it('merges donors when merge confirmed', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -423,7 +423,7 @@ describe('DonorsPage', () => {
   it('passes donor to DonorForm when edit button clicked', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -457,7 +457,7 @@ describe('DonorsPage', () => {
   it('clears editing state when Cancel button is clicked', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -496,11 +496,11 @@ describe('DonorsPage', () => {
   it('refreshes donor list after successful form submission', async () => {
     const user = userEvent.setup({ delay: null });
     const initialDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
     ];
     const updatedDonors = [
-      { id: 2, name: 'New Donor', email: 'new@example.com' },
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 2, name: 'New Donor', email: 'new@example.com', displayable_email: 'new@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
     ];
 
     let callCount = 0;
@@ -526,7 +526,7 @@ describe('DonorsPage', () => {
 
     mockedApiClient.post.mockResolvedValue({
       status: 201,
-      data: { id: 2, name: 'New Donor', email: 'new@example.com' },
+      data: { id: 2, name: 'New Donor', email: 'new@example.com', displayable_email: 'new@example.com' },
     });
 
     render(
@@ -556,7 +556,7 @@ describe('DonorsPage', () => {
     it('shows error snackbar when archive fails with 422', async () => {
       const user = userEvent.setup({ delay: null });
       const mockDonors = [
-        { id: 1, name: 'John Doe', email: 'john@example.com' },
+        { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
       ];
 
       mockedApiClient.get.mockResolvedValue({
@@ -596,7 +596,7 @@ describe('DonorsPage', () => {
     it('displays generic error message when API error has no details', async () => {
       const user = userEvent.setup({ delay: null });
       const mockDonors = [
-        { id: 1, name: 'John Doe', email: 'john@example.com' },
+        { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
       ];
 
       mockedApiClient.get.mockResolvedValue({
@@ -636,7 +636,7 @@ describe('DonorsPage', () => {
     it('error snackbar closes when user clicks close button', async () => {
       const user = userEvent.setup({ delay: null });
       const mockDonors = [
-        { id: 1, name: 'John Doe', email: 'john@example.com' },
+        { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
       ];
 
       mockedApiClient.get.mockResolvedValue({

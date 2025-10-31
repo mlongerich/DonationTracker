@@ -75,14 +75,14 @@ describe('DonorAutocomplete', () => {
     });
   });
 
-  it('hides mailinator emails and shows "No email provided"', async () => {
-    const donorsWithMailinator = [
-      { id: 1, name: 'John Doe', email: 'john@mailinator.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+  it('uses displayable_email from backend presenter', async () => {
+    const donorsFromBackend = [
+      { id: 1, name: 'John Doe', email: 'john@mailinator.com', displayable_email: null },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
     ];
 
     (apiClient.get as jest.Mock).mockResolvedValue({
-      data: { donors: donorsWithMailinator },
+      data: { donors: donorsFromBackend },
     });
 
     const user = userEvent.setup();

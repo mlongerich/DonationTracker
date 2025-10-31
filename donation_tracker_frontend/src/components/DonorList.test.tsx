@@ -10,8 +10,8 @@ describe('DonorList', () => {
 
   it('displays donor names and emails when donors provided', () => {
     const donors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
     ];
 
     render(<DonorList donors={donors} />);
@@ -24,9 +24,9 @@ describe('DonorList', () => {
 
   it('displays donors in the order provided', () => {
     const donors = [
-      { id: 3, name: 'Newest Donor', email: 'newest@example.com' },
-      { id: 2, name: 'Middle Donor', email: 'middle@example.com' },
-      { id: 1, name: 'Oldest Donor', email: 'oldest@example.com' },
+      { id: 3, name: 'Newest Donor', email: 'newest@example.com', displayable_email: 'newest@example.com' },
+      { id: 2, name: 'Middle Donor', email: 'middle@example.com', displayable_email: 'middle@example.com' },
+      { id: 1, name: 'Oldest Donor', email: 'oldest@example.com', displayable_email: 'oldest@example.com' },
     ];
 
     render(<DonorList donors={donors} />);
@@ -39,8 +39,8 @@ describe('DonorList', () => {
 
   it('renders edit button for each donor', () => {
     const donors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
     ];
 
     render(<DonorList donors={donors} />);
@@ -50,7 +50,7 @@ describe('DonorList', () => {
   });
 
   it('calls onEdit when edit button clicked', async () => {
-    const donors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
+    const donors = [{ id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' }];
     const handleEdit = jest.fn();
 
     render(<DonorList donors={donors} onEdit={handleEdit} />);
@@ -63,8 +63,8 @@ describe('DonorList', () => {
 
   it('accepts editingDonorId prop for highlighting', () => {
     const donors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
     ];
 
     render(<DonorList donors={donors} editingDonorId={1} />);
@@ -76,7 +76,7 @@ describe('DonorList', () => {
 
   it('shows tooltip "Edit donor" when hovering over edit button', async () => {
     const user = userEvent.setup();
-    const donors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
+    const donors = [{ id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' }];
 
     render(<DonorList donors={donors} />);
 
@@ -88,7 +88,7 @@ describe('DonorList', () => {
 
   it('shows tooltip "Archive donor" when hovering over archive button', async () => {
     const user = userEvent.setup();
-    const donors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
+    const donors = [{ id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' }];
 
     render(<DonorList donors={donors} />);
 
@@ -105,6 +105,7 @@ describe('DonorList', () => {
         id: 1,
         name: 'Archived Donor',
         email: 'archived@example.com',
+        displayable_email: 'archived@example.com',
         discarded_at: '2025-10-07T00:00:00Z',
       },
     ];
@@ -117,9 +118,9 @@ describe('DonorList', () => {
     expect(await screen.findByText('Restore donor')).toBeInTheDocument();
   });
 
-  it('hides @mailinator.com email addresses', () => {
+  it('hides @mailinator.com email addresses using backend displayable_email', () => {
     const donors = [
-      { id: 1, name: 'Anonymous', email: 'Anonymous@mailinator.com' },
+      { id: 1, name: 'Anonymous', email: 'Anonymous@mailinator.com', displayable_email: null },
     ];
 
     render(<DonorList donors={donors} />);
@@ -132,7 +133,7 @@ describe('DonorList', () => {
 
   it('displays placeholder text for hidden emails', () => {
     const donors = [
-      { id: 1, name: 'Anonymous', email: 'Anonymous@mailinator.com' },
+      { id: 1, name: 'Anonymous', email: 'Anonymous@mailinator.com', displayable_email: null },
     ];
 
     render(<DonorList donors={donors} />);
@@ -141,7 +142,7 @@ describe('DonorList', () => {
   });
 
   it('shows real email addresses for non-mailinator domains', () => {
-    const donors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
+    const donors = [{ id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' }];
 
     render(<DonorList donors={donors} />);
 
@@ -151,8 +152,8 @@ describe('DonorList', () => {
 
   it('renders checkboxes for donor selection', () => {
     const donors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
     ];
 
     render(<DonorList donors={donors} />);
@@ -163,8 +164,8 @@ describe('DonorList', () => {
 
   it('calls onSelectionChange when checkbox is clicked', async () => {
     const donors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
     ];
     const handleSelectionChange = jest.fn();
 

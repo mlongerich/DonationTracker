@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Autocomplete, TextField, CircularProgress } from '@mui/material';
 import apiClient from '../api/client';
-import { shouldDisplayEmail } from '../utils/emailUtils';
 import { Donor } from '../types';
 import { useDebouncedValue } from '../hooks';
 
@@ -58,8 +57,8 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
   }, [debouncedSearchInput]);
 
   const getOptionLabel = (option: Donor): string => {
-    if (shouldDisplayEmail(option.email)) {
-      return `${option.name} (${option.email})`;
+    if (option.displayable_email) {
+      return `${option.name} (${option.displayable_email})`;
     }
     return `${option.name} (No email provided)`;
   };
