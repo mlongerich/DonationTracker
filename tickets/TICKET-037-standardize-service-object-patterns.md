@@ -339,9 +339,56 @@ end
 - Clear separation of responsibilities
 - Easy to test each step independently
 
+### Standardized .call Interface (Added 2025-10-31)
+
+**Pattern Recommendation:** All services should implement `.call` interface for consistency
+
+```ruby
+# Pattern: Class method delegates to instance method
+class DonorService
+  def self.call(donor_attributes:, transaction_date:)
+    new(donor_attributes: donor_attributes, transaction_date: transaction_date).call
+  end
+
+  def initialize(donor_attributes:, transaction_date:)
+    @donor_attributes = donor_attributes
+    @transaction_date = transaction_date
+  end
+
+  def call
+    # Implementation (renamed from find_or_update)
+  end
+end
+
+class DonorMergeService
+  def self.call(donor_ids:, field_selections:)
+    new(donor_ids: donor_ids, field_selections: field_selections).call
+  end
+
+  def initialize(donor_ids:, field_selections:)
+    @donor_ids = donor_ids
+    @field_selections = field_selections
+  end
+
+  def call
+    # Implementation (renamed from merge)
+  end
+end
+
+# Controllers always use: ServiceName.call(args)
+result = DonorService.call(donor_attributes: params, transaction_date: Time.current)
+result = DonorMergeService.call(donor_ids: ids, field_selections: selections)
+```
+
+**Benefits:**
+- Consistent interface across all services
+- Easy refactoring (internals can change without breaking callers)
+- Testable (can inject dependencies via initialize)
+- Follows Railway Oriented Programming pattern
+
 ### Related Tickets
 - Follows conventions established in TICKET-014
-- Part of code quality improvement initiative
+- Part of code quality improvement initiative (CODE_SMELL_ANALYSIS.md)
 
 ### Notes
 - This is a refactoring ticket - no functionality changes
@@ -349,3 +396,4 @@ end
 - Keep backwards compatibility during migration if needed
 - Consider adding `frozen_string_literal: true` to all services
 - Document the pattern in CLAUDE.md for future reference
+- `.call` interface makes services interchangeable and composable

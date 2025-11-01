@@ -250,9 +250,21 @@ GET /api/reports/donor/:id             # Donor giving history
 GET /api/donations/overdue             # Overdue sponsorships
 ```
 
-### Webhooks (TICKET-012)
+### Webhooks (TICKET-026)
 ```
-POST /webhooks/stripe  # Stripe payment webhook
+POST /webhooks/stripe  # Stripe payment webhook (real-time sync)
+
+Supported Events:
+  - charge.succeeded              # One-time donations
+  - invoice.payment_succeeded     # Recurring subscription payments
+  - customer.subscription.deleted # Subscription cancellations
+
+Security:
+  - Webhook signature verification via Stripe-Signature header
+  - Returns 400 for invalid signatures
+  - Returns 200 for successful processing
+
+Note: Reuses StripePaymentImportService from TICKET-070 (zero code duplication)
 ```
 
 ---

@@ -29,11 +29,15 @@
   - `last_received_date`, `expected_next_date`
   - `missed_payments_count` (integer, default: 0)
   - `status` (enum: active/late/overdue/at_risk/cancelled/paused)
+  - **Stripe Integration Fields (TICKET-070):**
+    - `stripe_charge_id` (string, unique index)
+    - `stripe_customer_id` (string, indexed)
+    - `stripe_subscription_id` (string)
   - `created_at`, `updated_at`
 - **Donation Types:** general, project, sponsorship
 - **Payment Methods:** stripe, check, cash, other
 - **Relationships:** `belongs_to :donor`, `belongs_to :project` (optional)
-- **Status:** ✅ Basic CRUD complete, recurring tracking planned
+- **Status:** ✅ Basic CRUD complete, Stripe integration pending (TICKET-070)
 
 ### Projects
 - **Fields:** `id`, `title`, `description`, `project_type`, `system`, `created_at`, `updated_at`
@@ -124,10 +128,14 @@ erDiagram
 - `donations.project_id` (foreign key, nullable)
 - `projects.project_type` (enum lookup)
 
-**Planned (TICKET-035):**
-- `donations.date` (range queries, sorting)
-- `donations.status` (filtering)
-- `donations(donor_id, date)` (composite for common queries)
+**Planned:**
+- **TICKET-070 (Stripe Integration):**
+  - `donations.stripe_charge_id` (unique, idempotency)
+  - `donations.stripe_customer_id` (lookup for webhooks)
+- **TICKET-035 (Query Performance):**
+  - `donations.date` (range queries, sorting)
+  - `donations.status` (filtering)
+  - `donations(donor_id, date)` (composite for common queries)
 
 ---
 

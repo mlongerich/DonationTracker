@@ -375,6 +375,124 @@ class DonorSearchQuery < ApplicationQuery
 end
 ```
 
+### Concrete Example: ChildrenController#index (Added 2025-10-31)
+
+**Problem:** ChildrenController#index has 35 lines mixing concerns (Reek: TooManyStatements)
+
+**Current Code (Complex):**
+```ruby
+def index
+  scope = params[:include_discarded] == "true" ? Child.with_discarded : Child.kept
+
+  # Eager loading logic
+  if params[:include_sponsorships] == "true"
+    scope = scope.includes(sponsorships: :donor)
+  end
+
+  filtered_scope = apply_ransack_filters(scope)
+  children = paginate_collection(filtered_scope.order(name: :asc))
+
+  # Manual presenter logic with nested serialization
+  children_data = children.map do |child|
+    child_json = ChildPresenter.new(child).as_json
+    if params[:include_sponsorships] == "true"
+      child_json[:sponsorships] = child.sponsorships.map do |s|
+        { id: s.id, donor_id: s.donor_id, ... }  # Manual serialization!
+      end
+    end
+    child_json
+  end
+
+  render json: { children: children_data, meta: pagination_meta(children) }
+end
+```
+
+**Solution: Query Object + Enhanced Presenter**
+
+```ruby
+# app/queries/children_query.rb
+class ChildrenQuery < ApplicationQuery
+  def initialize(params = {})
+    @params = params
+  end
+
+  def call
+    scope = base_scope
+    scope = apply_eager_loading(scope)
+    scope = apply_filters(scope)
+    scope.order(name: :asc)
+  end
+
+  private
+
+  def base_scope
+    @params[:include_discarded] == "true" ? Child.with_discarded : Child.kept
+  end
+
+  def apply_eager_loading(scope)
+    @params[:include_sponsorships] == "true" ? scope.includes(sponsorships: :donor) : scope
+  end
+
+  def apply_filters(scope)
+    return scope unless @params[:q]
+    scope.ransack(@params[:q]).result
+  end
+end
+
+# app/presenters/child_presenter.rb (enhanced)
+class ChildPresenter < BasePresenter
+  def as_json(options = {})
+    result = {
+      id: object.id,
+      name: object.name,
+      created_at: object.created_at,
+      can_be_deleted: object.can_be_deleted?
+    }
+
+    # Add sponsorships using SponsorshipPresenter (not manual serialization!)
+    if options[:include_sponsorships] && object.association(:sponsorships).loaded?
+      result[:sponsorships] = object.sponsorships.map do |sponsorship|
+        SponsorshipPresenter.new(sponsorship).as_json
+      end
+    end
+
+    result
+  end
+end
+
+# app/presenters/collection_presenter.rb (support options)
+class CollectionPresenter
+  def initialize(collection, presenter_class, options = {})
+    @collection = collection
+    @presenter_class = presenter_class
+    @options = options
+  end
+
+  def as_json
+    @collection.map { |item| @presenter_class.new(item).as_json(@options) }
+  end
+end
+
+# Controller becomes thin (5 lines vs 35!)
+def index
+  scope = ChildrenQuery.new(params).call
+  children = paginate_collection(scope)
+
+  presenter_options = { include_sponsorships: params[:include_sponsorships] == "true" }
+
+  render json: {
+    children: CollectionPresenter.new(children, ChildPresenter, presenter_options).as_json,
+    meta: pagination_meta(children)
+  }
+end
+```
+
+**Benefits:**
+- Controller: 35 lines → 5 lines (86% reduction)
+- Reusable query logic (can use in background jobs, rake tasks)
+- Nested presenters (SponsorshipPresenter reused, not manual serialization)
+- Options pattern enables flexible presentation
+
 ### Future Enhancements
 - Add query result caching
 - Create `DonorAnalyticsQuery` for reporting
@@ -385,7 +503,8 @@ end
 ### Related Tickets
 - Works well with TICKET-028 (Controller Concerns)
 - Complements TICKET-033 (Policy Objects - can use policy scopes)
-- Part of code quality improvement initiative
+- TICKET-063: Standardize Presenter Responses (uses enhanced CollectionPresenter)
+- Part of code quality improvement initiative (CODE_SMELL_ANALYSIS.md)
 
 ### Notes
 - Query objects are POROs (Plain Old Ruby Objects)
@@ -393,3 +512,4 @@ end
 - Keep query objects focused on database queries only
 - Business logic belongs in services, not query objects
 - Consider adding `frozen_string_literal: true` for immutability
+- Presenter options pattern allows flexible serialization without controller logic
