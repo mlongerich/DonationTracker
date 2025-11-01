@@ -71,9 +71,20 @@ Current work items and user stories being actively developed.
 - [TICKET-021: Quick Donor Creation from Donation Page](TICKET-021-quick-donor-creation-from-donation-page.md) - 📋 Planned
 - [TICKET-022: Anonymous Donation Support](TICKET-022-anonymous-donation-support.md) - 📋 Planned
 - [TICKET-024: Separate Test and Development Database Environments](TICKET-024-separate-test-dev-environments.md) - 📋 Planned
-- [TICKET-026: Stripe Import & Webhook Integration](TICKET-026-stripe-import-webhook-integration.md) - 📋 Planned
-- [TICKET-027: Stripe Description Mapping Management](TICKET-027-stripe-description-mapping-management.md) - 📋 Planned
 - [TICKET-046: Add Project Filter to Donations Page](TICKET-046-donation-list-project-filter.md) - 📋 Planned
+
+#### Stripe Integration
+
+**⭐ PERMANENT (Production Code):**
+- [TICKET-070: Stripe CSV Import Foundation](TICKET-070-stripe-csv-import-foundation.md) - 📋 Planned (🔴 High, L) - *Core reusable service (webhooks depend on this)*
+- [TICKET-026: Stripe Webhook Integration](TICKET-026-stripe-import-webhook-integration.md) - 📋 Planned (🟡 Medium, M) - *Long-term production solution*
+
+**🗑️ TEMPORARY (One-Time Use):**
+- [TICKET-071: Stripe CSV Batch Import Task](TICKET-071-stripe-csv-batch-import-task.md) - 📋 Planned (🔴 High, M) - *Throwaway: delete after CSV import*
+- [TICKET-072: Import Error Recovery UI](TICKET-072-import-error-recovery-ui.md) - 📋 Planned (🟢 Low, M) - *Optional: skip if <10 failures*
+
+**FUTURE:**
+- [TICKET-027: Stripe Description Mapping Management](TICKET-027-stripe-description-mapping-management.md) - 📋 Planned (🟢 Low, S) - *Admin UI for mapping rules*
 
 #### Sponsorship & Children Features
 - [TICKET-048: Stripe Sponsorship & Child Extraction](TICKET-048-stripe-sponsorship-child-extraction.md) - 📋 Planned (🟡 Medium, M)
@@ -87,38 +98,69 @@ Current work items and user stories being actively developed.
 - [TICKET-061: Auto-Create Sponsorship from Donation](TICKET-061-auto-create-sponsorship-from-donation.md) - 📋 Planned (🟡 Medium, M)
 
 #### Code Quality & Architecture Improvements
-- [TICKET-033: Implement Policy Objects for Authorization](TICKET-033-implement-policy-objects-authorization.md) - 📋 Planned (🟡 Medium, M)
-- [TICKET-034: Create Query Objects for Complex Database Queries](TICKET-034-create-query-objects-complex-database-queries.md) - 📋 Planned (🟢 Low, M)
+
+**Critical Priority (Fix Now):**
+- [TICKET-066: Extract useChildren Custom Hook](TICKET-066-extract-use-children-hook.md) - 📋 Planned (🔴 High, M) - *Removes 100+ lines duplication*
+- [TICKET-067: Standardize API Response Wrapping with Presenters](TICKET-067-standardize-presenter-responses.md) - 📋 Planned (🔴 High, M) - *Fixes 60% inconsistency*
+
+**Medium Priority:**
+- [TICKET-068: Global Error Handling in ApplicationController](TICKET-068-global-error-handling.md) - 📋 Planned (🟡 Medium, S)
+- [TICKET-034: Create Query Objects for Complex Database Queries](TICKET-034-create-query-objects-complex-database-queries.md) - 📋 Planned (🟡 Medium, M) - *Updated with ChildrenController example*
 - [TICKET-036: Implement React Error Boundary](TICKET-036-implement-react-error-boundary.md) - 📋 Planned (🟡 Medium, S)
-- [TICKET-037: Standardize Service Object Patterns](TICKET-037-standardize-service-object-patterns.md) - 📋 Planned (🟢 Low, S)
-- [TICKET-039: Add Donation Status Enum Validation](TICKET-039-add-donation-status-enum-validation.md) - 📋 Planned (🟢 Low, S)
-- [TICKET-040: Implement Context API for Donor/Donation State](TICKET-040-implement-context-api-donor-donation-state.md) - 📋 Planned (🟢 Low, L)
+- [TICKET-037: Standardize Service Object Patterns](TICKET-037-standardize-service-object-patterns.md) - 📋 Planned (🟡 Medium, S) - *Updated with .call interface*
 - [TICKET-041: Add Test Coverage for API Client Methods](TICKET-041-api-client-test-coverage.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-042: Add Class-Level Documentation Comments](TICKET-042-add-class-documentation-comments.md) - 📋 Planned (🟡 Medium, S)
+- [TICKET-033: Implement Policy Objects for Authorization](TICKET-033-implement-policy-objects-authorization.md) - 📋 Planned (🟡 Medium, M)
+
+**Low Priority:**
+- [TICKET-069: Code Quality Cleanup (Batch)](TICKET-069-code-quality-cleanup-batch.md) - 📋 Planned (🟢 Low, S) - *5 minor improvements batched*
+- [TICKET-039: Add Donation Status Enum Validation](TICKET-039-add-donation-status-enum-validation.md) - 📋 Planned (🟢 Low, S)
+- [TICKET-040: Implement Context API for Donor/Donation State](TICKET-040-implement-context-api-donor-donation-state.md) - 📋 Planned (🟢 Low, L)
 - [TICKET-043: Refine Controller Concerns Implementation](TICKET-043-refine-controller-concerns-implementation.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-045: Refactor DonorImportService Complexity](TICKET-045-refactor-donor-import-service-complexity.md) - 📋 Planned (🟢 Low, M)
-- [TICKET-065: Move Business Logic to Backend](TICKET-065-move-business-logic-to-backend.md) - 📋 Planned (🟡 Medium, S)
 
 ---
 
 ## Quick Stats
 
-- **Total Tickets:** 66
+- **Total Tickets:** 69
 - **Completed:** 33
 - **In Progress:** 0
-- **Planned:** 31
+- **Planned:** 34
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 
 ### By Category
 
-
-- **Feature Development:** 11 planned, 10 completed
+- **Feature Development:** 9 planned, 10 completed
+- **Stripe Integration:** 5 planned
+  - **PERMANENT:** TICKET-070 (core), TICKET-026 (webhooks)
+  - **TEMPORARY:** TICKET-071 (batch import - delete after use)
+  - **OPTIONAL:** TICKET-072 (error UI - skip if possible)
+  - **FUTURE:** TICKET-027 (mapping UI)
 - **Sponsorship & Children Features:** 9 planned, 6 completed
 - **Code Quality & Architecture:** 11 planned, 17 completed
 - **In Progress:** 0
 - **Blocked:** 1 (TICKET-005)
 - **Deferred/Accepted Risk:** 1 (TICKET-049)
+
+### Code Lifecycle Guide
+
+**PERMANENT CODE (Keep Forever):**
+- TICKET-070: `StripePaymentImportService` - Core donation processing (reused by webhooks)
+- TICKET-026: `Webhooks::StripeController` - Production webhook endpoint
+
+**TEMPORARY CODE (Delete After CSV Import):**
+- TICKET-071: `StripeCsvBatchImporter` + rake task - One-time batch wrapper
+- TICKET-072: `ImportError` model + UI - Optional error review (skip if <10 failures)
+
+**Implementation Order:**
+1. TICKET-070 (foundation - PERMANENT)
+2. TICKET-071 (one-time import - TEMPORARY)
+3. Run CSV import
+4. TICKET-072 (only if >10 failures - OPTIONAL)
+5. TICKET-026 (webhooks - PERMANENT, reuses TICKET-070)
+6. Delete TICKET-071 and TICKET-072 code
 
 ---
 
