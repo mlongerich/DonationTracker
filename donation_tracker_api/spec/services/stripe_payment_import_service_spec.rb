@@ -130,5 +130,44 @@ RSpec.describe StripePaymentImportService do
         expect(donor.name).to eq('John Doe')
       end
     end
+
+    context 'with failed transaction status' do
+      it 'skips non-succeeded transactions' do
+        failed_csv = valid_csv_row.merge('Status' => 'failed')
+        result = described_class.new(failed_csv).import
+
+        expect(result[:skipped]).to be true
+        expect(result[:reason]).to eq('Status not succeeded')
+        expect(Donation.count).to eq(0)
+      end
+    end
+
+    context 'with child deduplication' do
+      it 'reuses existing child with matching name' do
+        existing_child = Child.create!(name: 'Sangwan')
+
+        result = described_class.new(valid_csv_row).import
+
+        expect(Child.count).to eq(1)
+        child = Child.first
+        expect(child.id).to eq(existing_child.id)
+      end
+    end
+
+    context 'with general donation' do
+      it 'creates general project donation' do
+        general_csv = valid_csv_row.merge(
+          'Description' => '$100 - General Monthly Donation',
+          'Transaction ID' => 'txn_general123'
+        )
+
+        result = described_class.new(general_csv).import
+        donation = result[:donations].first
+
+        expect(donation.project.title).to eq('General Donation')
+        expect(donation.project.project_type).to eq('general')
+        expect(donation.child_id).to be_nil
+      end
+    end
   end
 end

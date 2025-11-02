@@ -1,5 +1,6 @@
 class StripePaymentImportService
   SPONSORSHIP_PATTERN = /Monthly Sponsorship Donation for (.+)/i
+  GENERAL_PATTERN = /\$\d+ - General Monthly Donation/i
 
   def initialize(csv_row)
     @csv_row = csv_row
@@ -7,6 +8,7 @@ class StripePaymentImportService
   end
 
   def import
+    return skip_result("Status not succeeded") unless succeeded?
     return skip_result("Already imported") if already_imported?
 
     StripeInvoice.create!(
@@ -29,14 +31,34 @@ class StripePaymentImportService
 
     child_names = extract_child_names
 
-    child_names.each do |child_name|
-      child = Child.create!(name: child_name)
+    if child_names.any?
+      # Sponsorship donation
+      child_names.each do |child_name|
+        child = Child.find_or_create_by!(name: child_name)
+
+        donation = Donation.create!(
+          donor: donor,
+          amount: amount_in_cents,
+          date: Date.parse(@csv_row["Created Formatted"]),
+          child_id: child.id,
+          stripe_charge_id: @csv_row["Transaction ID"],
+          stripe_customer_id: @csv_row["Cust ID"],
+          stripe_subscription_id: @csv_row["Cust Subscription Data ID"],
+          stripe_invoice_id: @csv_row["Transaction ID"]
+        )
+
+        @imported_donations << donation
+      end
+    else
+      # Non-sponsorship donation (general, campaign, etc.)
+      project = find_or_create_project
 
       donation = Donation.create!(
         donor: donor,
+        project: project,
         amount: amount_in_cents,
         date: Date.parse(@csv_row["Created Formatted"]),
-        child_id: child.id,
+        child_id: nil,
         stripe_charge_id: @csv_row["Transaction ID"],
         stripe_customer_id: @csv_row["Cust ID"],
         stripe_subscription_id: @csv_row["Cust Subscription Data ID"],
@@ -50,6 +72,10 @@ class StripePaymentImportService
   end
 
   private
+
+  def succeeded?
+    @csv_row["Status"]&.downcase == "succeeded"
+  end
 
   def extract_child_names
     description = @csv_row["Description"]
@@ -76,5 +102,20 @@ class StripePaymentImportService
 
   def skip_result(reason)
     { success: true, donations: [], skipped: true, reason: reason }
+  end
+
+  def find_or_create_project
+    description = @csv_row["Description"]
+
+    # General donation pattern
+    if description&.match(GENERAL_PATTERN)
+      return Project.find_or_create_by!(title: "General Donation") do |project|
+        project.project_type = :general
+        project.system = true
+      end
+    end
+
+    # If no pattern matches, return nil for now (will handle unmapped later)
+    nil
   end
 end

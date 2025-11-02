@@ -2,15 +2,16 @@
 
 **Status:** 📋 Planned
 **Priority:** 🟡 Medium
-**Dependencies:** TICKET-006 (Donation model), TICKET-008 (Background jobs - if needed), TICKET-024 (Stripe integration provides subscription_id)
+**Dependencies:** TICKET-006 ✅ (Donation model), TICKET-070 (stripe_subscription_id field added)
+**Updated:** 2025-11-02
 
 ### User Story
 As an admin, I want to track recurring donations and identify missed payments so that I can follow up with donors, regardless of which project the donation supports.
 
 ### Acceptance Criteria
 - [ ] Backend: Add recurring fields to Donation (recurring:boolean, frequency:integer, expected_next_date:date, missed_payments_count:integer)
-- [ ] Backend: Add Stripe subscription tracking (stripe_subscription_id:string)
-- [ ] Backend: Use existing `status` column for donation state (migration already has this field)
+- [x] Backend: stripe_subscription_id field already exists (added by TICKET-070)
+- [ ] Backend: Use existing `status` column for donation state (field exists at schema.rb line 29)
 - [ ] Backend: Calculate expected_next_date based on frequency (monthly, quarterly, annually)
 - [ ] Backend: Background job CheckMissedPaymentsJob (Sidekiq)
 - [ ] Backend: Update status based on overdue days (late, overdue, at_risk, cancelled)
@@ -28,8 +29,10 @@ As an admin, I want to track recurring donations and identify missed payments so
 - **Orthogonal Design**: Recurring status is independent of project assignment
   - Any donation can be recurring (general, campaign, or sponsorship)
   - Project categorizes "what," recurring tracks "when/how often"
-- **Migration**: `rails g migration AddRecurringToDonations recurring:boolean frequency:integer expected_next_date:date missed_payments_count:integer stripe_subscription_id:string`
-- **Uses existing column**: `status` column already exists in schema (line 21 of schema.rb)
+- **Migration**: `rails g migration AddRecurringToDonations recurring:boolean frequency:integer expected_next_date:date missed_payments_count:integer`
+  - NOTE: stripe_subscription_id already exists (added by TICKET-070)
+- **Uses existing column**: `status` column already exists in schema (line 29 of schema.rb)
+- **Background Jobs**: Sidekiq already configured (Gemfile line verified)
 - **Frequency enum**: `enum frequency: { one_time: 0, monthly: 1, quarterly: 2, annually: 3 }`
 - **Status enum**: `enum status: { active: 0, late: 1, overdue: 2, at_risk: 3, cancelled: 4 }`
 - **Date calculation**:
@@ -43,8 +46,9 @@ As an admin, I want to track recurring donations and identify missed payments so
   - 31-90 days: `at_risk`
   - 90+ days: `cancelled`
 - **Stripe Integration**:
-  - Detect recurring from `stripe_subscription_id` presence
-  - Automatic cancellation via webhook `customer.subscription.deleted`
+  - Detect recurring from `stripe_subscription_id` presence (field already populated by TICKET-070 import)
+  - Historical Stripe data imported by TICKET-070 provides baseline subscription tracking
+  - Automatic cancellation via webhook `customer.subscription.deleted` (TICKET-026)
   - Frequency extracted from Stripe plan interval
 - **Example queries**:
   - `Donation.where(recurring: true, project: general_project)` (recurring general donations)
