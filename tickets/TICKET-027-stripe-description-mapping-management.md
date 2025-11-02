@@ -2,10 +2,20 @@
 
 **Status:** 📋 Planned
 **Priority:** 🟡 Medium
-**Dependencies:** TICKET-026 (Stripe Import & Webhook Integration)
+**Dependencies:** TICKET-070 (provides "UNMAPPED: {description}" projects to manage)
+**Updated:** 2025-11-02
 
 ### User Story
 As an admin, I want to create flexible mapping rules for Stripe donation descriptions so that I can handle naming convention changes, map multiple descriptions to one project, and receive notifications when unknown descriptions appear, all without requiring code changes.
+
+### Context
+TICKET-070 (Stripe CSV Import) creates the foundation by importing ALL donations with these patterns:
+- "Monthly Sponsorship Donation for {Child}" → Sponsorship project
+- "$X - General Monthly Donation" → General Donation project
+- "Donation for Campaign {ID}" → Campaign {ID} project
+- **All other descriptions** → "UNMAPPED: {description}" project
+
+This ticket provides admin tools to bulk remap "UNMAPPED: ..." projects to proper projects without code changes.
 
 ### Acceptance Criteria
 - [ ] Backend: StripeDescriptionMapping model (pattern, match_type, project, project_title, project_type, child_name, priority, active)

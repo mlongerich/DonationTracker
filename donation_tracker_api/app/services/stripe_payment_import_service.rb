@@ -1,6 +1,8 @@
 class StripePaymentImportService
   SPONSORSHIP_PATTERN = /Monthly Sponsorship Donation for (.+)/i
   GENERAL_PATTERN = /\$\d+ - General Monthly Donation/i
+  CAMPAIGN_PATTERN = /Donation for Campaign (\d+)/i
+  EMAIL_PATTERN = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i
 
   def initialize(csv_row)
     @csv_row = csv_row
@@ -11,36 +13,55 @@ class StripePaymentImportService
     return skip_result("Status not succeeded") unless succeeded?
     return skip_result("Already imported") if already_imported?
 
-    StripeInvoice.create!(
-      stripe_invoice_id: @csv_row["Transaction ID"],
-      stripe_charge_id: @csv_row["Transaction ID"],
-      stripe_customer_id: @csv_row["Cust ID"],
-      stripe_subscription_id: @csv_row["Cust Subscription Data ID"],
-      total_amount_cents: amount_in_cents,
-      invoice_date: Date.parse(@csv_row["Created Formatted"])
-    )
+    ActiveRecord::Base.transaction do
+      StripeInvoice.create!(
+        stripe_invoice_id: @csv_row["Transaction ID"],
+        stripe_charge_id: @csv_row["Transaction ID"],
+        stripe_customer_id: @csv_row["Cust ID"],
+        stripe_subscription_id: @csv_row["Cust Subscription Data ID"],
+        total_amount_cents: amount_in_cents,
+        invoice_date: Date.parse(@csv_row["Created Formatted"])
+      )
 
-    donor_result = DonorService.find_or_update_by_email(
-      {
-        name: @csv_row["Billing Details Name"],
-        email: @csv_row["Cust Email"]
-      },
-      DateTime.parse(@csv_row["Created Formatted"])
-    )
-    donor = donor_result[:donor]
+      donor_result = DonorService.find_or_update_by_email(
+        {
+          name: @csv_row["Billing Details Name"],
+          email: @csv_row["Cust Email"]
+        },
+        DateTime.parse(@csv_row["Created Formatted"])
+      )
+      donor = donor_result[:donor]
 
-    child_names = extract_child_names
+      child_names = extract_child_names
 
-    if child_names.any?
-      # Sponsorship donation
-      child_names.each do |child_name|
-        child = Child.find_or_create_by!(name: child_name)
+      if child_names.any?
+        # Sponsorship donation
+        child_names.each do |child_name|
+          child = Child.find_or_create_by!(name: child_name)
+
+          donation = Donation.create!(
+            donor: donor,
+            amount: amount_in_cents,
+            date: Date.parse(@csv_row["Created Formatted"]),
+            child_id: child.id,
+            stripe_charge_id: @csv_row["Transaction ID"],
+            stripe_customer_id: @csv_row["Cust ID"],
+            stripe_subscription_id: @csv_row["Cust Subscription Data ID"],
+            stripe_invoice_id: @csv_row["Transaction ID"]
+          )
+
+          @imported_donations << donation
+        end
+      else
+        # Non-sponsorship donation (general, campaign, etc.)
+        project = find_or_create_project
 
         donation = Donation.create!(
           donor: donor,
+          project: project,
           amount: amount_in_cents,
           date: Date.parse(@csv_row["Created Formatted"]),
-          child_id: child.id,
+          child_id: nil,
           stripe_charge_id: @csv_row["Transaction ID"],
           stripe_customer_id: @csv_row["Cust ID"],
           stripe_subscription_id: @csv_row["Cust Subscription Data ID"],
@@ -49,26 +70,11 @@ class StripePaymentImportService
 
         @imported_donations << donation
       end
-    else
-      # Non-sponsorship donation (general, campaign, etc.)
-      project = find_or_create_project
-
-      donation = Donation.create!(
-        donor: donor,
-        project: project,
-        amount: amount_in_cents,
-        date: Date.parse(@csv_row["Created Formatted"]),
-        child_id: nil,
-        stripe_charge_id: @csv_row["Transaction ID"],
-        stripe_customer_id: @csv_row["Cust ID"],
-        stripe_subscription_id: @csv_row["Cust Subscription Data ID"],
-        stripe_invoice_id: @csv_row["Transaction ID"]
-      )
-
-      @imported_donations << donation
     end
 
     { success: true, donations: @imported_donations, skipped: false }
+  rescue StandardError => e
+    { success: false, donations: [], skipped: false, error: e.message }
   end
 
   private
@@ -78,15 +84,23 @@ class StripePaymentImportService
   end
 
   def extract_child_names
-    description = @csv_row["Description"]
-    return [] if description.blank?
+    description_text = get_description_text
+    return [] if description_text.blank?
 
-    match = description.match(SPONSORSHIP_PATTERN)
+    match = description_text.match(SPONSORSHIP_PATTERN)
     return [] unless match
 
     # Handle comma-separated children (e.g., "Wan,Monthly Sponsorship Donation for Orawan")
     child_text = match[1]
     child_text.split(",").map(&:strip).reject(&:blank?)
+  end
+
+  def get_description_text
+    # Try Nickname first (column 16), fallback to Description (column 7)
+    nickname = @csv_row["Cust Subscription Data Plan Nickname"]
+    return nickname if nickname.present?
+
+    @csv_row["Description"]
   end
 
   def amount_in_cents
@@ -105,17 +119,39 @@ class StripePaymentImportService
   end
 
   def find_or_create_project
-    description = @csv_row["Description"]
+    description_text = get_description_text
 
     # General donation pattern
-    if description&.match(GENERAL_PATTERN)
+    if description_text&.match(GENERAL_PATTERN)
       return Project.find_or_create_by!(title: "General Donation") do |project|
         project.project_type = :general
         project.system = true
       end
     end
 
-    # If no pattern matches, return nil for now (will handle unmapped later)
-    nil
+    # Campaign donation pattern
+    if match = description_text&.match(CAMPAIGN_PATTERN)
+      campaign_id = match[1]
+      return Project.find_or_create_by!(title: "Campaign #{campaign_id}") do |project|
+        project.project_type = :campaign
+        project.system = false
+      end
+    end
+
+    # Email address → General Donation
+    if description_text&.match(EMAIL_PATTERN)
+      return Project.find_or_create_by!(title: "General Donation") do |project|
+        project.project_type = :general
+        project.system = true
+      end
+    end
+
+    # Unmapped - create project for admin review via TICKET-027
+    truncated_desc = description_text.to_s[0, 100]
+    Project.find_or_create_by!(title: "UNMAPPED: #{truncated_desc}") do |project|
+      project.project_type = :general
+      project.system = false
+      project.description = "Auto-created from Stripe import. Original description: #{description_text}"
+    end
   end
 end
