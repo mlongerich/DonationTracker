@@ -109,5 +109,26 @@ RSpec.describe StripePaymentImportService do
         expect(invoice.invoice_date).to eq(Date.parse('2020-06-15'))
       end
     end
+
+    context 'with donor deduplication' do
+      it 'reuses existing donor with matching email' do
+        # Create existing donor with OLDER last_updated_at (2019)
+        existing_donor = Donor.create!(
+          name: 'Existing Name',
+          email: 'john@example.com',
+          last_updated_at: DateTime.parse('2019-01-01')
+        )
+
+        # CSV transaction is from 2020-06-15, newer than existing donor
+        described_class.new(valid_csv_row).import
+
+        # Should reuse existing donor, not create new one
+        expect(Donor.count).to eq(1)
+        donor = Donor.first
+        expect(donor.id).to eq(existing_donor.id)
+        # Should update name because CSV transaction is newer
+        expect(donor.name).to eq('John Doe')
+      end
+    end
   end
 end

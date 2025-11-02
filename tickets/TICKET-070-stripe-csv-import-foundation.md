@@ -16,7 +16,8 @@
 - All 238 tests passing
 
 **🔵 Phase 2 In Progress: Full Feature Implementation**
-- Need to add: DonorService integration, project pattern matching, error handling, transaction wrapper
+- ✅ DonorService integration (donor deduplication via find_or_update_by_email)
+- Need to add: project pattern matching, error handling, transaction wrapper, status checking
 
 **⭐ CODE LIFECYCLE: PERMANENT - Core Reusable Service**
 
@@ -59,7 +60,7 @@ The project has a Stripe CSV export (`PFAOnlinePayments-Stripe.csv`) with 1,303 
 **Core Service (PERMANENT - Reused by Webhooks):**
 - [x] Backend: `StripePaymentImportService` processes single Stripe payment record
 - [x] Backend: Service accepts Hash input (works for CSV rows OR webhook payloads)
-- [ ] Backend: Extract donor info (name, email) with deduplication via `DonorService` (currently uses Donor.create!)
+- [x] Backend: Extract donor info (name, email) with deduplication via `DonorService`
 - [x] Backend: Extract child names from sponsorship descriptions
 - [x] Backend: Handle multi-child sponsorships (split into separate donations, share StripeInvoice)
 - [ ] Backend: Pattern matching for project extraction

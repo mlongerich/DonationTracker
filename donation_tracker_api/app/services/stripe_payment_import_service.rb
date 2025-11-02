@@ -18,10 +18,14 @@ class StripePaymentImportService
       invoice_date: Date.parse(@csv_row["Created Formatted"])
     )
 
-    donor = Donor.create!(
-      name: @csv_row["Billing Details Name"],
-      email: @csv_row["Cust Email"]
+    donor_result = DonorService.find_or_update_by_email(
+      {
+        name: @csv_row["Billing Details Name"],
+        email: @csv_row["Cust Email"]
+      },
+      DateTime.parse(@csv_row["Created Formatted"])
     )
+    donor = donor_result[:donor]
 
     child_names = extract_child_names
 
