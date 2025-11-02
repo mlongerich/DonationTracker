@@ -28,11 +28,28 @@ if ! docker-compose exec -T api bundle exec brakeman --quiet --exit-on-warn; the
     exit 1
 fi
 
-echo "🧪 Running RSpec tests..."
+echo "🧪 Running RSpec tests with coverage..."
 if ! docker-compose exec -T api bundle exec rspec; then
     echo "❌ Tests are failing - all tests must pass before committing"
     exit 1
 fi
+
+echo "📊 Checking test coverage..."
+# Extract coverage from SimpleCov's last run
+COVERAGE=$(docker-compose exec -T api bash -c 'cat coverage/.last_run.json 2>/dev/null | grep -o "\"line\": [0-9.]*" | grep -o "[0-9.]*"' || echo "0")
+
+# Remove trailing whitespace and newlines
+COVERAGE=$(echo "$COVERAGE" | tr -d '[:space:]')
+
+# Convert to integer for comparison
+COVERAGE_INT=$(echo "$COVERAGE" | cut -d. -f1)
+
+if [[ -z "$COVERAGE_INT" ]] || [[ "$COVERAGE_INT" -lt 95 ]]; then
+    echo "❌ Test coverage is ${COVERAGE}% - must be at least 95%"
+    exit 1
+fi
+
+echo "✅ Test coverage: ${COVERAGE}% (meets 95% threshold)"
 
 echo "✅ All backend quality checks passed!"
 exit 0

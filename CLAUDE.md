@@ -264,6 +264,75 @@ end
 - **Class methods**: Simple, stateless operations
 - **Instance methods**: Multi-step workflows, complex validation, state tracking
 
+#### Stripe CSV Import Pattern
+
+**Context:** StripePaymentImportService imports 1,303 historical Stripe transactions from CSV export.
+
+**Challenge:** Multi-child sponsorships appear as multiple CSV rows with same `Transaction ID` (e.g., "Wan" and "Orawan" both share charge `ch_123`). Donations table originally had unique constraint on `stripe_charge_id`, causing duplicate key violations.
+
+**Solution:** Introduced `stripe_invoices` abstraction layer with 1-to-many relationship (one invoice → multiple donations).
+
+**Schema Design:**
+```ruby
+# stripe_invoices table
+- stripe_invoice_id (string, unique) - Maps to Stripe Transaction ID
+- stripe_charge_id (string)          - Also Transaction ID (for now)
+- stripe_customer_id (string)
+- stripe_subscription_id (string)
+- total_amount_cents (integer)
+- invoice_date (date)
+
+# donations table (updated)
+- stripe_invoice_id (string, FK)     - References stripe_invoices.stripe_invoice_id
+- stripe_charge_id (string)          - No longer unique
+- stripe_customer_id (string)
+- stripe_subscription_id (string)
+```
+
+**Service Pattern:**
+```ruby
+class StripePaymentImportService
+  def import
+    return skip_result('Already imported') if already_imported?
+
+    # Create invoice ONCE per CSV transaction
+    StripeInvoice.create!(
+      stripe_invoice_id: @csv_row['Transaction ID'],
+      stripe_charge_id: @csv_row['Transaction ID'],
+      # ... other metadata
+    )
+
+    # Create donations for each child (multi-child support)
+    child_names.each do |child_name|
+      Donation.create!(
+        stripe_invoice_id: @csv_row['Transaction ID'],  # Link to invoice
+        # ... other fields
+      )
+    end
+  end
+
+  private
+
+  def already_imported?
+    # Check StripeInvoice, not Donation (idempotency)
+    StripeInvoice.exists?(stripe_invoice_id: @csv_row['Transaction ID'])
+  end
+end
+```
+
+**Key Design Decisions:**
+1. **Idempotency:** Check `StripeInvoice.exists?` instead of `Donation.exists?`
+2. **Future-proof:** `stripe_invoice_id` uses Transaction ID now, but can map to actual Stripe Invoice ID later
+3. **Data Integrity:** One StripeInvoice per CSV row, even if multiple donations created
+4. **Migration Safety:** Removed unique constraint on `donations.stripe_charge_id`
+
+**Implementation Notes:**
+- Used strict TDD: RED → GREEN → refactor, one test at a time
+- 10 comprehensive tests covering single/multi-child, idempotency, metadata storage
+- Migration lesson: Commented-out migrations marked as "up" by Rails - delete and recreate with fresh timestamp
+
+**See:** TICKET-070, `app/services/stripe_payment_import_service.rb`, `app/models/stripe_invoice.rb`
+
 #### Controller Concerns
 
 **When to extract:**

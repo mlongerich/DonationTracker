@@ -20,13 +20,16 @@
 **Last Updated:** 2025-11-01
 
 **Latest Milestones:**
-- TICKET-070/071/072/026 - Stripe Integration Planning (CSV Import + Webhooks) 📋 (2025-11-01)
+- TICKET-070 - Stripe CSV Import Foundation (StripeInvoice Abstraction Phase 1) 🔵 (2025-11-01)
+  - Created stripe_invoices table for 1-to-many relationship (solves multi-child sponsorship problem)
+  - Implemented StripePaymentImportService foundation with 10 tests, 95.34% coverage
+  - Configured SimpleCov with 95% threshold in pre-commit hooks
 - TICKET-065 - Move Business Logic to Backend (displayable_email) ✅ (2025-10-31)
 - TICKET-064 - Smart Sponsorship Detection & Backend Logic ✅ (2025-10-31)
 - TICKET-032 - Custom Hooks Library (useDebouncedValue, usePagination, useRansackFilters) ✅ (2025-10-29)
 - TICKET-063 - Archive Business Logic for Active Sponsorships ✅ (2025-10-29)
 
-**Current Focus:** Stripe CSV import implementation (TICKET-070 foundation → TICKET-071 batch import)
+**Current Focus:** Completing TICKET-070 full feature implementation (DonorService, project patterns, error handling)
 **Deferred Risk:** TICKET-049 (frontend protection sufficient, backend API risk accepted)
 
 **See [docs/project/README.md](docs/project/README.md#current-status) for detailed status**

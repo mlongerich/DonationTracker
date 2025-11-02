@@ -2,6 +2,7 @@ class Donation < ApplicationRecord
   belongs_to :donor
   belongs_to :project, optional: true
   belongs_to :sponsorship, optional: true
+  belongs_to :stripe_invoice, optional: true, foreign_key: :stripe_invoice_id, primary_key: :stripe_invoice_id
 
   attr_accessor :child_id
 

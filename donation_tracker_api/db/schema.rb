@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_30_180519) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_01_232611) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -33,6 +33,10 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_30_180519) do
     t.bigint "project_id"
     t.bigint "sponsorship_id"
     t.integer "child_id"
+    t.string "stripe_charge_id"
+    t.string "stripe_customer_id"
+    t.string "stripe_subscription_id"
+    t.string "stripe_invoice_id"
     t.index ["child_id"], name: "index_donations_on_child_id"
     t.index ["date"], name: "index_donations_on_date"
     t.index ["donor_id"], name: "index_donations_on_donor_id"
@@ -40,6 +44,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_30_180519) do
     t.index ["project_id"], name: "index_donations_on_project_id"
     t.index ["sponsorship_id"], name: "index_donations_on_sponsorship_id"
     t.index ["status"], name: "index_donations_on_status"
+    t.index ["stripe_charge_id"], name: "index_donations_on_stripe_charge_id"
+    t.index ["stripe_customer_id"], name: "index_donations_on_stripe_customer_id"
+    t.index ["stripe_invoice_id"], name: "index_donations_on_stripe_invoice_id"
   end
 
   create_table "donors", force: :cascade do |t|
@@ -83,6 +90,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_30_180519) do
     t.index ["donor_id"], name: "index_sponsorships_on_donor_id"
     t.index ["end_date"], name: "index_sponsorships_on_end_date"
     t.index ["project_id"], name: "index_sponsorships_on_project_id"
+  end
+
+  create_table "stripe_invoices", force: :cascade do |t|
+    t.string "stripe_invoice_id", null: false
+    t.string "stripe_charge_id", null: false
+    t.string "stripe_customer_id"
+    t.string "stripe_subscription_id"
+    t.integer "total_amount_cents", null: false
+    t.date "invoice_date", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["stripe_charge_id"], name: "index_stripe_invoices_on_stripe_charge_id"
+    t.index ["stripe_invoice_id"], name: "index_stripe_invoices_on_stripe_invoice_id", unique: true
   end
 
   create_table "users", force: :cascade do |t|
