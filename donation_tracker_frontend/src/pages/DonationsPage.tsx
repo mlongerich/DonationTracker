@@ -39,10 +39,18 @@ const DonationsPage = () => {
 
   const fetchDonations = async () => {
     try {
+      const queryParams: Record<string, unknown> = buildQueryParams();
+      // Remove null/empty values to prevent Ransack OR logic issues
+      Object.keys(queryParams).forEach(key => {
+        if (queryParams[key] === null || queryParams[key] === '') {
+          delete queryParams[key];
+        }
+      });
+
       const params: Record<string, unknown> = {
         page: currentPage,
         per_page: 10,
-        ...buildQueryParams(),
+        ...queryParams,
       };
 
       const response = await apiClient.get('/api/donations', { params });
