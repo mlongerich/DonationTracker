@@ -4,13 +4,11 @@ import { ChildFormData } from '../types';
 
 interface ChildFormProps {
   onSubmit: (data: ChildFormData) => void;
-  onCancel: () => void;
   initialData?: ChildFormData;
 }
 
 const ChildForm: React.FC<ChildFormProps> = ({
   onSubmit,
-  onCancel,
   initialData,
 }) => {
   const [name, setName] = useState(initialData?.name || '');
@@ -40,14 +38,14 @@ const ChildForm: React.FC<ChildFormProps> = ({
         fullWidth
         size="small"
       />
-      <Stack direction="row" spacing={2}>
-        <Button variant="contained" onClick={handleSubmit}>
-          Submit
-        </Button>
-        <Button variant="outlined" onClick={onCancel}>
-          Cancel
-        </Button>
-      </Stack>
+      <Button
+        variant="contained"
+        color="primary"
+        fullWidth
+        onClick={handleSubmit}
+      >
+        Submit
+      </Button>
     </Stack>
   );
 };

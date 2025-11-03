@@ -48,7 +48,11 @@ describe('ChildrenPage', () => {
 
     await waitFor(() => {
       expect(mockedApiClient.get).toHaveBeenCalledWith('/api/children', {
-        params: { include_sponsorships: true }
+        params: expect.objectContaining({
+          include_sponsorships: true,
+          page: 1,
+          per_page: 10,
+        }),
       });
     });
   });
@@ -76,11 +80,11 @@ describe('ChildrenPage', () => {
 
     render(<ChildrenPage />);
 
+    // Form should be always visible (no "Add Child" button)
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /add child/i })).toBeInTheDocument();
+      expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
     });
 
-    await user.click(screen.getByRole('button', { name: /add child/i }));
     await user.type(screen.getByLabelText(/name/i), 'Maria');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
@@ -198,7 +202,11 @@ describe('ChildrenPage', () => {
     await waitFor(() => {
       expect(mockedApiClient.get).toHaveBeenCalledTimes(1);
       expect(mockedApiClient.get).toHaveBeenCalledWith('/api/children', {
-        params: { include_sponsorships: true }
+        params: expect.objectContaining({
+          include_sponsorships: true,
+          page: 1,
+          per_page: 10,
+        }),
       });
     });
   });
@@ -227,21 +235,27 @@ describe('ChildrenPage', () => {
       }
     ];
 
-    mockedApiClient.get.mockResolvedValueOnce({
+    mockedApiClient.get.mockResolvedValue({
       data: {
         children: mockChildren,
-        meta: { total_count: 2, total_pages: 1, current_page: 1, per_page: 25 },
+        meta: { total_count: 2, total_pages: 1, current_page: 1, per_page: 10 },
       },
     });
 
     render(<ChildrenPage />);
 
     await waitFor(() => {
-      // Verify Maria's sponsorship is displayed
-      expect(screen.getByText(/Sponsored by.*John Doe.*\$50/i)).toBeInTheDocument();
+      // Verify both children names are displayed
+      expect(screen.getByText('Maria')).toBeInTheDocument();
+      expect(screen.getByText('Juan')).toBeInTheDocument();
+    }, { timeout: 3000 });
 
-      // Verify Juan's sponsorship is displayed
-      expect(screen.getByText(/Sponsored by.*Jane Smith.*\$75/i)).toBeInTheDocument();
+    // Verify sponsorships are displayed (text might be split across elements)
+    await waitFor(() => {
+      expect(screen.getByText(/John Doe/i)).toBeInTheDocument();
+      expect(screen.getByText(/\$0\.50\/mo/i)).toBeInTheDocument();
+      expect(screen.getByText(/Jane Smith/i)).toBeInTheDocument();
+      expect(screen.getByText(/\$0\.75\/mo/i)).toBeInTheDocument();
     });
   });
 
@@ -325,7 +339,12 @@ describe('ChildrenPage', () => {
 
     await waitFor(() => {
       expect(mockedApiClient.get).toHaveBeenCalledWith('/api/children', {
-        params: { include_sponsorships: true, include_discarded: 'true' }
+        params: expect.objectContaining({
+          include_sponsorships: true,
+          include_discarded: 'true',
+          page: 1,
+          per_page: 10,
+        }),
       });
     });
   });
@@ -524,6 +543,177 @@ describe('ChildrenPage', () => {
       // Error should be gone
       await waitFor(() => {
         expect(screen.queryByText('Cannot archive child with active sponsorships')).not.toBeInTheDocument();
+      });
+    });
+  });
+
+  describe('Search functionality', () => {
+    it('renders search field', async () => {
+      mockedApiClient.get.mockResolvedValue({
+        data: {
+          children: [],
+          meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+        },
+      });
+
+      render(<ChildrenPage />);
+
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(/search by name/i)).toBeInTheDocument();
+      });
+    });
+
+    it('updates search query state when typing in search field', async () => {
+      const user = userEvent.setup();
+      mockedApiClient.get.mockResolvedValue({
+        data: {
+          children: [],
+          meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+        },
+      });
+
+      render(<ChildrenPage />);
+
+      const searchField = await screen.findByPlaceholderText(/search by name/i);
+      await user.type(searchField, 'Maria');
+
+      expect(searchField).toHaveValue('Maria');
+    });
+
+    it('triggers API call with search param after debounce delay', async () => {
+      const user = userEvent.setup();
+
+      mockedApiClient.get.mockResolvedValue({
+        data: {
+          children: [],
+          meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+        },
+      });
+
+      render(<ChildrenPage />);
+
+      const searchField = await screen.findByPlaceholderText(/search by name/i);
+      await user.type(searchField, 'Maria');
+
+      // Wait for debounce (300ms) plus some buffer
+      await new Promise(resolve => setTimeout(resolve, 350));
+
+      await waitFor(() => {
+        expect(mockedApiClient.get).toHaveBeenCalledWith('/api/children', {
+          params: expect.objectContaining({
+            q: { name_cont: 'Maria' },
+            page: 1,
+            per_page: 10,
+          }),
+        });
+      });
+    });
+  });
+
+  describe('Pagination', () => {
+    it('displays pagination when total_pages > 1', async () => {
+      mockedApiClient.get.mockResolvedValue({
+        data: {
+          children: [
+            { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [] },
+          ],
+          meta: { total_count: 25, total_pages: 3, current_page: 1, per_page: 10 },
+        },
+      });
+
+      render(<ChildrenPage />);
+
+      await waitFor(() => {
+        // MUI Pagination renders as navigation element
+        const pagination = screen.getByRole('navigation');
+        expect(pagination).toBeInTheDocument();
+      });
+    });
+
+    it('hides pagination when total_pages <= 1', async () => {
+      mockedApiClient.get.mockResolvedValue({
+        data: {
+          children: [
+            { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [] },
+          ],
+          meta: { total_count: 5, total_pages: 1, current_page: 1, per_page: 10 },
+        },
+      });
+
+      render(<ChildrenPage />);
+
+      await waitFor(() => {
+        expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+      });
+    });
+
+    it('triggers API call with new page number when page changes', async () => {
+      const user = userEvent.setup();
+      mockedApiClient.get.mockResolvedValue({
+        data: {
+          children: [
+            { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [] },
+          ],
+          meta: { total_count: 25, total_pages: 3, current_page: 1, per_page: 10 },
+        },
+      });
+
+      render(<ChildrenPage />);
+
+      await waitFor(() => {
+        expect(screen.getByRole('navigation')).toBeInTheDocument();
+      });
+
+      // Click page 2 button
+      const page2Button = screen.getByRole('button', { name: 'Go to page 2' });
+      await user.click(page2Button);
+
+      await waitFor(() => {
+        expect(mockedApiClient.get).toHaveBeenCalledWith('/api/children', {
+          params: expect.objectContaining({
+            page: 2,
+            per_page: 10,
+          }),
+        });
+      });
+    });
+
+    it('resets to page 1 when search query changes', async () => {
+      const user = userEvent.setup();
+
+      mockedApiClient.get.mockResolvedValue({
+        data: {
+          children: [
+            { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [] },
+          ],
+          meta: { total_count: 25, total_pages: 3, current_page: 1, per_page: 10 },
+        },
+      });
+
+      render(<ChildrenPage />);
+
+      // Navigate to page 2 first
+      await waitFor(() => {
+        expect(screen.getByRole('navigation')).toBeInTheDocument();
+      });
+
+      const page2Button = screen.getByRole('button', { name: 'Go to page 2' });
+      await user.click(page2Button);
+
+      // Now search - should reset to page 1
+      const searchField = await screen.findByPlaceholderText(/search by name/i);
+      await user.type(searchField, 'Maria');
+
+      // Wait for debounce
+      await new Promise(resolve => setTimeout(resolve, 350));
+
+      await waitFor(() => {
+        expect(mockedApiClient.get).toHaveBeenCalledWith('/api/children', {
+          params: expect.objectContaining({
+            page: 1,  // Should reset to page 1
+            q: { name_cont: 'Maria' },
+          }),
+        });
       });
     });
   });

@@ -4,7 +4,7 @@ import ChildForm from './ChildForm';
 
 describe('ChildForm', () => {
   it('renders name input field', () => {
-    render(<ChildForm onSubmit={jest.fn()} onCancel={jest.fn()} />);
+    render(<ChildForm onSubmit={jest.fn()} />);
 
     expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
   });
@@ -13,7 +13,7 @@ describe('ChildForm', () => {
     const mockSubmit = jest.fn();
     const user = userEvent.setup();
 
-    render(<ChildForm onSubmit={mockSubmit} onCancel={jest.fn()} />);
+    render(<ChildForm onSubmit={mockSubmit} />);
 
     await user.type(screen.getByLabelText(/name/i), 'Maria');
     await user.click(screen.getByRole('button', { name: /submit/i }));
@@ -21,21 +21,10 @@ describe('ChildForm', () => {
     expect(mockSubmit).toHaveBeenCalledWith({ name: 'Maria' });
   });
 
-  it('calls onCancel when cancel button is clicked', async () => {
-    const mockCancel = jest.fn();
-    const user = userEvent.setup();
-
-    render(<ChildForm onSubmit={jest.fn()} onCancel={mockCancel} />);
-
-    await user.click(screen.getByRole('button', { name: /cancel/i }));
-
-    expect(mockCancel).toHaveBeenCalled();
-  });
-
   it('populates form with initial data when provided', () => {
     const initialData = { name: 'Maria' };
 
-    render(<ChildForm onSubmit={jest.fn()} onCancel={jest.fn()} initialData={initialData} />);
+    render(<ChildForm onSubmit={jest.fn()} initialData={initialData} />);
 
     expect(screen.getByLabelText(/name/i)).toHaveValue('Maria');
   });
@@ -44,7 +33,7 @@ describe('ChildForm', () => {
     const mockSubmit = jest.fn();
     const user = userEvent.setup();
 
-    render(<ChildForm onSubmit={mockSubmit} onCancel={jest.fn()} />);
+    render(<ChildForm onSubmit={mockSubmit} />);
 
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
