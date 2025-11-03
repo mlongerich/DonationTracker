@@ -300,4 +300,61 @@ describe('DonationsPage', () => {
     expect(screen.getAllByLabelText(/end date/i).length).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: /clear filters/i })).toBeInTheDocument();
   });
+
+  it('filters out null and empty query params before sending to API', async () => {
+    // This test verifies the Ransack filter fix (TICKET-071)
+    // Empty/null params should NOT be sent to avoid OR logic issues
+    mockedApiClient.get.mockImplementation((url) => {
+      if (url === '/api/donations') {
+        return Promise.resolve({
+          data: {
+            donations: [],
+            meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+          },
+        });
+      }
+      if (url === '/api/donors') {
+        return Promise.resolve({
+          data: {
+            donors: [],
+            meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+          },
+        });
+      }
+      return Promise.resolve({ data: {} });
+    });
+
+    render(
+      <BrowserRouter>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DonationsPage />
+        </LocalizationProvider>
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/api/donations', {
+        params: expect.objectContaining({
+          page: 1,
+          per_page: 10,
+        }),
+      });
+    });
+
+    // Verify that the params object does NOT contain null or empty string values
+    const callParams = (mockedApiClient.get.mock.calls.find(
+      (call) => call[0] === '/api/donations'
+    ) || [])[1];
+
+    if (callParams && callParams.params) {
+      const params = callParams.params as Record<string, unknown>;
+      Object.entries(params).forEach(([key, value]) => {
+        // Page and per_page should exist, but q params should not if null/empty
+        if (key.startsWith('q[')) {
+          expect(value).not.toBe(null);
+          expect(value).not.toBe('');
+        }
+      });
+    }
+  });
 });

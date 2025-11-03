@@ -187,7 +187,7 @@ const DonationList: React.FC<DonationListProps> = ({
               <Card key={donation.id} variant="outlined">
                 <CardContent>
                   <Typography variant="subtitle1">
-                    {formatCurrency(donation.amount)}
+                    {formatCurrency(Number(donation.amount))}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {donation.date} - {donation.donor_name || `Donor #${donation.donor_id}`}

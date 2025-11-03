@@ -326,4 +326,24 @@ describe('DonationList', () => {
     const calendarButtons = screen.getAllByLabelText(/choose date/i);
     expect(calendarButtons[1]).toBeInTheDocument();
   });
+
+  it('converts string amount to number before formatting currency (TICKET-071)', () => {
+    // API returns amount as string, formatCurrency expects number
+    // Verifies Number() conversion works correctly
+    const donations = [
+      {
+        id: 1,
+        amount: '2500', // String from API (cents)
+        date: '2024-01-15',
+        donor_id: 1,
+        donor_name: 'Raymond McGaw',
+        project_title: 'General Donation',
+      },
+    ];
+
+    renderWithLocalization(<DonationList donations={donations} />);
+
+    // Should display as $25.00, not $2500.00
+    expect(screen.getByText(/\$25\.00/i)).toBeInTheDocument();
+  });
 });
