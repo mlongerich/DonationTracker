@@ -365,9 +365,15 @@ end
 
 **See:** TICKET-070, `app/services/stripe_payment_import_service.rb`, `app/models/stripe_invoice.rb`
 
-#### Stripe Project Mapping Patterns (TICKET-071)
+#### Stripe CSV Batch Import Pattern (TICKET-071)
 
-**Context:** CSV import must map description text to projects. Some descriptions are generic (phone numbers, "Subscription creation") and should map to "General Donation" system project rather than creating named projects.
+**Code Lifecycle:** MVP - Temporary Until Webhooks (TICKET-026)
+- Rake task (`rails stripe:import_csv`) is used repeatedly with new CSV exports
+- `StripeCsvBatchImporter` provides orchestration until webhooks complete
+- Delete ONLY AFTER TICKET-026 (webhooks) is complete and stable
+- Core service (`StripePaymentImportService`) is PERMANENT - reused by webhooks
+
+**Project Mapping Context:** CSV import must map description text to projects. Some descriptions are generic (phone numbers, "Subscription creation") and should map to "General Donation" system project rather than creating named projects.
 
 **Pattern Order (first match wins):**
 1. **Blank/empty** → "General Donation"

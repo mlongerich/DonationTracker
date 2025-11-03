@@ -7,15 +7,16 @@
 **Created:** 2025-11-01
 **Updated:** 2025-11-03
 
-**🗑️ CODE LIFECYCLE: TEMPORARY - One-Time Use Only**
+**🔄 CODE LIFECYCLE: MVP - Temporary Until Webhooks (TICKET-026)**
 
-**This code can be DELETED after CSV import completes.**
-- Rake task: One-time batch wrapper (throwaway)
-- `StripeCsvBatchImporter`: Temporary orchestration (throwaway)
-- Only needed to process 1,303 historical records once
+**This code is FUNCTIONAL MVP, used repeatedly until webhooks complete.**
+- Rake task: MVP batch import solution (used regularly)
+- `StripeCsvBatchImporter`: Temporary orchestration (used until TICKET-026)
+- Will be run MULTIPLE TIMES with new CSV exports until webhooks implemented
+- Current production solution for importing Stripe data
 
 **PERMANENT code is in TICKET-070 (StripePaymentImportService).**
-After import, archive or remove this ticket's code. It has no long-term value.
+Delete this ticket's code ONLY AFTER TICKET-026 (webhooks) is complete and stable.
 
 ### User Story
 As an admin, I want to run a rake task to import the entire Stripe CSV file so that I can bulk-load all historical transactions with progress tracking and error reporting.
@@ -366,34 +367,37 @@ end
 
 ### Code Lifecycle & Cleanup
 
-**THROWAWAY CODE (Delete After Import):**
-- `lib/tasks/stripe_import.rake` - One-time batch wrapper
-- `app/services/stripe_csv_batch_importer.rb` - Temporary orchestration
-- `spec/services/stripe_csv_batch_importer_spec.rb` - Tests for throwaway code
-- `spec/tasks/stripe_import_spec.rb` - Tests for throwaway task
+**MVP CODE (Keep Until TICKET-026 Complete):**
+- `lib/tasks/stripe_import.rake` - MVP batch import solution
+- `app/services/stripe_csv_batch_importer.rb` - MVP orchestration
+- `spec/services/stripe_csv_batch_importer_spec.rb` - Tests for MVP code
+- `spec/tasks/stripe_import_spec.rb` - Tests for MVP task
 
-**POST-IMPORT CLEANUP:**
-1. Run import successfully
-2. Verify all 1,303 records processed
-3. **Delete or archive:**
+**LIFECYCLE PLAN:**
+1. ✅ **Phase 1 (Current):** MVP in production - run repeatedly with CSV exports
+2. 🔵 **Phase 2 (TICKET-026):** Implement webhooks alongside CSV imports
+3. ✅ **Phase 3 (Post-TICKET-026):** Webhooks stable → Delete CSV import code
+4. 🗑️ **Phase 4 (Cleanup):** Archive or delete:
    - `lib/tasks/stripe_import.rake`
    - `app/services/stripe_csv_batch_importer.rb`
    - Related spec files
-4. **Keep:**
-   - TICKET-070's `StripePaymentImportService` (used by webhooks)
-   - Migration (Stripe fields on donations table)
 
-**Why throwaway?**
-- CSV import is a one-time migration
-- Future donations come via webhooks (TICKET-026)
-- No need to maintain batch processing code
-- Reduces maintenance burden
+**Keep Permanently:**
+- TICKET-070's `StripePaymentImportService` (used by webhooks)
+- Migration (Stripe fields on donations table)
+
+**Why temporary but not throwaway?**
+- MVP solution used repeatedly until webhooks complete
+- Current production infrastructure for Stripe imports
+- Provides value over weeks/months, not just once
+- Delete only after replacement (webhooks) proven stable
 
 ### Notes
 - CSV file: `PFAOnlinePayments-Stripe.csv` (1,445 rows, 1,303 succeeded)
-- Expected ~1,285 donations created (some multi-child split into 2+ donations)
-- Estimated runtime: 2-3 minutes for full import
-- Safe to re-run (idempotent via stripe_charge_id unique index)
-- Failed rows can be manually reviewed and retried via TICKET-072 UI
-- **After successful import, this code has no future use**
+- Actual: 1,225 donations created (some multi-child split into 2+ donations, some skipped)
+- Runtime: ~30 seconds for full import
+- Safe to re-run multiple times (idempotent via stripe_invoice_id checking)
+- Failed rows can be tracked via TICKET-076 (Failed Payments Tracking)
+- **MVP in production: Will be run regularly with new CSV exports until TICKET-026 complete**
 - **Webhooks (TICKET-026) use StripePaymentImportService directly**
+- **Estimated lifespan: Several weeks/months until webhooks stable**

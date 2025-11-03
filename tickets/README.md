@@ -78,9 +78,10 @@ Current work items and user stories being actively developed.
 **⭐ PERMANENT (Production Code):**
 - [TICKET-070: Stripe CSV Import Foundation](TICKET-070-stripe-csv-import-foundation.md) - 📋 Planned (🔴 High, L) - *Core reusable service (webhooks depend on this)*
 - [TICKET-026: Stripe Webhook Integration](TICKET-026-stripe-import-webhook-integration.md) - 📋 Planned (🟡 Medium, M) - *Long-term production solution*
+- [TICKET-076: Failed Stripe Payments Tracking](TICKET-076-failed-stripe-payments-tracking.md) - 🔵 In Progress (🔴 High, M) - *Track failed/refunded payments from CSV + webhooks*
 
 **🗑️ TEMPORARY (One-Time Use):**
-- [TICKET-071: Stripe CSV Batch Import Task](TICKET-071-stripe-csv-batch-import-task.md) - 📋 Planned (🔴 High, M) - *Throwaway: delete after CSV import*
+- [TICKET-071: Stripe CSV Batch Import Task](TICKET-071-stripe-csv-batch-import-task.md) - 🟡 Blocked - Pending User Testing (🔴 High, M) - *Throwaway: delete after CSV import*
 - [TICKET-072: Import Error Recovery UI](TICKET-072-import-error-recovery-ui.md) - 📋 Planned (🟢 Low, M) - *Optional: skip if <10 failures*
 
 **FUTURE:**
@@ -96,6 +97,7 @@ Current work items and user stories being actively developed.
 - [TICKET-058: Donor Sponsorship List Endpoint](TICKET-058-donor-sponsorship-list-endpoint.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-059: Child Info Display on Donation Pages](TICKET-059-child-info-display-donation-pages.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-061: Auto-Create Sponsorship from Donation](TICKET-061-auto-create-sponsorship-from-donation.md) - 📋 Planned (🟡 Medium, M)
+- [TICKET-077: Last Donation Date Tracking](TICKET-077-last-donation-date-tracking.md) - 🔵 In Progress (🔴 High, M) - *Show last donation date for donors, children, sponsorships*
 
 #### Code Quality & Architecture Improvements
 
