@@ -289,47 +289,79 @@ end
 - stripe_subscription_id (string)
 ```
 
+**Multi-Child Sponsorship Idempotency:**
+
+Multi-child sponsorships in the CSV appear as **separate rows** with the **same Transaction ID** but different children:
+- Row 7: Transaction ID `ch_1H4U4A`, Child "Wan"
+- Row 8: Transaction ID `ch_1H4U4A`, Child "Orawan"
+
+**Idempotency Requirements:**
+1. ✅ Same invoice + same child → Skip (duplicate)
+2. ✅ Same invoice + different child → Import (multi-child sponsorship)
+3. ✅ Different invoice + different child → Import (separate donations)
+
+**Key Implementation Detail:**
+
+`child_id` is a **virtual attribute** (`attr_accessor`) on Donation model, NOT a database column. It triggers `auto_create_sponsorship_from_child_id` callback which creates the sponsorship and sets `sponsorship_id`.
+
+Therefore, idempotency checks CANNOT use `child_id` directly - must check via sponsorship relationship:
+
+```ruby
+# WRONG - child_id is not in database
+Donation.exists?(stripe_invoice_id: txn_id, child_id: child.id)
+
+# CORRECT - check via sponsorship relationship
+Donation
+  .joins(:sponsorship)
+  .where(stripe_invoice_id: txn_id)
+  .where(sponsorships: { child_id: child.id })
+  .exists?
+```
+
 **Service Pattern:**
+
 ```ruby
 class StripePaymentImportService
   def import
-    return skip_result('Already imported') if already_imported?
+    ActiveRecord::Base.transaction do
+      # Create/find StripeInvoice (allows multiple donations per invoice)
+      StripeInvoice.find_or_create_by!(stripe_invoice_id: txn_id) do |invoice|
+        # Set invoice metadata only on create
+      end
 
-    # Create invoice ONCE per CSV transaction
-    StripeInvoice.create!(
-      stripe_invoice_id: @csv_row['Transaction ID'],
-      stripe_charge_id: @csv_row['Transaction ID'],
-      # ... other metadata
-    )
+      child_names.each do |child_name|
+        child = Child.find_or_create_by!(name: child_name)
 
-    # Create donations for each child (multi-child support)
-    child_names.each do |child_name|
-      Donation.create!(
-        stripe_invoice_id: @csv_row['Transaction ID'],  # Link to invoice
-        # ... other fields
-      )
+        # Check if donation exists for THIS child + invoice (idempotency)
+        existing = Donation
+          .joins(:sponsorship)
+          .where(stripe_invoice_id: txn_id, sponsorships: { child_id: child.id })
+          .exists?
+
+        next if existing # Skip duplicate
+
+        Donation.create!(
+          child_id: child.id,  # Virtual attr - triggers sponsorship creation
+          stripe_invoice_id: txn_id
+        )
+      end
     end
-  end
-
-  private
-
-  def already_imported?
-    # Check StripeInvoice, not Donation (idempotency)
-    StripeInvoice.exists?(stripe_invoice_id: @csv_row['Transaction ID'])
   end
 end
 ```
 
 **Key Design Decisions:**
-1. **Idempotency:** Check `StripeInvoice.exists?` instead of `Donation.exists?`
-2. **Future-proof:** `stripe_invoice_id` uses Transaction ID now, but can map to actual Stripe Invoice ID later
-3. **Data Integrity:** One StripeInvoice per CSV row, even if multiple donations created
-4. **Migration Safety:** Removed unique constraint on `donations.stripe_charge_id`
+
+1. **Idempotency:** Check per-child donation via sponsorship relationship, NOT just StripeInvoice
+2. **Virtual Attribute:** `child_id` is `attr_accessor`, triggers callback to create sponsorship
+3. **Multi-Child Support:** Same invoice can have multiple donations for different children
+4. **Data Integrity:** StripeInvoice created once, reused by all children
 
 **Implementation Notes:**
-- Used strict TDD: RED → GREEN → refactor, one test at a time
-- 10 comprehensive tests covering single/multi-child, idempotency, metadata storage
-- Migration lesson: Commented-out migrations marked as "up" by Rails - delete and recreate with fresh timestamp
+
+- 18 comprehensive tests covering all 3 idempotency scenarios
+- Strict TDD: RED → GREEN → refactor, one test at a time
+- Bug fix: Original implementation only checked StripeInvoice, causing multi-child duplicates
 
 **See:** TICKET-070, `app/services/stripe_payment_import_service.rb`, `app/models/stripe_invoice.rb`
 

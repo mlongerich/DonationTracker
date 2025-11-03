@@ -54,17 +54,24 @@ RSpec.describe StripePaymentImportService do
         described_class.new(valid_csv_row).import
       end
 
-      it 'skips already imported stripe_charge_id' do
+      it 'skips already imported donation for same child' do
         result = described_class.new(valid_csv_row).import
 
         expect(result[:skipped]).to be true
         expect(result[:reason]).to eq('Already imported')
+        expect(result[:donations]).to be_empty
       end
 
-      it 'checks StripeInvoice table for idempotency' do
-        expect(StripeInvoice).to receive(:exists?).with(stripe_invoice_id: 'txn_123abc').and_return(true)
+      it 'creates StripeInvoice once and reuses it' do
+        # First import created the StripeInvoice
+        expect(StripeInvoice.count).to eq(1)
 
-        described_class.new(valid_csv_row).import
+        # Second import reuses the same StripeInvoice
+        expect {
+          described_class.new(valid_csv_row).import
+        }.not_to change(StripeInvoice, :count)
+
+        expect(StripeInvoice.count).to eq(1)
       end
     end
 
@@ -218,6 +225,30 @@ RSpec.describe StripePaymentImportService do
         expect(donation.project.title).to eq('UNMAPPED: Book')
         expect(donation.project.project_type).to eq('general')
         expect(donation.child_id).to be_nil
+      end
+    end
+
+    context 'with multi-child sponsorship (separate rows, same Transaction ID)' do
+      it 'allows second child donation when first child already imported' do
+        # First row - Wan
+        first_row = valid_csv_row.merge(
+          'Transaction ID' => 'txn_multi_child',
+          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Wan'
+        )
+
+        # Import first child
+        described_class.new(first_row).import
+
+        # Second row - Orawan (same Transaction ID, different child)
+        second_row = valid_csv_row.merge(
+          'Transaction ID' => 'txn_multi_child',
+          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Orawan'
+        )
+
+        # Should NOT skip, should create second donation
+        expect {
+          described_class.new(second_row).import
+        }.to change(Donation, :count).by(1)
       end
     end
   end

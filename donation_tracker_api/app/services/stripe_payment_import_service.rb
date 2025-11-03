@@ -11,17 +11,16 @@ class StripePaymentImportService
 
   def import
     return skip_result("Status not succeeded") unless succeeded?
-    return skip_result("Already imported") if already_imported?
 
     ActiveRecord::Base.transaction do
-      StripeInvoice.create!(
-        stripe_invoice_id: @csv_row["Transaction ID"],
-        stripe_charge_id: @csv_row["Transaction ID"],
-        stripe_customer_id: @csv_row["Cust ID"],
-        stripe_subscription_id: @csv_row["Cust Subscription Data ID"],
-        total_amount_cents: amount_in_cents,
-        invoice_date: Date.parse(@csv_row["Created Formatted"])
-      )
+      # Create StripeInvoice if it doesn't exist yet (allows multiple donations per invoice)
+      stripe_invoice = StripeInvoice.find_or_create_by!(stripe_invoice_id: @csv_row["Transaction ID"]) do |invoice|
+        invoice.stripe_charge_id = @csv_row["Transaction ID"]
+        invoice.stripe_customer_id = @csv_row["Cust ID"]
+        invoice.stripe_subscription_id = @csv_row["Cust Subscription Data ID"]
+        invoice.total_amount_cents = amount_in_cents
+        invoice.invoice_date = Date.parse(@csv_row["Created Formatted"])
+      end
 
       donor_result = DonorService.find_or_update_by_email(
         {
@@ -38,6 +37,16 @@ class StripePaymentImportService
         # Sponsorship donation
         child_names.each do |child_name|
           child = Child.find_or_create_by!(name: child_name)
+
+          # Check if this specific child's donation already exists for this invoice
+          # Note: child_id is a virtual attribute (attr_accessor), so we check via sponsorship relationship
+          existing_donation = Donation
+            .joins(:sponsorship)
+            .where(stripe_invoice_id: @csv_row["Transaction ID"])
+            .where(sponsorships: { child_id: child.id })
+            .exists?
+
+          next if existing_donation # Skip this child, already imported
 
           donation = Donation.create!(
             donor: donor,
@@ -56,21 +65,28 @@ class StripePaymentImportService
         # Non-sponsorship donation (general, campaign, etc.)
         project = find_or_create_project
 
-        donation = Donation.create!(
-          donor: donor,
-          project: project,
-          amount: amount_in_cents,
-          date: Date.parse(@csv_row["Created Formatted"]),
-          child_id: nil,
-          stripe_charge_id: @csv_row["Transaction ID"],
-          stripe_customer_id: @csv_row["Cust ID"],
-          stripe_subscription_id: @csv_row["Cust Subscription Data ID"],
-          stripe_invoice_id: @csv_row["Transaction ID"]
-        )
+        # Check if this project's donation already exists for this invoice
+        # For non-sponsorships, check by invoice + project (sponsorship_id will be nil)
+        unless Donation.where(stripe_invoice_id: @csv_row["Transaction ID"], project_id: project.id, sponsorship_id: nil).exists?
+          donation = Donation.create!(
+            donor: donor,
+            project: project,
+            amount: amount_in_cents,
+            date: Date.parse(@csv_row["Created Formatted"]),
+            child_id: nil,
+            stripe_charge_id: @csv_row["Transaction ID"],
+            stripe_customer_id: @csv_row["Cust ID"],
+            stripe_subscription_id: @csv_row["Cust Subscription Data ID"],
+            stripe_invoice_id: @csv_row["Transaction ID"]
+          )
 
-        @imported_donations << donation
+          @imported_donations << donation
+        end
       end
     end
+
+    # Return skip if no donations were created (all already existed)
+    return skip_result("Already imported") if @imported_donations.empty?
 
     { success: true, donations: @imported_donations, skipped: false }
   rescue StandardError => e
