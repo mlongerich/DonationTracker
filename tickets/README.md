@@ -49,6 +49,9 @@ Current work items and user stories being actively developed.
 - [TICKET-062: Donor Cascade Delete Strategy](completed/TICKET-062-donor-cascade-delete-strategy.md) - ✅ Complete (2025-10-28)
 - [TICKET-063: Archive Business Logic for Active Sponsorships](completed/TICKET-063-archive-business-logic-active-sponsorships.md) - ✅ Complete (2025-10-29)
 - [TICKET-064: Smart Sponsorship Detection & Auto-Creation](completed/TICKET-064-smart-sponsorship-detection-donation-form.md) - ✅ Complete (2025-10-31)
+- [TICKET-065: Move Business Logic to Backend](completed/TICKET-065-move-business-logic-to-backend.md) - ✅ Complete (2025-10-31)
+- [TICKET-050: Children Page Search & Pagination](completed/TICKET-050-children-page-ui-standardization.md) - ✅ Complete (2025-11-03)
+- [TICKET-070: Stripe CSV Import Foundation](completed/TICKET-070-stripe-csv-import-foundation.md) - ✅ Complete (2025-11-02)
 
 ### 🔵 In Progress Tickets
 
@@ -76,9 +79,8 @@ Current work items and user stories being actively developed.
 #### Stripe Integration
 
 **⭐ PERMANENT (Production Code):**
-- [TICKET-070: Stripe CSV Import Foundation](TICKET-070-stripe-csv-import-foundation.md) - 📋 Planned (🔴 High, L) - *Core reusable service (webhooks depend on this)*
 - [TICKET-026: Stripe Webhook Integration](TICKET-026-stripe-import-webhook-integration.md) - 📋 Planned (🟡 Medium, M) - *Long-term production solution*
-- [TICKET-076: Failed Stripe Payments Tracking](TICKET-076-failed-stripe-payments-tracking.md) - 🔵 In Progress (🔴 High, M) - *Track failed/refunded payments from CSV + webhooks*
+- [TICKET-076: Failed Stripe Payments Tracking](TICKET-076-failed-stripe-payments-tracking.md) - 📋 Planned (🔴 High, M) - *Track failed/refunded payments from CSV + webhooks*
 
 **🗑️ TEMPORARY (One-Time Use):**
 - [TICKET-071: Stripe CSV Batch Import Task](TICKET-071-stripe-csv-batch-import-task.md) - 🟡 Blocked - Pending User Testing (🔴 High, M) - *Throwaway: delete after CSV import*
@@ -89,7 +91,6 @@ Current work items and user stories being actively developed.
 
 #### Sponsorship & Children Features
 - [TICKET-048: Stripe Sponsorship & Child Extraction](TICKET-048-stripe-sponsorship-child-extraction.md) - 📋 Planned (🟡 Medium, M)
-- [TICKET-050: Children Page UI Standardization](TICKET-050-children-page-ui-standardization.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-051: Add Project Type Sort/Filter to Projects Page](TICKET-051-project-page-type-sort-filter.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-052: Improve Sponsorship Donation Linking](TICKET-052-improve-sponsorship-donation-linking.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-053: Sponsorships Page Filters & Pagination UI](TICKET-053-sponsorships-page-filters-pagination-ui.md) - 📋 Planned (🟡 Medium, M)
@@ -97,7 +98,7 @@ Current work items and user stories being actively developed.
 - [TICKET-058: Donor Sponsorship List Endpoint](TICKET-058-donor-sponsorship-list-endpoint.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-059: Child Info Display on Donation Pages](TICKET-059-child-info-display-donation-pages.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-061: Auto-Create Sponsorship from Donation](TICKET-061-auto-create-sponsorship-from-donation.md) - 📋 Planned (🟡 Medium, M)
-- [TICKET-077: Last Donation Date Tracking](TICKET-077-last-donation-date-tracking.md) - 🔵 In Progress (🔴 High, M) - *Show last donation date for donors, children, sponsorships*
+- [TICKET-077: Last Donation Date Tracking](TICKET-077-last-donation-date-tracking.md) - 📋 Planned (🔴 High, M) - *Show last donation date for donors, children, sponsorships*
 
 #### Code Quality & Architecture Improvements
 
@@ -125,23 +126,23 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 69
-- **Completed:** 33
+- **Total Tickets:** 71
+- **Completed:** 37 (52%)
 - **In Progress:** 0
-- **Planned:** 34
+- **Planned:** 32
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 
 ### By Category
 
 - **Feature Development:** 9 planned, 10 completed
-- **Stripe Integration:** 5 planned
-  - **PERMANENT:** TICKET-070 (core), TICKET-026 (webhooks)
-  - **TEMPORARY:** TICKET-071 (batch import - delete after use)
-  - **OPTIONAL:** TICKET-072 (error UI - skip if possible)
+- **Stripe Integration:** 4 planned, 1 completed
+  - **PERMANENT:** ✅ TICKET-070 (core service - complete), TICKET-026 (webhooks - planned)
+  - **TEMPORARY:** TICKET-071 (batch import - blocked on user testing)
+  - **OPTIONAL:** TICKET-072 (error UI - skip if <10 failures)
   - **FUTURE:** TICKET-027 (mapping UI)
-- **Sponsorship & Children Features:** 9 planned, 6 completed
-- **Code Quality & Architecture:** 11 planned, 17 completed
+- **Sponsorship & Children Features:** 8 planned, 8 completed
+- **Code Quality & Architecture:** 11 planned, 18 completed
 - **In Progress:** 0
 - **Blocked:** 1 (TICKET-005)
 - **Deferred/Accepted Risk:** 1 (TICKET-049)
@@ -149,16 +150,16 @@ Current work items and user stories being actively developed.
 ### Code Lifecycle Guide
 
 **PERMANENT CODE (Keep Forever):**
-- TICKET-070: `StripePaymentImportService` - Core donation processing (reused by webhooks)
-- TICKET-026: `Webhooks::StripeController` - Production webhook endpoint
+- ✅ TICKET-070: `StripePaymentImportService` - Core donation processing (reused by webhooks) - **COMPLETE**
+- 📋 TICKET-026: `Webhooks::StripeController` - Production webhook endpoint - **PLANNED**
 
 **TEMPORARY CODE (Delete After CSV Import):**
-- TICKET-071: `StripeCsvBatchImporter` + rake task - One-time batch wrapper
-- TICKET-072: `ImportError` model + UI - Optional error review (skip if <10 failures)
+- 🟡 TICKET-071: `StripeCsvBatchImporter` + rake task - One-time batch wrapper - **BLOCKED (user testing)**
+- 📋 TICKET-072: `ImportError` model + UI - Optional error review (skip if <10 failures) - **PLANNED**
 
 **Implementation Order:**
-1. TICKET-070 (foundation - PERMANENT)
-2. TICKET-071 (one-time import - TEMPORARY)
+1. ✅ TICKET-070 (foundation - PERMANENT) - **COMPLETE**
+2. 🟡 TICKET-071 (one-time import - TEMPORARY) - **BLOCKED**
 3. Run CSV import
 4. TICKET-072 (only if >10 failures - OPTIONAL)
 5. TICKET-026 (webhooks - PERMANENT, reuses TICKET-070)

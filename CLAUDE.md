@@ -611,6 +611,40 @@ import { Donor } from '../types';
 
 **See:** TICKET-025
 
+#### Form Component Pattern
+
+**Standard:** All form components follow consistent UX patterns for maintainability
+
+**Button Configuration:**
+- **No Cancel button** - Forms embedded in pages (user can navigate away naturally)
+- **Submit button:** Full-width, primary color (`variant="contained" color="primary" fullWidth`)
+- **Placement:** Bottom of form
+
+**Example (ChildForm, DonationForm):**
+```tsx
+<Box component="form" onSubmit={handleSubmit}>
+  {/* Form fields */}
+  <TextField label="Name" size="small" fullWidth required />
+
+  {/* Submit button */}
+  <Button type="submit" variant="contained" color="primary" fullWidth>
+    {initialData ? 'Update' : 'Create'}
+  </Button>
+</Box>
+```
+
+**Props:**
+- `onSubmit: (data: FormData) => Promise<void>` - Required
+- `initialData?: FormData` - Optional (edit mode if provided)
+- ~~`onCancel`~~ - Removed (not needed for embedded forms)
+
+**Rationale:**
+- Embedded forms don't need Cancel (user navigates away via page links)
+- Full-width Submit button is more prominent and mobile-friendly
+- Consistent across DonationForm, ChildForm, ProjectForm
+
+**See:** TICKET-050 (ChildForm consistency improvements)
+
 #### Custom Hooks Library
 
 **Purpose:** Extract and reuse stateful logic across components

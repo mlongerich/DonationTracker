@@ -1,10 +1,10 @@
 ## [TICKET-050] Children Page: Add Search and Pagination
 
-**Status:** 🔵 In Progress
+**Status:** ✅ Complete
 **Priority:** 🟡 Medium
 **Effort:** S (Small - 1-2 hours)
 **Started:** 2025-11-03
-**Completed:** TBD
+**Completed:** 2025-11-03
 **Dependencies:** TICKET-049 (Child soft delete backend) ✅ Complete
 
 ### User Story
@@ -34,31 +34,36 @@ As a user, I want to search children by name and navigate through paginated resu
 - Multi-sponsor display working correctly
 - Only missing: search UI + pagination UI
 
-### Acceptance Criteria (Remaining Work)
+### Acceptance Criteria ✅ COMPLETE
 
 **ChildrenPage.tsx:**
-- [ ] Remove `showForm` state (line 11) and "Add Child" button (lines 167-171)
-- [ ] Import `useDebouncedValue` and `usePagination` hooks from '../hooks'
-- [ ] Add `searchQuery` state and `debouncedQuery` using useDebouncedValue(searchQuery, 300)
-- [ ] Add pagination state using `usePagination()` hook
-- [ ] Add search TextField before ChildList (pattern: DonorsPage lines 119-126)
-- [ ] Modify `fetchChildren` to include Ransack query params: `q: { name_cont: debouncedQuery }`
-- [ ] Modify `fetchChildren` to include pagination params: `page`, `per_page: 10`
-- [ ] Add useEffect to reset to page 1 when debouncedQuery changes
-- [ ] Add Pagination component after ChildList (pattern: DonorsPage lines 157-166)
-- [ ] Update fetchChildren calls in all handlers to preserve search/pagination state
+- [x] ~~Remove `showForm` state~~ (was not present - form always visible)
+- [x] Import `useDebouncedValue` and `usePagination` hooks from '../hooks' (line 8)
+- [x] Add `searchQuery` state and `debouncedQuery` using useDebouncedValue(searchQuery, 300) (lines 17-18)
+- [x] Add pagination state using `usePagination()` hook (lines 20-26)
+- [x] Add search TextField before ChildList (lines 212-219)
+- [x] Modify `fetchChildren` to include Ransack query params: `q: { name_cont: debouncedQuery }` (lines 36-39)
+- [x] Modify `fetchChildren` to include pagination params: `page`, `per_page: 10` (lines 41-51)
+- [x] Add useEffect to reset to page 1 when debouncedQuery changes (lines 28-31)
+- [x] Add Pagination component after ChildList (lines 241-250)
+- [x] Update fetchChildren calls in all handlers to preserve search/pagination state
+
+**ChildForm.tsx:**
+- [x] Remove Cancel button (consistency with DonationForm pattern)
+- [x] Make Submit button full-width with primary color
+- [x] Remove onCancel prop from component interface
 
 **ChildrenPage.test.tsx:**
-- [ ] Test: Search field updates state on change
-- [ ] Test: Debounce delays search by 300ms
-- [ ] Test: Search triggers API call with q[name_cont] param
-- [ ] Test: Pagination appears when total_pages > 1
-- [ ] Test: Page change triggers API call with new page number
-- [ ] Test: Search resets page to 1
+- [x] Test: Search field updates state on change
+- [x] Test: Debounce delays search by 300ms
+- [x] Test: Search triggers API call with q[name_cont] param
+- [x] Test: Pagination appears when total_pages > 1
+- [x] Test: Page change triggers API call with new page number
+- [x] Test: Search resets page to 1
+- [x] All 27 tests passing (23 ChildrenPage + 4 ChildForm)
 
-**Cypress E2E (Optional - Nice to Have):**
-- [ ] Test: Search for child by name workflow
-- [ ] Test: Pagination navigation
+**Cypress E2E:**
+- ⏭️ Deferred - Frontend unit tests provide sufficient coverage
 
 ### Technical Implementation Details
 
@@ -190,7 +195,8 @@ const loadChildren = async () => {
 - Comprehensive test suite already exists (only need 6 additional tests)
 
 ### Related Commits
-- TBD
+- `38ed828` frontend: implement search and pagination for Children page (TICKET-050)
+- `b649086` docs: update TICKET-050 to reflect actual remaining work
 
 ### Related Tickets
 - ✅ TICKET-049: Child soft delete backend (complete - provided archive/restore foundation)
@@ -200,6 +206,17 @@ const loadChildren = async () => {
 ---
 
 ## Change Log
+
+**2025-11-03: Implementation Complete ✅**
+- Implemented search TextField with debounced query (300ms)
+- Added pagination UI component (10 items per page)
+- Removed "Add Child" button toggle - form now always visible
+- Integrated useDebouncedValue and usePagination hooks
+- Updated ChildForm to remove Cancel button (consistency with DonationForm)
+- Added 6 new tests for search and pagination functionality
+- Updated 8 existing tests to expect pagination params
+- All 27 tests passing (23 ChildrenPage + 4 ChildForm)
+- Commits: 38ed828, b649086
 
 **2025-11-03: Ticket Scope Reduction**
 - Removed already-implemented acceptance criteria (archive/restore/multi-sponsor/UI standardization)
