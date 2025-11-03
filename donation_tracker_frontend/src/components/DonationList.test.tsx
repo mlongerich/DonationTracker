@@ -36,7 +36,7 @@ describe('DonationList', () => {
     const donations = [
       {
         id: 1,
-        amount: '100.50',
+        amount: '10050', // 100.50 dollars = 10050 cents
         date: '2025-10-15',
         donor_id: 1,
         donor_name: 'John Doe',
@@ -45,7 +45,7 @@ describe('DonationList', () => {
 
     renderWithLocalization(<DonationList donations={donations} />);
 
-    expect(screen.getByText(/\$100.50/i)).toBeInTheDocument();
+    expect(screen.getByText(/\$100\.50/i)).toBeInTheDocument();
     expect(screen.getByText(/2025-10-15/i)).toBeInTheDocument();
     expect(screen.getByText(/John Doe/i)).toBeInTheDocument();
   });
@@ -222,8 +222,8 @@ describe('DonationList', () => {
 
     // Mock API response for donor search
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
     ];
 
     jest.spyOn(require('../api/client').default, 'get').mockResolvedValue({
@@ -249,7 +249,7 @@ describe('DonationList', () => {
     const user = userEvent.setup();
 
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
     ];
 
     jest.spyOn(require('../api/client').default, 'get').mockResolvedValue({

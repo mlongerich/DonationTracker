@@ -13,7 +13,7 @@ describe('SponsorshipList', () => {
       child_name: 'Maria',
       project_id: 1,
       project_title: 'Sponsor Maria',
-      monthly_amount: '50.0',
+      monthly_amount: '5000', // 50 dollars = 5000 cents
       start_date: '2025-01-01',
       active: true
     }
@@ -54,7 +54,7 @@ describe('SponsorshipList', () => {
       child_name: 'Juan',
       project_id: 2,
       project_title: 'Sponsor Juan',
-      monthly_amount: '30.0',
+      monthly_amount: '3000', // 30 dollars = 3000 cents
       start_date: '2025-01-01',
       end_date: '2025-01-15',
       active: false

@@ -113,7 +113,7 @@ describe('SponsorshipModal', () => {
         sponsorship: {
           donor_id: 1,
           child_id: 1,
-          monthly_amount: 50,
+          monthly_amount: 5000, // 50 dollars = 5000 cents
         },
       });
       expect(mockOnSuccess).toHaveBeenCalled();

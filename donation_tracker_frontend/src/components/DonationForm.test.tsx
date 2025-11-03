@@ -78,8 +78,8 @@ describe('DonationForm', () => {
 
   it('hides mailinator emails in autocomplete options', async () => {
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@mailinator.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
+      { id: 1, name: 'John Doe', email: 'john@mailinator.com', displayable_email: null }, // mailinator hidden
+      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
     ];
 
     // Mock the get method to return donors
@@ -88,6 +88,12 @@ describe('DonationForm', () => {
         return Promise.resolve({ data: { donors: mockDonors } });
       }
       return Promise.reject(new Error('Unexpected URL'));
+    });
+
+    // Mock searchProjectOrChild to prevent errors from ProjectOrChildAutocomplete
+    (searchProjectOrChild as jest.Mock).mockResolvedValue({
+      projects: [],
+      children: [],
     });
 
     const user = userEvent.setup();
@@ -248,7 +254,7 @@ describe('DonationForm', () => {
         expect.objectContaining({
           child_id: 5,
           donor_id: 1,
-          amount: 100,
+          amount: 10000, // 100 dollars = 10000 cents
         })
       );
     });

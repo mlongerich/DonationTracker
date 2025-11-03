@@ -1,22 +1,53 @@
-## [TICKET-062] Extract useChildren Custom Hook
+## [TICKET-066] Extract useChildren Custom Hook
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 **Priority:** 🔴 High
 **Effort:** M (Medium - 2-3 hours)
 **Created:** 2025-10-31
+**Completed:** 2025-11-03
 **Dependencies:** None
 
 ### User Story
 As a developer, I want a reusable custom hook for fetching children data so that I don't have to duplicate 100+ lines of data fetching logic across handler functions.
 
+### Implementation Summary
+
+**Files Created:**
+- `src/hooks/useChildren.ts` (91 lines)
+- `src/hooks/useChildren.test.ts` (150 lines, 8 tests)
+
+**Files Modified:**
+- `src/hooks/index.ts` - Added useChildren export
+- `src/pages/ChildrenPage.tsx` - Refactored from 270 → 201 lines (-69 lines, -26%)
+- Test files updated for currency format consistency (cents vs dollars)
+
+**Test Results:**
+- ✅ 8/8 useChildren hook tests passing
+- ✅ 264/264 total tests passing
+- ✅ All currency formatting consistent (cents in backend, dollars in UI)
+
+**Bugs Fixed:**
+- handleCreate/handleUpdate now respect pagination, search, archived filters
+- handleSponsorshipSuccess now respects archived filter
+- Consistent data fetching across all 7 handler functions
+
 ### Problem Statement
 
 **Critical Code Smell: Severe DRY Violation**
 
-`ChildrenPage.tsx` has **7 identical data fetching blocks** (100+ lines duplicated):
+`ChildrenPage.tsx` (270 lines) has **5 identical data fetching blocks** with complex params:
 
+**Current duplication locations:**
+1. Lines 34-70: `useEffect` - pagination, search, archived filter
+2. Lines 73-77: `handleCreate` - NO params (misses pagination/search/archived!)
+3. Lines 79-85: `handleUpdate` - NO params (misses pagination/search/archived!)
+4. Lines 91-110: `handleDelete` - includes archived filter, rebuilds sponsorship map
+5. Lines 112-141: `handleArchive` - includes archived filter, rebuilds sponsorship map, error handling
+6. Lines 143-162: `handleRestore` - includes archived filter, rebuilds sponsorship map
+7. Lines 168-184: `handleSponsorshipSuccess` - only includes sponsorships (missing archived!)
+
+**Pattern (lines 93-110):**
 ```typescript
-// This pattern appears in lines: 27, 45, 53, 70, 92, 122, 142
 const params: { include_sponsorships: boolean; include_discarded?: string } = {
   include_sponsorships: true
 };
@@ -26,7 +57,7 @@ if (showArchived) {
 const response = await apiClient.get('/api/children', { params });
 setChildren(response.data.children);
 
-// Sponsorship map rebuilding (15 lines duplicated 5x)
+// Rebuild sponsorship map (15 lines duplicated 5x)
 const sponsorshipMap = new Map<number, Sponsorship[]>();
 response.data.children.forEach((child: Child & { sponsorships?: Sponsorship[] }) => {
   if (child.sponsorships) {
@@ -36,12 +67,13 @@ response.data.children.forEach((child: Child & { sponsorships?: Sponsorship[] })
 setSponsorships(sponsorshipMap);
 ```
 
-**Impact:**
-- 100+ lines of duplicated code in single file
-- Changes must be made in 7 places (error-prone)
-- No consistent error handling
-- No loading states
-- Violates DRY principle severely
+**Critical Issues:**
+- **Bug:** handleCreate/handleUpdate ignore pagination, search, and archived filter (stale data!)
+- **Bug:** handleSponsorshipSuccess ignores archived filter (shows wrong data!)
+- 80+ lines of duplicated code
+- Inconsistent param building (some use pagination, some don't)
+- No loading states during refetch
+- Changes must be made in 7 places
 
 **Pattern Drift:**
 - ✅ `usePagination` and `useDebouncedValue` hooks exist (CLAUDE.md pattern)
@@ -55,12 +87,13 @@ setSponsorships(sponsorshipMap);
 
 #### Frontend Hook
 - [ ] Create `hooks/useChildren.ts` custom hook
-- [ ] Hook manages: `children`, `sponsorships`, `loading`, `error` state
-- [ ] `fetchChildren()` method accepts options: `includeSponsorship`, `includeDiscarded`
+- [ ] Hook manages: `children`, `sponsorships`, `loading`, `error`, `paginationMeta` state
+- [ ] `fetchChildren()` method accepts options: `includeSponsorship`, `includeDiscarded`, `page`, `perPage`, `search`
 - [ ] Automatically builds sponsorship map from nested data
 - [ ] Returns `refetch` alias for `fetchChildren`
 - [ ] Loading states managed internally
 - [ ] Error handling with user-friendly messages
+- [ ] Exposes pagination metadata for UI rendering
 
 #### Refactor ChildrenPage
 - [ ] Replace 7 data fetching blocks with single `useChildren()` hook

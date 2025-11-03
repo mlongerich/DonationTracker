@@ -703,6 +703,41 @@ useEffect(() => {
 const params = { page: currentPage, per_page: 10, ...buildQueryParams() };
 ```
 
+**4. `useChildren()`**
+- Manages children data fetching with sponsorships, pagination, and search
+- Returns: `children`, `sponsorships`, `loading`, `error`, `paginationMeta`, `fetchChildren`, `refetch`
+- Use case: ChildrenPage (eliminated 69 lines of duplication)
+
+```tsx
+const { children, sponsorships, loading, error, paginationMeta, fetchChildren } = useChildren();
+
+// Fetch with filters
+useEffect(() => {
+  fetchChildren({
+    includeSponsorship: true,
+    includeDiscarded: showArchived,
+    page: currentPage,
+    perPage: 10,
+    search: debouncedQuery,
+  });
+}, [showArchived, currentPage, debouncedQuery, fetchChildren]);
+
+// Refetch after mutations
+const handleCreate = async (data) => {
+  await apiClient.post('/api/children', { child: data });
+  fetchChildren({ includeSponsorship: true, includeDiscarded: showArchived });
+};
+```
+
+**Benefits:**
+- Centralized data fetching logic
+- Automatic sponsorship map building
+- Built-in loading and error states
+- Pagination metadata management
+- Fixes bugs where handlers ignored filters
+
+**See:** TICKET-066
+
 **When to Create Custom Hooks:**
 - Logic duplicated in 2+ components
 - Complex stateful logic (useState + useEffect combinations)
