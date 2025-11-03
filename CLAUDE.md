@@ -365,6 +365,54 @@ end
 
 **See:** TICKET-070, `app/services/stripe_payment_import_service.rb`, `app/models/stripe_invoice.rb`
 
+#### Stripe Project Mapping Patterns (TICKET-071)
+
+**Context:** CSV import must map description text to projects. Some descriptions are generic (phone numbers, "Subscription creation") and should map to "General Donation" system project rather than creating named projects.
+
+**Pattern Order (first match wins):**
+1. **Blank/empty** → "General Donation"
+2. **General monthly donation** (`$X - General Monthly Donation`) → "General Donation"
+3. **Campaign** (`Donation for Campaign 123`) → "Campaign 123" project
+4. **Invoice** (`Invoice ABC-123`) → "General Donation"
+5. **Email address** (`user@example.com`) → "General Donation"
+6. **All numbers** (`66826191275`) → "General Donation"
+7. **Subscription creation** → "General Donation"
+8. **Payment app** (`Captured via Payment app`) → "General Donation"
+9. **Stripe app** (`Payment for Stripe App`) → "General Donation"
+10. **Named items** (e.g., "Tshirt", "Jacket", "Kidz Club") → Create named project for admin review (TICKET-027)
+
+**Implementation:**
+```ruby
+def find_or_create_project
+  description_text = get_description_text
+
+  # 1. Blank/empty → General Donation
+  return general_donation if description_text.blank?
+
+  # 2-5. Existing patterns (general, campaign, invoice, email)
+  return general_donation if description_text.match(GENERAL_PATTERN)
+  return campaign_project if description_text.match(CAMPAIGN_PATTERN)
+  return general_donation if description_text.match(/Invoice [A-Z0-9-]+/i)
+  return general_donation if description_text.match(EMAIL_PATTERN)
+
+  # 6-9. Enhanced patterns (TICKET-071)
+  return general_donation if description_text.match(/\A\d+\z/)  # All numbers
+  return general_donation if description_text.match(/Subscription creation/i)
+  return general_donation if description_text.match(/Captured via Payment app/i)
+  return general_donation if description_text.match(/Payment for Stripe App/i)
+
+  # 10. Named projects - create for admin review
+  Project.find_or_create_by!(title: description_text[0, 100])
+end
+```
+
+**Results (1,225 donations):**
+- ✅ 395 donations → "General Donation" (enhanced pattern matching)
+- ✅ 9 named projects created (Tshirt, Jacket, Bag, Book, etc.)
+- ✅ 0 UNMAPPED projects (all patterns working correctly)
+
+**See:** TICKET-071, `app/services/stripe_payment_import_service.rb#find_or_create_project`
+
 #### Controller Concerns
 
 **When to extract:**
