@@ -3,6 +3,7 @@ import { Stack, TextField, Button } from '@mui/material';
 import DonorAutocomplete from './DonorAutocomplete';
 import ChildAutocomplete from './ChildAutocomplete';
 import { Donor, Child, SponsorshipFormData } from '../types';
+import { parseCurrency } from '../utils/currency';
 
 interface SponsorshipFormProps {
   onSubmit: (data: SponsorshipFormData) => void | Promise<void>;
@@ -29,7 +30,7 @@ const SponsorshipForm: React.FC<SponsorshipFormProps> = ({
     onSubmit({
       donor_id: selectedDonor.id,
       child_id: finalChildId,
-      monthly_amount: monthlyAmount,
+      monthly_amount: parseCurrency(monthlyAmount),
     });
   };
 

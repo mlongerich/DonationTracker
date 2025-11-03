@@ -6,6 +6,7 @@ import Stack from '@mui/material/Stack';
 import { createDonation } from '../api/client';
 import DonorAutocomplete, { Donor } from './DonorAutocomplete';
 import ProjectOrChildAutocomplete from './ProjectOrChildAutocomplete';
+import { parseCurrency } from '../utils/currency';
 
 interface Option {
   id: number;
@@ -53,7 +54,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
 
       // Create donation (backend handles sponsorship auto-creation)
       await createDonation({
-        amount: parseFloat(amount),
+        amount: parseCurrency(amount),
         date,
         donor_id: selectedDonor.id,
         project_id: projectId,

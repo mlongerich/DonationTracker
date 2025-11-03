@@ -15,6 +15,7 @@ import ArchiveIcon from '@mui/icons-material/Archive';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { Child, Sponsorship } from '../types';
+import { formatCurrency } from '../utils/currency';
 
 interface ChildListProps {
   children: Child[];
@@ -53,7 +54,7 @@ const ChildList: React.FC<ChildListProps> = ({
         const isArchived = !!child.discarded_at;
         const activeSponsors = getActiveSponsors(child.id);
         const sponsorshipText = activeSponsors.length > 0
-          ? `Sponsored by: ${activeSponsors.map(s => `${s.donor_name} ($${parseFloat(s.monthly_amount)}/mo)`).join(', ')}`
+          ? `Sponsored by: ${activeSponsors.map(s => `${s.donor_name} (${formatCurrency(Number(s.monthly_amount))}/mo)`).join(', ')}`
           : 'No active sponsors';
 
         return (

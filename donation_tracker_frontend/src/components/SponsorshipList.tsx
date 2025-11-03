@@ -10,6 +10,7 @@ import {
   Typography
 } from '@mui/material';
 import { Sponsorship } from '../types';
+import { formatCurrency } from '../utils/currency';
 
 interface SponsorshipListProps {
   sponsorships: Sponsorship[];
@@ -39,7 +40,7 @@ const SponsorshipList: React.FC<SponsorshipListProps> = ({ sponsorships, onEndSp
             <TableRow key={sponsorship.id}>
               <TableCell>{sponsorship.donor_name}</TableCell>
               <TableCell>{sponsorship.child_name}</TableCell>
-              <TableCell>${parseFloat(sponsorship.monthly_amount).toFixed(2)}</TableCell>
+              <TableCell>{formatCurrency(Number(sponsorship.monthly_amount))}</TableCell>
               <TableCell>{sponsorship.start_date || 'Not set'}</TableCell>
               <TableCell>{sponsorship.active ? 'Active' : 'Ended'}</TableCell>
               <TableCell>

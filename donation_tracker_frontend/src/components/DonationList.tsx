@@ -15,6 +15,7 @@ import {
 import { Dayjs } from 'dayjs';
 import DonorAutocomplete, { Donor } from './DonorAutocomplete';
 import { Donation, PaginationMeta } from '../types';
+import { formatCurrency } from '../utils/currency';
 
 interface DonationListProps {
   donations: Donation[];
@@ -186,7 +187,7 @@ const DonationList: React.FC<DonationListProps> = ({
               <Card key={donation.id} variant="outlined">
                 <CardContent>
                   <Typography variant="subtitle1">
-                    ${Number(donation.amount).toFixed(2)}
+                    {formatCurrency(donation.amount)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {donation.date} - {donation.donor_name || `Donor #${donation.donor_id}`}
