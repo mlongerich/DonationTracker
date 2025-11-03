@@ -1,215 +1,214 @@
-## [TICKET-050] Children Page UI Standardization
+## [TICKET-050] Children Page: Add Search and Pagination
 
-**Status:** 📋 Planned
+**Status:** 🔵 In Progress
 **Priority:** 🟡 Medium
-**Started:** TBD
+**Effort:** S (Small - 1-2 hours)
+**Started:** 2025-11-03
 **Completed:** TBD
-**Dependencies:** TICKET-049 (Child soft delete backend)
-**Blocked by:** TICKET-049
+**Dependencies:** TICKET-049 (Child soft delete backend) ✅ Complete
 
 ### User Story
-As a user, I want the Children page to have the same consistent layout and functionality as the Donors and Donations pages so that the interface is predictable and easy to use.
+As a user, I want to search children by name and navigate through paginated results on the Children page so that I can quickly find specific children in a large dataset, with the same consistent interface as the Donors and Donations pages.
 
-### Acceptance Criteria
-- [ ] Remove "Add Child" button toggle pattern
-- [ ] ChildForm is always visible (not conditionally rendered)
-- [ ] Add h6 section header "Add Child" (or "Edit Child" when editing)
-- [ ] Add h6 section header "List Children"
-- [ ] Add search by name TextField with debouncing (300ms)
-- [ ] Add "Show Archived Children" checkbox toggle
-- [ ] ChildList displays archive/restore buttons based on child state
-- [ ] Archive button soft deletes child via API
-- [ ] Restore button unarchives child via API
-- [ ] Search respects archived toggle state
-- [ ] Pagination displays when total_pages > 1
-- [ ] Visual indicators for archived children (opacity, chip, tooltip)
-- [ ] **Display ALL sponsors per child** (not just first active)
-- [ ] Show comma-separated list of sponsors with amounts
-- [ ] Handle children with multiple active sponsorships
-- [ ] **"Add Sponsor" button always visible** (not just when no sponsors exist)
-- [ ] Remove `activeSponsors.length === 0` condition from button visibility
-- [ ] Jest unit tests pass for all new functionality
-- [ ] Cypress E2E tests validate archive/restore workflow
+### Already Implemented ✅
 
-### Technical Notes
-- **Pattern Reference**: Follow DonorsPage.tsx layout exactly (lines 98-179)
-- **State Management**:
-  - Add `searchQuery` and `debouncedQuery` state (like DonorsPage:12-13)
-  - Add `showArchived` state (like DonorsPage:14)
-  - Add `paginationMeta` state (like DonorsPage:18-23)
-- **Search Implementation**: Debounce 300ms, reset to page 1 on search change
-- **API Integration**: Use Ransack `q[name_cont]` param for search
-- **Archive Toggle**: Pass `include_discarded=true` param when checked
-- **Pagination**: Use Kaminari backend pagination with `PaginationConcern`
+**From TICKET-049 (Child soft delete) and prior work:**
+- ✅ ChildForm is always visible (conditionally shows create vs edit mode)
+- ✅ Section headers "Add Child"/"Edit Child" and "List Children" (lines 164-165, 188-189)
+- ✅ "Show Archived Children" checkbox toggle (lines 191-200)
+- ✅ Archive/Restore buttons in ChildList based on child state (lines 99-154)
+- ✅ Archive functionality (`handleArchive`) with error handling (lines 83-112)
+- ✅ Restore functionality (`handleRestore`) (lines 114-133)
+- ✅ Visual indicators for archived children (opacity: 0.6, "Archived" chip, tooltips) (lines 54, 66-68, 90-92 in ChildList)
+- ✅ Display ALL active sponsors per child (not just first) (lines 56-58 in ChildList)
+- ✅ Comma-separated sponsor list with amounts (e.g., "Sponsored by: John ($50/mo), Jane ($75/mo)")
+- ✅ "Add Sponsor" button always visible (no condition on sponsor count) (lines 110-119 in ChildList)
+- ✅ Comprehensive test coverage (530 lines in ChildrenPage.test.tsx + 167 lines in ChildList.test.tsx)
+- ✅ Error snackbar for archive failures with 422 status codes (lines 219-228)
+- ✅ Backend pagination support via `PaginationConcern` (ChildrenController line 14)
+- ✅ Backend Ransack filtering support via `RansackFilterable` (ChildrenController line 13)
 
-### Frontend Implementation Checklist
-- [ ] **ChildrenPage.tsx Updates**:
-  - [ ] Remove `showForm` state (line 10)
-  - [ ] Remove "Add Child" button (lines 67-71)
-  - [ ] Add `searchQuery` and `debouncedQuery` state
-  - [ ] Add `showArchived` state
-  - [ ] Add `paginationMeta` state
-  - [ ] Add debounce useEffect for search (300ms)
-  - [ ] Modify `fetchChildren` to use pagination and filters
-  - [ ] Add `handleArchive` function (calls DELETE endpoint)
-  - [ ] Add `handleRestore` function (calls POST restore endpoint)
-  - [ ] Add `handlePageChange` function
-  - [ ] Wrap ChildForm in Box with h6 "Add Child"/"Edit Child" header
-  - [ ] Always render ChildForm (remove conditional)
-  - [ ] Add Box wrapper for "List Children" section
-  - [ ] Add search TextField before ChildList
-  - [ ] Add "Show Archived Children" Checkbox
-  - [ ] Add Pagination component after ChildList
-  - [ ] Pass archive/restore handlers to ChildList
+**Current State Analysis:**
+- ChildrenPage has 80% of desired functionality already implemented
+- Archive/restore workflow is fully functional
+- Multi-sponsor display working correctly
+- Only missing: search UI + pagination UI
 
-- [ ] **ChildList.tsx Updates**:
-  - [ ] Add `onArchive` prop
-  - [ ] Add `onRestore` prop
-  - [ ] Add archive button for active children
-  - [ ] Add restore button for archived children
-  - [ ] Add visual indicators for archived state (opacity: 0.6)
-  - [ ] Add Chip for archived status
-  - [ ] Add Tooltip for accessibility
-  - [ ] **Display ALL sponsors** (not just first active)
-  - [ ] Show sponsor list in secondary text (e.g., "Sponsored by: John ($50/mo), Jane ($75/mo)")
-  - [ ] Handle multiple active sponsorships per child
-  - [ ] Update "No active sponsor" to "No sponsors" when none exist
-  - [ ] **Remove condition**: `activeSponsors.length === 0` from "Add Sponsor" button (line 36)
-  - [ ] "Add Sponsor" button should always be visible regardless of sponsor count
+### Acceptance Criteria (Remaining Work)
 
-- [ ] **API Client Updates** (if needed):
-  - [ ] Verify `DELETE /api/children/:id` returns success
-  - [ ] Verify `POST /api/children/:id/restore` returns success
-  - [ ] Add TypeScript types for archive/restore responses
+**ChildrenPage.tsx:**
+- [ ] Remove `showForm` state (line 11) and "Add Child" button (lines 167-171)
+- [ ] Import `useDebouncedValue` and `usePagination` hooks from '../hooks'
+- [ ] Add `searchQuery` state and `debouncedQuery` using useDebouncedValue(searchQuery, 300)
+- [ ] Add pagination state using `usePagination()` hook
+- [ ] Add search TextField before ChildList (pattern: DonorsPage lines 119-126)
+- [ ] Modify `fetchChildren` to include Ransack query params: `q: { name_cont: debouncedQuery }`
+- [ ] Modify `fetchChildren` to include pagination params: `page`, `per_page: 10`
+- [ ] Add useEffect to reset to page 1 when debouncedQuery changes
+- [ ] Add Pagination component after ChildList (pattern: DonorsPage lines 157-166)
+- [ ] Update fetchChildren calls in all handlers to preserve search/pagination state
 
-### UI/UX Design Specifications
-**Layout Structure** (matching DonorsPage):
+**ChildrenPage.test.tsx:**
+- [ ] Test: Search field updates state on change
+- [ ] Test: Debounce delays search by 300ms
+- [ ] Test: Search triggers API call with q[name_cont] param
+- [ ] Test: Pagination appears when total_pages > 1
+- [ ] Test: Page change triggers API call with new page number
+- [ ] Test: Search resets page to 1
+
+**Cypress E2E (Optional - Nice to Have):**
+- [ ] Test: Search for child by name workflow
+- [ ] Test: Pagination navigation
+
+### Technical Implementation Details
+
+#### State Management Pattern (from DonorsPage):
 ```tsx
-<Box>
-  <Typography variant="h4" component="h1">Children Management</Typography>
+import { useDebouncedValue, usePagination } from '../hooks';
 
-  <Box sx={{ mb: 4 }}>
-    <Typography variant="h6" component="h2">
-      {editingChild ? 'Edit Child' : 'Add Child'}
-    </Typography>
-    <ChildForm ... />
-  </Box>
+// Remove line 11: const [showForm, setShowForm] = useState(false);
 
-  <Box sx={{ mb: 4 }}>
-    <Typography variant="h6" component="h2">List Children</Typography>
-    <TextField placeholder="Search by name..." size="small" ... />
-    <FormControlLabel
-      control={<Checkbox checked={showArchived} ... />}
-      label="Show Archived Children"
-    />
-    <ChildList ... />
-  </Box>
+// Add:
+const [searchQuery, setSearchQuery] = useState('');
+const debouncedQuery = useDebouncedValue(searchQuery, 300);
 
-  {paginationMeta.total_pages > 1 && <Pagination ... />}
-</Box>
+const {
+  currentPage,
+  paginationMeta,
+  setPaginationMeta,
+  handlePageChange,
+  resetToFirstPage,
+} = usePagination();
+
+// Reset to page 1 when search changes
+useEffect(() => {
+  resetToFirstPage();
+}, [debouncedQuery, resetToFirstPage]);
 ```
 
-**Search Field**:
-- Placeholder: "Search by name..."
-- Size: small
-- Full width
-- Margin bottom: 2
+#### fetchChildren Update:
+```tsx
+const loadChildren = async () => {
+  // Build query params
+  const queryParams: Record<string, unknown> = {};
+  if (debouncedQuery) {
+    queryParams.q = { name_cont: debouncedQuery };
+  }
 
-**Archive Checkbox**:
-- Label: "Show Archived Children"
-- Margin bottom: 2
+  const params: {
+    include_sponsorships: boolean;
+    include_discarded?: string;
+    page?: number;
+    per_page?: number;
+    q?: { name_cont: string };
+  } = {
+    include_sponsorships: true,
+    page: currentPage,
+    per_page: 10,
+    ...queryParams,
+  };
 
-**Archived Child Visual Indicators**:
-- Opacity: 0.6 (like DonorList)
-- Chip: "Archived" (color: default, size: small)
-- Tooltip: "This child is archived" (on hover)
+  if (showArchived) {
+    params.include_discarded = 'true';
+  }
+
+  const response = await apiClient.get('/api/children', { params });
+  setChildren(response.data.children);
+  setPaginationMeta(response.data.meta); // NEW: Extract pagination metadata
+
+  // Build sponsorship map from nested data (existing logic)
+  const sponsorshipMap = new Map<number, Sponsorship[]>();
+  response.data.children.forEach((child: Child & { sponsorships?: Sponsorship[] }) => {
+    if (child.sponsorships) {
+      sponsorshipMap.set(child.id, child.sponsorships);
+    }
+  });
+  setSponsorships(sponsorshipMap);
+};
+```
+
+#### UI Changes:
+```tsx
+// Remove lines 167-171 (Add Child button)
+
+// Add search field before ChildList (after line 190):
+<TextField
+  fullWidth
+  placeholder="Search by name..."
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  sx={{ mb: 2 }}
+  size="small"
+/>
+
+// Add pagination after ChildList (after line 209):
+{paginationMeta && paginationMeta.total_pages > 1 && (
+  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+    <Pagination
+      count={paginationMeta.total_pages}
+      page={currentPage}
+      onChange={handlePageChange}
+      color="primary"
+    />
+  </Box>
+)}
+```
 
 ### Testing Strategy
-**Jest Unit Tests** (`ChildrenPage.test.tsx`):
-- [ ] Renders "Add Child" heading
-- [ ] Renders "List Children" heading
-- [ ] Renders ChildForm always (no toggle button)
-- [ ] Search field updates state on change
-- [ ] Debounce delays search by 300ms
-- [ ] Archive checkbox toggles showArchived state
-- [ ] Pagination appears when total_pages > 1
-- [ ] Archive button calls handleArchive
-- [ ] Restore button calls handleRestore
 
-**Jest Unit Tests** (`ChildList.test.tsx`):
-- [ ] Displays archive button for active children
-- [ ] Displays restore button for archived children
-- [ ] Archived children have reduced opacity
-- [ ] Archived chip appears on archived children
-- [ ] Tooltip shows on hover over archived children
-- [ ] Displays all active sponsors (multiple) correctly
-- [ ] Shows "No sponsors" when child has no sponsorships
-- [ ] Formats multiple sponsors as comma-separated list
-- [ ] "Add Sponsor" button visible when child has no sponsors
-- [ ] "Add Sponsor" button visible when child has one sponsor
-- [ ] "Add Sponsor" button visible when child has multiple sponsors
+**Jest Unit Tests (6 new tests):**
+1. Search field updates searchQuery state on change
+2. Debounced search delays API call by 300ms
+3. Search triggers fetchChildren with `q[name_cont]` param
+4. Pagination component appears when total_pages > 1
+5. Pagination component hidden when total_pages = 1
+6. Page change triggers fetchChildren with new page number
 
-**Cypress E2E Tests** (`children-page.cy.ts` - new file):
-- [ ] Navigate to /children page
-- [ ] Search for child by name
-- [ ] Archive a child (verify API call)
-- [ ] Verify child disappears from list
-- [ ] Toggle "Show Archived Children"
-- [ ] Verify archived child appears with visual indicators
-- [ ] Restore archived child (verify API call)
-- [ ] Verify child reappears in active list
-- [ ] Test pagination navigation (if applicable)
+**Pattern Reference:** DonorsPage.test.tsx (search/pagination tests)
 
 ### Files to Change
-- `donation_tracker_frontend/src/pages/ChildrenPage.tsx`
-- `donation_tracker_frontend/src/pages/ChildrenPage.test.tsx`
-- `donation_tracker_frontend/src/components/ChildList.tsx`
-- `donation_tracker_frontend/src/components/ChildList.test.tsx`
-- `donation_tracker_frontend/src/types/child.ts` (if needed for archive types)
-- `donation_tracker_frontend/cypress/e2e/children-page.cy.ts` (new)
+- `donation_tracker_frontend/src/pages/ChildrenPage.tsx` (add search + pagination)
+- `donation_tracker_frontend/src/pages/ChildrenPage.test.tsx` (add 6 tests)
+- `donation_tracker_frontend/cypress/e2e/children-page.cy.ts` (optional - search E2E test)
 
-### Accessibility Requirements
-- All buttons have proper aria-labels
-- Archived state announced to screen readers
-- Keyboard navigation works for all controls
-- Focus management when toggling edit mode
-- Tooltips provide context for archive/restore actions
+### Reference Files
+- ✅ `donation_tracker_frontend/src/pages/DonorsPage.tsx` (lines 1-192) - Search + pagination pattern
+- ✅ `donation_tracker_api/app/controllers/api/children_controller.rb` (line 13) - Ransack support confirmed
+- ✅ `donation_tracker_frontend/src/hooks/useDebouncedValue.ts` - Debounce hook exists
+- ✅ `donation_tracker_frontend/src/hooks/usePagination.ts` - Pagination hook exists
+
+### Effort Justification
+
+**Original Estimate:** 3-4 hours (Medium)
+**Revised Estimate:** 1-2 hours (Small)
+
+**Rationale:**
+- 80% of ticket already complete (archive/restore/multi-sponsor/error handling)
+- Only 4 simple changes needed (remove button, add search field, add pagination, update tests)
+- All hooks and patterns already exist (copy-paste from DonorsPage)
+- Backend already supports all required APIs (no API changes needed)
+- Comprehensive test suite already exists (only need 6 additional tests)
 
 ### Related Commits
 - TBD
 
-### Reference Tickets
-- TICKET-001: Donor soft delete pattern (frontend reference)
-- TICKET-030: Multi-page architecture refactoring
-- TICKET-047: List styling standardization
-- TICKET-049: Child soft delete backend (dependency)
-
-### Reference Files
-- `donation_tracker_frontend/src/pages/DonorsPage.tsx` (primary pattern reference)
-- `donation_tracker_frontend/src/components/DonorList.tsx` (archive UI pattern)
+### Related Tickets
+- ✅ TICKET-049: Child soft delete backend (complete - provided archive/restore foundation)
+- ✅ TICKET-030: Multi-page architecture refactoring (complete - provided page structure)
+- 📋 TICKET-059: Child info display on donation pages (benefits from search/pagination here)
 
 ---
 
-## Summary of Updates (2025-10-24)
+## Change Log
 
-**New Requirement Added:**
+**2025-11-03: Ticket Scope Reduction**
+- Removed already-implemented acceptance criteria (archive/restore/multi-sponsor/UI standardization)
+- Focused scope on remaining work: search + pagination only
+- Reduced effort estimate from 3-4 hours to 1-2 hours
+- Added "Already Implemented" section documenting TICKET-049 completion
+- Updated title to "Add Search and Pagination" (more accurate)
+- Documented current state: 80% complete
 
-1. **"Add Sponsor" Button Always Visible**:
-   - Current behavior: Button only shows when `activeSponsors.length === 0` (ChildList.tsx:36)
-   - Problem: Cannot add additional sponsors from Children page (must go to Sponsorships page)
-   - Solution: Remove conditional, always show "Add Sponsor" button
-   - User benefit: Can add multiple sponsors for a child without navigating away
-
-**Acceptance Criteria Added:**
-- "Add Sponsor" button always visible (not just when no sponsors exist)
-- Remove `activeSponsors.length === 0` condition from button visibility
-
-**Implementation Checklist Added:**
-- Remove condition from ChildList.tsx line 36
-- Add 3 new Jest tests for button visibility in all sponsor count scenarios
-
-**Rationale:**
-- Integrated into TICKET-050 (UI standardization ticket)
-- Small change (1 line removal)
-- Logically grouped with other ChildList UI improvements
-- Prevents fragmentation of related UI fixes
+**2025-10-24: Original Creation**
+- Full UI standardization scope (included archive/restore/multi-sponsor features)
+- Estimated 3-4 hours (Medium effort)
