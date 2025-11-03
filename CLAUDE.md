@@ -625,6 +625,54 @@ const params = { page: currentPage, per_page: 10, ...buildQueryParams() };
 
 **See:** TICKET-032
 
+#### Currency Utilities (DRY Pattern)
+
+**Purpose:** Single source of truth for currency conversion between cents (database) and dollars (display)
+
+**Why Cents?**
+- Industry standard (Stripe, PayPal, all payment processors)
+- Avoids floating-point precision errors
+- Integer math is accurate (no $10.999 issues)
+- Future-proof for Stripe webhooks (send cents)
+
+**Implementation:**
+```typescript
+// src/utils/currency.ts
+export const formatCurrency = (cents: number): string => {
+  return `$${(cents / 100).toFixed(2)}`;
+};
+
+export const parseCurrency = (dollars: string | number): number => {
+  return Math.round(parseFloat(String(dollars)) * 100);
+};
+```
+
+**Usage:**
+```typescript
+// Forms (input: dollars → output: cents)
+import { parseCurrency } from '../utils/currency';
+await createDonation({
+  amount: parseCurrency(amount), // "100" → 10000 cents
+});
+
+// Display (input: cents → output: formatted string)
+import { formatCurrency } from '../utils/currency';
+<Typography>{formatCurrency(donation.amount)}</Typography> // 10000 → "$100.00"
+```
+
+**Files using parseCurrency:**
+- DonationForm.tsx (line 57)
+- SponsorshipForm.tsx (line 33)
+
+**Files using formatCurrency:**
+- DonationList.tsx (line 190)
+- ChildList.tsx (line 57)
+- SponsorshipList.tsx (line 43)
+
+**Tests:** 4 passing tests in `currency.test.ts`
+
+**See:** TICKET-071 (currency standardization)
+
 #### React Router Multi-Page Architecture
 
 **File Structure:**
