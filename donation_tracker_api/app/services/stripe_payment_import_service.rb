@@ -154,6 +154,14 @@ class StripePaymentImportService
       end
     end
 
+    # Invoice number → General Donation
+    if description_text&.match(/Invoice [A-Z0-9-]+/i)
+      return Project.find_or_create_by!(title: "General Donation") do |project|
+        project.project_type = :general
+        project.system = true
+      end
+    end
+
     # Email address → General Donation
     if description_text&.match(EMAIL_PATTERN)
       return Project.find_or_create_by!(title: "General Donation") do |project|
