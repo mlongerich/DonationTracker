@@ -137,6 +137,14 @@ class StripePaymentImportService
   def find_or_create_project
     description_text = get_description_text
 
+    # Blank/empty description → General Donation
+    if description_text.blank?
+      return Project.find_or_create_by!(title: "General Donation") do |project|
+        project.project_type = :general
+        project.system = true
+      end
+    end
+
     # General donation pattern
     if description_text&.match(GENERAL_PATTERN)
       return Project.find_or_create_by!(title: "General Donation") do |project|
@@ -170,9 +178,41 @@ class StripePaymentImportService
       end
     end
 
-    # Unmapped - create project for admin review via TICKET-027
+    # All numbers → General Donation
+    if description_text&.match(/\A\d+\z/)
+      return Project.find_or_create_by!(title: "General Donation") do |project|
+        project.project_type = :general
+        project.system = true
+      end
+    end
+
+    # Subscription creation → General Donation
+    if description_text&.match(/Subscription creation/i)
+      return Project.find_or_create_by!(title: "General Donation") do |project|
+        project.project_type = :general
+        project.system = true
+      end
+    end
+
+    # Payment app → General Donation
+    if description_text&.match(/Captured via Payment app/i)
+      return Project.find_or_create_by!(title: "General Donation") do |project|
+        project.project_type = :general
+        project.system = true
+      end
+    end
+
+    # Stripe app → General Donation
+    if description_text&.match(/Payment for Stripe App/i)
+      return Project.find_or_create_by!(title: "General Donation") do |project|
+        project.project_type = :general
+        project.system = true
+      end
+    end
+
+    # Named projects - create for admin review via TICKET-027
     truncated_desc = description_text.to_s[0, 100]
-    Project.find_or_create_by!(title: "UNMAPPED: #{truncated_desc}") do |project|
+    Project.find_or_create_by!(title: truncated_desc) do |project|
       project.project_type = :general
       project.system = false
       project.description = "Auto-created from Stripe import. Original description: #{description_text}"

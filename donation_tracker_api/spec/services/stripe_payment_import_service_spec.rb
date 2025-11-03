@@ -212,8 +212,116 @@ RSpec.describe StripePaymentImportService do
       end
     end
 
-    context 'with unmapped donation' do
-      it 'creates unmapped project donation' do
+    context 'with blank description' do
+      it 'maps to general donation project' do
+        blank_csv = valid_csv_row.merge(
+          'Description' => '',
+          'Cust Subscription Data Plan Nickname' => '',
+          'Transaction ID' => 'txn_blank123'
+        )
+
+        result = described_class.new(blank_csv).import
+        donation = result[:donations].first
+
+        expect(donation.project.title).to eq('General Donation')
+        expect(donation.project.project_type).to eq('general')
+        expect(donation.project.system).to be true
+        expect(donation.child_id).to be_nil
+      end
+    end
+
+    context 'with invoice description' do
+      it 'maps to general donation project' do
+        invoice_csv = valid_csv_row.merge(
+          'Description' => 'Invoice ABC-12345',
+          'Cust Subscription Data Plan Nickname' => '',
+          'Transaction ID' => 'txn_invoice123'
+        )
+
+        result = described_class.new(invoice_csv).import
+        donation = result[:donations].first
+
+        expect(donation.project.title).to eq('General Donation')
+        expect(donation.project.project_type).to eq('general')
+        expect(donation.project.system).to be true
+        expect(donation.child_id).to be_nil
+      end
+    end
+
+    context 'with all-numeric description' do
+      it 'maps to general donation project' do
+        numeric_csv = valid_csv_row.merge(
+          'Description' => '66826191275',
+          'Cust Subscription Data Plan Nickname' => '',
+          'Transaction ID' => 'txn_numeric123'
+        )
+
+        result = described_class.new(numeric_csv).import
+        donation = result[:donations].first
+
+        expect(donation.project.title).to eq('General Donation')
+        expect(donation.project.project_type).to eq('general')
+        expect(donation.project.system).to be true
+        expect(donation.child_id).to be_nil
+      end
+    end
+
+    context 'with subscription creation description' do
+      it 'maps to general donation project' do
+        subscription_csv = valid_csv_row.merge(
+          'Description' => 'Subscription creation',
+          'Cust Subscription Data Plan Nickname' => '',
+          'Transaction ID' => 'txn_subscription123'
+        )
+
+        result = described_class.new(subscription_csv).import
+        donation = result[:donations].first
+
+        expect(donation.project.title).to eq('General Donation')
+        expect(donation.project.project_type).to eq('general')
+        expect(donation.project.system).to be true
+        expect(donation.child_id).to be_nil
+      end
+    end
+
+    context 'with payment app description' do
+      it 'maps to general donation project' do
+        payment_app_csv = valid_csv_row.merge(
+          'Description' => 'Captured via Payment app (Android)',
+          'Cust Subscription Data Plan Nickname' => '',
+          'Transaction ID' => 'txn_paymentapp123'
+        )
+
+        result = described_class.new(payment_app_csv).import
+        donation = result[:donations].first
+
+        expect(donation.project.title).to eq('General Donation')
+        expect(donation.project.project_type).to eq('general')
+        expect(donation.project.system).to be true
+        expect(donation.child_id).to be_nil
+      end
+    end
+
+    context 'with stripe app description' do
+      it 'maps to general donation project' do
+        stripe_app_csv = valid_csv_row.merge(
+          'Description' => 'Payment for Stripe App',
+          'Cust Subscription Data Plan Nickname' => '',
+          'Transaction ID' => 'txn_stripeapp123'
+        )
+
+        result = described_class.new(stripe_app_csv).import
+        donation = result[:donations].first
+
+        expect(donation.project.title).to eq('General Donation')
+        expect(donation.project.project_type).to eq('general')
+        expect(donation.project.system).to be true
+        expect(donation.child_id).to be_nil
+      end
+    end
+
+    context 'with named project donation' do
+      it 'creates named project donation (no UNMAPPED prefix)' do
         unmapped_csv = valid_csv_row.merge(
           'Cust Subscription Data Plan Nickname' => 'Book',
           'Transaction ID' => 'txn_unmapped123'
@@ -222,7 +330,7 @@ RSpec.describe StripePaymentImportService do
         result = described_class.new(unmapped_csv).import
         donation = result[:donations].first
 
-        expect(donation.project.title).to eq('UNMAPPED: Book')
+        expect(donation.project.title).to eq('Book')
         expect(donation.project.project_type).to eq('general')
         expect(donation.child_id).to be_nil
       end
