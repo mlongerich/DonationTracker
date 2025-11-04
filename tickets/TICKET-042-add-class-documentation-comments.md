@@ -2,32 +2,39 @@
 
 **Status:** 📋 Planned
 **Priority:** 🟡 Medium
-**Effort:** S (Small)
+**Effort:** S (Small - 1-2 hours)
 **Created:** 2025-10-19
+**Updated:** 2025-11-04
 **Dependencies:** None
 
 ### User Story
 As a developer, I want all classes and modules to have descriptive documentation comments so that I can quickly understand their purpose, responsibilities, and usage without reading the entire implementation.
 
 ### Problem Statement
-Reek analysis identified **20 IrresponsibleModule warnings** across the codebase:
-- All controllers (5 files)
-- All models (4 files)
-- All services (3 files)
-- All presenters (3 files)
-- All concerns (2 files)
-- Application base classes (3 files)
+
+**Current State (2025-11-04):**
+Reek analysis identified **29 IrresponsibleModule warnings** across the codebase:
+- Controllers: 8 files (Api::Children, Api::Donations, Api::Donors, Api::Projects, Api::Search, Api::Sponsorships, Api::Test, ApplicationController)
+- Models: 6 files (Child, Donation, Donor, Project, Sponsorship, User, ApplicationRecord)
+- Services: 5 files (DonorService, DonorImportService, DonorMergeService, StripeCsvBatchImporter, StripePaymentImportService)
+- Concerns: 2 files (PaginationConcern, RansackFilterable)
+- Jobs: 1 file (ApplicationJob)
+- Mailers: 1 file (ApplicationMailer)
+- Presenters: 0 files ✅ (already have documentation)
 
 **Code Smell:** `IrresponsibleModule` (Reek warning)
 **Issue:** Missing class-level comments make onboarding and maintenance harder
+**Impact:** 29 out of 130 total Reek warnings (22% of all warnings)
 
 ### Acceptance Criteria
-- [ ] Add documentation comments to all 7 controllers (including Children, Sponsorships)
-- [ ] Add documentation comments to all 7 models (including Child, Sponsorship, ApplicationRecord)
-- [ ] Add documentation comments to all 3 services
+- [ ] Add documentation comments to all 8 controllers
+- [ ] Add documentation comments to all 7 models (including ApplicationRecord)
+- [ ] Add documentation comments to all 5 services
 - [ ] Add documentation comments to all 2 concerns
+- [ ] Add documentation comments to ApplicationJob
+- [ ] Add documentation comments to ApplicationMailer
 - [ ] All comments include purpose, responsibilities, and usage examples
-- [ ] Run `bundle exec reek app/` - verify IrresponsibleModule warnings reduced to 0
+- [ ] Run `bundle exec reek app/` - verify 29 fewer IrresponsibleModule warnings (130 → 101 total)
 - [ ] All existing tests pass unchanged
 - [ ] Update CLAUDE.md with documentation standards
 
@@ -190,39 +197,50 @@ end
 - **Onboarding**: New developers understand purpose at a glance
 - **Maintainability**: Clear responsibilities prevent scope creep
 - **Documentation**: Comments serve as inline documentation
-- **Code Quality**: Eliminates all 20 Reek IrresponsibleModule warnings
+- **Code Quality**: Eliminates 29 IrresponsibleModule warnings (130 → 101 total Reek warnings)
 - **IDE Support**: Better IntelliSense and code navigation
+- **22% Improvement**: Addresses 22% of all Reek warnings in the codebase
 
-### Files to Modify
+### Files to Modify (29 total)
 
-**Controllers (7 files - from Reek analysis):**
-- `app/controllers/api/children_controller.rb` ⚠️ NEW
+**Controllers (8 files):**
+- `app/controllers/api/children_controller.rb`
 - `app/controllers/api/donations_controller.rb`
 - `app/controllers/api/donors_controller.rb`
 - `app/controllers/api/projects_controller.rb`
-- `app/controllers/api/sponsorships_controller.rb` ⚠️ NEW
+- `app/controllers/api/search_controller.rb`
+- `app/controllers/api/sponsorships_controller.rb`
 - `app/controllers/api/test_controller.rb`
 - `app/controllers/application_controller.rb`
 
-**Models (7 files - from Reek analysis):**
-- `app/models/child.rb` ⚠️ NEW
+**Models (7 files):**
+- `app/models/application_record.rb`
+- `app/models/child.rb`
 - `app/models/donation.rb`
 - `app/models/donor.rb`
 - `app/models/project.rb`
-- `app/models/sponsorship.rb` ⚠️ NEW
+- `app/models/sponsorship.rb`
 - `app/models/user.rb`
-- `app/models/application_record.rb`
 
-**Services (3 files):**
+**Services (5 files):**
 - `app/services/donor_service.rb`
 - `app/services/donor_import_service.rb`
 - `app/services/donor_merge_service.rb`
+- `app/services/stripe_csv_batch_importer.rb`
+- `app/services/stripe_payment_import_service.rb`
 
 **Concerns (2 files):**
 - `app/controllers/concerns/pagination_concern.rb`
 - `app/controllers/concerns/ransack_filterable.rb`
 
-**Note:** Presenters already have good documentation (not flagged by Reek)
+**Jobs (1 file):**
+- `app/jobs/application_job.rb`
+
+**Mailers (1 file):**
+- `app/mailers/application_mailer.rb`
+
+**Presenters (6 files):**
+- ✅ Already documented (not flagged by Reek)
 
 ### Documentation Standards (for CLAUDE.md)
 

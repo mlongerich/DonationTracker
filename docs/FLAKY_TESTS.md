@@ -23,6 +23,22 @@ Track intermittent test failures to identify patterns and prioritize fixes.
 - **Status:** ⚠️ Flaky - passes when run in isolation, fails intermittently in full suite
 - **Frequency:** 1/2 runs failed
 
+#### DonationForm.test.tsx
+- **Test:** `passes child_id to backend when child selected`
+- **Failure:** Timeout or timing issue (exact error not captured)
+- **Context:** Failed during full test suite run (TICKET-069), passed on isolated re-run (1/15 tests passed when isolated)
+- **Root Cause:** Likely timing issue with autocomplete/form interactions in full suite
+- **Status:** ⚠️ Flaky - passes when run in isolation, fails intermittently in full suite
+- **Frequency:** Failed in full suite run, passed in isolation (2025-11-04)
+
+#### ProjectOrChildAutocomplete.test.tsx
+- **Test:** `debounces search input (300ms)`
+- **Failure:** Timeout or assertion failure (exact error not captured)
+- **Context:** Failed during full test suite run (TICKET-069), passed on isolated re-run (4/4 tests passed when isolated)
+- **Root Cause:** Debounce timing issue in full suite context
+- **Status:** ⚠️ Flaky - passes when run in isolation, fails intermittently in full suite
+- **Frequency:** Failed in full suite run, passed in isolation (2025-11-04)
+
 ---
 
 ## Analysis

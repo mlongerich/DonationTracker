@@ -1,25 +1,40 @@
 ## [TICKET-043] Refine Controller Concerns Implementation
 
-**Status:** 📋 Planned
-**Priority:** 🟢 Low
+**Status:** 🔀 Merged into TICKET-069
+**Priority:** 🟢 Low (duplicate)
 **Effort:** S (Small)
 **Created:** 2025-10-19
+**Merged:** 2025-11-04
 **Dependencies:** TICKET-028 (completed)
 
 ### User Story
 As a developer, I want controller concerns to follow Rails best practices so that the code is clean, maintainable, and passes code quality checks without warnings.
 
-### Problem Statement
+## ⚠️ TICKET MERGED INTO TICKET-069
+
+**All issues identified in this ticket are now covered by TICKET-069 (Code Quality Cleanup Batch):**
+
+- ✅ DuplicateMethodCall in RansackFilterable → TICKET-069 Section 2
+- ✅ UncommunicativeVariableName (`@q`) → TICKET-069 Section 4
+- ✅ UtilityFunction in PaginationConcern → TICKET-069 Section 3
+- ✅ IrresponsibleModule warnings → TICKET-042 (separate documentation ticket)
+
+**Please refer to TICKET-069 for implementation details.**
+
+---
+
+### Original Problem Statement (for reference)
+
 Reek identified 5 code smells in the newly created controller concerns (from TICKET-028):
 
 **RansackFilterable (3 warnings):**
-1. `DuplicateMethodCall`: Calls `params[:q]` 2 times (lines 5, 7)
-2. `UncommunicativeVariableName`: Variable `@q` is unclear
-3. `IrresponsibleModule`: Missing documentation
+1. `DuplicateMethodCall`: Calls `params[:q]` 2 times (lines 5, 7) → **TICKET-069**
+2. `UncommunicativeVariableName`: Variable `@q` is unclear → **TICKET-069**
+3. `IrresponsibleModule`: Missing documentation → **TICKET-042**
 
 **PaginationConcern (2 warnings):**
-1. `UtilityFunction`: `pagination_meta` doesn't use instance state
-2. `IrresponsibleModule`: Missing documentation
+1. `UtilityFunction`: `pagination_meta` doesn't use instance state → **TICKET-069**
+2. `IrresponsibleModule`: Missing documentation → **TICKET-042**
 
 **Code Smell:** Reek warnings in recently created code
 **Issue:** Minor quality issues that should be addressed for consistency
