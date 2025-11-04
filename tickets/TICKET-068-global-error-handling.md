@@ -1,4 +1,4 @@
-## [TICKET-064] Global Error Handling in ApplicationController
+## [TICKET-068] Global Error Handling in ApplicationController
 
 **Status:** 📋 Planned
 **Priority:** 🟡 Medium

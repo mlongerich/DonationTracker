@@ -1,4 +1,4 @@
-## [TICKET-065] Code Quality Cleanup (Batch)
+## [TICKET-069] Code Quality Cleanup (Batch)
 
 **Status:** 📋 Planned
 **Priority:** 🟢 Low
