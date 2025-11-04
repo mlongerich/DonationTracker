@@ -1,5 +1,10 @@
 import axios from 'axios';
-import { DonationFormData, ProjectFormData, SponsorshipFormData, Sponsorship } from '../types';
+import {
+  DonationFormData,
+  ProjectFormData,
+  SponsorshipFormData,
+  Sponsorship,
+} from '../types';
 
 // Create axios instance with base configuration
 export const apiClient = axios.create({
@@ -54,16 +59,19 @@ export const mergeDonors = async (
     donor_ids: donorIds,
     field_selections: fieldSelections,
   });
-  return response.data;
+  return response.data.donor;
 };
 
 export const createDonation = async (donation: DonationFormData) => {
   const response = await apiClient.post('/api/donations', { donation });
-  return response.data;
+  return response.data.donation;
 };
 
 // Project API methods
-export const fetchProjects = async (params?: { page?: number; per_page?: number }) => {
+export const fetchProjects = async (params?: {
+  page?: number;
+  per_page?: number;
+}) => {
   const response = await apiClient.get('/api/projects', { params });
   return response.data;
 };
@@ -72,15 +80,15 @@ export const fetchProjectsBySearch = async (searchQuery: string) => {
   const response = await apiClient.get('/api/projects', {
     params: {
       q: { title_cont: searchQuery },
-      per_page: 10
-    }
+      per_page: 10,
+    },
   });
   return response.data.projects || [];
 };
 
 export const searchProjectOrChild = async (query: string) => {
   const response = await apiClient.get('/api/search/project_or_child', {
-    params: { q: query }
+    params: { q: query },
   });
   return response.data;
 };
@@ -95,7 +103,10 @@ export const createProject = async (project: ProjectFormData) => {
   return response.data;
 };
 
-export const updateProject = async (id: number, project: Partial<ProjectFormData>) => {
+export const updateProject = async (
+  id: number,
+  project: Partial<ProjectFormData>
+) => {
   const response = await apiClient.put(`/api/projects/${id}`, { project });
   return response.data;
 };
@@ -110,8 +121,8 @@ export const fetchChildren = async (searchQuery: string) => {
   const response = await apiClient.get('/api/children', {
     params: {
       q: { name_cont: searchQuery },
-      per_page: 10
-    }
+      per_page: 10,
+    },
   });
   return response.data.children || [];
 };
@@ -127,15 +138,19 @@ export const fetchSponsorshipsForDonation = async (
       q: {
         child_id_eq: childId,
         donor_id_eq: donorId,
-        end_date_null: true
-      }
-    }
+        end_date_null: true,
+      },
+    },
   });
   return response.data.sponsorships || [];
 };
 
-export const createSponsorship = async (data: SponsorshipFormData): Promise<Sponsorship> => {
-  const response = await apiClient.post('/api/sponsorships', { sponsorship: data });
+export const createSponsorship = async (
+  data: SponsorshipFormData
+): Promise<Sponsorship> => {
+  const response = await apiClient.post('/api/sponsorships', {
+    sponsorship: data,
+  });
   return response.data.sponsorship;
 };
 

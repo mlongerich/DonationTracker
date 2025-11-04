@@ -1,4 +1,7 @@
 // Mock axios first to avoid ESM issues
+// Now we can import and use the actual client module
+import apiClient from './client';
+
 jest.mock('axios', () => ({
   __esModule: true,
   default: {
@@ -8,20 +11,17 @@ jest.mock('axios', () => ({
       delete: jest.fn(),
       interceptors: {
         request: { use: jest.fn(), eject: jest.fn() },
-        response: { use: jest.fn(), eject: jest.fn() }
-      }
-    }))
-  }
+        response: { use: jest.fn(), eject: jest.fn() },
+      },
+    })),
+  },
 }));
-
-// Now we can import and use the actual client module
-import apiClient from './client';
 const actualModule = jest.requireActual<typeof import('./client')>('./client');
 const {
   mergeDonors,
   fetchChildren,
   fetchSponsorshipsForDonation,
-  createSponsorship
+  createSponsorship,
 } = actualModule;
 
 describe('mergeDonors', () => {
@@ -32,7 +32,9 @@ describe('mergeDonors', () => {
       email: 'alice.smith@example.com',
     };
 
-    (apiClient.post as jest.Mock).mockResolvedValue({ data: mockMergedDonor });
+    (apiClient.post as jest.Mock).mockResolvedValue({
+      data: { donor: mockMergedDonor },
+    });
 
     const result = await mergeDonors([1, 2], { name: 1, email: 2 });
 
@@ -48,18 +50,20 @@ describe('fetchChildren', () => {
   it('calls apiClient.get with correct endpoint and search query', async () => {
     const mockChildren = [
       { id: 1, name: 'Maria', discarded_at: null },
-      { id: 2, name: 'Carlos', discarded_at: null }
+      { id: 2, name: 'Carlos', discarded_at: null },
     ];
 
-    (apiClient.get as jest.Mock).mockResolvedValue({ data: { children: mockChildren } });
+    (apiClient.get as jest.Mock).mockResolvedValue({
+      data: { children: mockChildren },
+    });
 
     const result = await fetchChildren('Mar');
 
     expect(apiClient.get).toHaveBeenCalledWith('/api/children', {
       params: {
         q: { name_cont: 'Mar' },
-        per_page: 10
-      }
+        per_page: 10,
+      },
     });
     expect(result).toEqual(mockChildren);
   });
@@ -74,11 +78,13 @@ describe('fetchSponsorshipsForDonation', () => {
         child_name: 'Maria',
         donor_id: 5,
         monthly_amount: '50',
-        active: true
-      }
+        active: true,
+      },
     ];
 
-    (apiClient.get as jest.Mock).mockResolvedValue({ data: { sponsorships: mockSponsorships } });
+    (apiClient.get as jest.Mock).mockResolvedValue({
+      data: { sponsorships: mockSponsorships },
+    });
 
     const result = await fetchSponsorshipsForDonation(5, 1);
 
@@ -88,9 +94,9 @@ describe('fetchSponsorshipsForDonation', () => {
         q: {
           child_id_eq: 1,
           donor_id_eq: 5,
-          end_date_null: true
-        }
-      }
+          end_date_null: true,
+        },
+      },
     });
     expect(result).toEqual(mockSponsorships);
   });
@@ -101,7 +107,7 @@ describe('createSponsorship', () => {
     const formData = {
       donor_id: 5,
       child_id: 1,
-      monthly_amount: 50
+      monthly_amount: 50,
     };
 
     const mockSponsorship = {
@@ -112,15 +118,17 @@ describe('createSponsorship', () => {
       donor_name: 'John Doe',
       monthly_amount: '50',
       project_id: 20,
-      active: true
+      active: true,
     };
 
-    (apiClient.post as jest.Mock).mockResolvedValue({ data: { sponsorship: mockSponsorship } });
+    (apiClient.post as jest.Mock).mockResolvedValue({
+      data: { sponsorship: mockSponsorship },
+    });
 
     const result = await createSponsorship(formData);
 
     expect(apiClient.post).toHaveBeenCalledWith('/api/sponsorships', {
-      sponsorship: formData
+      sponsorship: formData,
     });
     expect(result).toEqual(mockSponsorship);
   });
@@ -130,18 +138,20 @@ describe('fetchProjectsBySearch', () => {
   it('calls apiClient.get with correct endpoint and search query', async () => {
     const mockProjects = [
       { id: 1, title: 'Project Alpha', project_type: 'general' },
-      { id: 2, title: 'Project Beta', project_type: 'general' }
+      { id: 2, title: 'Project Beta', project_type: 'general' },
     ];
 
-    (apiClient.get as jest.Mock).mockResolvedValue({ data: { projects: mockProjects } });
+    (apiClient.get as jest.Mock).mockResolvedValue({
+      data: { projects: mockProjects },
+    });
 
     const result = await actualModule.fetchProjectsBySearch('Alpha');
 
     expect(apiClient.get).toHaveBeenCalledWith('/api/projects', {
       params: {
         q: { title_cont: 'Alpha' },
-        per_page: 10
-      }
+        per_page: 10,
+      },
     });
     expect(result).toEqual(mockProjects);
   });
