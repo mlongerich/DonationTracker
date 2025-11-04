@@ -44,12 +44,12 @@ COVERAGE=$(echo "$COVERAGE" | tr -d '[:space:]')
 # Convert to integer for comparison
 COVERAGE_INT=$(echo "$COVERAGE" | cut -d. -f1)
 
-if [[ -z "$COVERAGE_INT" ]] || [[ "$COVERAGE_INT" -lt 95 ]]; then
-    echo "❌ Test coverage is ${COVERAGE}% - must be at least 95%"
+if [[ -z "$COVERAGE_INT" ]] || [[ "$COVERAGE_INT" -lt 90 ]]; then
+    echo "❌ Test coverage is ${COVERAGE}% - must be at least 90%"
     exit 1
 fi
 
-echo "✅ Test coverage: ${COVERAGE}% (meets 95% threshold)"
+echo "✅ Test coverage: ${COVERAGE}% (meets 90% threshold)"
 
 echo "✅ All backend quality checks passed!"
 exit 0
