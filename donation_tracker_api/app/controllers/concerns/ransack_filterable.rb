@@ -2,9 +2,10 @@ module RansackFilterable
   extend ActiveSupport::Concern
 
   def apply_ransack_filters(scope)
-    return scope unless params[:q].present?
+    ransack_params = params[:q]
+    return scope unless ransack_params.present?
 
-    @q = scope.ransack(params[:q])
-    @q.result
+    @ransack_query = scope.ransack(ransack_params)
+    @ransack_query.result
   end
 end

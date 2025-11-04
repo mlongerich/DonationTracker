@@ -14,7 +14,7 @@ class Donation < ApplicationRecord
   validate :date_not_in_future
   validate :sponsorship_project_must_have_sponsorship_id
 
-  def self.ransackable_attributes(auth_object = nil)
+  def self.ransackable_attributes(_auth_object = nil)
     [ "amount", "date", "donor_id", "project_id", "created_at", "updated_at" ]
   end
 

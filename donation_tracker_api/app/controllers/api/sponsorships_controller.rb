@@ -3,20 +3,22 @@ class Api::SponsorshipsController < ApplicationController
   include RansackFilterable
 
   def index
-    if params[:child_id].present?
-      child = Child.find(params[:child_id])
-      sponsorships = child.sponsorships.includes(:donor, :child)
+    child_id = params[:child_id]
 
-      render json: {
-        sponsorships: CollectionPresenter.new(sponsorships, SponsorshipPresenter).as_json
-      }, status: :ok
+    if child_id.present?
+      child = Child.find(child_id)
+      sponsorships = child.sponsorships.includes(:donor, :child)
+      json_data = CollectionPresenter.new(sponsorships, SponsorshipPresenter).as_json
+
+      render json: { sponsorships: json_data }, status: :ok
     else
       scope = Sponsorship.includes(:donor, :child).all
       filtered_scope = apply_ransack_filters(scope)
       sponsorships = paginate_collection(filtered_scope.order(created_at: :desc))
+      json_data = CollectionPresenter.new(sponsorships, SponsorshipPresenter).as_json
 
       render json: {
-        sponsorships: CollectionPresenter.new(sponsorships, SponsorshipPresenter).as_json,
+        sponsorships: json_data,
         meta: pagination_meta(sponsorships)
       }, status: :ok
     end

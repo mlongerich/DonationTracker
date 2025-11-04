@@ -35,10 +35,11 @@ module Api
     end
 
     def validate_date_range!
-      return true unless params[:q]&.key?(:date_gteq) && params[:q]&.key?(:date_lteq)
+      ransack_params = params[:q]
+      return true unless ransack_params&.key?(:date_gteq) && ransack_params&.key?(:date_lteq)
 
-      start_date = Date.parse(params[:q][:date_gteq].to_s)
-      end_date = Date.parse(params[:q][:date_lteq].to_s)
+      start_date = Date.parse(ransack_params[:date_gteq].to_s)
+      end_date = Date.parse(ransack_params[:date_lteq].to_s)
 
       if start_date > end_date
         render json: {

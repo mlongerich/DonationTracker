@@ -3,18 +3,19 @@ class Api::ChildrenController < ApplicationController
   include RansackFilterable
 
   def index
-    scope = params[:include_discarded] == "true" ? Child.with_discarded : Child.kept
+    include_discarded = params[:include_discarded] == "true"
+    include_sponsorships = params[:include_sponsorships] == "true"
+
+    scope = include_discarded ? Child.with_discarded : Child.kept
 
     # Conditionally eager load sponsorships to avoid N+1 queries
-    if params[:include_sponsorships] == "true"
-      scope = scope.includes(sponsorships: :donor)
-    end
+    scope = scope.includes(sponsorships: :donor) if include_sponsorships
 
     filtered_scope = apply_ransack_filters(scope)
     children = paginate_collection(filtered_scope.order(name: :asc))
 
     # Use CollectionPresenter with options
-    presenter_options = { include_sponsorships: params[:include_sponsorships] == "true" }
+    presenter_options = { include_sponsorships: include_sponsorships }
 
     render json: {
       children: CollectionPresenter.new(children, ChildPresenter, presenter_options).as_json,

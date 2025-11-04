@@ -6,6 +6,10 @@ module PaginationConcern
   end
 
   def pagination_meta(paginated_collection)
+    PaginationConcern.build_meta(paginated_collection)
+  end
+
+  def self.build_meta(paginated_collection)
     {
       total_count: paginated_collection.total_count,
       total_pages: paginated_collection.total_pages,

@@ -13,11 +13,11 @@ class Donor < ApplicationRecord
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }, uniqueness: { case_sensitive: false, conditions: -> { kept } }
 
   # Ransack: Explicitly whitelist searchable attributes
-  def self.ransackable_attributes(auth_object = nil)
+  def self.ransackable_attributes(_auth_object = nil)
     [ "name", "email", "created_at", "updated_at", "last_updated_at", "name_or_email", "discarded_at" ]
   end
 
-  def self.ransackable_associations(auth_object = nil)
+  def self.ransackable_associations(_auth_object = nil)
     %w[donations sponsorships children]
   end
 
