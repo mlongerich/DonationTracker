@@ -130,14 +130,16 @@ RSpec.describe "/api/children", type: :request do
   end
 
   describe "POST /api/children" do
-    it "creates a new child with valid attributes" do
+    it "creates a new child with valid attributes and returns wrapped presenter" do
       child_params = { child: { name: "Maria" } }
 
       post "/api/children", params: child_params
 
       expect(response).to have_http_status(:created)
       json = JSON.parse(response.body)
+      expect(json).to have_key("child")
       expect(json["child"]["name"]).to eq("Maria")
+      expect(json["child"]).to have_key("can_be_deleted")
     end
 
     it "returns errors for invalid attributes" do
@@ -152,19 +154,21 @@ RSpec.describe "/api/children", type: :request do
   end
 
   describe "GET /api/children/:id" do
-    it "returns a specific child" do
+    it "returns a specific child wrapped with presenter" do
       child = create(:child, name: "Maria")
 
       get "/api/children/#{child.id}"
 
       expect(response).to have_http_status(:success)
       json = JSON.parse(response.body)
-      expect(json["name"]).to eq("Maria")
+      expect(json).to have_key("child")
+      expect(json["child"]["name"]).to eq("Maria")
+      expect(json["child"]).to have_key("can_be_deleted")
     end
   end
 
   describe "PUT /api/children/:id" do
-    it "updates a child with valid attributes" do
+    it "updates a child with valid attributes and returns wrapped presenter" do
       child = create(:child, name: "Maria")
       update_params = { child: { name: "Maria Updated" } }
 
@@ -172,7 +176,9 @@ RSpec.describe "/api/children", type: :request do
 
       expect(response).to have_http_status(:success)
       json = JSON.parse(response.body)
+      expect(json).to have_key("child")
       expect(json["child"]["name"]).to eq("Maria Updated")
+      expect(json["child"]).to have_key("can_be_deleted")
     end
   end
 

@@ -8,11 +8,13 @@ RSpec.describe CollectionPresenter do
       collection = [ item1, item2 ]
 
       presenter_class = double("PresenterClass")
-      presenter1 = double("presenter1", as_json: { id: 1 })
-      presenter2 = double("presenter2", as_json: { id: 2 })
+      presenter1 = double("presenter1")
+      presenter2 = double("presenter2")
 
-      allow(presenter_class).to receive(:new).with(item1, {}).and_return(presenter1)
-      allow(presenter_class).to receive(:new).with(item2, {}).and_return(presenter2)
+      allow(presenter_class).to receive(:new).with(item1).and_return(presenter1)
+      allow(presenter_class).to receive(:new).with(item2).and_return(presenter2)
+      allow(presenter1).to receive(:as_json).with({}).and_return({ id: 1 })
+      allow(presenter2).to receive(:as_json).with({}).and_return({ id: 2 })
 
       collection_presenter = described_class.new(collection, presenter_class)
       result = collection_presenter.as_json

@@ -8,6 +8,7 @@ class DonorPresenter < BasePresenter
       email: object.email,
       displayable_email: displayable_email,
       discarded_at: object.discarded_at,
+      can_be_deleted: object.can_be_deleted?,
       created_at: object.created_at,
       updated_at: object.updated_at
     }

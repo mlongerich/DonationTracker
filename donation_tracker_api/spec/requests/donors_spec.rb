@@ -6,16 +6,21 @@ RSpec.describe "/api/donors", type: :request do
   end
 
   describe "POST /api/donors" do
-    it "creates donor via DonorService" do
+    it "creates donor via DonorService and returns wrapped presenter response" do
       donor_params = { name: "John Doe", email: "john@example.com" }
 
       post "/api/donors", params: { donor: donor_params }, headers: { "Host" => "api" }
 
       expect(response).to have_http_status(:created)
       expect(Donor.last.name).to eq("John Doe")
+
+      json_response = JSON.parse(response.body)
+      expect(json_response).to have_key("donor")
+      expect(json_response["donor"]["name"]).to eq("John Doe")
+      expect(json_response["donor"]["displayable_email"]).to eq("john@example.com")
     end
 
-    it "returns 200 OK when updating existing donor with newer data" do
+    it "returns 200 OK when updating existing donor with newer data and wraps with presenter" do
       create(:donor, name: "Old Name", email: "existing@test.com", last_updated_at: 1.day.ago)
 
       donor_params = { name: "Updated Name", email: "existing@test.com" }
@@ -23,19 +28,25 @@ RSpec.describe "/api/donors", type: :request do
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
-      expect(json_response["name"]).to eq("Updated Name")
+      expect(json_response).to have_key("donor")
+      expect(json_response["donor"]["name"]).to eq("Updated Name")
     end
   end
 
   describe "GET /api/donors/:id" do
-    it "returns donor by id" do
-      donor = create(:donor, name: "Alice Brown")
+    it "returns donor by id wrapped with presenter" do
+      donor = create(:donor, name: "Alice Brown", email: "alice@example.com")
 
       get "/api/donors/#{donor.id}", headers: { "Host" => "api" }
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
-      expect(json_response["name"]).to eq("Alice Brown")
+
+      # Expect wrapped response
+      expect(json_response).to have_key("donor")
+      expect(json_response["donor"]["name"]).to eq("Alice Brown")
+      expect(json_response["donor"]["displayable_email"]).to eq("alice@example.com")
+      expect(json_response["donor"]).to have_key("can_be_deleted")
     end
   end
 
@@ -178,15 +189,16 @@ RSpec.describe "/api/donors", type: :request do
   end
 
   describe "PATCH /api/donors/:id" do
-    it "updates donor with valid attributes" do
+    it "updates donor with valid attributes and returns wrapped presenter response" do
       donor = create(:donor, name: "Original Name", email: "original@example.com", last_updated_at: 1.day.ago)
 
       patch "/api/donors/#{donor.id}", params: { donor: { name: "Updated Name" } }, headers: { "Host" => "api" }
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
-      expect(json_response["name"]).to eq("Updated Name")
-      expect(json_response["email"]).to eq("original@example.com")
+      expect(json_response).to have_key("donor")
+      expect(json_response["donor"]["name"]).to eq("Updated Name")
+      expect(json_response["donor"]["email"]).to eq("original@example.com")
     end
 
     it "updates last_updated_at timestamp" do
@@ -217,8 +229,8 @@ RSpec.describe "/api/donors", type: :request do
   end
 
   describe "POST /api/donors/:id/restore" do
-    it "restores discarded donor" do
-      donor = create(:donor)
+    it "restores discarded donor and returns wrapped presenter response" do
+      donor = create(:donor, name: "Restored Donor")
       donor.discard
 
       post "/api/donors/#{donor.id}/restore", headers: { "Host" => "api" }
@@ -227,6 +239,11 @@ RSpec.describe "/api/donors", type: :request do
       donor.reload
       expect(donor.discarded?).to be false
       expect(donor.discarded_at).to be_nil
+
+      json_response = JSON.parse(response.body)
+      expect(json_response).to have_key("donor")
+      expect(json_response["donor"]["name"]).to eq("Restored Donor")
+      expect(json_response["donor"]["discarded_at"]).to be_nil
     end
   end
 
@@ -245,7 +262,7 @@ RSpec.describe "/api/donors", type: :request do
   end
 
   describe "POST /api/donors/merge" do
-    it "merges donors with selected fields" do
+    it "merges donors with selected fields and returns wrapped presenter response" do
       donor1 = create(:donor, name: 'Alice Smith', email: 'alice@example.com')
       donor2 = create(:donor, name: 'Alice S.', email: 'alice.smith@example.com')
 
@@ -256,8 +273,9 @@ RSpec.describe "/api/donors", type: :request do
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
-      expect(json_response["name"]).to eq("Alice Smith")
-      expect(json_response["email"]).to eq("alice.smith@example.com")
+      expect(json_response).to have_key("donor")
+      expect(json_response["donor"]["name"]).to eq("Alice Smith")
+      expect(json_response["donor"]["email"]).to eq("alice.smith@example.com")
     end
   end
 end

@@ -13,43 +13,25 @@ class Api::ChildrenController < ApplicationController
     filtered_scope = apply_ransack_filters(scope)
     children = paginate_collection(filtered_scope.order(name: :asc))
 
-    # Build children data with optional sponsorships using presenter
-    children_data = children.map do |child|
-      child_json = ChildPresenter.new(child).as_json
-
-      if params[:include_sponsorships] == "true"
-        child_json[:sponsorships] = child.sponsorships.map do |s|
-          {
-            id: s.id,
-            donor_id: s.donor_id,
-            donor_name: s.donor&.name,
-            child_id: s.child_id,
-            monthly_amount: s.monthly_amount.to_s,
-            active: s.active?,
-            end_date: s.end_date
-          }
-        end
-      end
-
-      child_json
-    end
+    # Use CollectionPresenter with options
+    presenter_options = { include_sponsorships: params[:include_sponsorships] == "true" }
 
     render json: {
-      children: children_data,
+      children: CollectionPresenter.new(children, ChildPresenter, presenter_options).as_json,
       meta: pagination_meta(children)
     }
   end
 
   def show
     child = Child.find(params[:id])
-    render json: child
+    render json: { child: ChildPresenter.new(child).as_json }
   end
 
   def create
     child = Child.new(child_params)
 
     if child.save
-      render json: { child: child }, status: :created
+      render json: { child: ChildPresenter.new(child).as_json }, status: :created
     else
       render json: { errors: child.errors }, status: :unprocessable_entity
     end
@@ -59,7 +41,7 @@ class Api::ChildrenController < ApplicationController
     child = Child.find(params[:id])
 
     if child.update(child_params)
-      render json: { child: child }
+      render json: { child: ChildPresenter.new(child).as_json }
     else
       render json: { errors: child.errors }, status: :unprocessable_entity
     end

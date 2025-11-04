@@ -21,7 +21,7 @@ module Api
 
       if donation.save
         donation.reload
-        render json: DonationPresenter.new(donation).as_json, status: :created
+        render json: { donation: DonationPresenter.new(donation).as_json }, status: :created
       else
         render json: { errors: donation.errors.full_messages }, status: :unprocessable_entity
       end
@@ -29,7 +29,7 @@ module Api
 
     def show
       donation = Donation.includes(:donor).find(params[:id])
-      render json: DonationPresenter.new(donation).as_json, status: :ok
+      render json: { donation: DonationPresenter.new(donation).as_json }, status: :ok
     end
 
     private

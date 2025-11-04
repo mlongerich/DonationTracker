@@ -7,7 +7,7 @@ class CollectionPresenter < BasePresenter
 
   def as_json(options = {})
     @collection.map do |item|
-      @presenter_class.new(item, @options).as_json(options)
+      @presenter_class.new(item).as_json(@options.merge(options))
     end
   end
 end

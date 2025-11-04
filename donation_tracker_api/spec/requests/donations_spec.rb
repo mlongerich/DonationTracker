@@ -16,7 +16,7 @@ RSpec.describe "/api/donations", type: :request do
       expect(response).to have_http_status(:created)
     end
 
-    it "includes donor_name in response" do
+    it "includes donor_name in wrapped response" do
       donor = create(:donor, name: "Jane Doe")
 
       post "/api/donations", params: {
@@ -29,7 +29,8 @@ RSpec.describe "/api/donations", type: :request do
 
       expect(response).to have_http_status(:created)
       json = JSON.parse(response.body)
-      expect(json["donor_name"]).to eq("Jane Doe")
+      expect(json).to have_key("donation")
+      expect(json["donation"]["donor_name"]).to eq("Jane Doe")
     end
 
     it "saves project_id and returns project_title when project is provided" do
@@ -47,8 +48,8 @@ RSpec.describe "/api/donations", type: :request do
 
       expect(response).to have_http_status(:created)
       json = JSON.parse(response.body)
-      expect(json["project_id"]).to eq(project.id)
-      expect(json["project_title"]).to eq("Summer Campaign")
+      expect(json["donation"]["project_id"]).to eq(project.id)
+      expect(json["donation"]["project_title"]).to eq("Summer Campaign")
 
       # Verify it was actually saved to database
       donation = Donation.last
@@ -165,7 +166,7 @@ RSpec.describe "/api/donations", type: :request do
       expect(response).to have_http_status(:ok)
     end
 
-    it "includes donor_name in response" do
+    it "includes donor_name in wrapped response" do
       donor = create(:donor, name: "John Smith")
       donation = create(:donation, donor: donor)
 
@@ -173,7 +174,8 @@ RSpec.describe "/api/donations", type: :request do
 
       expect(response).to have_http_status(:ok)
       json = JSON.parse(response.body)
-      expect(json["donor_name"]).to eq("John Smith")
+      expect(json).to have_key("donation")
+      expect(json["donation"]["donor_name"]).to eq("John Smith")
     end
   end
 end
