@@ -18,7 +18,7 @@ import { useDebouncedValue } from '../hooks';
 
 const SponsorshipsPage: React.FC = () => {
   const [sponsorships, setSponsorships] = useState<Sponsorship[]>([]);
-  const [page, setPage] = useState(1);
+  const [page] = useState(1); // TODO: Implement pagination (TICKET-053)
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
@@ -26,6 +26,8 @@ const SponsorshipsPage: React.FC = () => {
 
   useEffect(() => {
     fetchSponsorships();
+    // Disable exhaustive-deps: fetchSponsorships is stable but would cause infinite loop if added
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, debouncedQuery, showEnded]);
 
   const fetchSponsorships = async () => {

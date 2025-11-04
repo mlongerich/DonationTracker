@@ -58,14 +58,14 @@ describe('Navigation', () => {
   });
 
   it('uses Material-UI AppBar component', () => {
-    const { container } = render(
+    render(
       <BrowserRouter>
         <Navigation />
       </BrowserRouter>
     );
 
     // AppBar renders as a <header> element with specific MUI classes
-    const header = container.querySelector('header');
+    const header = screen.getByRole('banner');
     expect(header).toBeInTheDocument();
     expect(header).toHaveClass('MuiAppBar-root');
   });

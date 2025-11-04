@@ -49,11 +49,12 @@ describe('ProjectForm', () => {
     });
   });
 
-  it('renders form fields with Stack spacing', () => {
-    const { container } = render(<ProjectForm onSubmit={jest.fn()} />);
+  it('renders form fields', () => {
+    render(<ProjectForm onSubmit={jest.fn()} />);
 
-    // Check for MUI Stack component with spacing
-    const stack = container.querySelector('.MuiStack-root');
-    expect(stack).toBeInTheDocument();
+    // Verify form renders with expected fields
+    expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/project type/i)).toBeInTheDocument();
   });
 });

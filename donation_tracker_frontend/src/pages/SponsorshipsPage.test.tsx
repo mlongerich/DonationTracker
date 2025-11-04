@@ -69,8 +69,8 @@ describe('SponsorshipsPage', () => {
     render(<SponsorshipsPage />);
     await waitFor(() => {
       expect(screen.getByText('John Doe')).toBeInTheDocument();
-      expect(screen.getByText('Alice')).toBeInTheDocument();
     });
+    expect(screen.getByText('Alice')).toBeInTheDocument();
   });
 
   it('ends a sponsorship', async () => {

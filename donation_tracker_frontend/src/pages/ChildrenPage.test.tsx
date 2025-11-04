@@ -286,13 +286,14 @@ describe('ChildrenPage', () => {
 
     await waitFor(() => {
       expect(mockedApiClient.get).toHaveBeenCalledTimes(1);
-      expect(mockedApiClient.get).toHaveBeenCalledWith('/api/children', {
-        params: expect.objectContaining({
-          include_sponsorships: true,
-          page: 1,
-          per_page: 10,
-        }),
-      });
+    });
+
+    expect(mockedApiClient.get).toHaveBeenCalledWith('/api/children', {
+      params: expect.objectContaining({
+        include_sponsorships: true,
+        page: 1,
+        per_page: 10,
+      }),
     });
   });
 
@@ -345,20 +346,20 @@ describe('ChildrenPage', () => {
 
     await waitFor(
       () => {
-        // Verify both children names are displayed
         expect(screen.getByText('Maria')).toBeInTheDocument();
-        expect(screen.getByText('Juan')).toBeInTheDocument();
       },
       { timeout: 3000 }
     );
 
+    expect(screen.getByText('Juan')).toBeInTheDocument();
+
     // Verify sponsorships are displayed (text might be split across elements)
     await waitFor(() => {
       expect(screen.getByText(/John Doe/i)).toBeInTheDocument();
-      expect(screen.getByText(/\$0\.50\/mo/i)).toBeInTheDocument();
-      expect(screen.getByText(/Jane Smith/i)).toBeInTheDocument();
-      expect(screen.getByText(/\$0\.75\/mo/i)).toBeInTheDocument();
     });
+    expect(screen.getByText(/\$0\.50\/mo/i)).toBeInTheDocument();
+    expect(screen.getByText(/Jane Smith/i)).toBeInTheDocument();
+    expect(screen.getByText(/\$0\.75\/mo/i)).toBeInTheDocument();
   });
 
   it('displays sponsorship info and allows adding sponsors', async () => {
@@ -383,10 +384,10 @@ describe('ChildrenPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/no active sponsor/i)).toBeInTheDocument();
-      expect(
-        screen.getByRole('button', { name: /add sponsor/i })
-      ).toBeInTheDocument();
     });
+    expect(
+      screen.getByRole('button', { name: /add sponsor/i })
+    ).toBeInTheDocument();
   });
 
   it('opens sponsorship modal when Add Sponsor button clicked', async () => {

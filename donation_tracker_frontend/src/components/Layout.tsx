@@ -6,7 +6,7 @@ const Layout = () => {
   return (
     <>
       <Navigation />
-      <Container maxWidth="sm">
+      <Container maxWidth="sm" data-testid="layout-container">
         <Box sx={{ my: 4 }}>
           <Outlet />
         </Box>

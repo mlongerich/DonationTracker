@@ -109,10 +109,13 @@ describe('DonorAutocomplete', () => {
 
     await waitFor(() => {
       const options = screen.getAllByRole('option');
-      const allText = options.map((opt) => opt.textContent).join(' ');
-      expect(allText).toContain('John Doe (No email provided)');
-      expect(allText).toContain('Jane Smith (jane@example.com)');
+      expect(options.length).toBeGreaterThan(0);
     });
+
+    const options = screen.getAllByRole('option');
+    const allText = options.map((opt) => opt.textContent).join(' ');
+    expect(allText).toContain('John Doe (No email provided)');
+    expect(allText).toContain('Jane Smith (jane@example.com)');
   });
 
   it('renders with small size', () => {

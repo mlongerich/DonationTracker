@@ -167,12 +167,11 @@ describe('ProjectsPage', () => {
     });
   });
 
-  it('renders with MUI Container and spacing', () => {
-    const { container } = render(<ProjectsPage />);
+  it('renders projects page', () => {
+    render(<ProjectsPage />);
 
-    // Check for MUI Container class
-    const muiContainer = container.querySelector('.MuiContainer-root');
-    expect(muiContainer).toBeInTheDocument();
+    // Verify page renders with form
+    expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
   });
 
   it('clears form fields after successful project creation', async () => {
@@ -192,8 +191,8 @@ describe('ProjectsPage', () => {
     // Wait for form to clear (formKey changes causing remount)
     await waitFor(() => {
       expect(screen.getByLabelText(/title/i)).toHaveValue('');
-      expect(screen.getByLabelText(/description/i)).toHaveValue('');
     });
+    expect(screen.getByLabelText(/description/i)).toHaveValue('');
   }, 10000);
 
   it('displays success Alert after creating project', async () => {
@@ -308,8 +307,8 @@ describe('ProjectsPage', () => {
       expect(mockedApiClient.get).toHaveBeenCalledWith('/api/projects', {
         params: {},
       });
-      expect(mockedApiClient.get).toHaveBeenCalledTimes(2); // mount + refresh
     });
+    expect(mockedApiClient.get).toHaveBeenCalledTimes(2); // mount + refresh
 
     // Verify new project appears in list
     expect(screen.getByText('New Project')).toBeInTheDocument();

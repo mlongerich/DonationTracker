@@ -132,8 +132,8 @@ describe('SponsorshipModal', () => {
           monthly_amount: 5000, // 50 dollars = 5000 cents
         },
       });
-      expect(mockOnSuccess).toHaveBeenCalled();
     });
+    expect(mockOnSuccess).toHaveBeenCalled();
   });
 
   it('closes modal after successful sponsorship submission', async () => {
@@ -169,8 +169,8 @@ describe('SponsorshipModal', () => {
 
     await waitFor(() => {
       expect(mockOnSuccess).toHaveBeenCalled();
-      expect(mockOnClose).toHaveBeenCalled();
     });
+    expect(mockOnClose).toHaveBeenCalled();
   });
 
   it('displays error message when sponsorship creation fails with 422', async () => {

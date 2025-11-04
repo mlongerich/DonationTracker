@@ -139,17 +139,17 @@ describe('DonationForm', () => {
     // Check that options are rendered with correct email hiding
     await waitFor(
       () => {
-        // Use getAllByRole to find options
         const options = screen.getAllByRole('option');
         expect(options.length).toBeGreaterThan(0);
-
-        // Check the text content includes our expected values
-        const allText = options.map((opt) => opt.textContent).join(' ');
-        expect(allText).toContain('John Doe (No email provided)');
-        expect(allText).toContain('Jane Smith (jane@example.com)');
       },
       { timeout: 5000 }
     );
+
+    // Check the text content includes our expected values
+    const options = screen.getAllByRole('option');
+    const allText = options.map((opt) => opt.textContent).join(' ');
+    expect(allText).toContain('John Doe (No email provided)');
+    expect(allText).toContain('Jane Smith (jane@example.com)');
   });
 
   it('renders project or child autocomplete field', () => {

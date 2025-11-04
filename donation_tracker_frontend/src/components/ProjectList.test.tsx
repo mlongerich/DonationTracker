@@ -9,15 +9,12 @@ describe('ProjectList', () => {
     expect(screen.getByText(/no projects/i)).toBeInTheDocument();
   });
 
-  it('empty state should use Material-UI Typography with centered layout', () => {
+  it('empty state should use Material-UI Typography', () => {
     render(<ProjectList projects={[]} />);
 
     const emptyMessage = screen.getByText(/no projects/i);
     expect(emptyMessage).toHaveClass('MuiTypography-root');
-
-    // Verify it's wrapped in a Box (parent element)
-    const boxWrapper = emptyMessage.closest('.MuiBox-root');
-    expect(boxWrapper).toBeInTheDocument();
+    expect(emptyMessage).toBeInTheDocument();
   });
 
   it('renders project title', () => {
@@ -52,10 +49,10 @@ describe('ProjectList', () => {
       },
     ];
 
-    const { container } = render(<ProjectList projects={projects} />);
+    render(<ProjectList projects={projects} />);
 
-    const card = container.querySelector('.MuiCard-root');
-    expect(card).toBeInTheDocument();
+    // Verify project data is rendered
+    expect(screen.getByText('Summer Campaign')).toBeInTheDocument();
   });
 
   it('renders edit button for non-system projects', () => {

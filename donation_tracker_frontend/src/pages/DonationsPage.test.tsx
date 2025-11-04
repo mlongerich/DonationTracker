@@ -449,7 +449,9 @@ describe('DonationsPage', () => {
       Object.entries(params).forEach(([key, value]) => {
         // Page and per_page should exist, but q params should not if null/empty
         if (key.startsWith('q[')) {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect(value).not.toBe(null);
+          // eslint-disable-next-line jest/no-conditional-expect
           expect(value).not.toBe('');
         }
       });

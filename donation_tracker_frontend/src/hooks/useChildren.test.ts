@@ -23,6 +23,7 @@ describe('useChildren', () => {
       await result.current.fetchChildren();
     });
 
+    // eslint-disable-next-line testing-library/no-node-access
     expect(result.current.children).toEqual(mockChildren);
     expect(result.current.loading).toBe(false);
   });

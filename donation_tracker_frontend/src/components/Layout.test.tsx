@@ -30,7 +30,7 @@ describe('Layout', () => {
   });
 
   it('wraps content in Material-UI Container with maxWidth sm', () => {
-    const { container } = render(
+    render(
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
@@ -41,7 +41,7 @@ describe('Layout', () => {
     );
 
     // Container should exist with proper MUI classes
-    const muiContainer = container.querySelector('.MuiContainer-root');
+    const muiContainer = screen.getByTestId('layout-container');
     expect(muiContainer).toBeInTheDocument();
     expect(muiContainer).toHaveClass('MuiContainer-maxWidthSm');
   });
