@@ -20,12 +20,8 @@ class Api::ProjectsController < ApplicationController
 
   def create
     project = Project.new(project_params)
-
-    if project.save
-      render json: { project: ProjectPresenter.new(project).as_json }, status: :created
-    else
-      render json: { errors: project.errors }, status: :unprocessable_entity
-    end
+    project.save!  # Raises RecordInvalid if validation fails
+    render json: { project: ProjectPresenter.new(project).as_json }, status: :created
   end
 
   def update
@@ -36,11 +32,8 @@ class Api::ProjectsController < ApplicationController
       return
     end
 
-    if project.update(project_params)
-      render json: { project: ProjectPresenter.new(project).as_json }
-    else
-      render json: { errors: project.errors }, status: :unprocessable_entity
-    end
+    project.update!(project_params)  # Raises RecordInvalid if validation fails
+    render json: { project: ProjectPresenter.new(project).as_json }
   end
 
   def destroy
@@ -57,12 +50,8 @@ class Api::ProjectsController < ApplicationController
 
   def archive
     project = Project.find(params[:id])
-
-    if project.discard
-      head :no_content
-    else
-      render json: { errors: project.errors.full_messages }, status: :unprocessable_entity
-    end
+    project.discard!  # Raises if fails
+    head :no_content
   end
 
   def restore

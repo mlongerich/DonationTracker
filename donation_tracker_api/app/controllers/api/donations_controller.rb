@@ -18,13 +18,9 @@ module Api
 
     def create
       donation = Donation.new(donation_params)
-
-      if donation.save
-        donation.reload
-        render json: { donation: DonationPresenter.new(donation).as_json }, status: :created
-      else
-        render json: { errors: donation.errors.full_messages }, status: :unprocessable_entity
-      end
+      donation.save!  # Raises RecordInvalid if validation fails
+      donation.reload
+      render json: { donation: DonationPresenter.new(donation).as_json }, status: :created
     end
 
     def show

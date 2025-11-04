@@ -29,22 +29,14 @@ class Api::ChildrenController < ApplicationController
 
   def create
     child = Child.new(child_params)
-
-    if child.save
-      render json: { child: ChildPresenter.new(child).as_json }, status: :created
-    else
-      render json: { errors: child.errors }, status: :unprocessable_entity
-    end
+    child.save!  # Raises RecordInvalid if validation fails
+    render json: { child: ChildPresenter.new(child).as_json }, status: :created
   end
 
   def update
     child = Child.find(params[:id])
-
-    if child.update(child_params)
-      render json: { child: ChildPresenter.new(child).as_json }
-    else
-      render json: { errors: child.errors }, status: :unprocessable_entity
-    end
+    child.update!(child_params)  # Raises RecordInvalid if validation fails
+    render json: { child: ChildPresenter.new(child).as_json }
   end
 
   def destroy
@@ -56,12 +48,8 @@ class Api::ChildrenController < ApplicationController
 
   def archive
     child = Child.find(params[:id])
-
-    if child.discard
-      head :no_content
-    else
-      render json: { errors: child.errors.full_messages }, status: :unprocessable_entity
-    end
+    child.discard!  # Raises if fails
+    head :no_content
   end
 
   def restore
