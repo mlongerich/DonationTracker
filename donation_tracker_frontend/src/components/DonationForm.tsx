@@ -43,7 +43,8 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
     try {
       // Extract project_id or child_id from selection
       const projectId =
-        selectedProjectOrChild?.type === 'project' && selectedProjectOrChild.id > 0
+        selectedProjectOrChild?.type === 'project' &&
+        selectedProjectOrChild.id > 0
           ? selectedProjectOrChild.id
           : null;
 
@@ -64,7 +65,11 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
       setSuccess(true);
       setAmount('');
       setSelectedDonor(null);
-      setSelectedProjectOrChild({ id: 0, name: 'General Donation', type: 'project' });
+      setSelectedProjectOrChild({
+        id: 0,
+        name: 'General Donation',
+        type: 'project',
+      });
       setDate(new Date().toISOString().split('T')[0]);
       onSuccess?.(); // Notify parent to refresh donation list
     } catch (err) {

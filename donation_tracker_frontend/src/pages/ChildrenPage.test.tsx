@@ -35,7 +35,12 @@ describe('ChildrenPage', () => {
 
   it('fetches children on mount', async () => {
     const mockChildren = [
-      { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01' }
+      {
+        id: 1,
+        name: 'Maria',
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+      },
     ];
     mockedApiClient.get.mockResolvedValue({
       data: {
@@ -63,18 +68,41 @@ describe('ChildrenPage', () => {
       .mockResolvedValueOnce({
         data: {
           children: [],
-          meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+          meta: {
+            total_count: 0,
+            total_pages: 0,
+            current_page: 1,
+            per_page: 25,
+          },
         },
       })
       .mockResolvedValueOnce({
         data: {
-          children: [{ id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [] }],
-          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+          children: [
+            {
+              id: 1,
+              name: 'Maria',
+              created_at: '2025-01-01',
+              updated_at: '2025-01-01',
+              sponsorships: [],
+            },
+          ],
+          meta: {
+            total_count: 1,
+            total_pages: 1,
+            current_page: 1,
+            per_page: 25,
+          },
         },
       });
     mockedApiClient.post.mockResolvedValue({
       data: {
-        child: { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01' },
+        child: {
+          id: 1,
+          name: 'Maria',
+          created_at: '2025-01-01',
+          updated_at: '2025-01-01',
+        },
       },
     });
 
@@ -89,31 +117,62 @@ describe('ChildrenPage', () => {
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
     await waitFor(() => {
-      expect(mockedApiClient.post).toHaveBeenCalledWith('/api/children', { child: { name: 'Maria' } });
+      expect(mockedApiClient.post).toHaveBeenCalledWith('/api/children', {
+        child: { name: 'Maria' },
+      });
     });
   }, 10000);
 
   it('updates an existing child', async () => {
     const user = userEvent.setup();
     const mockChildren = [
-      { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [] }
+      {
+        id: 1,
+        name: 'Maria',
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+        sponsorships: [],
+      },
     ];
     mockedApiClient.get
       .mockResolvedValueOnce({
         data: {
           children: mockChildren,
-          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+          meta: {
+            total_count: 1,
+            total_pages: 1,
+            current_page: 1,
+            per_page: 25,
+          },
         },
       })
       .mockResolvedValueOnce({
         data: {
-          children: [{ id: 1, name: 'Maria Updated', created_at: '2025-01-01', updated_at: '2025-01-02', sponsorships: [] }],
-          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+          children: [
+            {
+              id: 1,
+              name: 'Maria Updated',
+              created_at: '2025-01-01',
+              updated_at: '2025-01-02',
+              sponsorships: [],
+            },
+          ],
+          meta: {
+            total_count: 1,
+            total_pages: 1,
+            current_page: 1,
+            per_page: 25,
+          },
         },
       });
     mockedApiClient.put.mockResolvedValue({
       data: {
-        child: { id: 1, name: 'Maria Updated', created_at: '2025-01-01', updated_at: '2025-01-02' },
+        child: {
+          id: 1,
+          name: 'Maria Updated',
+          created_at: '2025-01-01',
+          updated_at: '2025-01-02',
+        },
       },
     });
 
@@ -132,26 +191,45 @@ describe('ChildrenPage', () => {
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
     await waitFor(() => {
-      expect(mockedApiClient.put).toHaveBeenCalledWith('/api/children/1', { child: { name: 'Maria Updated' } });
+      expect(mockedApiClient.put).toHaveBeenCalledWith('/api/children/1', {
+        child: { name: 'Maria Updated' },
+      });
     });
   });
 
   it('deletes a child', async () => {
     const user = userEvent.setup();
     const mockChildren = [
-      { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [], can_be_deleted: true }
+      {
+        id: 1,
+        name: 'Maria',
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+        sponsorships: [],
+        can_be_deleted: true,
+      },
     ];
     mockedApiClient.get
       .mockResolvedValueOnce({
         data: {
           children: mockChildren,
-          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+          meta: {
+            total_count: 1,
+            total_pages: 1,
+            current_page: 1,
+            per_page: 25,
+          },
         },
       })
       .mockResolvedValueOnce({
         data: {
           children: [],
-          meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+          meta: {
+            total_count: 0,
+            total_pages: 0,
+            current_page: 1,
+            per_page: 25,
+          },
         },
       });
     mockedApiClient.delete.mockResolvedValue({ data: {} });
@@ -178,16 +256,23 @@ describe('ChildrenPage', () => {
         created_at: '2025-01-01',
         updated_at: '2025-01-01',
         sponsorships: [
-          { id: 1, donor_id: 1, donor_name: 'John Doe', child_id: 1, monthly_amount: '50.0', active: true }
-        ]
+          {
+            id: 1,
+            donor_id: 1,
+            donor_name: 'John Doe',
+            child_id: 1,
+            monthly_amount: '50.0',
+            active: true,
+          },
+        ],
       },
       {
         id: 2,
         name: 'Juan',
         created_at: '2025-01-02',
         updated_at: '2025-01-02',
-        sponsorships: []
-      }
+        sponsorships: [],
+      },
     ];
 
     mockedApiClient.get.mockResolvedValueOnce({
@@ -220,8 +305,15 @@ describe('ChildrenPage', () => {
         updated_at: '2025-01-01',
         can_be_deleted: false,
         sponsorships: [
-          { id: 1, donor_id: 10, donor_name: 'John Doe', child_id: 1, monthly_amount: '50.0', active: true }
-        ]
+          {
+            id: 1,
+            donor_id: 10,
+            donor_name: 'John Doe',
+            child_id: 1,
+            monthly_amount: '50.0',
+            active: true,
+          },
+        ],
       },
       {
         id: 2,
@@ -230,9 +322,16 @@ describe('ChildrenPage', () => {
         updated_at: '2025-01-02',
         can_be_deleted: false,
         sponsorships: [
-          { id: 2, donor_id: 20, donor_name: 'Jane Smith', child_id: 2, monthly_amount: '75.0', active: true }
-        ]
-      }
+          {
+            id: 2,
+            donor_id: 20,
+            donor_name: 'Jane Smith',
+            child_id: 2,
+            monthly_amount: '75.0',
+            active: true,
+          },
+        ],
+      },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -244,11 +343,14 @@ describe('ChildrenPage', () => {
 
     render(<ChildrenPage />);
 
-    await waitFor(() => {
-      // Verify both children names are displayed
-      expect(screen.getByText('Maria')).toBeInTheDocument();
-      expect(screen.getByText('Juan')).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        // Verify both children names are displayed
+        expect(screen.getByText('Maria')).toBeInTheDocument();
+        expect(screen.getByText('Juan')).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
 
     // Verify sponsorships are displayed (text might be split across elements)
     await waitFor(() => {
@@ -261,7 +363,13 @@ describe('ChildrenPage', () => {
 
   it('displays sponsorship info and allows adding sponsors', async () => {
     const mockChildren = [
-      { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [] }
+      {
+        id: 1,
+        name: 'Maria',
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+        sponsorships: [],
+      },
     ];
 
     mockedApiClient.get.mockResolvedValueOnce({
@@ -275,14 +383,22 @@ describe('ChildrenPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/no active sponsor/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /add sponsor/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /add sponsor/i })
+      ).toBeInTheDocument();
     });
   });
 
   it('opens sponsorship modal when Add Sponsor button clicked', async () => {
     const user = userEvent.setup();
     const mockChildren = [
-      { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [] }
+      {
+        id: 1,
+        name: 'Maria',
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+        sponsorships: [],
+      },
     ];
 
     mockedApiClient.get.mockResolvedValueOnce({
@@ -295,10 +411,14 @@ describe('ChildrenPage', () => {
     render(<ChildrenPage />);
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /add sponsor/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /add sponsor/i })
+      ).toBeInTheDocument();
     });
 
-    const addSponsorButton = screen.getByRole('button', { name: /add sponsor/i });
+    const addSponsorButton = screen.getByRole('button', {
+      name: /add sponsor/i,
+    });
     await user.click(addSponsorButton);
 
     expect(screen.getByText(/add sponsor for maria/i)).toBeInTheDocument();
@@ -315,7 +435,9 @@ describe('ChildrenPage', () => {
     render(<ChildrenPage />);
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/show archived children/i)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/show archived children/i)
+      ).toBeInTheDocument();
     });
   });
 
@@ -331,7 +453,9 @@ describe('ChildrenPage', () => {
     render(<ChildrenPage />);
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/show archived children/i)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/show archived children/i)
+      ).toBeInTheDocument();
     });
 
     const checkbox = screen.getByLabelText(/show archived children/i);
@@ -358,8 +482,8 @@ describe('ChildrenPage', () => {
         updated_at: '2025-01-01',
         sponsorships: [],
         can_be_deleted: true,
-        discarded_at: '2025-01-15T10:00:00Z'
-      }
+        discarded_at: '2025-01-15T10:00:00Z',
+      },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -389,8 +513,8 @@ describe('ChildrenPage', () => {
         updated_at: '2025-01-01',
         sponsorships: [],
         can_be_deleted: true,
-        discarded_at: '2025-01-15T10:00:00Z'
-      }
+        discarded_at: '2025-01-15T10:00:00Z',
+      },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -403,7 +527,9 @@ describe('ChildrenPage', () => {
     render(<ChildrenPage />);
 
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /restore/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /restore/i })
+      ).toBeInTheDocument();
     });
   });
 
@@ -417,14 +543,19 @@ describe('ChildrenPage', () => {
           created_at: '2025-01-01',
           updated_at: '2025-01-01',
           sponsorships: [],
-          can_be_deleted: false
-        }
+          can_be_deleted: false,
+        },
       ];
 
       mockedApiClient.get.mockResolvedValue({
         data: {
           children: mockChildren,
-          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+          meta: {
+            total_count: 1,
+            total_pages: 1,
+            current_page: 1,
+            per_page: 25,
+          },
         },
       });
 
@@ -447,7 +578,9 @@ describe('ChildrenPage', () => {
 
       // Error snackbar should appear with message
       await waitFor(() => {
-        expect(screen.getByText('Cannot archive child with active sponsorships')).toBeInTheDocument();
+        expect(
+          screen.getByText('Cannot archive child with active sponsorships')
+        ).toBeInTheDocument();
       });
     });
 
@@ -460,14 +593,19 @@ describe('ChildrenPage', () => {
           created_at: '2025-01-01',
           updated_at: '2025-01-01',
           sponsorships: [],
-          can_be_deleted: false
-        }
+          can_be_deleted: false,
+        },
       ];
 
       mockedApiClient.get.mockResolvedValue({
         data: {
           children: mockChildren,
-          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+          meta: {
+            total_count: 1,
+            total_pages: 1,
+            current_page: 1,
+            per_page: 25,
+          },
         },
       });
 
@@ -503,14 +641,19 @@ describe('ChildrenPage', () => {
           created_at: '2025-01-01',
           updated_at: '2025-01-01',
           sponsorships: [],
-          can_be_deleted: false
-        }
+          can_be_deleted: false,
+        },
       ];
 
       mockedApiClient.get.mockResolvedValue({
         data: {
           children: mockChildren,
-          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
+          meta: {
+            total_count: 1,
+            total_pages: 1,
+            current_page: 1,
+            per_page: 25,
+          },
         },
       });
 
@@ -533,7 +676,9 @@ describe('ChildrenPage', () => {
 
       // Wait for error to appear
       await waitFor(() => {
-        expect(screen.getByText('Cannot archive child with active sponsorships')).toBeInTheDocument();
+        expect(
+          screen.getByText('Cannot archive child with active sponsorships')
+        ).toBeInTheDocument();
       });
 
       // Click close button on alert
@@ -542,7 +687,9 @@ describe('ChildrenPage', () => {
 
       // Error should be gone
       await waitFor(() => {
-        expect(screen.queryByText('Cannot archive child with active sponsorships')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Cannot archive child with active sponsorships')
+        ).not.toBeInTheDocument();
       });
     });
   });
@@ -552,14 +699,21 @@ describe('ChildrenPage', () => {
       mockedApiClient.get.mockResolvedValue({
         data: {
           children: [],
-          meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+          meta: {
+            total_count: 0,
+            total_pages: 0,
+            current_page: 1,
+            per_page: 10,
+          },
         },
       });
 
       render(<ChildrenPage />);
 
       await waitFor(() => {
-        expect(screen.getByPlaceholderText(/search by name/i)).toBeInTheDocument();
+        expect(
+          screen.getByPlaceholderText(/search by name/i)
+        ).toBeInTheDocument();
       });
     });
 
@@ -568,7 +722,12 @@ describe('ChildrenPage', () => {
       mockedApiClient.get.mockResolvedValue({
         data: {
           children: [],
-          meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+          meta: {
+            total_count: 0,
+            total_pages: 0,
+            current_page: 1,
+            per_page: 10,
+          },
         },
       });
 
@@ -586,7 +745,12 @@ describe('ChildrenPage', () => {
       mockedApiClient.get.mockResolvedValue({
         data: {
           children: [],
-          meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+          meta: {
+            total_count: 0,
+            total_pages: 0,
+            current_page: 1,
+            per_page: 10,
+          },
         },
       });
 
@@ -596,7 +760,7 @@ describe('ChildrenPage', () => {
       await user.type(searchField, 'Maria');
 
       // Wait for debounce (300ms) plus some buffer
-      await new Promise(resolve => setTimeout(resolve, 350));
+      await new Promise((resolve) => setTimeout(resolve, 350));
 
       await waitFor(() => {
         expect(mockedApiClient.get).toHaveBeenCalledWith('/api/children', {
@@ -615,9 +779,20 @@ describe('ChildrenPage', () => {
       mockedApiClient.get.mockResolvedValue({
         data: {
           children: [
-            { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [] },
+            {
+              id: 1,
+              name: 'Maria',
+              created_at: '2025-01-01',
+              updated_at: '2025-01-01',
+              sponsorships: [],
+            },
           ],
-          meta: { total_count: 25, total_pages: 3, current_page: 1, per_page: 10 },
+          meta: {
+            total_count: 25,
+            total_pages: 3,
+            current_page: 1,
+            per_page: 10,
+          },
         },
       });
 
@@ -634,9 +809,20 @@ describe('ChildrenPage', () => {
       mockedApiClient.get.mockResolvedValue({
         data: {
           children: [
-            { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [] },
+            {
+              id: 1,
+              name: 'Maria',
+              created_at: '2025-01-01',
+              updated_at: '2025-01-01',
+              sponsorships: [],
+            },
           ],
-          meta: { total_count: 5, total_pages: 1, current_page: 1, per_page: 10 },
+          meta: {
+            total_count: 5,
+            total_pages: 1,
+            current_page: 1,
+            per_page: 10,
+          },
         },
       });
 
@@ -652,9 +838,20 @@ describe('ChildrenPage', () => {
       mockedApiClient.get.mockResolvedValue({
         data: {
           children: [
-            { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [] },
+            {
+              id: 1,
+              name: 'Maria',
+              created_at: '2025-01-01',
+              updated_at: '2025-01-01',
+              sponsorships: [],
+            },
           ],
-          meta: { total_count: 25, total_pages: 3, current_page: 1, per_page: 10 },
+          meta: {
+            total_count: 25,
+            total_pages: 3,
+            current_page: 1,
+            per_page: 10,
+          },
         },
       });
 
@@ -684,9 +881,20 @@ describe('ChildrenPage', () => {
       mockedApiClient.get.mockResolvedValue({
         data: {
           children: [
-            { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01', sponsorships: [] },
+            {
+              id: 1,
+              name: 'Maria',
+              created_at: '2025-01-01',
+              updated_at: '2025-01-01',
+              sponsorships: [],
+            },
           ],
-          meta: { total_count: 25, total_pages: 3, current_page: 1, per_page: 10 },
+          meta: {
+            total_count: 25,
+            total_pages: 3,
+            current_page: 1,
+            per_page: 10,
+          },
         },
       });
 
@@ -705,12 +913,12 @@ describe('ChildrenPage', () => {
       await user.type(searchField, 'Maria');
 
       // Wait for debounce
-      await new Promise(resolve => setTimeout(resolve, 350));
+      await new Promise((resolve) => setTimeout(resolve, 350));
 
       await waitFor(() => {
         expect(mockedApiClient.get).toHaveBeenCalledWith('/api/children', {
           params: expect.objectContaining({
-            page: 1,  // Should reset to page 1
+            page: 1, // Should reset to page 1
             q: { name_cont: 'Maria' },
           }),
         });

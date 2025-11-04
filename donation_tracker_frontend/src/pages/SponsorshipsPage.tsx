@@ -54,8 +54,9 @@ const SponsorshipsPage: React.FC = () => {
       setError(null);
     } catch (err: any) {
       if (err.response?.status === 422) {
-        const errorMsg = err.response.data.errors?.base?.[0]
-          || 'This sponsorship already exists';
+        const errorMsg =
+          err.response.data.errors?.base?.[0] ||
+          'This sponsorship already exists';
         setError(errorMsg);
       } else {
         setError('Failed to create sponsorship');

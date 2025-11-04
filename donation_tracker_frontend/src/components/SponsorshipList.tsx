@@ -7,7 +7,7 @@ import {
   TableRow,
   Paper,
   Button,
-  Typography
+  Typography,
 } from '@mui/material';
 import { Sponsorship } from '../types';
 import { formatCurrency } from '../utils/currency';
@@ -17,9 +17,16 @@ interface SponsorshipListProps {
   onEndSponsorship: (id: number) => void;
 }
 
-const SponsorshipList: React.FC<SponsorshipListProps> = ({ sponsorships, onEndSponsorship }) => {
+const SponsorshipList: React.FC<SponsorshipListProps> = ({
+  sponsorships,
+  onEndSponsorship,
+}) => {
   if (sponsorships.length === 0) {
-    return <Typography variant="body1" color="text.secondary">No sponsorships found</Typography>;
+    return (
+      <Typography variant="body1" color="text.secondary">
+        No sponsorships found
+      </Typography>
+    );
   }
 
   return (
@@ -40,7 +47,9 @@ const SponsorshipList: React.FC<SponsorshipListProps> = ({ sponsorships, onEndSp
             <TableRow key={sponsorship.id}>
               <TableCell>{sponsorship.donor_name}</TableCell>
               <TableCell>{sponsorship.child_name}</TableCell>
-              <TableCell>{formatCurrency(Number(sponsorship.monthly_amount))}</TableCell>
+              <TableCell>
+                {formatCurrency(Number(sponsorship.monthly_amount))}
+              </TableCell>
               <TableCell>{sponsorship.start_date || 'Not set'}</TableCell>
               <TableCell>{sponsorship.active ? 'Active' : 'Ended'}</TableCell>
               <TableCell>

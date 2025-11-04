@@ -24,7 +24,9 @@ describe('ProjectForm', () => {
   it('renders submit button', () => {
     render(<ProjectForm onSubmit={jest.fn()} />);
 
-    expect(screen.getByRole('button', { name: /create project/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /create project/i })
+    ).toBeInTheDocument();
   });
 
   it('calls onSubmit with form data when submitted', async () => {
@@ -34,7 +36,10 @@ describe('ProjectForm', () => {
     render(<ProjectForm onSubmit={mockOnSubmit} />);
 
     await user.type(screen.getByLabelText(/title/i), 'Summer Campaign');
-    await user.type(screen.getByLabelText(/description/i), 'A summer fundraiser');
+    await user.type(
+      screen.getByLabelText(/description/i),
+      'A summer fundraiser'
+    );
     await user.click(screen.getByRole('button', { name: /create project/i }));
 
     expect(mockOnSubmit).toHaveBeenCalledWith({

@@ -9,8 +9,8 @@ jest.mock('../api/client', () => ({
     get: jest.fn(),
     post: jest.fn(),
     put: jest.fn(),
-    delete: jest.fn()
-  }
+    delete: jest.fn(),
+  },
 }));
 
 describe('SponsorshipForm', () => {
@@ -18,7 +18,13 @@ describe('SponsorshipForm', () => {
     const mockSubmit = jest.fn();
     const mockCancel = jest.fn();
 
-    render(<SponsorshipForm onSubmit={mockSubmit} onCancel={mockCancel} childId={1} />);
+    render(
+      <SponsorshipForm
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        childId={1}
+      />
+    );
 
     expect(screen.getByLabelText(/donor/i)).toBeInTheDocument();
   });
@@ -27,7 +33,13 @@ describe('SponsorshipForm', () => {
     const mockSubmit = jest.fn();
     const mockCancel = jest.fn();
 
-    render(<SponsorshipForm onSubmit={mockSubmit} onCancel={mockCancel} childId={1} />);
+    render(
+      <SponsorshipForm
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        childId={1}
+      />
+    );
 
     expect(screen.getByLabelText(/monthly amount/i)).toBeInTheDocument();
   });
@@ -37,7 +49,13 @@ describe('SponsorshipForm', () => {
     const mockCancel = jest.fn();
     const user = userEvent.setup();
 
-    render(<SponsorshipForm onSubmit={mockSubmit} onCancel={mockCancel} childId={1} />);
+    render(
+      <SponsorshipForm
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        childId={1}
+      />
+    );
 
     const cancelButton = screen.getByText(/cancel/i);
     await user.click(cancelButton);
@@ -50,7 +68,13 @@ describe('SponsorshipForm', () => {
     const mockCancel = jest.fn();
     const user = userEvent.setup();
 
-    render(<SponsorshipForm onSubmit={mockSubmit} onCancel={mockCancel} childId={1} />);
+    render(
+      <SponsorshipForm
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        childId={1}
+      />
+    );
 
     // Type monthly amount only (no donor selected)
     const amountField = screen.getByLabelText(/monthly amount/i);
@@ -69,9 +93,17 @@ describe('SponsorshipForm', () => {
     const mockSubmit = jest.fn();
     const mockCancel = jest.fn();
 
-    render(<SponsorshipForm onSubmit={mockSubmit} onCancel={mockCancel} childId={1} />);
+    render(
+      <SponsorshipForm
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        childId={1}
+      />
+    );
 
-    const amountField = screen.getByLabelText(/monthly amount/i) as HTMLInputElement;
+    const amountField = screen.getByLabelText(
+      /monthly amount/i
+    ) as HTMLInputElement;
     expect(amountField.value).toBe('100');
   });
 
@@ -80,7 +112,13 @@ describe('SponsorshipForm', () => {
     const mockCancel = jest.fn();
     const user = userEvent.setup();
 
-    render(<SponsorshipForm onSubmit={mockSubmit} onCancel={mockCancel} childId={1} />);
+    render(
+      <SponsorshipForm
+        onSubmit={mockSubmit}
+        onCancel={mockCancel}
+        childId={1}
+      />
+    );
 
     // Explicitly set amount to 0
     const amountField = screen.getByLabelText(/monthly amount/i);

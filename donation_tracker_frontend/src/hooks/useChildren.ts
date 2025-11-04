@@ -27,57 +27,62 @@ export const useChildren = (): UseChildrenReturn => {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
+  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(
+    null
+  );
 
-  const fetchChildren = useCallback(async (options: UseChildrenOptions = {}) => {
-    setLoading(true);
-    setError(null);
+  const fetchChildren = useCallback(
+    async (options: UseChildrenOptions = {}) => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const params: Record<string, unknown> = {};
+      try {
+        const params: Record<string, unknown> = {};
 
-      if (options.includeSponsorship) {
-        params.include_sponsorships = true;
-      }
-      if (options.includeDiscarded) {
-        params.include_discarded = 'true';
-      }
-      if (options.page) {
-        params.page = options.page;
-      }
-      if (options.perPage) {
-        params.per_page = options.perPage;
-      }
-      if (options.search) {
-        params.q = { name_cont: options.search };
-      }
-
-      const response = await apiClient.get('/api/children', { params });
-      setChildren(response.data.children);
-
-      if (response.data.meta) {
-        setPaginationMeta(response.data.meta);
-      }
-
-      // Build sponsorship map
-      const sponsorshipMap = new Map<number, Sponsorship[]>();
-      response.data.children.forEach(
-        (child: Child & { sponsorships?: Sponsorship[] }) => {
-          if (child.sponsorships) {
-            sponsorshipMap.set(child.id, child.sponsorships);
-          }
+        if (options.includeSponsorship) {
+          params.include_sponsorships = true;
         }
-      );
-      setSponsorships(sponsorshipMap);
-    } catch (err: any) {
-      const errorMessage =
-        err.response?.data?.error || 'Failed to fetch children';
-      setError(errorMessage);
-      console.error('Failed to fetch children:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+        if (options.includeDiscarded) {
+          params.include_discarded = 'true';
+        }
+        if (options.page) {
+          params.page = options.page;
+        }
+        if (options.perPage) {
+          params.per_page = options.perPage;
+        }
+        if (options.search) {
+          params.q = { name_cont: options.search };
+        }
+
+        const response = await apiClient.get('/api/children', { params });
+        setChildren(response.data.children);
+
+        if (response.data.meta) {
+          setPaginationMeta(response.data.meta);
+        }
+
+        // Build sponsorship map
+        const sponsorshipMap = new Map<number, Sponsorship[]>();
+        response.data.children.forEach(
+          (child: Child & { sponsorships?: Sponsorship[] }) => {
+            if (child.sponsorships) {
+              sponsorshipMap.set(child.id, child.sponsorships);
+            }
+          }
+        );
+        setSponsorships(sponsorshipMap);
+      } catch (err: any) {
+        const errorMessage =
+          err.response?.data?.error || 'Failed to fetch children';
+        setError(errorMessage);
+        console.error('Failed to fetch children:', err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   return {
     children,

@@ -71,8 +71,18 @@ describe('DonorsPage', () => {
 
   it('renders donor list with fetched data', async () => {
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
+      {
+        id: 2,
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        displayable_email: 'jane@example.com',
+      },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -178,13 +188,23 @@ describe('DonorsPage', () => {
 
   it('renders pagination when multiple pages exist', async () => {
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
     ];
 
     mockedApiClient.get.mockResolvedValue({
       data: {
         donors: mockDonors,
-        meta: { total_count: 25, total_pages: 3, current_page: 1, per_page: 10 },
+        meta: {
+          total_count: 25,
+          total_pages: 3,
+          current_page: 1,
+          per_page: 10,
+        },
       },
     });
 
@@ -225,7 +245,12 @@ describe('DonorsPage', () => {
   it('archives donor when archive is clicked', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -258,7 +283,13 @@ describe('DonorsPage', () => {
   it('restores donor when restore is clicked', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com', discarded_at: '2024-01-01' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+        discarded_at: '2024-01-01',
+      },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -291,8 +322,18 @@ describe('DonorsPage', () => {
   it('shows merge button when 2 or more donors selected', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
+      {
+        id: 2,
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        displayable_email: 'jane@example.com',
+      },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -313,7 +354,9 @@ describe('DonorsPage', () => {
     });
 
     // Merge button should not be visible initially
-    expect(screen.queryByRole('button', { name: /merge/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /merge/i })
+    ).not.toBeInTheDocument();
 
     // Get donor checkboxes (skip "Show Archived" checkbox at index 0)
     const checkboxes = screen.getAllByRole('checkbox');
@@ -323,7 +366,9 @@ describe('DonorsPage', () => {
     await user.click(donorCheckboxes[0]);
 
     // Still no merge button with only 1 selected
-    expect(screen.queryByRole('button', { name: /merge/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /merge/i })
+    ).not.toBeInTheDocument();
 
     // Select second donor checkbox
     await user.click(donorCheckboxes[1]);
@@ -335,8 +380,18 @@ describe('DonorsPage', () => {
   it('opens merge modal when merge button clicked', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
+      {
+        id: 2,
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        displayable_email: 'jane@example.com',
+      },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -373,8 +428,18 @@ describe('DonorsPage', () => {
   it('merges donors when merge confirmed', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
+      {
+        id: 2,
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        displayable_email: 'jane@example.com',
+      },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -408,7 +473,9 @@ describe('DonorsPage', () => {
     await user.click(mergeButton);
 
     // Click confirm button in modal
-    const confirmButton = screen.getByRole('button', { name: /confirm merge/i });
+    const confirmButton = screen.getByRole('button', {
+      name: /confirm merge/i,
+    });
     await user.click(confirmButton);
 
     // mergeDonors should be called with selected IDs
@@ -423,7 +490,12 @@ describe('DonorsPage', () => {
   it('passes donor to DonorForm when edit button clicked', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -457,7 +529,12 @@ describe('DonorsPage', () => {
   it('clears editing state when Cancel button is clicked', async () => {
     const user = userEvent.setup({ delay: null });
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
     ];
 
     mockedApiClient.get.mockResolvedValue({
@@ -490,17 +567,34 @@ describe('DonorsPage', () => {
 
     // Verify form returned to add mode
     expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /cancel/i })
+    ).not.toBeInTheDocument();
   });
 
   it('refreshes donor list after successful form submission', async () => {
     const user = userEvent.setup({ delay: null });
     const initialDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
     ];
     const updatedDonors = [
-      { id: 2, name: 'New Donor', email: 'new@example.com', displayable_email: 'new@example.com' },
-      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      {
+        id: 2,
+        name: 'New Donor',
+        email: 'new@example.com',
+        displayable_email: 'new@example.com',
+      },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
     ];
 
     let callCount = 0;
@@ -511,7 +605,12 @@ describe('DonorsPage', () => {
         return Promise.resolve({
           data: {
             donors: initialDonors,
-            meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 10 },
+            meta: {
+              total_count: 1,
+              total_pages: 1,
+              current_page: 1,
+              per_page: 10,
+            },
           },
         });
       }
@@ -519,14 +618,24 @@ describe('DonorsPage', () => {
       return Promise.resolve({
         data: {
           donors: updatedDonors,
-          meta: { total_count: 2, total_pages: 1, current_page: 1, per_page: 10 },
+          meta: {
+            total_count: 2,
+            total_pages: 1,
+            current_page: 1,
+            per_page: 10,
+          },
         },
       });
     });
 
     mockedApiClient.post.mockResolvedValue({
       status: 201,
-      data: { id: 2, name: 'New Donor', email: 'new@example.com', displayable_email: 'new@example.com' },
+      data: {
+        id: 2,
+        name: 'New Donor',
+        email: 'new@example.com',
+        displayable_email: 'new@example.com',
+      },
     });
 
     render(
@@ -556,13 +665,23 @@ describe('DonorsPage', () => {
     it('shows error snackbar when archive fails with 422', async () => {
       const user = userEvent.setup({ delay: null });
       const mockDonors = [
-        { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+        {
+          id: 1,
+          name: 'John Doe',
+          email: 'john@example.com',
+          displayable_email: 'john@example.com',
+        },
       ];
 
       mockedApiClient.get.mockResolvedValue({
         data: {
           donors: mockDonors,
-          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 10 },
+          meta: {
+            total_count: 1,
+            total_pages: 1,
+            current_page: 1,
+            per_page: 10,
+          },
         },
       });
 
@@ -589,20 +708,32 @@ describe('DonorsPage', () => {
 
       // Error snackbar should appear with message
       await waitFor(() => {
-        expect(screen.getByText('Cannot archive donor with active sponsorships')).toBeInTheDocument();
+        expect(
+          screen.getByText('Cannot archive donor with active sponsorships')
+        ).toBeInTheDocument();
       });
     });
 
     it('displays generic error message when API error has no details', async () => {
       const user = userEvent.setup({ delay: null });
       const mockDonors = [
-        { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+        {
+          id: 1,
+          name: 'John Doe',
+          email: 'john@example.com',
+          displayable_email: 'john@example.com',
+        },
       ];
 
       mockedApiClient.get.mockResolvedValue({
         data: {
           donors: mockDonors,
-          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 10 },
+          meta: {
+            total_count: 1,
+            total_pages: 1,
+            current_page: 1,
+            per_page: 10,
+          },
         },
       });
 
@@ -636,13 +767,23 @@ describe('DonorsPage', () => {
     it('error snackbar closes when user clicks close button', async () => {
       const user = userEvent.setup({ delay: null });
       const mockDonors = [
-        { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+        {
+          id: 1,
+          name: 'John Doe',
+          email: 'john@example.com',
+          displayable_email: 'john@example.com',
+        },
       ];
 
       mockedApiClient.get.mockResolvedValue({
         data: {
           donors: mockDonors,
-          meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 10 },
+          meta: {
+            total_count: 1,
+            total_pages: 1,
+            current_page: 1,
+            per_page: 10,
+          },
         },
       });
 
@@ -669,7 +810,9 @@ describe('DonorsPage', () => {
 
       // Wait for error to appear
       await waitFor(() => {
-        expect(screen.getByText('Cannot archive donor with active sponsorships')).toBeInTheDocument();
+        expect(
+          screen.getByText('Cannot archive donor with active sponsorships')
+        ).toBeInTheDocument();
       });
 
       // Click close button on alert
@@ -678,7 +821,9 @@ describe('DonorsPage', () => {
 
       // Error should be gone
       await waitFor(() => {
-        expect(screen.queryByText('Cannot archive donor with active sponsorships')).not.toBeInTheDocument();
+        expect(
+          screen.queryByText('Cannot archive donor with active sponsorships')
+        ).not.toBeInTheDocument();
       });
     });
   });

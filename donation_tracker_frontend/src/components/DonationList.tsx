@@ -98,7 +98,9 @@ const DonationList: React.FC<DonationListProps> = ({
     } else if (!value && onDateRangeChange) {
       // Handle clearing the date
       onDateRangeChange(
-        startDate && startDate.isValid() ? startDate.format('YYYY-MM-DD') : null,
+        startDate && startDate.isValid()
+          ? startDate.format('YYYY-MM-DD')
+          : null,
         null
       );
     }
@@ -190,7 +192,8 @@ const DonationList: React.FC<DonationListProps> = ({
                     {formatCurrency(Number(donation.amount))}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {donation.date} - {donation.donor_name || `Donor #${donation.donor_id}`}
+                    {donation.date} -{' '}
+                    {donation.donor_name || `Donor #${donation.donor_id}`}
                     {` - ${donation.project_title || 'General Donation'}`}
                   </Typography>
                 </CardContent>

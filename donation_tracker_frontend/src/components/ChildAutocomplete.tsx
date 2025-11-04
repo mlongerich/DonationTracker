@@ -25,7 +25,8 @@ const ChildAutocomplete: React.FC<ChildAutocompleteProps> = ({
   const [searchInput, setSearchInput] = useState('');
   const debouncedSearchInput = useDebouncedValue(searchInput, 300);
   const [loading, setLoading] = useState(false);
-  const isTyping = searchInput.trim() !== '' && searchInput !== debouncedSearchInput;
+  const isTyping =
+    searchInput.trim() !== '' && searchInput !== debouncedSearchInput;
 
   // Search for children when debounced input changes
   useEffect(() => {
@@ -85,7 +86,9 @@ const ChildAutocomplete: React.FC<ChildAutocompleteProps> = ({
               ...params.InputProps,
               endAdornment: (
                 <>
-                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {loading ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : null}
                   {params.InputProps.endAdornment}
                 </>
               ),

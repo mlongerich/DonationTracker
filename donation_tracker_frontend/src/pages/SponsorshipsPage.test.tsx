@@ -27,7 +27,9 @@ describe('SponsorshipsPage', () => {
       },
     });
     render(<SponsorshipsPage />);
-    expect(screen.getByRole('heading', { name: /sponsorships/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /sponsorships/i })
+    ).toBeInTheDocument();
   });
 
   it('fetches sponsorships on mount', async () => {
@@ -53,7 +55,13 @@ describe('SponsorshipsPage', () => {
     mockedApiClient.get.mockResolvedValue({
       data: {
         sponsorships: [
-          { id: 1, donor_name: 'John Doe', child_name: 'Alice', monthly_amount: 50, active: true },
+          {
+            id: 1,
+            donor_name: 'John Doe',
+            child_name: 'Alice',
+            monthly_amount: 50,
+            active: true,
+          },
         ],
         meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
       },
@@ -70,7 +78,13 @@ describe('SponsorshipsPage', () => {
     mockedApiClient.get.mockResolvedValue({
       data: {
         sponsorships: [
-          { id: 1, donor_name: 'John Doe', child_name: 'Alice', monthly_amount: 50, active: true },
+          {
+            id: 1,
+            donor_name: 'John Doe',
+            child_name: 'Alice',
+            monthly_amount: 50,
+            active: true,
+          },
         ],
         meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 25 },
       },
@@ -87,7 +101,9 @@ describe('SponsorshipsPage', () => {
     await user.click(endButton);
 
     await waitFor(() => {
-      expect(mockedApiClient.delete).toHaveBeenCalledWith('/api/sponsorships/1');
+      expect(mockedApiClient.delete).toHaveBeenCalledWith(
+        '/api/sponsorships/1'
+      );
     });
   });
 
@@ -110,7 +126,9 @@ describe('SponsorshipsPage', () => {
     render(<SponsorshipsPage />);
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /create new sponsorship/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: /create new sponsorship/i })
+      ).toBeInTheDocument();
     });
   });
 
@@ -138,7 +156,9 @@ describe('SponsorshipsPage', () => {
     // Trigger error by attempting to create sponsorship (would need form interaction in real test)
     // For this test, we verify the error display mechanism exists
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /sponsorships/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: /sponsorships/i })
+      ).toBeInTheDocument();
     });
   });
 
@@ -153,7 +173,9 @@ describe('SponsorshipsPage', () => {
     render(<SponsorshipsPage />);
 
     await waitFor(() => {
-      expect(screen.getByPlaceholderText(/search donor or child/i)).toBeInTheDocument();
+      expect(
+        screen.getByPlaceholderText(/search donor or child/i)
+      ).toBeInTheDocument();
     });
   });
 
@@ -169,7 +191,9 @@ describe('SponsorshipsPage', () => {
 
     render(<SponsorshipsPage />);
 
-    const searchInput = await screen.findByPlaceholderText(/search donor or child/i);
+    const searchInput = await screen.findByPlaceholderText(
+      /search donor or child/i
+    );
     await user.type(searchInput, 'John');
 
     await waitFor(() => {
@@ -194,7 +218,9 @@ describe('SponsorshipsPage', () => {
     render(<SponsorshipsPage />);
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/show ended sponsorships/i)).toBeInTheDocument();
+      expect(
+        screen.getByLabelText(/show ended sponsorships/i)
+      ).toBeInTheDocument();
     });
   });
 

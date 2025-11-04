@@ -8,14 +8,21 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import ProjectForm from '../components/ProjectForm';
 import ProjectList from '../components/ProjectList';
-import apiClient, { fetchProjects, createProject, updateProject, deleteProject } from '../api/client';
+import apiClient, {
+  fetchProjects,
+  createProject,
+  updateProject,
+  deleteProject,
+} from '../api/client';
 import { Project } from '../types';
 
 const ProjectsPage: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formKey, setFormKey] = useState(0);
-  const [success, setSuccess] = useState<'created' | 'updated' | 'deleted' | 'archived' | 'restored' | null>(null);
+  const [success, setSuccess] = useState<
+    'created' | 'updated' | 'deleted' | 'archived' | 'restored' | null
+  >(null);
   const [showArchived, setShowArchived] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,7 +62,7 @@ const ProjectsPage: React.FC = () => {
       }
       const response = await apiClient.get('/api/projects', { params });
       setProjects(response.data.projects);
-      setFormKey(prev => prev + 1); // Reset form by changing key
+      setFormKey((prev) => prev + 1); // Reset form by changing key
 
       // Auto-dismiss notification after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
@@ -94,7 +101,9 @@ const ProjectsPage: React.FC = () => {
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
       if (err.response?.status === 422) {
-        setError(err.response.data.errors?.join(', ') || 'Failed to archive project');
+        setError(
+          err.response.data.errors?.join(', ') || 'Failed to archive project'
+        );
       } else {
         setError('Failed to archive project');
       }

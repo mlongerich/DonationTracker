@@ -3,8 +3,18 @@ import DonorMergeModal from './DonorMergeModal';
 
 describe('DonorMergeModal', () => {
   const mockDonors = [
-    { id: 1, name: 'Alice Smith', email: 'alice@example.com', displayable_email: 'alice@example.com' },
-    { id: 2, name: 'Alice S.', email: 'alice.smith@example.com', displayable_email: 'alice.smith@example.com' },
+    {
+      id: 1,
+      name: 'Alice Smith',
+      email: 'alice@example.com',
+      displayable_email: 'alice@example.com',
+    },
+    {
+      id: 2,
+      name: 'Alice S.',
+      email: 'alice.smith@example.com',
+      displayable_email: 'alice.smith@example.com',
+    },
   ];
 
   it('displays donor names side by side', () => {

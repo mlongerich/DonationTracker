@@ -31,9 +31,7 @@ describe('DonorAutocomplete', () => {
   });
 
   it('searches donors after typing with 300ms debounce', async () => {
-    const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-    ];
+    const mockDonors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
 
     (apiClient.get as jest.Mock).mockResolvedValue({
       data: { donors: mockDonors },
@@ -61,7 +59,10 @@ describe('DonorAutocomplete', () => {
 
   it('displays loading indicator while searching', async () => {
     (apiClient.get as jest.Mock).mockImplementation(
-      () => new Promise((resolve) => setTimeout(() => resolve({ data: { donors: [] } }), 1000))
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ data: { donors: [] } }), 1000)
+        )
     );
 
     const user = userEvent.setup();
@@ -77,8 +78,18 @@ describe('DonorAutocomplete', () => {
 
   it('uses displayable_email from backend presenter', async () => {
     const donorsFromBackend = [
-      { id: 1, name: 'John Doe', email: 'john@mailinator.com', displayable_email: null },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@mailinator.com',
+        displayable_email: null,
+      },
+      {
+        id: 2,
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        displayable_email: 'jane@example.com',
+      },
     ];
 
     (apiClient.get as jest.Mock).mockResolvedValue({
@@ -98,7 +109,7 @@ describe('DonorAutocomplete', () => {
 
     await waitFor(() => {
       const options = screen.getAllByRole('option');
-      const allText = options.map(opt => opt.textContent).join(' ');
+      const allText = options.map((opt) => opt.textContent).join(' ');
       expect(allText).toContain('John Doe (No email provided)');
       expect(allText).toContain('Jane Smith (jane@example.com)');
     });
@@ -106,11 +117,7 @@ describe('DonorAutocomplete', () => {
 
   it('renders with small size', () => {
     render(
-      <DonorAutocomplete
-        value={null}
-        onChange={mockOnChange}
-        size="small"
-      />
+      <DonorAutocomplete value={null} onChange={mockOnChange} size="small" />
     );
 
     const input = screen.getByLabelText(/donor/i);
@@ -119,11 +126,7 @@ describe('DonorAutocomplete', () => {
 
   it('marks field as required when required prop is true', () => {
     render(
-      <DonorAutocomplete
-        value={null}
-        onChange={mockOnChange}
-        required={true}
-      />
+      <DonorAutocomplete value={null} onChange={mockOnChange} required={true} />
     );
 
     const input = screen.getByLabelText(/donor/i);

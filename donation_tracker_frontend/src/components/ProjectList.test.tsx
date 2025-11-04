@@ -272,7 +272,9 @@ describe('ProjectList', () => {
 
     render(<ProjectList projects={projects} onArchive={mockOnArchive} />);
 
-    expect(screen.getByRole('button', { name: /archive/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /archive/i })
+    ).toBeInTheDocument();
   });
 
   it('shows Restore button for archived projects when onRestore provided', () => {
@@ -292,7 +294,9 @@ describe('ProjectList', () => {
 
     render(<ProjectList projects={projects} onRestore={mockOnRestore} />);
 
-    expect(screen.getByRole('button', { name: /restore/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /restore/i })
+    ).toBeInTheDocument();
   });
 
   it('shows Delete button (not Archive) when project is deletable', () => {
@@ -320,7 +324,9 @@ describe('ProjectList', () => {
     );
 
     expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /archive/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /archive/i })
+    ).not.toBeInTheDocument();
   });
 
   it('shows Archive button (not Delete) when project is not deletable', () => {
@@ -347,7 +353,11 @@ describe('ProjectList', () => {
       />
     );
 
-    expect(screen.getByRole('button', { name: /archive/i })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /delete/i })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /archive/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /delete/i })
+    ).not.toBeInTheDocument();
   });
 });

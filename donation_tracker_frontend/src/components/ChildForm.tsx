@@ -7,10 +7,7 @@ interface ChildFormProps {
   initialData?: ChildFormData;
 }
 
-const ChildForm: React.FC<ChildFormProps> = ({
-  onSubmit,
-  initialData,
-}) => {
+const ChildForm: React.FC<ChildFormProps> = ({ onSubmit, initialData }) => {
   const [name, setName] = useState(initialData?.name || '');
   const [error, setError] = useState('');
 

@@ -20,7 +20,13 @@ interface ProjectListProps {
   onRestore?: (id: number) => void;
 }
 
-const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDelete, onArchive, onRestore }) => {
+const ProjectList: React.FC<ProjectListProps> = ({
+  projects,
+  onEdit,
+  onDelete,
+  onArchive,
+  onRestore,
+}) => {
   if (projects.length === 0) {
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
@@ -34,7 +40,13 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDelete, o
       {projects.map((project) => (
         <Card key={project.id} variant="outlined">
           <CardContent>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'start',
+              }}
+            >
               <Typography variant="subtitle1">{project.title}</Typography>
               {!project.system && (
                 <Box sx={{ display: 'flex', gap: 0.5 }}>
@@ -58,17 +70,19 @@ const ProjectList: React.FC<ProjectListProps> = ({ projects, onEdit, onDelete, o
                       </IconButton>
                     </Tooltip>
                   )}
-                  {!project.can_be_deleted && onArchive && !project.discarded_at && (
-                    <Tooltip title="Archive project">
-                      <IconButton
-                        aria-label="archive"
-                        size="small"
-                        onClick={() => onArchive(project.id)}
-                      >
-                        <ArchiveIcon />
-                      </IconButton>
-                    </Tooltip>
-                  )}
+                  {!project.can_be_deleted &&
+                    onArchive &&
+                    !project.discarded_at && (
+                      <Tooltip title="Archive project">
+                        <IconButton
+                          aria-label="archive"
+                          size="small"
+                          onClick={() => onArchive(project.id)}
+                        >
+                          <ArchiveIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                   {onRestore && project.discarded_at && (
                     <Tooltip title="Restore project">
                       <IconButton

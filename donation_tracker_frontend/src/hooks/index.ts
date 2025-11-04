@@ -7,7 +7,4 @@ export type {
   UseRansackFiltersReturn,
 } from './useRansackFilters';
 export { useChildren } from './useChildren';
-export type {
-  UseChildrenOptions,
-  UseChildrenReturn,
-} from './useChildren';
+export type { UseChildrenOptions, UseChildrenReturn } from './useChildren';

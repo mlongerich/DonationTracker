@@ -38,7 +38,7 @@ const ChildList: React.FC<ChildListProps> = ({
 }) => {
   const getActiveSponsors = (childId: number): Sponsorship[] => {
     const childSponsorships = sponsorships?.get(childId) || [];
-    return childSponsorships.filter(s => s.active);
+    return childSponsorships.filter((s) => s.active);
   };
   if (children.length === 0) {
     return (
@@ -53,9 +53,10 @@ const ChildList: React.FC<ChildListProps> = ({
       {children.map((child) => {
         const isArchived = !!child.discarded_at;
         const activeSponsors = getActiveSponsors(child.id);
-        const sponsorshipText = activeSponsors.length > 0
-          ? `Sponsored by: ${activeSponsors.map(s => `${s.donor_name} (${formatCurrency(Number(s.monthly_amount))}/mo)`).join(', ')}`
-          : 'No active sponsors';
+        const sponsorshipText =
+          activeSponsors.length > 0
+            ? `Sponsored by: ${activeSponsors.map((s) => `${s.donor_name} (${formatCurrency(Number(s.monthly_amount))}/mo)`).join(', ')}`
+            : 'No active sponsors';
 
         return (
           <Card

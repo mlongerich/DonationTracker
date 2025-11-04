@@ -1,5 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Typography, Box, TextField, Checkbox, FormControlLabel, Pagination, Button, Alert, Snackbar } from '@mui/material';
+import {
+  Typography,
+  Box,
+  TextField,
+  Checkbox,
+  FormControlLabel,
+  Pagination,
+  Button,
+  Alert,
+  Snackbar,
+} from '@mui/material';
 import apiClient, { mergeDonors } from '../api/client';
 import DonorForm from '../components/DonorForm';
 import DonorList from '../components/DonorList';
@@ -64,7 +74,9 @@ const DonorsPage = () => {
       setError(null);
     } catch (err: any) {
       if (err.response?.status === 422) {
-        setError(err.response.data.errors?.join(', ') || 'Failed to archive donor');
+        setError(
+          err.response.data.errors?.join(', ') || 'Failed to archive donor'
+        );
       } else {
         setError('Failed to archive donor');
       }

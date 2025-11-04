@@ -37,9 +37,12 @@ describe('ProjectOrChildAutocomplete', () => {
     expect(searchProjectOrChild).not.toHaveBeenCalled();
 
     // Should call API after 300ms debounce
-    await waitFor(() => expect(searchProjectOrChild).toHaveBeenCalledWith('test'), {
-      timeout: 400,
-    });
+    await waitFor(
+      () => expect(searchProjectOrChild).toHaveBeenCalledWith('test'),
+      {
+        timeout: 400,
+      }
+    );
   });
 
   it('fetches projects when typing', async () => {
@@ -49,7 +52,7 @@ describe('ProjectOrChildAutocomplete', () => {
         { id: 1, title: 'Project Alpha', project_type: 'general' },
         { id: 2, title: 'Project Beta', project_type: 'general' },
       ],
-      children: []
+      children: [],
     };
 
     (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
@@ -59,9 +62,12 @@ describe('ProjectOrChildAutocomplete', () => {
     const searchField = screen.getByRole('combobox');
     await user.type(searchField, 'project');
 
-    await waitFor(() => expect(searchProjectOrChild).toHaveBeenCalledWith('project'), {
-      timeout: 400,
-    });
+    await waitFor(
+      () => expect(searchProjectOrChild).toHaveBeenCalledWith('project'),
+      {
+        timeout: 400,
+      }
+    );
   });
 
   it('fetches children when typing', async () => {
@@ -71,7 +77,7 @@ describe('ProjectOrChildAutocomplete', () => {
       children: [
         { id: 1, name: 'Maria Santos' },
         { id: 2, name: 'Juan Rodriguez' },
-      ]
+      ],
     };
 
     (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
@@ -81,8 +87,11 @@ describe('ProjectOrChildAutocomplete', () => {
     const searchField = screen.getByRole('combobox');
     await user.type(searchField, 'maria');
 
-    await waitFor(() => expect(searchProjectOrChild).toHaveBeenCalledWith('maria'), {
-      timeout: 400,
-    });
+    await waitFor(
+      () => expect(searchProjectOrChild).toHaveBeenCalledWith('maria'),
+      {
+        timeout: 400,
+      }
+    );
   });
 });

@@ -10,7 +10,9 @@ describe('Navigation', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByRole('link', { name: /donations/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /donations/i })
+    ).toBeInTheDocument();
   });
 
   it('renders Donors link', () => {
@@ -50,7 +52,9 @@ describe('Navigation', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByRole('link', { name: /sponsorships/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /sponsorships/i })
+    ).toBeInTheDocument();
   });
 
   it('uses Material-UI AppBar component', () => {

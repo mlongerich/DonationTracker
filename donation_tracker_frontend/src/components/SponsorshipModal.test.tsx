@@ -16,10 +16,22 @@ const mockedApiClient = apiClient as jest.Mocked<typeof apiClient>;
 // Mock the DonorAutocomplete component since it's used by SponsorshipForm
 jest.mock('./DonorAutocomplete', () => ({
   __esModule: true,
-  default: ({ onChange, label }: { onChange: (donor: unknown) => void; label: string }) => (
+  default: ({
+    onChange,
+    label,
+  }: {
+    onChange: (donor: unknown) => void;
+    label: string;
+  }) => (
     <input
       aria-label={label}
-      onChange={(e) => onChange(e.target.value ? { id: 1, name: 'Test Donor', email: 'test@example.com' } : null)}
+      onChange={(e) =>
+        onChange(
+          e.target.value
+            ? { id: 1, name: 'Test Donor', email: 'test@example.com' }
+            : null
+        )
+      }
     />
   ),
 }));
@@ -56,7 +68,9 @@ describe('SponsorshipModal', () => {
       />
     );
 
-    expect(screen.queryByText(/add sponsor for maria/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/add sponsor for maria/i)
+    ).not.toBeInTheDocument();
   });
 
   it('calls onClose when cancel button clicked', async () => {
@@ -83,7 +97,9 @@ describe('SponsorshipModal', () => {
     const mockOnSuccess = jest.fn();
     const user = userEvent.setup();
 
-    mockedApiClient.post.mockResolvedValue({ data: { sponsorship: { id: 1 } } });
+    mockedApiClient.post.mockResolvedValue({
+      data: { sponsorship: { id: 1 } },
+    });
 
     render(
       <SponsorshipModal
@@ -126,7 +142,7 @@ describe('SponsorshipModal', () => {
     const user = userEvent.setup();
 
     mockedApiClient.post.mockResolvedValue({
-      data: { sponsorship: { id: 1 } }
+      data: { sponsorship: { id: 1 } },
     });
 
     render(
@@ -163,8 +179,10 @@ describe('SponsorshipModal', () => {
     mockedApiClient.post.mockRejectedValue({
       response: {
         status: 422,
-        data: { errors: ['Sponsorship already exists for this donor and child'] }
-      }
+        data: {
+          errors: ['Sponsorship already exists for this donor and child'],
+        },
+      },
     });
 
     render(
@@ -190,7 +208,9 @@ describe('SponsorshipModal', () => {
     await user.click(submitButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/Sponsorship already exists/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Sponsorship already exists/i)
+      ).toBeInTheDocument();
     });
   });
 });

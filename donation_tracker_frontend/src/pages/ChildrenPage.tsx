@@ -1,4 +1,13 @@
-import { Typography, Box, TextField, FormControlLabel, Checkbox, Alert, Pagination, CircularProgress } from '@mui/material';
+import {
+  Typography,
+  Box,
+  TextField,
+  FormControlLabel,
+  Checkbox,
+  Alert,
+  Pagination,
+  CircularProgress,
+} from '@mui/material';
 import { useState, useEffect } from 'react';
 import apiClient from '../api/client';
 import { Child, ChildFormData } from '../types';
@@ -9,17 +18,14 @@ import { useDebouncedValue, usePagination, useChildren } from '../hooks';
 
 const ChildrenPage = () => {
   const [editingChild, setEditingChild] = useState<Child | null>(null);
-  const [selectedChildForSponsorship, setSelectedChildForSponsorship] = useState<Child | null>(null);
+  const [selectedChildForSponsorship, setSelectedChildForSponsorship] =
+    useState<Child | null>(null);
   const [showArchived, setShowArchived] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
 
-  const {
-    currentPage,
-    handlePageChange,
-    resetToFirstPage,
-  } = usePagination();
+  const { currentPage, handlePageChange, resetToFirstPage } = usePagination();
 
   const {
     children,
@@ -83,7 +89,9 @@ const ChildrenPage = () => {
       setLocalError(null);
     } catch (err: any) {
       if (err.response?.status === 422) {
-        setLocalError(err.response.data.errors?.join(', ') || 'Failed to archive child');
+        setLocalError(
+          err.response.data.errors?.join(', ') || 'Failed to archive child'
+        );
       } else {
         setLocalError('Failed to archive child');
       }
@@ -114,7 +122,11 @@ const ChildrenPage = () => {
       </Typography>
 
       {displayError && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setLocalError(null)}>
+        <Alert
+          severity="error"
+          sx={{ mb: 2 }}
+          onClose={() => setLocalError(null)}
+        >
           {displayError}
         </Alert>
       )}
@@ -129,9 +141,7 @@ const ChildrenPage = () => {
             initialData={{ name: editingChild.name }}
           />
         ) : (
-          <ChildForm
-            onSubmit={handleCreate}
-          />
+          <ChildForm onSubmit={handleCreate} />
         )}
       </Box>
 

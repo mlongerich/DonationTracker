@@ -17,15 +17,18 @@ export interface UseRansackFiltersReturn {
 export function useRansackFilters(): UseRansackFiltersReturn {
   const [filters, setFilters] = useState<RansackFilter>({});
 
-  const setFilter = useCallback((key: string, value: string | number | null) => {
-    setFilters((prev) => {
-      if (value === null || value === '') {
-        const { [key]: _, ...rest } = prev;
-        return rest;
-      }
-      return { ...prev, [key]: value };
-    });
-  }, []);
+  const setFilter = useCallback(
+    (key: string, value: string | number | null) => {
+      setFilters((prev) => {
+        if (value === null || value === '') {
+          const { [key]: _, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, [key]: value };
+      });
+    },
+    []
+  );
 
   const clearFilters = useCallback(() => {
     setFilters({});

@@ -35,13 +35,16 @@ const ProjectOrChildAutocomplete = ({
       if (debouncedInputValue.trim()) {
         setLoading(true);
         try {
-          const { projects, children } = await searchProjectOrChild(debouncedInputValue);
+          const { projects, children } =
+            await searchProjectOrChild(debouncedInputValue);
 
-          const projectOptions: Option[] = (projects || []).map((p: Project) => ({
-            id: p.id,
-            name: p.title,
-            type: 'project' as const,
-          }));
+          const projectOptions: Option[] = (projects || []).map(
+            (p: Project) => ({
+              id: p.id,
+              name: p.title,
+              type: 'project' as const,
+            })
+          );
           const childOptions: Option[] = (children || []).map((c: Child) => ({
             id: c.id,
             name: c.name,

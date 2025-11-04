@@ -25,13 +25,22 @@ describe('App', () => {
     jest.clearAllMocks();
     // Mock API calls to prevent errors
     mockedApiClient.get.mockImplementation((url: string) => {
-      if (url === '/api/donations' || url === '/api/donors' || url === '/api/projects') {
+      if (
+        url === '/api/donations' ||
+        url === '/api/donors' ||
+        url === '/api/projects'
+      ) {
         return Promise.resolve({
           data: {
             donations: [],
             donors: [],
             projects: [],
-            meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 25 },
+            meta: {
+              total_count: 0,
+              total_pages: 0,
+              current_page: 1,
+              per_page: 25,
+            },
           },
         });
       }
@@ -57,7 +66,9 @@ describe('App', () => {
     render(<App />);
 
     // Navigation should have links
-    expect(screen.getByRole('link', { name: /donations/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: /donations/i })
+    ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /donors/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /projects/i })).toBeInTheDocument();
   });

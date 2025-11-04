@@ -16,6 +16,6 @@ describe('parseCurrency', () => {
   });
 
   it('converts "25.50" string to 2550 cents', () => {
-    expect(parseCurrency("25.50")).toBe(2550);
+    expect(parseCurrency('25.50')).toBe(2550);
   });
 });

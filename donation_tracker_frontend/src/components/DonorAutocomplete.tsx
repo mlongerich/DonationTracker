@@ -27,7 +27,8 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
   const [searchInput, setSearchInput] = useState('');
   const debouncedSearchInput = useDebouncedValue(searchInput, 300);
   const [loading, setLoading] = useState(false);
-  const isTyping = searchInput.trim() !== '' && searchInput !== debouncedSearchInput;
+  const isTyping =
+    searchInput.trim() !== '' && searchInput !== debouncedSearchInput;
 
   // Search for donors when debounced input changes
   useEffect(() => {
@@ -94,7 +95,9 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
               ...params.InputProps,
               endAdornment: (
                 <>
-                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {loading ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : null}
                   {params.InputProps.endAdornment}
                 </>
               ),

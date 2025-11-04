@@ -75,8 +75,24 @@ describe('DonationsPage', () => {
 
   it('renders donation list with fetched data', async () => {
     const mockDonations = [
-      { id: 1, amount: 100, donor_name: 'John Doe', project_title: 'Project A', date: '2024-01-01', donor_id: 1, project_id: 1 },
-      { id: 2, amount: 200, donor_name: 'Jane Smith', project_title: 'Project B', date: '2024-01-02', donor_id: 2, project_id: 2 },
+      {
+        id: 1,
+        amount: 100,
+        donor_name: 'John Doe',
+        project_title: 'Project A',
+        date: '2024-01-01',
+        donor_id: 1,
+        project_id: 1,
+      },
+      {
+        id: 2,
+        amount: 200,
+        donor_name: 'Jane Smith',
+        project_title: 'Project B',
+        date: '2024-01-02',
+        donor_id: 2,
+        project_id: 2,
+      },
     ];
 
     // Mock donations API call
@@ -85,7 +101,12 @@ describe('DonationsPage', () => {
         return Promise.resolve({
           data: {
             donations: mockDonations,
-            meta: { total_count: 2, total_pages: 1, current_page: 1, per_page: 10 },
+            meta: {
+              total_count: 2,
+              total_pages: 1,
+              current_page: 1,
+              per_page: 10,
+            },
           },
         });
       }
@@ -94,7 +115,12 @@ describe('DonationsPage', () => {
         return Promise.resolve({
           data: {
             donors: [],
-            meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+            meta: {
+              total_count: 0,
+              total_pages: 0,
+              current_page: 1,
+              per_page: 10,
+            },
           },
         });
       }
@@ -117,7 +143,15 @@ describe('DonationsPage', () => {
 
   it('renders pagination when multiple pages exist', async () => {
     const mockDonations = [
-      { id: 1, amount: 100, donor_name: 'John Doe', project_title: 'Project A', date: '2024-01-01', donor_id: 1, project_id: 1 },
+      {
+        id: 1,
+        amount: 100,
+        donor_name: 'John Doe',
+        project_title: 'Project A',
+        date: '2024-01-01',
+        donor_id: 1,
+        project_id: 1,
+      },
     ];
 
     mockedApiClient.get.mockImplementation((url) => {
@@ -125,7 +159,12 @@ describe('DonationsPage', () => {
         return Promise.resolve({
           data: {
             donations: mockDonations,
-            meta: { total_count: 25, total_pages: 3, current_page: 1, per_page: 10 },
+            meta: {
+              total_count: 25,
+              total_pages: 3,
+              current_page: 1,
+              per_page: 10,
+            },
           },
         });
       }
@@ -133,7 +172,12 @@ describe('DonationsPage', () => {
         return Promise.resolve({
           data: {
             donors: [],
-            meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+            meta: {
+              total_count: 0,
+              total_pages: 0,
+              current_page: 1,
+              per_page: 10,
+            },
           },
         });
       }
@@ -182,7 +226,12 @@ describe('DonationsPage', () => {
         return Promise.resolve({
           data: {
             donations: [],
-            meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+            meta: {
+              total_count: 0,
+              total_pages: 0,
+              current_page: 1,
+              per_page: 10,
+            },
           },
         });
       }
@@ -190,7 +239,12 @@ describe('DonationsPage', () => {
         return Promise.resolve({
           data: {
             donors: [],
-            meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+            meta: {
+              total_count: 0,
+              total_pages: 0,
+              current_page: 1,
+              per_page: 10,
+            },
           },
         });
       }
@@ -207,14 +261,24 @@ describe('DonationsPage', () => {
 
     // DonationForm should have amount field and create button
     expect(screen.getByLabelText(/amount/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /create donation/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /create donation/i })
+    ).toBeInTheDocument();
     // Date and Donor fields exist (may appear multiple times due to filters)
     expect(screen.getAllByLabelText(/donor/i).length).toBeGreaterThan(0);
   });
 
   it('refreshes donation list after successful form submission', async () => {
     const initialDonations = [
-      { id: 1, amount: 100, donor_name: 'John Doe', project_title: 'Project A', date: '2024-01-01', donor_id: 1, project_id: 1 },
+      {
+        id: 1,
+        amount: 100,
+        donor_name: 'John Doe',
+        project_title: 'Project A',
+        date: '2024-01-01',
+        donor_id: 1,
+        project_id: 1,
+      },
     ];
 
     let getDonationsCallCount = 0;
@@ -224,7 +288,12 @@ describe('DonationsPage', () => {
         return Promise.resolve({
           data: {
             donations: initialDonations,
-            meta: { total_count: 1, total_pages: 1, current_page: 1, per_page: 10 },
+            meta: {
+              total_count: 1,
+              total_pages: 1,
+              current_page: 1,
+              per_page: 10,
+            },
           },
         });
       }
@@ -232,7 +301,12 @@ describe('DonationsPage', () => {
         return Promise.resolve({
           data: {
             donors: [],
-            meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+            meta: {
+              total_count: 0,
+              total_pages: 0,
+              current_page: 1,
+              per_page: 10,
+            },
           },
         });
       }
@@ -257,7 +331,9 @@ describe('DonationsPage', () => {
     // Verify DonationForm is rendered with onSuccess callback
     // The actual form submission and refresh is covered by E2E tests (donation-entry.cy.ts)
     // This test verifies the page setup is correct
-    expect(screen.getByRole('button', { name: /create donation/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /create donation/i })
+    ).toBeInTheDocument();
   });
 
   it('renders filter controls for date range and donor', async () => {
@@ -266,7 +342,12 @@ describe('DonationsPage', () => {
         return Promise.resolve({
           data: {
             donations: [],
-            meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+            meta: {
+              total_count: 0,
+              total_pages: 0,
+              current_page: 1,
+              per_page: 10,
+            },
           },
         });
       }
@@ -274,7 +355,12 @@ describe('DonationsPage', () => {
         return Promise.resolve({
           data: {
             donors: [],
-            meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+            meta: {
+              total_count: 0,
+              total_pages: 0,
+              current_page: 1,
+              per_page: 10,
+            },
           },
         });
       }
@@ -298,7 +384,9 @@ describe('DonationsPage', () => {
     // Note: Actual filter interaction and functionality is thoroughly tested in donation-filtering.cy.ts
     expect(screen.getAllByLabelText(/start date/i).length).toBeGreaterThan(0);
     expect(screen.getAllByLabelText(/end date/i).length).toBeGreaterThan(0);
-    expect(screen.getByRole('button', { name: /clear filters/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /clear filters/i })
+    ).toBeInTheDocument();
   });
 
   it('filters out null and empty query params before sending to API', async () => {
@@ -309,7 +397,12 @@ describe('DonationsPage', () => {
         return Promise.resolve({
           data: {
             donations: [],
-            meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+            meta: {
+              total_count: 0,
+              total_pages: 0,
+              current_page: 1,
+              per_page: 10,
+            },
           },
         });
       }
@@ -317,7 +410,12 @@ describe('DonationsPage', () => {
         return Promise.resolve({
           data: {
             donors: [],
-            meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+            meta: {
+              total_count: 0,
+              total_pages: 0,
+              current_page: 1,
+              per_page: 10,
+            },
           },
         });
       }

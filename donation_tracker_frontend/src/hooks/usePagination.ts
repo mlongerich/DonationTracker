@@ -24,7 +24,9 @@ export interface UsePaginationReturn {
  */
 export function usePagination(initialPage: number = 1): UsePaginationReturn {
   const [currentPage, setCurrentPage] = useState(initialPage);
-  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
+  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(
+    null
+  );
 
   const handlePageChange = useCallback(
     (_event: React.ChangeEvent<unknown>, page: number) => {

@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, Snackbar, Alert } from '@mui/material';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Snackbar,
+  Alert,
+} from '@mui/material';
 import SponsorshipForm from './SponsorshipForm';
 import { SponsorshipFormData } from '../types';
 import apiClient from '../api/client';
@@ -28,7 +34,8 @@ const SponsorshipModal: React.FC<SponsorshipModalProps> = ({
       onClose();
     } catch (err: any) {
       if (err.response?.status === 422) {
-        const errorMessage = err.response.data.errors?.[0] || 'Validation error';
+        const errorMessage =
+          err.response.data.errors?.[0] || 'Validation error';
         setError(errorMessage);
       } else {
         setError('An unexpected error occurred');
@@ -52,8 +59,16 @@ const SponsorshipModal: React.FC<SponsorshipModalProps> = ({
           />
         </DialogContent>
       </Dialog>
-      <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseError}>
-        <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={handleCloseError}
+      >
+        <Alert
+          onClose={handleCloseError}
+          severity="error"
+          sx={{ width: '100%' }}
+        >
           {error}
         </Alert>
       </Snackbar>

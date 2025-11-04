@@ -15,12 +15,17 @@ describe('SponsorshipList', () => {
       project_title: 'Sponsor Maria',
       monthly_amount: '5000', // 50 dollars = 5000 cents
       start_date: '2025-01-01',
-      active: true
-    }
+      active: true,
+    },
   ];
 
   it('renders table with sponsorship data', () => {
-    render(<SponsorshipList sponsorships={mockSponsorships} onEndSponsorship={jest.fn()} />);
+    render(
+      <SponsorshipList
+        sponsorships={mockSponsorships}
+        onEndSponsorship={jest.fn()}
+      />
+    );
 
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('Maria')).toBeInTheDocument();
@@ -31,7 +36,12 @@ describe('SponsorshipList', () => {
     const mockEndSponsorship = jest.fn();
     const user = userEvent.setup();
 
-    render(<SponsorshipList sponsorships={mockSponsorships} onEndSponsorship={mockEndSponsorship} />);
+    render(
+      <SponsorshipList
+        sponsorships={mockSponsorships}
+        onEndSponsorship={mockEndSponsorship}
+      />
+    );
 
     const endButton = screen.getByRole('button', { name: /end/i });
     await user.click(endButton);
@@ -46,23 +56,32 @@ describe('SponsorshipList', () => {
   });
 
   it('does not show End button for ended sponsorships', () => {
-    const endedSponsorship: Sponsorship[] = [{
-      id: 2,
-      donor_id: 2,
-      donor_name: 'Jane Smith',
-      child_id: 2,
-      child_name: 'Juan',
-      project_id: 2,
-      project_title: 'Sponsor Juan',
-      monthly_amount: '3000', // 30 dollars = 3000 cents
-      start_date: '2025-01-01',
-      end_date: '2025-01-15',
-      active: false
-    }];
+    const endedSponsorship: Sponsorship[] = [
+      {
+        id: 2,
+        donor_id: 2,
+        donor_name: 'Jane Smith',
+        child_id: 2,
+        child_name: 'Juan',
+        project_id: 2,
+        project_title: 'Sponsor Juan',
+        monthly_amount: '3000', // 30 dollars = 3000 cents
+        start_date: '2025-01-01',
+        end_date: '2025-01-15',
+        active: false,
+      },
+    ];
 
-    render(<SponsorshipList sponsorships={endedSponsorship} onEndSponsorship={jest.fn()} />);
+    render(
+      <SponsorshipList
+        sponsorships={endedSponsorship}
+        onEndSponsorship={jest.fn()}
+      />
+    );
 
-    expect(screen.queryByRole('button', { name: /end/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /end/i })
+    ).not.toBeInTheDocument();
     expect(screen.getByText('Ended')).toBeInTheDocument();
   });
 });

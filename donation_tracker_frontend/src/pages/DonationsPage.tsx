@@ -17,12 +17,8 @@ const DonationsPage = () => {
   });
   const [selectedDonorId, setSelectedDonorId] = useState<number | null>(null);
 
-  const {
-    currentPage,
-    paginationMeta,
-    setPaginationMeta,
-    handlePageChange,
-  } = usePagination();
+  const { currentPage, paginationMeta, setPaginationMeta, handlePageChange } =
+    usePagination();
 
   const { setFilter, buildQueryParams } = useRansackFilters();
 
@@ -41,7 +37,7 @@ const DonationsPage = () => {
     try {
       const queryParams: Record<string, unknown> = buildQueryParams();
       // Remove null/empty values to prevent Ransack OR logic issues
-      Object.keys(queryParams).forEach(key => {
+      Object.keys(queryParams).forEach((key) => {
         if (queryParams[key] === null || queryParams[key] === '') {
           delete queryParams[key];
         }

@@ -20,11 +20,23 @@ describe('ChildAutocomplete', () => {
 
   it('searches for children when user types', async () => {
     const mockChildren = [
-      { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01' },
-      { id: 2, name: 'Mario', created_at: '2025-01-02', updated_at: '2025-01-02' }
+      {
+        id: 1,
+        name: 'Maria',
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+      },
+      {
+        id: 2,
+        name: 'Mario',
+        created_at: '2025-01-02',
+        updated_at: '2025-01-02',
+      },
     ];
 
-    (apiClient.get as jest.Mock).mockResolvedValue({ data: { children: mockChildren } });
+    (apiClient.get as jest.Mock).mockResolvedValue({
+      data: { children: mockChildren },
+    });
 
     const user = userEvent.setup();
     render(<ChildAutocomplete value={null} onChange={mockOnChange} />);
@@ -34,17 +46,24 @@ describe('ChildAutocomplete', () => {
 
     await waitFor(() => {
       expect(apiClient.get).toHaveBeenCalledWith('/api/children', {
-        params: { q: { name_cont: 'Mar' }, per_page: 10 }
+        params: { q: { name_cont: 'Mar' }, per_page: 10 },
       });
     });
   });
 
   it('calls onChange when child is selected', async () => {
     const mockChildren = [
-      { id: 1, name: 'Maria', created_at: '2025-01-01', updated_at: '2025-01-01' }
+      {
+        id: 1,
+        name: 'Maria',
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+      },
     ];
 
-    (apiClient.get as jest.Mock).mockResolvedValue({ data: { children: mockChildren } });
+    (apiClient.get as jest.Mock).mockResolvedValue({
+      data: { children: mockChildren },
+    });
 
     const user = userEvent.setup();
     render(<ChildAutocomplete value={null} onChange={mockOnChange} />);
@@ -62,7 +81,9 @@ describe('ChildAutocomplete', () => {
   });
 
   it('displays loading indicator while searching', async () => {
-    (apiClient.get as jest.Mock).mockImplementation(() => new Promise(() => {}));
+    (apiClient.get as jest.Mock).mockImplementation(
+      () => new Promise(() => {})
+    );
 
     const user = userEvent.setup();
     render(<ChildAutocomplete value={null} onChange={mockOnChange} />);

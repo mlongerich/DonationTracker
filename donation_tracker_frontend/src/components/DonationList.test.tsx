@@ -61,7 +61,9 @@ describe('DonationList', () => {
       },
     ];
 
-    const { container } = renderWithLocalization(<DonationList donations={donations} />);
+    const { container } = renderWithLocalization(
+      <DonationList donations={donations} />
+    );
 
     // Should have Card component
     const card = container.querySelector('.MuiCard-root');
@@ -106,7 +108,9 @@ describe('DonationList', () => {
       per_page: 25,
     };
 
-    renderWithLocalization(<DonationList donations={donations} paginationMeta={paginationMeta} />);
+    renderWithLocalization(
+      <DonationList donations={donations} paginationMeta={paginationMeta} />
+    );
 
     // Should show pagination when total_pages > 1
     expect(screen.getByRole('navigation')).toBeInTheDocument();
@@ -129,7 +133,9 @@ describe('DonationList', () => {
       per_page: 25,
     };
 
-    renderWithLocalization(<DonationList donations={donations} paginationMeta={paginationMeta} />);
+    renderWithLocalization(
+      <DonationList donations={donations} paginationMeta={paginationMeta} />
+    );
 
     // Should NOT show pagination when total_pages === 1
     expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
@@ -138,19 +144,25 @@ describe('DonationList', () => {
   it('renders start date picker', () => {
     renderWithLocalization(<DonationList donations={[]} />);
 
-    expect(screen.getByRole('group', { name: /start date/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', { name: /start date/i })
+    ).toBeInTheDocument();
   });
 
   it('renders end date picker', () => {
     renderWithLocalization(<DonationList donations={[]} />);
 
-    expect(screen.getByRole('group', { name: /end date/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('group', { name: /end date/i })
+    ).toBeInTheDocument();
   });
 
   it('calls onDateRangeChange when start date is selected', async () => {
     const mockOnDateRangeChange = jest.fn();
 
-    renderWithLocalization(<DonationList donations={[]} onDateRangeChange={mockOnDateRangeChange} />);
+    renderWithLocalization(
+      <DonationList donations={[]} onDateRangeChange={mockOnDateRangeChange} />
+    );
 
     // Open the calendar popup
     const calendarButtons = screen.getAllByLabelText(/choose date/i);
@@ -166,7 +178,9 @@ describe('DonationList', () => {
   it('calls onDateRangeChange when end date is selected', async () => {
     const mockOnDateRangeChange = jest.fn();
 
-    renderWithLocalization(<DonationList donations={[]} onDateRangeChange={mockOnDateRangeChange} />);
+    renderWithLocalization(
+      <DonationList donations={[]} onDateRangeChange={mockOnDateRangeChange} />
+    );
 
     // Open the calendar popup
     const calendarButtons = screen.getAllByLabelText(/choose date/i);
@@ -182,14 +196,18 @@ describe('DonationList', () => {
   it('renders clear filters button', () => {
     renderWithLocalization(<DonationList donations={[]} />);
 
-    expect(screen.getByRole('button', { name: /clear filters/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /clear filters/i })
+    ).toBeInTheDocument();
   });
 
   it('clears date filters when clear button is clicked', async () => {
     const mockOnDateRangeChange = jest.fn();
     const user = userEvent.setup();
 
-    renderWithLocalization(<DonationList donations={[]} onDateRangeChange={mockOnDateRangeChange} />);
+    renderWithLocalization(
+      <DonationList donations={[]} onDateRangeChange={mockOnDateRangeChange} />
+    );
 
     // Set start date
     const monthInputs = screen.getAllByRole('spinbutton', { name: /month/i });
@@ -222,15 +240,27 @@ describe('DonationList', () => {
 
     // Mock API response for donor search
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
+      {
+        id: 2,
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        displayable_email: 'jane@example.com',
+      },
     ];
 
     jest.spyOn(require('../api/client').default, 'get').mockResolvedValue({
       data: { donors: mockDonors },
     });
 
-    renderWithLocalization(<DonationList donations={[]} onDonorChange={mockOnDonorChange} />);
+    renderWithLocalization(
+      <DonationList donations={[]} onDonorChange={mockOnDonorChange} />
+    );
 
     const donorInput = screen.getByLabelText(/donor/i);
     await user.type(donorInput, 'John');
@@ -249,14 +279,21 @@ describe('DonationList', () => {
     const user = userEvent.setup();
 
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', displayable_email: 'john@example.com' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
     ];
 
     jest.spyOn(require('../api/client').default, 'get').mockResolvedValue({
       data: { donors: mockDonors },
     });
 
-    renderWithLocalization(<DonationList donations={[]} onDonorChange={mockOnDonorChange} />);
+    renderWithLocalization(
+      <DonationList donations={[]} onDonorChange={mockOnDonorChange} />
+    );
 
     const donorInput = screen.getByLabelText(/donor/i);
     await user.type(donorInput, 'John');
@@ -308,7 +345,9 @@ describe('DonationList', () => {
   it('handleStartDateChange accepts context parameter from MUI DatePicker', () => {
     const mockOnDateRangeChange = jest.fn();
 
-    renderWithLocalization(<DonationList donations={[]} onDateRangeChange={mockOnDateRangeChange} />);
+    renderWithLocalization(
+      <DonationList donations={[]} onDateRangeChange={mockOnDateRangeChange} />
+    );
 
     // Get the DatePicker component instance to verify onChange handler signature
     // This test verifies TypeScript compilation succeeds with correct handler type
@@ -319,7 +358,9 @@ describe('DonationList', () => {
   it('handleEndDateChange accepts context parameter from MUI DatePicker', () => {
     const mockOnDateRangeChange = jest.fn();
 
-    renderWithLocalization(<DonationList donations={[]} onDateRangeChange={mockOnDateRangeChange} />);
+    renderWithLocalization(
+      <DonationList donations={[]} onDateRangeChange={mockOnDateRangeChange} />
+    );
 
     // Get the DatePicker component instance to verify onChange handler signature
     // This test verifies TypeScript compilation succeeds with correct handler type

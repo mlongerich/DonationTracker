@@ -1,10 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DonationForm from './DonationForm';
-import apiClient, {
-  searchProjectOrChild,
-  createDonation,
-} from '../api/client';
+import apiClient, { searchProjectOrChild, createDonation } from '../api/client';
 
 jest.mock('../api/client', () => ({
   __esModule: true,
@@ -40,7 +37,9 @@ describe('DonationForm', () => {
   it('renders submit button', () => {
     render(<DonationForm />);
 
-    expect(screen.getByRole('button', { name: /create donation/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /create donation/i })
+    ).toBeInTheDocument();
   });
 
   it('renders autocomplete for donor search instead of dropdown', () => {
@@ -52,9 +51,7 @@ describe('DonationForm', () => {
   });
 
   it('searches for donors when user types in autocomplete', async () => {
-    const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@example.com' },
-    ];
+    const mockDonors = [{ id: 1, name: 'John Doe', email: 'john@example.com' }];
 
     (apiClient.get as jest.Mock).mockResolvedValue({
       data: { donors: mockDonors },
@@ -78,8 +75,18 @@ describe('DonationForm', () => {
 
   it('hides mailinator emails in autocomplete options', async () => {
     const mockDonors = [
-      { id: 1, name: 'John Doe', email: 'john@mailinator.com', displayable_email: null }, // mailinator hidden
-      { id: 2, name: 'Jane Smith', email: 'jane@example.com', displayable_email: 'jane@example.com' },
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@mailinator.com',
+        displayable_email: null,
+      }, // mailinator hidden
+      {
+        id: 2,
+        name: 'Jane Smith',
+        email: 'jane@example.com',
+        displayable_email: 'jane@example.com',
+      },
     ];
 
     // Mock the get method to return donors
@@ -107,12 +114,15 @@ describe('DonationForm', () => {
     // Wait for debounce and API call
     await waitFor(
       () => {
-        expect(apiClient.get).toHaveBeenCalledWith('/api/donors', expect.objectContaining({
-          params: expect.objectContaining({
-            q: { name_or_email_cont: 'J' },
-            per_page: 10,
-          }),
-        }));
+        expect(apiClient.get).toHaveBeenCalledWith(
+          '/api/donors',
+          expect.objectContaining({
+            params: expect.objectContaining({
+              q: { name_or_email_cont: 'J' },
+              per_page: 10,
+            }),
+          })
+        );
       },
       { timeout: 5000 }
     );
@@ -134,7 +144,7 @@ describe('DonationForm', () => {
         expect(options.length).toBeGreaterThan(0);
 
         // Check the text content includes our expected values
-        const allText = options.map(opt => opt.textContent).join(' ');
+        const allText = options.map((opt) => opt.textContent).join(' ');
         expect(allText).toContain('John Doe (No email provided)');
         expect(allText).toContain('Jane Smith (jane@example.com)');
       },
@@ -180,14 +190,18 @@ describe('DonationForm', () => {
   it('submit button should be a Material-UI Button', () => {
     render(<DonationForm />);
 
-    const submitButton = screen.getByRole('button', { name: /create donation/i });
+    const submitButton = screen.getByRole('button', {
+      name: /create donation/i,
+    });
     expect(submitButton).toHaveClass('MuiButton-root');
   });
 
   it('success message should be a Material-UI Alert', async () => {
     (createDonation as jest.Mock).mockResolvedValue({});
     (apiClient.get as jest.Mock).mockResolvedValue({
-      data: { donors: [{ id: 1, name: 'Test Donor', email: 'test@example.com' }] },
+      data: {
+        donors: [{ id: 1, name: 'Test Donor', email: 'test@example.com' }],
+      },
     });
 
     const user = userEvent.setup();
@@ -233,7 +247,9 @@ describe('DonationForm', () => {
     const projectField = screen.getByLabelText(/project or child/i);
     await user.clear(projectField);
     await user.type(projectField, 'Eli');
-    await waitFor(() => expect(searchProjectOrChild).toHaveBeenCalledWith('Eli'));
+    await waitFor(() =>
+      expect(searchProjectOrChild).toHaveBeenCalledWith('Eli')
+    );
     const childOption = await screen.findByText(/Eli/);
     await user.click(childOption);
 
