@@ -17,9 +17,17 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2025-11-03
+**Last Updated:** 2025-11-04
 
 **Latest Milestones:**
+- TICKET-067 - Standardize API Response Wrapping with Presenters ✅ (2025-11-04)
+  - Fixed 60% inconsistency → 100% consistent presenter usage across all endpoints
+  - All single-resource endpoints now return `{ resource: {...} }` format
+  - Updated 11 controller actions (Donors, Children, Donations)
+  - Enhanced DonorPresenter, ChildPresenter with can_be_deleted field
+  - Fixed CollectionPresenter options passing for include_sponsorships support
+  - Backend: 263 tests pass, 91.9% coverage
+  - Frontend: 263 tests pass
 - TICKET-050 - Children Page Search & Pagination ✅ (2025-11-03)
   - Debounced search TextField (300ms delay, Ransack name_cont filter)
   - Pagination UI component (10 items per page)
