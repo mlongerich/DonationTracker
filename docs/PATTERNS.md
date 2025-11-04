@@ -231,6 +231,120 @@ end
 
 ---
 
+### Global Error Handling Pattern (TICKET-068)
+
+**Purpose:** Provide consistent error responses across all API endpoints with proper HTTP status codes.
+
+**Problem Solved:**
+- Controllers were using if/else blocks for save/update validation
+- Inconsistent error response formats across endpoints
+- HTTP 500 errors for expected failures (not found, validation errors)
+- Duplicate error handling logic in every controller action
+
+**Implementation:**
+
+```ruby
+# app/controllers/application_controller.rb
+class ApplicationController < ActionController::API
+  rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
+  rescue_from ActiveRecord::RecordInvalid, with: :render_unprocessable_entity
+  rescue_from ActionController::ParameterMissing, with: :render_bad_request
+
+  private
+
+  # Returns { error: "message" } with 404 status
+  def render_not_found(exception)
+    render json: { error: exception.message }, status: :not_found
+  end
+
+  # Returns { errors: [...] } with 422 status
+  def render_unprocessable_entity(exception)
+    render json: { errors: exception.record.errors.full_messages },
+           status: :unprocessable_entity
+  end
+
+  # Returns { error: "message" } with 400 status
+  def render_bad_request(exception)
+    render json: { error: exception.message }, status: :bad_request
+  end
+end
+```
+
+**Controller Pattern (Before):**
+```ruby
+def create
+  child = Child.new(child_params)
+  if child.save
+    render json: { child: ChildPresenter.new(child).as_json }, status: :created
+  else
+    render json: { errors: child.errors.full_messages }, status: :unprocessable_entity
+  end
+end
+
+def update
+  child = Child.find(params[:id])
+  if child.update(child_params)
+    render json: { child: ChildPresenter.new(child).as_json }
+  else
+    render json: { errors: child.errors.full_messages }, status: :unprocessable_entity
+  end
+end
+```
+
+**Controller Pattern (After):**
+```ruby
+def create
+  child = Child.new(child_params)
+  child.save!  # Raises RecordInvalid on validation failure
+  render json: { child: ChildPresenter.new(child).as_json }, status: :created
+end
+
+def update
+  child = Child.find(params[:id])  # Raises RecordNotFound if not found
+  child.update!(child_params)  # Raises RecordInvalid on validation failure
+  render json: { child: ChildPresenter.new(child).as_json }
+end
+```
+
+**Benefits:**
+- ✅ Controllers focus on happy path (no if/else blocks for validation)
+- ✅ Consistent error format across all endpoints
+- ✅ Proper HTTP status codes (404, 422, 400 instead of 500)
+- ✅ Global handlers catch exceptions automatically
+- ✅ 5-10 lines removed per controller action
+- ✅ Single source of truth for error response structure
+
+**Error Response Formats:**
+```json
+// 404 Not Found
+{
+  "error": "Couldn't find Child with 'id'=999"
+}
+
+// 422 Unprocessable Entity
+{
+  "errors": [
+    "Name can't be blank",
+    "Email is invalid"
+  ]
+}
+
+// 400 Bad Request
+{
+  "error": "param is missing or the value is empty: child"
+}
+```
+
+**When to Use:**
+- All controller actions that create/update records
+- Use `save!`/`update!` instead of `save`/`update`
+- Use `find` instead of `find_by` when record must exist
+- Let global handlers catch and format exceptions
+
+**See:** TICKET-068, `app/controllers/application_controller.rb`
+
+---
+
 ### Presenter/Decorator Pattern
 
 **Purpose:** Extract view-specific logic and JSON formatting from models/controllers.
@@ -326,6 +440,165 @@ end
 - **Testability**: Easy to test JSON formatting in isolation
 - **Reusability**: Same presenter used across multiple endpoints
 - **Maintainability**: Single place to update JSON structure
+
+---
+
+### Stripe CSV Import Pattern (TICKET-070)
+
+**Context:** StripePaymentImportService imports 1,303 historical Stripe transactions from CSV export.
+
+**Challenge:** Multi-child sponsorships appear as multiple CSV rows with same `Transaction ID` (e.g., "Wan" and "Orawan" both share charge `ch_123`). Donations table originally had unique constraint on `stripe_charge_id`, causing duplicate key violations.
+
+**Solution:** Introduced `stripe_invoices` abstraction layer with 1-to-many relationship (one invoice → multiple donations).
+
+**Schema Design:**
+```ruby
+# stripe_invoices table
+- stripe_invoice_id (string, unique) - Maps to Stripe Transaction ID
+- stripe_charge_id (string)          - Also Transaction ID (for now)
+- stripe_customer_id (string)
+- stripe_subscription_id (string)
+- total_amount_cents (integer)
+- invoice_date (date)
+
+# donations table (updated)
+- stripe_invoice_id (string, FK)     - References stripe_invoices.stripe_invoice_id
+- stripe_charge_id (string)          - No longer unique
+- stripe_customer_id (string)
+- stripe_subscription_id (string)
+```
+
+**Multi-Child Sponsorship Idempotency:**
+
+Multi-child sponsorships in the CSV appear as **separate rows** with the **same Transaction ID** but different children:
+- Row 7: Transaction ID `ch_1H4U4A`, Child "Wan"
+- Row 8: Transaction ID `ch_1H4U4A`, Child "Orawan"
+
+**Idempotency Requirements:**
+1. ✅ Same invoice + same child → Skip (duplicate)
+2. ✅ Same invoice + different child → Import (multi-child sponsorship)
+3. ✅ Different invoice + different child → Import (separate donations)
+
+**Key Implementation Detail:**
+
+`child_id` is a **virtual attribute** (`attr_accessor`) on Donation model, NOT a database column. It triggers `auto_create_sponsorship_from_child_id` callback which creates the sponsorship and sets `sponsorship_id`.
+
+Therefore, idempotency checks CANNOT use `child_id` directly - must check via sponsorship relationship:
+
+```ruby
+# WRONG - child_id is not in database
+Donation.exists?(stripe_invoice_id: txn_id, child_id: child.id)
+
+# CORRECT - check via sponsorship relationship
+Donation
+  .joins(:sponsorship)
+  .where(stripe_invoice_id: txn_id)
+  .where(sponsorships: { child_id: child.id })
+  .exists?
+```
+
+**Service Pattern:**
+
+```ruby
+class StripePaymentImportService
+  def import
+    ActiveRecord::Base.transaction do
+      # Create/find StripeInvoice (allows multiple donations per invoice)
+      StripeInvoice.find_or_create_by!(stripe_invoice_id: txn_id) do |invoice|
+        # Set invoice metadata only on create
+      end
+
+      child_names.each do |child_name|
+        child = Child.find_or_create_by!(name: child_name)
+
+        # Check if donation exists for THIS child + invoice (idempotency)
+        existing = Donation
+          .joins(:sponsorship)
+          .where(stripe_invoice_id: txn_id, sponsorships: { child_id: child.id })
+          .exists?
+
+        next if existing # Skip duplicate
+
+        Donation.create!(
+          child_id: child.id,  # Virtual attr - triggers sponsorship creation
+          stripe_invoice_id: txn_id
+        )
+      end
+    end
+  end
+end
+```
+
+**Key Design Decisions:**
+
+1. **Idempotency:** Check per-child donation via sponsorship relationship, NOT just StripeInvoice
+2. **Virtual Attribute:** `child_id` is `attr_accessor`, triggers callback to create sponsorship
+3. **Multi-Child Support:** Same invoice can have multiple donations for different children
+4. **Data Integrity:** StripeInvoice created once, reused by all children
+
+**Implementation Notes:**
+
+- 18 comprehensive tests covering all 3 idempotency scenarios
+- Strict TDD: RED → GREEN → refactor, one test at a time
+- Bug fix: Original implementation only checked StripeInvoice, causing multi-child duplicates
+
+**See:** TICKET-070, `app/services/stripe_payment_import_service.rb`, `app/models/stripe_invoice.rb`
+
+---
+
+### Stripe CSV Batch Import Pattern (TICKET-071)
+
+**Code Lifecycle:** MVP - Temporary Until Webhooks (TICKET-026)
+- Rake task (`rails stripe:import_csv`) is used repeatedly with new CSV exports
+- `StripeCsvBatchImporter` provides orchestration until webhooks complete
+- Delete ONLY AFTER TICKET-026 (webhooks) is complete and stable
+- Core service (`StripePaymentImportService`) is PERMANENT - reused by webhooks
+
+**Project Mapping Context:** CSV import must map description text to projects. Some descriptions are generic (phone numbers, "Subscription creation") and should map to "General Donation" system project rather than creating named projects.
+
+**Pattern Order (first match wins):**
+1. **Blank/empty** → "General Donation"
+2. **General monthly donation** (`$X - General Monthly Donation`) → "General Donation"
+3. **Campaign** (`Donation for Campaign 123`) → "Campaign 123" project
+4. **Invoice** (`Invoice ABC-123`) → "General Donation"
+5. **Email address** (`user@example.com`) → "General Donation"
+6. **All numbers** (`66826191275`) → "General Donation"
+7. **Subscription creation** → "General Donation"
+8. **Payment app** (`Captured via Payment app`) → "General Donation"
+9. **Stripe app** (`Payment for Stripe App`) → "General Donation"
+10. **Named items** (e.g., "Tshirt", "Jacket", "Kidz Club") → Create named project for admin review (TICKET-027)
+
+**Implementation:**
+```ruby
+def find_or_create_project
+  description_text = get_description_text
+
+  # 1. Blank/empty → General Donation
+  return general_donation if description_text.blank?
+
+  # 2-5. Existing patterns (general, campaign, invoice, email)
+  return general_donation if description_text.match(GENERAL_PATTERN)
+  return campaign_project if description_text.match(CAMPAIGN_PATTERN)
+  return general_donation if description_text.match(/Invoice [A-Z0-9-]+/i)
+  return general_donation if description_text.match(EMAIL_PATTERN)
+
+  # 6-9. Enhanced patterns (TICKET-071)
+  return general_donation if description_text.match(/\A\d+\z/)  # All numbers
+  return general_donation if description_text.match(/Subscription creation/i)
+  return general_donation if description_text.match(/Captured via Payment app/i)
+  return general_donation if description_text.match(/Payment for Stripe App/i)
+
+  # 10. Named projects - create for admin review
+  Project.find_or_create_by!(title: description_text[0, 100])
+end
+```
+
+**Results (1,225 donations):**
+- ✅ 395 donations → "General Donation" (enhanced pattern matching)
+- ✅ 9 named projects created (Tshirt, Jacket, Bag, Book, etc.)
+- ✅ 0 UNMAPPED projects (all patterns working correctly)
+
+**See:** TICKET-071, `app/services/stripe_payment_import_service.rb#find_or_create_project`
 
 ---
 
@@ -941,4 +1214,183 @@ end
 
 ---
 
-*Last updated: 2025-10-24*
+### Custom Hooks Library (TICKET-032, TICKET-066)
+
+**Purpose:** Extract and reuse stateful logic across components
+
+**When to Create Custom Hooks:**
+- Logic duplicated in 2+ components
+- Complex stateful logic (useState + useEffect combinations)
+- Would reduce duplication by 20+ lines
+- Clear, reusable interface
+
+**Hook Location:** `src/hooks/` with barrel export in `src/hooks/index.ts`
+
+**Implemented Hooks:**
+
+**1. `useDebouncedValue<T>(value: T, delay: number = 300): T`**
+- Debounces value changes to prevent excessive API calls
+- Returns debounced value that updates after delay
+- Use case: Search inputs, filter fields
+
+```tsx
+const [searchQuery, setSearchQuery] = useState('');
+const debouncedQuery = useDebouncedValue(searchQuery, 300);
+
+useEffect(() => {
+  // API call only fires after 300ms of no typing
+  fetchResults(debouncedQuery);
+}, [debouncedQuery]);
+```
+
+**2. `usePagination(initialPage: number = 1)`**
+- Manages pagination state and handlers
+- Returns: `currentPage`, `setCurrentPage`, `paginationMeta`, `setPaginationMeta`, `handlePageChange`, `resetToFirstPage`
+- Use case: List pages (DonorsPage, DonationsPage)
+
+```tsx
+const { currentPage, paginationMeta, setPaginationMeta, handlePageChange, resetToFirstPage } = usePagination();
+
+// Reset to page 1 when search changes
+useEffect(() => {
+  resetToFirstPage();
+}, [debouncedQuery, resetToFirstPage]);
+
+// MUI Pagination component
+<Pagination count={paginationMeta.total_pages} page={currentPage} onChange={handlePageChange} />
+```
+
+**3. `useRansackFilters()`**
+- Manages Ransack query filter state
+- Returns: `filters`, `setFilter`, `clearFilters`, `buildQueryParams`
+- Use case: Pages with MULTIPLE filters (DonationsPage with date range + donor filter)
+- **Not recommended** for single-filter scenarios (use direct query building instead)
+
+```tsx
+const { setFilter, buildQueryParams } = useRansackFilters();
+
+// Update filters
+useEffect(() => {
+  setFilter('date_gteq', startDate);
+  setFilter('date_lteq', endDate);
+  setFilter('donor_id_eq', donorId);
+}, [startDate, endDate, donorId, setFilter]);
+
+// Build query params
+const params = { page: currentPage, per_page: 10, ...buildQueryParams() };
+```
+
+**4. `useChildren()`**
+- Manages children data fetching with sponsorships, pagination, and search
+- Returns: `children`, `sponsorships`, `loading`, `error`, `paginationMeta`, `fetchChildren`, `refetch`
+- Use case: ChildrenPage (eliminated 69 lines of duplication)
+
+```tsx
+const { children, sponsorships, loading, error, paginationMeta, fetchChildren } = useChildren();
+
+// Fetch with filters
+useEffect(() => {
+  fetchChildren({
+    includeSponsorship: true,
+    includeDiscarded: showArchived,
+    page: currentPage,
+    perPage: 10,
+    search: debouncedQuery,
+  });
+}, [showArchived, currentPage, debouncedQuery, fetchChildren]);
+
+// Refetch after mutations
+const handleCreate = async (data) => {
+  await apiClient.post('/api/children', { child: data });
+  fetchChildren({ includeSponsorship: true, includeDiscarded: showArchived });
+};
+```
+
+**Benefits:**
+- Centralized data fetching logic
+- Automatic sponsorship map building
+- Built-in loading and error states
+- Pagination metadata management
+- Fixes bugs where handlers ignored filters
+
+---
+
+### React Router Multi-Page Architecture
+
+**File Structure:**
+```
+src/
+├── App.tsx                    # Router configuration
+├── pages/                     # Page components (state management)
+│   ├── DonorsPage.tsx
+│   ├── DonationsPage.tsx
+│   └── ProjectsPage.tsx
+├── components/
+│   ├── Layout.tsx            # Shared layout with Outlet
+│   └── Navigation.tsx        # AppBar navigation
+└── types/                    # Centralized types
+```
+
+**Pattern:**
+```tsx
+// src/App.tsx
+<BrowserRouter>
+  <Routes>
+    <Route path="/" element={<Layout />}>
+      <Route index element={<Navigate to="/donations" replace />} />
+      <Route path="donations" element={<DonationsPage />} />
+      <Route path="donors" element={<DonorsPage />} />
+    </Route>
+  </Routes>
+</BrowserRouter>
+
+// src/components/Layout.tsx
+const Layout = () => (
+  <Container maxWidth="sm">
+    <Navigation />
+    <Outlet />  {/* Pages render here */}
+  </Container>
+);
+```
+
+**Best Practices:**
+- Keep App.tsx minimal (router only)
+- Page-level state (useState, useEffect)
+- No Context API yet (not needed)
+- Index route redirects to primary page
+- E2E tests for all routes
+- Use `component={NavLink}` for MUI buttons
+
+---
+
+### Native Git Hooks (No Stashing!)
+
+**Why:** Pre-commit framework caused data loss via failed unstashing
+
+**Key Features:**
+- ✅ No stashing - unstaged changes remain in working directory
+- ✅ Automatic backups - every commit creates `.git/backups/` backup
+- ✅ Recovery tool - `bash scripts/recover-backup.sh`
+
+**Installation:**
+```bash
+bash scripts/install-native-hooks.sh
+```
+
+**Recovery:**
+```bash
+# View backups
+bash scripts/recover-backup.sh
+
+# Apply backup
+bash scripts/recover-backup.sh .git/backups/pre-commit_YYYYMMDD_HHMMSS.patch
+```
+
+**Backup System:**
+- 3 files per commit: unstaged patch, staged patch, untracked list
+- Keeps last 20 backups
+- Stored in `.git/backups/` (not tracked)
+
+---
+
+*Last updated: 2025-11-04*

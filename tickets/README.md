@@ -52,6 +52,8 @@ Current work items and user stories being actively developed.
 - [TICKET-065: Move Business Logic to Backend](completed/TICKET-065-move-business-logic-to-backend.md) - ✅ Complete (2025-10-31)
 - [TICKET-050: Children Page Search & Pagination](completed/TICKET-050-children-page-ui-standardization.md) - ✅ Complete (2025-11-03)
 - [TICKET-070: Stripe CSV Import Foundation](completed/TICKET-070-stripe-csv-import-foundation.md) - ✅ Complete (2025-11-02)
+- [TICKET-067: Standardize API Response Wrapping with Presenters](completed/TICKET-067-standardize-presenter-responses.md) - ✅ Complete (2025-11-04)
+- [TICKET-068: Global Error Handling in ApplicationController](completed/TICKET-068-global-error-handling.md) - ✅ Complete (2025-11-04)
 
 ### 🔵 In Progress Tickets
 
@@ -79,14 +81,14 @@ Current work items and user stories being actively developed.
 #### Stripe Integration
 
 **⭐ PERMANENT (Production Code):**
-- [TICKET-026: Stripe Webhook Integration](TICKET-026-stripe-import-webhook-integration.md) - 📋 Planned (🟡 Medium, M) - *Long-term production solution*
 - [TICKET-076: Failed Stripe Payments Tracking](TICKET-076-failed-stripe-payments-tracking.md) - 📋 Planned (🔴 High, M) - *Track failed/refunded payments from CSV + webhooks*
 
 **🗑️ TEMPORARY (One-Time Use):**
 - [TICKET-071: Stripe CSV Batch Import Task](TICKET-071-stripe-csv-batch-import-task.md) - 🟡 Blocked - Pending User Testing (🔴 High, M) - *Throwaway: delete after CSV import*
 - [TICKET-072: Import Error Recovery UI](TICKET-072-import-error-recovery-ui.md) - 📋 Planned (🟢 Low, M) - *Optional: skip if <10 failures*
 
-**FUTURE:**
+**POST-MVP (Future Enhancements):**
+- [TICKET-026: Stripe Webhook Integration](TICKET-026-stripe-import-webhook-integration.md) - 📋 Planned Post-MVP (🟢 Low, M) - *Real-time sync after MVP launch*
 - [TICKET-027: Stripe Description Mapping Management](TICKET-027-stripe-description-mapping-management.md) - 📋 Planned (🟢 Low, S) - *Admin UI for mapping rules*
 
 #### Sponsorship & Children Features
@@ -104,10 +106,8 @@ Current work items and user stories being actively developed.
 
 **Critical Priority (Fix Now):**
 - [TICKET-066: Extract useChildren Custom Hook](TICKET-066-extract-use-children-hook.md) - 📋 Planned (🔴 High, M) - *Removes 100+ lines duplication*
-- [TICKET-067: Standardize API Response Wrapping with Presenters](TICKET-067-standardize-presenter-responses.md) - 📋 Planned (🔴 High, M) - *Fixes 60% inconsistency*
 
 **Medium Priority:**
-- [TICKET-068: Global Error Handling in ApplicationController](TICKET-068-global-error-handling.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-034: Create Query Objects for Complex Database Queries](TICKET-034-create-query-objects-complex-database-queries.md) - 📋 Planned (🟡 Medium, M) - *Updated with ChildrenController example*
 - [TICKET-036: Implement React Error Boundary](TICKET-036-implement-react-error-boundary.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-037: Standardize Service Object Patterns](TICKET-037-standardize-service-object-patterns.md) - 📋 Planned (🟡 Medium, S) - *Updated with .call interface*
@@ -127,9 +127,9 @@ Current work items and user stories being actively developed.
 ## Quick Stats
 
 - **Total Tickets:** 71
-- **Completed:** 37 (52%)
+- **Completed:** 39 (55%)
 - **In Progress:** 0
-- **Planned:** 32
+- **Planned:** 30
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 
@@ -137,12 +137,11 @@ Current work items and user stories being actively developed.
 
 - **Feature Development:** 9 planned, 10 completed
 - **Stripe Integration:** 4 planned, 1 completed
-  - **PERMANENT:** ✅ TICKET-070 (core service - complete), TICKET-026 (webhooks - planned)
-  - **TEMPORARY:** TICKET-071 (batch import - blocked on user testing)
-  - **OPTIONAL:** TICKET-072 (error UI - skip if <10 failures)
-  - **FUTURE:** TICKET-027 (mapping UI)
+  - **PERMANENT:** ✅ TICKET-070 (core service - complete), TICKET-076 (failed payments tracking - planned)
+  - **TEMPORARY:** TICKET-071 (batch import - blocked on user testing), TICKET-072 (error UI - optional)
+  - **POST-MVP:** TICKET-026 (webhooks - post-MVP), TICKET-027 (mapping UI - future)
 - **Sponsorship & Children Features:** 8 planned, 8 completed
-- **Code Quality & Architecture:** 11 planned, 18 completed
+- **Code Quality & Architecture:** 9 planned, 20 completed
 - **In Progress:** 0
 - **Blocked:** 1 (TICKET-005)
 - **Deferred/Accepted Risk:** 1 (TICKET-049)
@@ -159,11 +158,12 @@ Current work items and user stories being actively developed.
 
 **Implementation Order:**
 1. ✅ TICKET-070 (foundation - PERMANENT) - **COMPLETE**
-2. 🟡 TICKET-071 (one-time import - TEMPORARY) - **BLOCKED**
-3. Run CSV import
+2. 🟡 TICKET-071 (one-time import - TEMPORARY) - **BLOCKED (user testing)**
+3. Run CSV import (production data migration)
 4. TICKET-072 (only if >10 failures - OPTIONAL)
-5. TICKET-026 (webhooks - PERMANENT, reuses TICKET-070)
-6. Delete TICKET-071 and TICKET-072 code
+5. Delete TICKET-071 and TICKET-072 code
+6. **POST-MVP:** TICKET-026 (webhooks - PERMANENT, reuses TICKET-070)
+7. **POST-MVP:** TICKET-027 (mapping admin UI - FUTURE)
 
 ---
 

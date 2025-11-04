@@ -1,11 +1,13 @@
 ## [TICKET-026] Stripe Webhook Integration (Real-time Sync)
 
-**Status:** 📋 Planned
-**Priority:** 🟡 Medium
+**Status:** 📋 Planned (Post-MVP)
+**Priority:** 🟢 Low (Future Enhancement)
 **Dependencies:** TICKET-070 (Stripe CSV Import Foundation) - **REQUIRED**
-**Created:** 2025-11-01 (Updated)
+**Created:** 2025-11-01 (Updated: 2025-11-04)
 
-**⭐ CODE LIFECYCLE: PERMANENT - Long-Term Production Solution**
+**⭐ CODE LIFECYCLE: PERMANENT - Long-Term Production Solution (Post-MVP)**
+
+**TIMING:** This feature is planned for **after MVP launch**. The current CSV import workflow (TICKET-071) is sufficient for initial production use.
 
 **This ticket creates PERMANENT production infrastructure.**
 - Webhook endpoint runs forever (real-time donation sync)
@@ -25,7 +27,7 @@ As an admin, I want Stripe webhook integration so that new donations are automat
 **CSV import has been moved to TICKET-070, TICKET-071, TICKET-072.**
 This ticket ONLY focuses on webhook integration for real-time donation sync.
 
-**This is the LONG-TERM solution.** CSV import (TICKET-071) is one-time throwaway code.
+**Post-MVP Enhancement:** This feature will be implemented after MVP launch. The current workflow uses periodic CSV exports from Stripe, which is sufficient for initial production use. Webhooks provide real-time automation but are not critical for MVP.
 
 ### Acceptance Criteria
 

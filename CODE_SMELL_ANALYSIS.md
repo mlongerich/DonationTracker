@@ -127,7 +127,9 @@ const ChildrenPage = () => {
 
 ---
 
-### 2. Inconsistent API Response Wrapping
+### 2. Inconsistent API Response Wrapping ✅ FIXED (TICKET-067)
+
+**Status:** ✅ **COMPLETE** (2025-11-04)
 
 **Location:** Controllers (all)
 
@@ -200,13 +202,17 @@ end
 - Harder to add business logic (e.g., `can_be_deleted?` field)
 - Breaks established conventions
 
-**Ticket Recommendation:** **TICKET-067: Standardize API Response Wrapping with Presenters**
+**Ticket Recommendation:** **TICKET-067: Standardize API Response Wrapping with Presenters** ✅ COMPLETE
 
 ---
 
 ## 🟡 MEDIUM Issues (Should Fix)
 
-### 3. Controller Action Complexity (TooManyStatements Smell)
+### 3. Controller Action Complexity (TooManyStatements Smell) ⚠️ PARTIALLY ADDRESSED
+
+**Note:** TICKET-068 (Global Error Handling) addressed inconsistent error handling across controllers, removing if/else blocks. Query object pattern (TICKET-034) still planned for complex query logic.
+
+**Original Issue:**
 
 **Location:**
 - `Api::ChildrenController#index` (11 statements, Reek warning)
@@ -523,7 +529,9 @@ export const fetchSponsorshipsForDonation = async (donorId: number, childId: num
 
 ---
 
-### 7. Inconsistent Error Handling Across Controllers
+### 7. Inconsistent Error Handling Across Controllers ✅ FIXED (TICKET-068)
+
+**Status:** ✅ **COMPLETE** (2025-11-04)
 
 **Location:** All controllers
 
@@ -607,7 +615,9 @@ end
 - Controllers can use `save!`/`update!` (cleaner code, no if/else)
 - Easier to add logging, error tracking
 
-**Ticket Recommendation:** **TICKET-069: Implement Global Error Handling in ApplicationController**
+**Ticket Recommendation:** **TICKET-068: Implement Global Error Handling in ApplicationController** ✅ COMPLETE
+
+**Implementation:** ApplicationController now has rescue_from handlers for RecordNotFound, RecordInvalid, and ParameterMissing. All controllers use save!/update!/find pattern. 4 comprehensive tests passing.
 
 ---
 
@@ -642,7 +652,7 @@ const [children, setChildren] = useState<Child[]>([]);  // Loads ALL children
 - `PaginationConcern` backend exists ✅
 - Backend `/api/children` supports pagination ✅
 
-**Ticket Recommendation:** **TICKET-050 (already exists)** - Children Page UI Standardization (includes pagination)
+**Ticket Recommendation:** **TICKET-050 (already exists)** - Children Page UI Standardization (includes pagination) ✅ COMPLETE (2025-11-03)
 
 ---
 
@@ -875,27 +885,20 @@ return (
    - **Dependencies:** None
    - **Pattern:** Extends existing custom hooks pattern
 
-2. **TICKET-067: Standardize API Response Wrapping with Presenters**
-   - **Priority:** 🔴 High
-   - **Effort:** M (2-3 hours)
-   - **Impact:** Fixes pattern drift, consistent API responses
-   - **Dependencies:** None
-   - **Pattern:** Completes Presenter Pattern implementation (TICKET-029)
+2. ~~**TICKET-067: Standardize API Response Wrapping with Presenters**~~ ✅ COMPLETE (2025-11-04)
+   - Fixed 60% inconsistency → 100% consistent presenter usage
 
-3. **TICKET-068: Extract Query Objects for Complex Controller Actions**
+3. ~~**TICKET-068: Global Error Handling in ApplicationController**~~ ✅ COMPLETE (2025-11-04)
+   - Controllers now use save!/update!/find with global exception handlers
+
+### Medium Priority (Should Fix)
+
+4. **TICKET-034: Extract Query Objects for Complex Controller Actions**
    - **Priority:** 🟡 Medium
    - **Effort:** M (3-4 hours)
    - **Impact:** Thinner controllers, testable query logic
    - **Dependencies:** None
-   - **Pattern:** Implements planned Query Object Pattern (TICKET-034)
-
-### Medium Priority (Should Fix)
-
-4. **TICKET-069: Implement Global Error Handling in ApplicationController**
-   - **Priority:** 🟡 Medium
-   - **Effort:** S (1-2 hours)
-   - **Impact:** Consistent error responses, cleaner controllers
-   - **Dependencies:** None
+   - **Pattern:** Implements planned Query Object Pattern
 
 5. **TICKET-037: Standardize Service Object Patterns** (Already Exists)
    - **Priority:** 🟡 Medium
@@ -913,7 +916,8 @@ return (
 
 ### Low Priority (Nice to Have)
 
-8. **TICKET-050: Children Page UI Standardization** (Already Exists - adds pagination)
+8. ~~**TICKET-050: Children Page UI Standardization**~~ ✅ COMPLETE (2025-11-03)
+   - Added pagination, search, and UI consistency
 9. **TICKET-042: Add Class-Level Documentation Comments** (Already Exists)
 10. **TICKET-070: Prefix Unused Ransack Parameters** (New - XS effort)
 11. **TICKET-071: Reduce Duplicate Method Calls** (New - S effort)

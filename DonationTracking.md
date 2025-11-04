@@ -20,6 +20,13 @@
 **Last Updated:** 2025-11-04
 
 **Latest Milestones:**
+- TICKET-068 - Global Error Handling in ApplicationController ✅ (2025-11-04)
+  - Added rescue_from handlers for RecordNotFound, RecordInvalid, ParameterMissing
+  - Controllers now use save!/update!/find (raising exceptions) instead of if/else blocks
+  - Consistent error responses: `{ error: "..." }` (404, 400), `{ errors: [...] }` (422)
+  - Updated 4 controller actions (Children, Donations, Donors, Projects)
+  - 4 comprehensive tests covering all exception types
+  - Backend: 267 tests pass, 91.5% coverage
 - TICKET-067 - Standardize API Response Wrapping with Presenters ✅ (2025-11-04)
   - Fixed 60% inconsistency → 100% consistent presenter usage across all endpoints
   - All single-resource endpoints now return `{ resource: {...} }` format
@@ -46,8 +53,8 @@
 - TICKET-064 - Smart Sponsorship Detection & Backend Logic ✅ (2025-10-31)
 - TICKET-032 - Custom Hooks Library (useDebouncedValue, usePagination, useRansackFilters) ✅ (2025-10-29)
 
-**Current Focus:** Code quality improvements (TICKET-066 useChildren hook refactoring)
-**Next Feature:** TICKET-053 (Sponsorships pagination UI) - high user value, quick win
+**Current Focus:** Code quality improvements complete (TICKET-067, TICKET-068)
+**Next Feature:** TICKET-066 (useChildren hook refactoring) or TICKET-071 (Stripe CSV batch import)
 
 **See [docs/project/README.md](docs/project/README.md#current-status) for detailed status**
 
