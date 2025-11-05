@@ -35,6 +35,7 @@ const DonationList: React.FC<DonationListProps> = ({
   onDateRangeChange,
   onDonorChange,
 }) => {
+  console.log('[DonationList] Rendering with donations:', donations?.length, 'items');
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [dateError, setDateError] = useState<string | null>(null);

@@ -4,7 +4,7 @@ import apiClient from '../api/client';
 import DonationForm from '../components/DonationForm';
 import DonationList from '../components/DonationList';
 import { Donation } from '../types';
-import { usePagination, useRansackFilters } from '../hooks';
+import { usePagination } from '../hooks';
 
 const DonationsPage = () => {
   const [donations, setDonations] = useState<Donation[]>([]);
@@ -20,28 +20,20 @@ const DonationsPage = () => {
   const { currentPage, paginationMeta, setPaginationMeta, handlePageChange } =
     usePagination();
 
-  const { setFilter, buildQueryParams } = useRansackFilters();
-
-  // Update filters when date range changes
-  useEffect(() => {
-    setFilter('date_gteq', dateRange.startDate);
-    setFilter('date_lteq', dateRange.endDate);
-  }, [dateRange, setFilter]);
-
-  // Update filter when donor selection changes
-  useEffect(() => {
-    setFilter('donor_id_eq', selectedDonorId);
-  }, [selectedDonorId, setFilter]);
-
   const fetchDonations = async () => {
     try {
-      const queryParams: Record<string, unknown> = buildQueryParams();
-      // Remove null/empty values to prevent Ransack OR logic issues
-      Object.keys(queryParams).forEach((key) => {
-        if (queryParams[key] === null || queryParams[key] === '') {
-          delete queryParams[key];
-        }
-      });
+      // Build query params directly from state to avoid race condition (TICKET-078)
+      const queryParams: Record<string, unknown> = {};
+
+      if (dateRange.startDate) {
+        queryParams['q[date_gteq]'] = dateRange.startDate;
+      }
+      if (dateRange.endDate) {
+        queryParams['q[date_lteq]'] = dateRange.endDate;
+      }
+      if (selectedDonorId) {
+        queryParams['q[donor_id_eq]'] = selectedDonorId;
+      }
 
       const params: Record<string, unknown> = {
         page: currentPage,
