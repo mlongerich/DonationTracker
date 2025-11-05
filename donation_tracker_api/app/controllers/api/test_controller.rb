@@ -13,8 +13,12 @@ module Api
         return
       end
 
+      # Delete in correct order to avoid foreign key constraint violations
       Donation.delete_all
+      Sponsorship.delete_all
       Donor.delete_all
+      Child.delete_all
+      # Don't delete projects as they may be system projects
 
       render json: { message: "Database cleaned", donations_deleted: true, donors_deleted: true }, status: :ok
     end
