@@ -58,12 +58,11 @@ Current work items and user stories being actively developed.
 - [TICKET-069: Code Quality Cleanup (Linter Warnings Batch)](completed/TICKET-069-code-quality-cleanup-batch.md) - ✅ Complete (2025-11-04)
 - [TICKET-078: Fix Donation Filter Race Condition](completed/TICKET-078-fix-donation-filter-race-condition.md) - ✅ Complete (2025-11-05)
 - [TICKET-079: Project CRUD E2E Tests + Bug Fixes](completed/TICKET-079-project-crud-e2e-tests.md) - ✅ Complete (2025-11-05)
+- [TICKET-005: Auto-Reassign Donations After Donor Merge](completed/TICKET-005-auto-reassign-donations-after-merge.md) - ✅ Complete (2025-11-05)
 
 ### 🔵 In Progress Tickets
 
 ### ⏸️ Blocked Tickets
-
-- [TICKET-005: Auto-Reassign Donations After Donor Merge](TICKET-005-auto-reassign-donations-after-merge.md) - ⏸️ Blocked (Depends on TICKET-004 ✅, Donation model required)
 
 ### ⏸️ Deferred - Accepted Risk
 
