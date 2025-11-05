@@ -1,10 +1,5 @@
 describe('Donor Search & Pagination', () => {
   beforeEach(() => {
-    // Redirect all API calls from dev to test database
-    cy.intercept(`${Cypress.env('devApiUrl')}/api/**`, (req) => {
-      req.url = req.url.replace(Cypress.env('devApiUrl'), Cypress.env('testApiUrl'));
-    });
-
     cy.clearDonors();
     cy.visit('/donors');
     // Wait for page to fully load
@@ -18,8 +13,8 @@ describe('Donor Search & Pagination', () => {
     cy.createDonor('Bob Jones', 'bob@example.com');
     cy.createDonor('Alice Brown', 'alice.brown@example.com');
 
-    // Verify all donors appear and count shows 3
-    cy.contains('Donors (3)').should('be.visible');
+    // Verify all donors appear
+    cy.get('[data-testid="donor-row"]', { timeout: 10000 }).should('have.length', 3);
     cy.contains('Alice Smith').should('be.visible');
     cy.contains('Bob Jones').should('be.visible');
     cy.contains('Alice Brown').should('be.visible');
@@ -31,12 +26,10 @@ describe('Donor Search & Pagination', () => {
     cy.wait(500);
 
     // Should show only Alice donors
+    cy.get('[data-testid="donor-row"]').should('have.length', 2);
     cy.contains('Alice Smith').should('be.visible');
     cy.contains('Alice Brown').should('be.visible');
     cy.contains('Bob Jones').should('not.exist');
-
-    // Should show count of 2
-    cy.contains('Donors (2)').should('be.visible');
   });
 
   it('searches donors by email partial match', () => {
@@ -46,7 +39,7 @@ describe('Donor Search & Pagination', () => {
     cy.createDonor('Bob Example', 'example@yahoo.com');
 
     // Verify all donors appear
-    cy.contains('Donors (3)').should('be.visible');
+    cy.get('[data-testid="donor-row"]', { timeout: 10000 }).should('have.length', 3);
 
     // Search for "n" - should find mlongerich@gmail.com and michael@mailinator.com
     cy.get('input[placeholder="Search by name or email..."]').type('n');
@@ -55,14 +48,12 @@ describe('Donor Search & Pagination', () => {
     cy.wait(500);
 
     // Should show only donors with "n" in name or email
+    cy.get('[data-testid="donor-row"]').should('have.length', 2);
     cy.contains('Michael Longerich').should('be.visible');
     cy.contains('mlongerich@gmail.com').should('be.visible');
     cy.contains('John Smith').should('be.visible');
-    cy.contains('michael@mailinator.com').should('be.visible');
+    // Note: mailinator emails are hidden in UI, so we won't see the actual email
     cy.contains('Bob Example').should('not.exist');
-
-    // Should show count of 2
-    cy.contains('Donors (2)').should('be.visible');
   });
 
   it('searches donors by email domain', () => {
@@ -77,11 +68,10 @@ describe('Donor Search & Pagination', () => {
     cy.wait(500);
 
     // Should show only Gmail users
+    cy.get('[data-testid="donor-row"]').should('have.length', 2);
     cy.contains('User One').should('be.visible');
     cy.contains('User Three').should('be.visible');
     cy.contains('User Two').should('not.exist');
-
-    cy.contains('Donors (2)').should('be.visible');
   });
 
   it('searches donors by partial first name', () => {
@@ -96,11 +86,10 @@ describe('Donor Search & Pagination', () => {
     cy.wait(500);
 
     // Should show both Alice donors
+    cy.get('[data-testid="donor-row"]').should('have.length', 2);
     cy.contains('Alice Smith').should('be.visible');
     cy.contains('Alice Brown').should('be.visible');
     cy.contains('Bob Johnson').should('not.exist');
-
-    cy.contains('Donors (2)').should('be.visible');
   });
 
   it('searches donors by last name', () => {
@@ -115,10 +104,9 @@ describe('Donor Search & Pagination', () => {
     cy.wait(500);
 
     // Should show both Smith donors
+    cy.get('[data-testid="donor-row"]').should('have.length', 2);
     cy.contains('Alice Smith').should('be.visible');
     cy.contains('Charlie Smith').should('be.visible');
     cy.contains('Bob Johnson').should('not.exist');
-
-    cy.contains('Donors (2)').should('be.visible');
   });
 });

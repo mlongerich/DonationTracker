@@ -7,21 +7,27 @@ describe('Children and Sponsorship Management', () => {
 
   it('displays the Children page with form and list', () => {
     cy.contains('Children Management').should('be.visible');
-    cy.contains('button', /add child/i).should('be.visible');
+    cy.contains('Add Child').should('be.visible'); // Section heading, not button
+    cy.contains('List Children').should('be.visible');
   });
 
   it('creates a new child and displays in list', () => {
-    // Click Add Child button
-    cy.contains('button', /add child/i).click();
-
-    // Fill out the form
-    cy.get('input[type="text"]').first().type('Maria Gonzalez');
+    // Form is embedded on page - no button click needed
+    // Fill out the form in the "Add Child" section
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .find('input[type="text"]')
+      .first()
+      .type('Maria Gonzalez');
 
     // Submit the form
-    cy.contains('button', /submit/i).click();
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .contains('button', /submit/i)
+      .click();
 
     // Verify child appears in the list
-    cy.contains('Maria Gonzalez').should('be.visible');
+    cy.contains('Maria Gonzalez', { timeout: 5000 }).should('be.visible');
     cy.contains('No active sponsor').should('be.visible');
   });
 
@@ -36,40 +42,59 @@ describe('Children and Sponsorship Management', () => {
     // Navigate to children page
     cy.visit('/children');
 
-    // Create a child
-    cy.contains('button', /add child/i).click();
-    cy.get('input[type="text"]').first().type('Sofia Rodriguez');
-    cy.contains('button', /submit/i).click();
+    // Create a child using embedded form
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .find('input[type="text"]')
+      .first()
+      .type('Sofia Rodriguez');
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .contains('button', /submit/i)
+      .click();
 
     // Wait for child to appear with "No active sponsor"
     cy.contains('Sofia Rodriguez', { timeout: 10000 }).should('be.visible');
     cy.contains('No active sponsor', { timeout: 10000 }).should('be.visible');
 
-    // Click "Add Sponsor" button
-    cy.contains('button', /add sponsor/i, { timeout: 10000 }).should('be.visible').click();
+    // Click "Add Sponsor" icon button (aria-label)
+    cy.get('button[aria-label="add sponsor"]', { timeout: 10000 }).should('be.visible').click();
 
     // Search for and select donor - find the autocomplete input (modal should be open)
     cy.get('input[type="text"]').last().type('John');
     cy.wait(1000); // Wait for debounce
-    cy.contains('John Smith').click();
 
-    // Enter monthly amount
-    cy.get('input[type="number"]').type('50');
+    // Select from dropdown options, not the typed text
+    cy.get('[role="option"]').contains('John Smith').click();
 
-    // Submit sponsorship
-    cy.contains('button', /submit/i).click();
+    // Wait for form to update after donor selection
+    cy.wait(500);
+
+    // Enter monthly amount - select all then type to replace
+    cy.get('input[type="number"]').type('{selectall}50');
+
+    // Submit sponsorship - find SUBMIT button within the modal dialog
+    cy.contains('.MuiDialog-root', 'Add Sponsor for Sofia Rodriguez')
+      .contains('button', /submit/i)
+      .click();
 
     // Verify modal closes and sponsorship appears
     cy.contains(/add sponsor for sofia rodriguez/i).should('not.exist');
-    cy.contains(/sponsored by john smith/i).should('be.visible');
-    cy.contains(/\$50\/month/i).should('be.visible');
+    cy.contains(/sponsored by:.*john smith/i).should('be.visible');
+    cy.contains(/\$50\.00\/mo/i).should('be.visible');
   });
 
   it('deletes a child', () => {
-    // Create a child
-    cy.contains('button', /add child/i).click();
-    cy.get('input[type="text"]').first().type('Carlos Lopez');
-    cy.contains('button', /submit/i).click();
+    // Create a child using embedded form
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .find('input[type="text"]')
+      .first()
+      .type('Carlos Lopez');
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .contains('button', /submit/i)
+      .click();
 
     // Wait for child to appear
     cy.contains('Carlos Lopez', { timeout: 10000 }).should('be.visible');
@@ -89,11 +114,17 @@ describe('Children and Sponsorship Management', () => {
     cy.contains('button', /submit/i).click();
     cy.contains(/donor (created|updated) successfully/i, { timeout: 10000 }).should('be.visible');
 
-    // Create a child
+    // Create a child using embedded form
     cy.visit('/children');
-    cy.contains('button', /add child/i).click();
-    cy.get('input[type="text"]').first().type('Miguel Santos');
-    cy.contains('button', /submit/i).click();
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .find('input[type="text"]')
+      .first()
+      .type('Miguel Santos');
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .contains('button', /submit/i)
+      .click();
     cy.contains('Miguel Santos', { timeout: 10000 }).should('be.visible');
 
     // Navigate to Sponsorships page
@@ -111,8 +142,11 @@ describe('Children and Sponsorship Management', () => {
     cy.wait(1000); // Wait for debounce
     cy.contains('Miguel Santos').click();
 
-    // Enter monthly amount
-    cy.get('input[type="number"]').type('75');
+    // Wait for form to update after child selection
+    cy.wait(500);
+
+    // Enter monthly amount - select all then type to replace
+    cy.get('input[type="number"]').type('{selectall}75');
 
     // Submit the form
     cy.contains('button', /submit/i).click();

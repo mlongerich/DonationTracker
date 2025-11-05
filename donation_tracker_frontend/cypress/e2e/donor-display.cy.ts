@@ -1,12 +1,5 @@
 describe('Donor Email Display', () => {
   beforeEach(() => {
-    cy.intercept(`${Cypress.env('devApiUrl')}/api/**`, (req) => {
-      req.url = req.url.replace(
-        Cypress.env('devApiUrl'),
-        Cypress.env('testApiUrl')
-      );
-    });
-
     cy.clearDonors();
     cy.visit('/donors');
     cy.contains('Donation Tracker').should('be.visible');
