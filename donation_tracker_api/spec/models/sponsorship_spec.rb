@@ -188,6 +188,40 @@ RSpec.describe Sponsorship, type: :model do
         expect(sponsorship2.project_id).to eq(sponsorship3.project_id)
         expect(Project.where(project_type: :sponsorship, title: "Sponsor Ana").count).to eq(1)
       end
+
+      it "uses provided sponsorship project_id when valid" do
+        # Create a sponsorship project
+        existing_project = create(:project, project_type: :sponsorship, title: "Custom Sponsorship Project")
+
+        # Create sponsorship with explicit project_id
+        sponsorship = Sponsorship.create!(
+          donor: donor,
+          child: child,
+          project_id: existing_project.id,
+          monthly_amount: 50
+        )
+
+        # Should use the provided project, not create new one
+        expect(sponsorship.project_id).to eq(existing_project.id)
+        expect(sponsorship.project.title).to eq("Custom Sponsorship Project")
+      end
+
+      it "rejects non-sponsorship project_id" do
+        # Create a general (non-sponsorship) project
+        general_project = create(:project, project_type: :general, title: "General Project")
+
+        # Try to create sponsorship with non-sponsorship project
+        sponsorship = Sponsorship.new(
+          donor: donor,
+          child: child,
+          project_id: general_project.id,
+          monthly_amount: 50
+        )
+
+        # Should fail validation
+        expect(sponsorship.valid?).to be false
+        expect(sponsorship.errors[:project]).to include("must be a sponsorship project")
+      end
     end
   end
 

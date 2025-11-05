@@ -8,6 +8,7 @@ class Sponsorship < ApplicationRecord
   # Frontend forms should still validate > 0 for manual user entry (UX requirement)
   validates :monthly_amount, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validate :no_duplicate_active_sponsorships
+  validate :project_must_be_sponsorship_type
 
   scope :active, -> { where(end_date: nil) }
 
@@ -50,6 +51,14 @@ class Sponsorship < ApplicationRecord
 
     if existing
       errors.add(:base, "#{child.name} is already actively sponsored by #{donor.name}")
+    end
+  end
+
+  def project_must_be_sponsorship_type
+    return unless project_id.present? && project
+
+    unless project.project_type_sponsorship?
+      errors.add(:project, "must be a sponsorship project")
     end
   end
 

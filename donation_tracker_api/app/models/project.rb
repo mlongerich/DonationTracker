@@ -6,7 +6,7 @@ class Project < ApplicationRecord
 
   enum :project_type, { general: 0, campaign: 1, sponsorship: 2 }, prefix: true
 
-  validates :title, presence: true
+  validates :title, presence: true, uniqueness: true
 
   before_destroy :prevent_system_project_deletion
   before_discard :check_active_sponsorships

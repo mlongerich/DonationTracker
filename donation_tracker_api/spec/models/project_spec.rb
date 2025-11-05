@@ -8,6 +8,20 @@ RSpec.describe Project, type: :model do
       expect(project.errors[:title]).to include("can't be blank")
     end
 
+    it "requires a unique title" do
+      create(:project, title: "Unique Project")
+      duplicate_project = build(:project, title: "Unique Project")
+      expect(duplicate_project).not_to be_valid
+      expect(duplicate_project.errors[:title]).to include("has already been taken")
+    end
+
+    it "allows updating project with same title" do
+      project = create(:project, title: "Original Title")
+      project.description = "Updated description"
+      expect(project).to be_valid
+      expect(project.save).to be true
+    end
+
     it "prevents deletion of system projects" do
       system_project = create(:project, title: "System Project", system: true)
       system_project.destroy

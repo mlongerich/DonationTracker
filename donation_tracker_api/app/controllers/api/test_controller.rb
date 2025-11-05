@@ -18,9 +18,10 @@ module Api
       Sponsorship.delete_all
       Donor.delete_all
       Child.delete_all
-      # Don't delete projects as they may be system projects
+      # Delete non-system projects (keep system projects for application functionality)
+      Project.where(system: false).delete_all
 
-      render json: { message: "Database cleaned", donations_deleted: true, donors_deleted: true }, status: :ok
+      render json: { message: "Database cleaned", donations_deleted: true, donors_deleted: true, projects_deleted: true }, status: :ok
     end
   end
 end
