@@ -23,33 +23,33 @@ else
 fi
 
 echo "🔍 Running ESLint on frontend files..."
-if ! timeout 30s $RUNNER lint 2>&1 | head -50; then
+if ! $RUNNER lint 2>&1 | head -50; then
     echo "❌ ESLint found linting violations that must be fixed before committing"
     echo "💡 Fix automatically with: cd donation_tracker_frontend && npm run lint:fix"
     exit 1
 fi
 
 echo "🎨 Running Prettier formatting checks..."
-if ! timeout 30s $NPXRUNNER prettier --check "src/**/*.{ts,tsx}" 2>&1 | head -50; then
+if ! $NPXRUNNER prettier --check "src/**/*.{ts,tsx}" 2>&1 | head -50; then
     echo "❌ Prettier found formatting issues that must be fixed before committing"
     echo "💡 Fix automatically with: cd donation_tracker_frontend && npm run format"
     exit 1
 fi
 
 echo "📝 Running TypeScript type checking..."
-if ! timeout 30s $NPXRUNNER tsc --noEmit 2>&1 | head -50; then
+if ! $NPXRUNNER tsc --noEmit 2>&1 | head -50; then
     echo "❌ TypeScript found type errors that must be fixed before committing"
     exit 1
 fi
 
 echo "🧪 Running Jest unit tests..."
-if ! timeout 120s $RUNNER test:ci 2>&1 | tail -100; then
+if ! $RUNNER test:ci 2>&1 | tail -100; then
     echo "❌ Jest tests failed - must fix before committing"
     exit 1
 fi
 
 echo "🎭 Running Cypress E2E tests..."
-if ! timeout 300s $RUNNER cypress:run 2>&1 | tail -100; then
+if ! $RUNNER cypress:run 2>&1 | tail -100; then
     echo "❌ Cypress E2E tests failed - must fix before committing"
     exit 1
 fi

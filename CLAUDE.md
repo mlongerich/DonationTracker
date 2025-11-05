@@ -441,6 +441,50 @@ end
 - **Mobile-first**: Responsive components
 - **Axios**: Standardized API client
 
+#### Error Boundary Pattern
+
+**Purpose:** Catch React component errors and display user-friendly error UI instead of blank screen
+
+**Implementation:**
+```tsx
+// src/index.tsx - Root level wrapper
+<ErrorBoundary>
+  <App />
+</ErrorBoundary>
+```
+
+**Features:**
+- Catches render errors, lifecycle errors, constructor errors
+- Shows user-friendly error message with "Try Again" and "Reload Page" buttons
+- Displays error details (stack trace) in development mode only
+- Hides technical details in production
+- Supports custom fallback UI via `fallback` prop
+- Logs errors to console (ready for Sentry/LogRocket integration)
+
+**Limitations (use try-catch for these):**
+- Event handlers (use try-catch)
+- Asynchronous code (use .catch())
+- Server-side rendering errors
+- Errors in ErrorBoundary itself
+
+**Granular Error Boundaries (optional):**
+```tsx
+// Page-level for better isolation
+<ErrorBoundary fallback={<CustomErrorMessage />}>
+  <DonorsPage />
+</ErrorBoundary>
+```
+
+**Manual Testing:**
+```tsx
+// Temporarily add to any page
+import ErrorTrigger from '../components/ErrorTrigger';
+
+<ErrorTrigger />  // Click button to test ErrorBoundary
+```
+
+**See:** TICKET-036 for full implementation details
+
 #### TypeScript Type Organization
 
 **Central Type Definitions:**

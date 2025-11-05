@@ -457,5 +457,4 @@ describe('DonationsPage', () => {
       });
     }
   });
-
 });
