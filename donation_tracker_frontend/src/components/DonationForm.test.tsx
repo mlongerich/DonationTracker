@@ -227,52 +227,56 @@ describe('DonationForm', () => {
     });
   });
 
-  it('passes child_id to backend when child selected', async () => {
-    const mockDonor = { id: 1, name: 'John Doe', email: 'john@example.com' };
+  it(
+    'passes child_id to backend when child selected',
+    async () => {
+      const mockDonor = { id: 1, name: 'John Doe', email: 'john@example.com' };
 
-    // Mock API responses
-    (searchProjectOrChild as jest.Mock).mockResolvedValue({
-      projects: [],
-      children: [{ id: 5, name: 'Eli' }],
-    });
-    (apiClient.get as jest.Mock).mockResolvedValue({
-      data: { donors: [mockDonor] },
-    });
-    (createDonation as jest.Mock).mockResolvedValue({});
+      // Mock API responses
+      (searchProjectOrChild as jest.Mock).mockResolvedValue({
+        projects: [],
+        children: [{ id: 5, name: 'Eli' }],
+      });
+      (apiClient.get as jest.Mock).mockResolvedValue({
+        data: { donors: [mockDonor] },
+      });
+      (createDonation as jest.Mock).mockResolvedValue({});
 
-    const user = userEvent.setup();
-    render(<DonationForm />);
+      const user = userEvent.setup();
+      render(<DonationForm />);
 
-    // Select child from project/child autocomplete
-    const projectField = screen.getByLabelText(/project or child/i);
-    await user.clear(projectField);
-    await user.type(projectField, 'Eli');
-    await waitFor(() =>
-      expect(searchProjectOrChild).toHaveBeenCalledWith('Eli')
-    );
-    const childOption = await screen.findByText(/Eli/);
-    await user.click(childOption);
-
-    // Select donor
-    const donorField = screen.getByLabelText(/donor/i);
-    await user.type(donorField, 'John');
-    await waitFor(() => expect(apiClient.get).toHaveBeenCalled());
-    const donorOption = await screen.findByText(/John Doe/);
-    await user.click(donorOption);
-
-    // Fill amount and submit
-    await user.type(screen.getByLabelText(/amount/i), '100');
-    await user.click(screen.getByRole('button', { name: /create donation/i }));
-
-    // Verify donation includes child_id (backend handles sponsorship auto-creation)
-    await waitFor(() => {
-      expect(createDonation).toHaveBeenCalledWith(
-        expect.objectContaining({
-          child_id: 5,
-          donor_id: 1,
-          amount: 10000, // 100 dollars = 10000 cents
-        })
+      // Select child from project/child autocomplete
+      const projectField = screen.getByLabelText(/project or child/i);
+      await user.clear(projectField);
+      await user.type(projectField, 'Eli');
+      await waitFor(() =>
+        expect(searchProjectOrChild).toHaveBeenCalledWith('Eli')
       );
-    });
-  });
+      const childOption = await screen.findByText(/Eli/);
+      await user.click(childOption);
+
+      // Select donor
+      const donorField = screen.getByLabelText(/donor/i);
+      await user.type(donorField, 'John');
+      await waitFor(() => expect(apiClient.get).toHaveBeenCalled());
+      const donorOption = await screen.findByText(/John Doe/);
+      await user.click(donorOption);
+
+      // Fill amount and submit
+      await user.type(screen.getByLabelText(/amount/i), '100');
+      await user.click(screen.getByRole('button', { name: /create donation/i }));
+
+      // Verify donation includes child_id (backend handles sponsorship auto-creation)
+      await waitFor(() => {
+        expect(createDonation).toHaveBeenCalledWith(
+          expect.objectContaining({
+            child_id: 5,
+            donor_id: 1,
+            amount: 10000, // 100 dollars = 10000 cents
+          })
+        );
+      });
+    },
+    10000
+  ); // Increase timeout for userEvent typing delays + debounced API calls
 });
