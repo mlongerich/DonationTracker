@@ -42,9 +42,17 @@ if ! timeout 30s $NPXRUNNER tsc --noEmit 2>&1 | head -50; then
     exit 1
 fi
 
-# Skip tests in pre-commit hook (run separately with: npm test)
-# Tests are slow and already validated by CI/CD pipeline
-echo "⏭️  Skipping tests (run manually with: npm test)"
+echo "🧪 Running Jest unit tests..."
+if ! timeout 120s $RUNNER test:ci 2>&1 | tail -100; then
+    echo "❌ Jest tests failed - must fix before committing"
+    exit 1
+fi
 
-echo "✅ All frontend quality checks passed!"
+echo "🎭 Running Cypress E2E tests..."
+if ! timeout 300s $RUNNER cypress:run 2>&1 | tail -100; then
+    echo "❌ Cypress E2E tests failed - must fix before committing"
+    exit 1
+fi
+
+echo "✅ All frontend quality checks and tests passed!"
 exit 0

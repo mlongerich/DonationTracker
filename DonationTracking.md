@@ -17,9 +17,17 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2025-11-04
+**Last Updated:** 2025-11-05
 
 **Latest Milestones:**
+- TICKET-078 - Fix Donation Filter Race Condition ✅ (2025-11-05)
+  - Fixed race condition in DonationsPage.tsx between state updates and API calls
+  - Removed useRansackFilters hook, build query params directly from state
+  - All 5 reported filter issues resolved (donor filter, date filters, clear button)
+  - Fixed 8 Cypress E2E test files (34/34 tests passing)
+  - Added Jest and Cypress tests to pre-commit hooks
+  - Backend: TestController cleanup endpoint fix
+  - Frontend: 264 tests pass, Cypress: 34/34 E2E tests pass ✅
 - TICKET-069 - Code Quality Cleanup (Linter Warnings Batch) ✅ (2025-11-04)
   - Fixed 63 linter warnings (16 backend Reek, 47 frontend ESLint)
   - Backend: UnusedParameters (5), DuplicateMethodCall (9), UtilityFunction (1), UncommunicativeVariableName (1)
@@ -61,7 +69,7 @@
 - TICKET-064 - Smart Sponsorship Detection & Backend Logic ✅ (2025-10-31)
 - TICKET-032 - Custom Hooks Library (useDebouncedValue, usePagination, useRansackFilters) ✅ (2025-10-29)
 
-**Current Focus:** Code quality improvements complete (TICKET-067, TICKET-068, TICKET-069)
+**Current Focus:** Bug fixes and testing infrastructure improvements complete (TICKET-078)
 **Next Feature:** TICKET-052 (Sponsorship Donation Linking) or TICKET-066 (useChildren hook refactoring)
 
 **See [docs/project/README.md](docs/project/README.md#current-status) for detailed status**

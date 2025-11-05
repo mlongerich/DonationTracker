@@ -120,6 +120,37 @@ Allow data analysis in spreadsheet tools, backups
 
 ---
 
+### [Fix Cypress in Docker (Alpine ARM64 Binary Issue)]
+**Added:** 2025-11-05
+**Priority:** 🟡 Medium
+**Effort:** M
+
+**Description:**
+Cypress binary fails to run inside Docker frontend container due to Alpine Linux ARM64 architecture incompatibility. Currently requires running Cypress tests locally outside Docker.
+
+**User Value:**
+- Pre-commit hooks can run Cypress tests automatically
+- CI/CD pipeline can run full E2E test suite
+- Consistent development environment across team
+
+**Technical Approach:**
+- Option 1: Switch Docker frontend base image from Alpine to Debian/Ubuntu (supports Cypress)
+- Option 2: Use Cypress Docker image as base (`cypress/base:latest`)
+- Option 3: Run Cypress in separate Docker service with X11 forwarding
+- Option 4: Use GitHub Actions / CI runner for E2E tests only
+
+**Dependencies:**
+- None (infrastructure change)
+
+**Error:**
+```
+Command failed with ENOENT: /root/.cache/Cypress/13.17.0/Cypress/Cypress --no-sandbox --smoke-test --ping=642
+spawn /root/.cache/Cypress/13.17.0/Cypress/Cypress ENOENT
+Platform: linux-arm64 (Alpine Linux - 3.22.1)
+```
+
+---
+
 ### [Archived Donor Donation Visibility Policy]
 **Added:** 2025-10-18
 **Priority:** 🟡 Medium
