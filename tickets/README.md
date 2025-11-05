@@ -57,6 +57,7 @@ Current work items and user stories being actively developed.
 - [TICKET-068: Global Error Handling in ApplicationController](completed/TICKET-068-global-error-handling.md) - ✅ Complete (2025-11-04)
 - [TICKET-069: Code Quality Cleanup (Linter Warnings Batch)](completed/TICKET-069-code-quality-cleanup-batch.md) - ✅ Complete (2025-11-04)
 - [TICKET-078: Fix Donation Filter Race Condition](completed/TICKET-078-fix-donation-filter-race-condition.md) - ✅ Complete (2025-11-05)
+- [TICKET-079: Project CRUD E2E Tests + Bug Fixes](completed/TICKET-079-project-crud-e2e-tests.md) - ✅ Complete (2025-11-05)
 
 ### 🔵 In Progress Tickets
 
@@ -115,7 +116,6 @@ Current work items and user stories being actively developed.
 #### Testing & Quality Assurance
 
 **E2E Test Coverage:**
-- [TICKET-079: Project CRUD E2E Tests](TICKET-079-project-crud-e2e-tests.md) - 📋 Planned (🟡 Medium, M) - *Full project CRUD + cascade delete protection*
 - [TICKET-080: Sponsorship Management E2E Tests](TICKET-080-sponsorship-management-e2e-tests.md) - 📋 Planned (🔴 High, L) - *End/reactivate/delete actions + filters*
 - [TICKET-081: Donor Archive/Restore Extended E2E Tests](TICKET-081-donor-archive-restore-extended-e2e-tests.md) - 📋 Planned (🟢 Low, S) - *Data preservation validation*
 - [TICKET-082: Smart Sponsorship Detection E2E Tests](TICKET-082-smart-sponsorship-detection-e2e-tests.md) - 📋 Planned (🟡 Medium, M) - *Auto-creation workflows*

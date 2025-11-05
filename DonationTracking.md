@@ -20,6 +20,15 @@
 **Last Updated:** 2025-11-05
 
 **Latest Milestones:**
+- TICKET-079 - Project CRUD E2E Tests + Bug Fixes ✅ (2025-11-05)
+  - Created comprehensive E2E test suite: 10 tests covering full CRUD + archive/restore
+  - **Bug Fix 1**: Added unique title validation to Project model
+  - **Bug Fix 2**: Fixed test cleanup to delete projects between E2E runs
+  - **Bug Fix 3**: Fixed sponsorship API to respect provided project_id (strong parameters + validation)
+  - **Bug Fix 4**: Fixed DonationForm test timeout (increased to 10s for userEvent delays)
+  - Added 2 RSpec tests for Project uniqueness, 2 for Sponsorship project_id validation
+  - Backend: 270 tests pass (93.11% coverage), Frontend: 264 tests pass
+  - Cypress: 44/44 E2E tests pass (37s runtime for project-crud.cy.ts) ✅
 - TICKET-078 - Fix Donation Filter Race Condition ✅ (2025-11-05)
   - Fixed race condition in DonationsPage.tsx between state updates and API calls
   - Removed useRansackFilters hook, build query params directly from state
