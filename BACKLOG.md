@@ -35,23 +35,9 @@ What needs to be done first?
 ## Prioritized Backlog
 
 ### [Donor Bulk Operations]
+**Status:** ✅ **Converted to TICKET-087**
 **Added:** 2025-10-07
-**Priority:** 🟡 Medium
-**Effort:** M
-
-**Description:**
-Allow bulk actions on donors (bulk archive, bulk restore, bulk export)
-
-**User Value:**
-Saves time when managing many donors at once
-
-**Technical Approach:**
-- Add checkbox selection to DonorList
-- Add bulk action toolbar
-- Backend endpoint for bulk operations
-
-**Dependencies:**
-- Archive/Restore feature ✅ (complete)
+**Converted:** 2025-11-05
 
 ---
 
@@ -100,89 +86,22 @@ Migrate existing data without manual entry
 ---
 
 ### [Donor Export to Excel/CSV]
+**Status:** ✅ **Converted to TICKET-088**
 **Added:** 2025-10-07
-**Priority:** 🟢 Low
-**Effort:** S
-
-**Description:**
-Export donor list to Excel or CSV format
-
-**User Value:**
-Allow data analysis in spreadsheet tools, backups
-
-**Technical Approach:**
-- Add export button to donor list
-- Backend generates CSV/XLSX
-- Include filters (active/archived, search results)
-
-**Dependencies:**
-- Donor list with search/filter ✅ (complete)
+**Converted:** 2025-11-05
 
 ---
 
 ### [Fix Cypress in Docker (Alpine ARM64 Binary Issue)]
+**Status:** ✅ **Converted to TICKET-090**
 **Added:** 2025-11-05
-**Priority:** 🟡 Medium
-**Effort:** M
-
-**Description:**
-Cypress binary fails to run inside Docker frontend container due to Alpine Linux ARM64 architecture incompatibility. Currently requires running Cypress tests locally outside Docker.
-
-**User Value:**
-- Pre-commit hooks can run Cypress tests automatically
-- CI/CD pipeline can run full E2E test suite
-- Consistent development environment across team
-
-**Technical Approach:**
-- Option 1: Switch Docker frontend base image from Alpine to Debian/Ubuntu (supports Cypress)
-- Option 2: Use Cypress Docker image as base (`cypress/base:latest`)
-- Option 3: Run Cypress in separate Docker service with X11 forwarding
-- Option 4: Use GitHub Actions / CI runner for E2E tests only
-
-**Dependencies:**
-- None (infrastructure change)
-
-**Error:**
-```
-Command failed with ENOENT: /root/.cache/Cypress/13.17.0/Cypress/Cypress --no-sandbox --smoke-test --ping=642
-spawn /root/.cache/Cypress/13.17.0/Cypress/Cypress ENOENT
-Platform: linux-arm64 (Alpine Linux - 3.22.1)
-```
+**Converted:** 2025-11-05
 
 ---
 
 ### [Archived Donor Donation Visibility Policy]
+**Status:** ✅ **Converted to TICKET-089**
 **Added:** 2025-10-18
-**Priority:** 🟡 Medium
-**Effort:** S
-
-**Description:**
-Decide and implement how donations from archived donors should be displayed in the donation list and reports. Currently, donations remain visible even after their donor is archived, but this behavior needs to be explicitly defined as a business rule.
-
-**User Value:**
-Clear, predictable behavior when working with archived donors and historical donations
-
-**Options to Consider:**
-1. **Keep visible with indicator** - Show all donations with "Archived Donor" badge/indicator
-2. **Hide by default, filterable** - Hide archived donor donations by default, add filter to show them
-3. **Always visible** - Current behavior, donations always show regardless of donor status
-4. **Cascade archive** - When donor is archived, associated donations are soft-deleted too (with restore)
-5. **Read-only mode** - Show but prevent editing donations from archived donors
-
-**Technical Approach:**
-- Update DonationList filtering logic based on chosen policy
-- Add visual indicators if needed (badges, grayed out rows)
-- Update DonationPresenter to include donor archive status
-- Consider implications for reports and analytics
-- Document decision in CLAUDE.md business rules section
-
-**Dependencies:**
-- Donor soft delete/archive feature ✅ (TICKET-001 complete)
-- Donation list with filtering ✅ (TICKET-016 complete)
-
-**Related Considerations:**
-- What happens when archived donor is restored? (Donations should become visible again)
-- Should donation totals include archived donor donations?
-- Should search include archived donor donations?
+**Converted:** 2025-11-05
 
 ---
