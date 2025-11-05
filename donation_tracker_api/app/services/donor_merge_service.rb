@@ -53,10 +53,20 @@ class DonorMergeService
     merged_donor = Donor.transaction do
       temporarily_change_emails
       soft_delete_source_donors
-      create_merged_donor(merged_attributes)
+      new_donor = create_merged_donor(merged_attributes)
+
+      # Reassign associations after creating merged donor
+      @donations_count = reassign_donations(new_donor.id)
+      @sponsorships_count = reassign_sponsorships(new_donor.id)
+
+      new_donor
     end
 
-    { merged_donor: merged_donor }
+    {
+      merged_donor: merged_donor,
+      donations_reassigned: @donations_count,
+      sponsorships_reassigned: @sponsorships_count
+    }
   end
 
   def build_merged_attributes
@@ -86,5 +96,15 @@ class DonorMergeService
     @donors.each { |donor| donor.update_column(:merged_into_id, new_donor.id) }
 
     new_donor
+  end
+
+  def reassign_donations(merged_donor_id)
+    Donation.where(donor_id: @donor_ids)
+            .update_all(donor_id: merged_donor_id)
+  end
+
+  def reassign_sponsorships(merged_donor_id)
+    Sponsorship.where(donor_id: @donor_ids)
+               .update_all(donor_id: merged_donor_id)
   end
 end

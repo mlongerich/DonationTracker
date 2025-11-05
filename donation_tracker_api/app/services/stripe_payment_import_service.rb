@@ -22,11 +22,12 @@ class StripePaymentImportService
         invoice.invoice_date = Date.parse(@csv_row["Created Formatted"])
       end
 
-      donor_result = DonorService.find_or_update_by_email(
+      donor_result = DonorService.find_or_update_by_email_or_stripe_customer(
         {
           name: @csv_row["Billing Details Name"],
           email: @csv_row["Cust Email"]
         },
+        @csv_row["Cust ID"],
         DateTime.parse(@csv_row["Created Formatted"])
       )
       donor = donor_result[:donor]

@@ -359,5 +359,42 @@ RSpec.describe StripePaymentImportService do
         }.to change(Donation, :count).by(1)
       end
     end
+
+    context 'with merged donor' do
+      it 'assigns donation to merged donor not original donor' do
+        # Setup: Create donor1 with existing donation
+        donor1 = Donor.create!(name: "John Doe", email: "john@example.com")
+        project = Project.create!(title: "Test Project", project_type: :general)
+        Donation.create!(
+          donor: donor1,
+          project: project,
+          amount: 10000,
+          date: Date.today,
+          stripe_customer_id: "cus_merged123"
+        )
+
+        # Setup: Create donor2 (merged donor)
+        donor2 = Donor.create!(name: "John Doe", email: "john.doe@example.com")
+
+        # Setup: Simulate merge (donor1 → donor2)
+        donor1.update_column(:merged_into_id, donor2.id)
+        donor1.discard
+
+        # Import new CSV row with same stripe_customer_id
+        csv_row = valid_csv_row.merge(
+          'Cust ID' => 'cus_merged123',
+          'Transaction ID' => 'txn_new_payment',
+          'Description' => 'New payment after merge',
+          'Cust Subscription Data Plan Nickname' => ''
+        )
+
+        result = described_class.new(csv_row).import
+        new_donation = result[:donations].first
+
+        # Should assign to merged donor (donor2), not original (donor1)
+        expect(new_donation.donor_id).to eq(donor2.id)
+        expect(new_donation.donor_id).not_to eq(donor1.id)
+      end
+    end
   end
 end

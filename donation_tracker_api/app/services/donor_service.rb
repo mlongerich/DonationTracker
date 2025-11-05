@@ -1,4 +1,30 @@
 class DonorService
+  def self.find_or_update_by_email_or_stripe_customer(donor_attributes, stripe_customer_id, transaction_date)
+    # Priority 1: Check for existing donor by stripe_customer_id
+    if stripe_customer_id.present?
+      existing_donation = Donation.where(stripe_customer_id: stripe_customer_id).first
+
+      if existing_donation
+        donor = existing_donation.donor
+        original_donor_id = donor.id
+
+        # Follow merge chain if donor was merged
+        while donor.merged_into_id.present?
+          donor = Donor.find(donor.merged_into_id)
+        end
+
+        return {
+          donor: donor,
+          created: false,
+          redirected: (donor.id != original_donor_id)
+        }
+      end
+    end
+
+    # Priority 2: Fallback to email lookup (existing logic)
+    find_or_update_by_email(donor_attributes, transaction_date)
+  end
+
   def self.find_or_update_by_email(donor_attributes, transaction_date)
     # Normalize email before lookup (match Donor model's set_defaults logic)
     lookup_email = normalize_email(donor_attributes[:email], donor_attributes[:name])
