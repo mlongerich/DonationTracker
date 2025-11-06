@@ -1,7 +1,7 @@
 describe('Project Management - Full CRUD Workflow', () => {
   beforeEach(() => {
     // Clean database before each test
-    cy.request('DELETE', 'http://localhost:3001/api/test/cleanup');
+    cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
     cy.visit('/projects');
   });
 
@@ -173,13 +173,13 @@ describe('Project Management - Full CRUD Workflow', () => {
 
     it('prevents deletion when donations exist', () => {
       // Create a donor via API
-      cy.request('POST', 'http://localhost:3001/api/donors', {
+      cy.request('POST', `${Cypress.env('testApiUrl')}/api/donors`, {
         donor: { name: 'Test Donor', email: 'test@example.com' }
       }).then((donorResponse) => {
         const donorId = donorResponse.body.donor.id;
 
         // Create a project via API to get the ID
-        cy.request('POST', 'http://localhost:3001/api/projects', {
+        cy.request('POST', `${Cypress.env('testApiUrl')}/api/projects`, {
           project: {
             title: 'Project With Donations',
             description: 'This has donations',
@@ -189,7 +189,7 @@ describe('Project Management - Full CRUD Workflow', () => {
           const projectId = projectResponse.body.project.id;
 
           // Create a donation via API
-          cy.request('POST', 'http://localhost:3001/api/donations', {
+          cy.request('POST', `${Cypress.env('testApiUrl')}/api/donations`, {
             donation: {
               donor_id: donorId,
               project_id: projectId,
@@ -218,19 +218,19 @@ describe('Project Management - Full CRUD Workflow', () => {
 
     it('prevents deletion when sponsorships exist', () => {
       // Create a donor via API
-      cy.request('POST', 'http://localhost:3001/api/donors', {
+      cy.request('POST', `${Cypress.env('testApiUrl')}/api/donors`, {
         donor: { name: 'Sponsor Donor', email: 'sponsor@example.com' }
       }).then((donorResponse) => {
         const donorId = donorResponse.body.donor.id;
 
         // Create a child via API
-        cy.request('POST', 'http://localhost:3001/api/children', {
+        cy.request('POST', `${Cypress.env('testApiUrl')}/api/children`, {
           child: { name: 'Test Child' }
         }).then((childResponse) => {
           const childId = childResponse.body.child.id;
 
           // Create a sponsorship project via API to get the ID
-          cy.request('POST', 'http://localhost:3001/api/projects', {
+          cy.request('POST', `${Cypress.env('testApiUrl')}/api/projects`, {
             project: {
               title: 'Sponsorship Project',
               description: 'This has sponsorships',
@@ -240,7 +240,7 @@ describe('Project Management - Full CRUD Workflow', () => {
             const projectId = projectResponse.body.project.id;
 
             // Create a sponsorship via API (no end_date = active sponsorship)
-            cy.request('POST', 'http://localhost:3001/api/sponsorships', {
+            cy.request('POST', `${Cypress.env('testApiUrl')}/api/sponsorships`, {
               sponsorship: {
                 donor_id: donorId,
                 child_id: childId,
@@ -304,12 +304,12 @@ describe('Project Management - Full CRUD Workflow', () => {
 
       // Create a project via API and simulate it being a "system" project
       // by ensuring it has associations (which prevents deletion)
-      cy.request('POST', 'http://localhost:3001/api/donors', {
+      cy.request('POST', `${Cypress.env('testApiUrl')}/api/donors`, {
         donor: { name: 'System Test Donor', email: 'system@example.com' }
       }).then((donorResponse) => {
         const donorId = donorResponse.body.donor.id;
 
-        cy.request('POST', 'http://localhost:3001/api/projects', {
+        cy.request('POST', `${Cypress.env('testApiUrl')}/api/projects`, {
           project: {
             title: 'Test System Project',
             description: 'System managed project',
@@ -319,7 +319,7 @@ describe('Project Management - Full CRUD Workflow', () => {
           const projectId = projectResponse.body.project.id;
 
           // Create a donation to make it non-deletable (similar to system projects)
-          cy.request('POST', 'http://localhost:3001/api/donations', {
+          cy.request('POST', `${Cypress.env('testApiUrl')}/api/donations`, {
             donation: {
               donor_id: donorId,
               project_id: projectId,
@@ -350,13 +350,13 @@ describe('Project Management - Full CRUD Workflow', () => {
   describe('Project Archive and Restore', () => {
     it('archives a project with donations and restores it', () => {
       // Create a donor and project with donation
-      cy.request('POST', 'http://localhost:3001/api/donors', {
+      cy.request('POST', `${Cypress.env('testApiUrl')}/api/donors`, {
         donor: { name: 'Test Donor', email: 'archive-test@example.com' }
       }).then((donorResponse) => {
         const donorId = donorResponse.body.donor.id;
 
         // Create project via API to get the ID
-        cy.request('POST', 'http://localhost:3001/api/projects', {
+        cy.request('POST', `${Cypress.env('testApiUrl')}/api/projects`, {
           project: {
             title: 'Archive Test Project',
             description: 'This will be archived',
@@ -366,7 +366,7 @@ describe('Project Management - Full CRUD Workflow', () => {
           const projectId = projectResponse.body.project.id;
 
           // Create donation via API
-          cy.request('POST', 'http://localhost:3001/api/donations', {
+          cy.request('POST', `${Cypress.env('testApiUrl')}/api/donations`, {
             donation: {
               donor_id: donorId,
               project_id: projectId,

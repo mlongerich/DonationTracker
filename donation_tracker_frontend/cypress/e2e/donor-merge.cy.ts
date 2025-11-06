@@ -1,7 +1,7 @@
 describe('Donor Merge', () => {
   beforeEach(() => {
     // Clear database
-    cy.request('DELETE', 'http://localhost:3001/api/test/cleanup');
+    cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
     cy.visit('/donors');
   });
 

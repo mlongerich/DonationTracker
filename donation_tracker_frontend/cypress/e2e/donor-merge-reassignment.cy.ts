@@ -1,7 +1,7 @@
 describe('Donor Merge - Donation & Sponsorship Reassignment', () => {
   beforeEach(() => {
     // Clear database
-    cy.request('DELETE', 'http://localhost:3001/api/test/cleanup');
+    cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
   });
 
   it('reassigns donations to merged donor', () => {

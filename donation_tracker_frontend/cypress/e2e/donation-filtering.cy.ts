@@ -2,7 +2,7 @@ describe('Donation Date Range Filtering', () => {
   // Helper function to create a donation via UI
   const createDonationViaUI = (donorName: string, donorEmail: string, amount: string, date: string) => {
     // First, create donor via API if it doesn't exist (autocomplete doesn't create donors)
-    cy.request('POST', 'http://localhost:3001/api/donors', {
+    cy.request('POST', `${Cypress.env('testApiUrl')}/api/donors`, {
       donor: { name: donorName, email: donorEmail },
     });
 
@@ -56,7 +56,7 @@ describe('Donation Date Range Filtering', () => {
 
   beforeEach(() => {
     // Clean database before each test
-    cy.request('DELETE', 'http://localhost:3001/api/test/cleanup');
+    cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
 
     // Intercept donations API calls globally for all tests
     cy.intercept('GET', '/api/donations*').as('getDonations');
