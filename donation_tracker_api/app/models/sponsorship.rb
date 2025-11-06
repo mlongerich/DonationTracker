@@ -1,3 +1,30 @@
+# frozen_string_literal: true
+
+# Represents an ongoing sponsorship relationship between a donor and a child.
+#
+# A sponsorship must have:
+# - Donor (required)
+# - Child (required)
+# - Monthly amount in cents (>= 0, allows 0 for system auto-created sponsorships)
+# - Project (auto-created if not provided, must be sponsorship type)
+# - Optional start_date and end_date
+#
+# Features:
+# - Auto-creates sponsorship project if not provided
+# - Auto-restores archived donors/children/projects when creating
+# - Prevents duplicate active sponsorships (same donor, child, amount)
+# - Active scope for sponsorships without end_date
+# - Cascade delete prevention (restrict if donations exist)
+# - Ransack filtering on donor_id, child_id, monthly_amount, dates
+#
+# @example Create a sponsorship
+#   Sponsorship.create!(donor: donor, child: child, monthly_amount: 5000, start_date: Date.today)
+#
+# @see Donor for donor relationship
+# @see Child for child relationship
+# @see Project for project relationship
+# @see Donation for donation relationship
+# @see TICKET-064 for smart sponsorship detection
 class Sponsorship < ApplicationRecord
   belongs_to :donor
   belongs_to :child

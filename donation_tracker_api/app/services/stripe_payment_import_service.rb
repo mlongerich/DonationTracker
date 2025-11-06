@@ -1,3 +1,35 @@
+# frozen_string_literal: true
+
+# Imports individual Stripe payment rows with smart project and child detection.
+#
+# This service handles:
+# - Donor lookup via Stripe customer ID or email
+# - Multi-child sponsorship detection via regex parsing
+# - Project mapping via 10-step pattern matching (TICKET-071)
+# - Idempotent imports (skips if transaction_id already exists)
+# - Transaction safety for multi-donation sponsorships
+#
+# Pattern matching priority (highest to lowest):
+# 1. Sponsorship (child names in description)
+# 2. General Monthly Donation
+# 3. Campaign by ID
+# 4. Named items (Water Filter, Bibles, Food)
+# 5. Generic phone numbers → General Donation
+#
+# Uses instance method pattern for complex multi-step operations.
+#
+# 🗑️ CODE LIFECYCLE: TEMPORARY - One-Time Use Only
+# Will be replaced by TICKET-026 (Stripe Webhook Integration) for real-time sync.
+#
+# @example Import a Stripe payment row
+#   service = StripePaymentImportService.new(csv_row_hash)
+#   result = service.import
+#   # => { success: true, donations: [<Donation>, ...], skipped: false }
+#
+# @see DonorService for donor lookup logic
+# @see StripeCsvBatchImporter for batch processing
+# @see TICKET-070 for multi-child sponsorship implementation
+# @see TICKET-071 for project pattern matching
 class StripePaymentImportService
   SPONSORSHIP_PATTERN = /Monthly Sponsorship Donation for (.+)/i
   GENERAL_PATTERN = /\$\d+ - General Monthly Donation/i

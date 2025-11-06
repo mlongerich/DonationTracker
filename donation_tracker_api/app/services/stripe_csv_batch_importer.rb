@@ -4,7 +4,30 @@ require "csv"
 
 # Batch imports Stripe payment CSV file using StripePaymentImportService.
 #
+# This service handles:
+# - Row-by-row processing of Stripe CSV exports
+# - Delegation to StripePaymentImportService for individual row imports
+# - Import statistics (imported, skipped, failed counts)
+# - Error tracking with row numbers for debugging
+#
+# Uses instance method pattern for complex multi-step operations.
+#
 # 🗑️ CODE LIFECYCLE: TEMPORARY - One-Time Use Only
+# Will be replaced by TICKET-026 (Stripe Webhook Integration) for real-time sync.
+#
+# @example Batch import Stripe CSV
+#   service = StripeCsvBatchImporter.new("path/to/stripe_export.csv")
+#   result = service.import
+#   # => {
+#   #   imported_count: 150,
+#   #   skipped_count: 10,
+#   #   failed_count: 2,
+#   #   errors: ["Row 42: Invalid email format"]
+#   # }
+#
+# @see StripePaymentImportService for individual row import logic
+# @see TICKET-071 for batch import implementation
+# @see TICKET-026 for future webhook replacement
 class StripeCsvBatchImporter
   def initialize(file_path)
     @file_path = file_path

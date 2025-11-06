@@ -60,6 +60,7 @@ Current work items and user stories being actively developed.
 - [TICKET-079: Project CRUD E2E Tests + Bug Fixes](completed/TICKET-079-project-crud-e2e-tests.md) - ✅ Complete (2025-11-05)
 - [TICKET-005: Auto-Reassign Donations After Donor Merge](completed/TICKET-005-auto-reassign-donations-after-merge.md) - ✅ Complete (2025-11-05)
 - [TICKET-036: Implement React Error Boundary](completed/TICKET-036-implement-react-error-boundary.md) - ✅ Complete (2025-11-05)
+- [TICKET-042: Add Class-Level Documentation Comments](completed/TICKET-042-add-class-documentation-comments.md) - ✅ Complete (2025-11-06)
 
 ### 🔵 In Progress Tickets
 
@@ -128,7 +129,6 @@ Current work items and user stories being actively developed.
 - [TICKET-034: Create Query Objects for Complex Database Queries](TICKET-034-create-query-objects-complex-database-queries.md) - 📋 Planned (🟡 Medium, M) - *Updated with ChildrenController example*
 - [TICKET-037: Standardize Service Object Patterns](TICKET-037-standardize-service-object-patterns.md) - 📋 Planned (🟡 Medium, S) - *Updated with .call interface*
 - [TICKET-041: Add Test Coverage for API Client Methods](TICKET-041-api-client-test-coverage.md) - 📋 Planned (🟡 Medium, M)
-- [TICKET-042: Add Class-Level Documentation Comments](TICKET-042-add-class-documentation-comments.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-033: Implement Policy Objects for Authorization](TICKET-033-implement-policy-objects-authorization.md) - 📋 Planned (🟡 Medium, M)
 
 **Low Priority:**
@@ -142,10 +142,10 @@ Current work items and user stories being actively developed.
 ## Quick Stats
 
 - **Total Tickets:** 90
-- **Completed:** 42 (47%)
+- **Completed:** 43 (48%)
 - **In Progress:** 0
-- **Planned:** 46
-- **Estimated Hours Remaining:** ~168 hours (~4.2 weeks)
+- **Planned:** 45
+- **Estimated Hours Remaining:** ~167 hours (~4.2 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 
@@ -158,7 +158,7 @@ Current work items and user stories being actively developed.
   - **POST-MVP:** TICKET-026 (webhooks - post-MVP), TICKET-027 (mapping UI - future)
 - **Sponsorship & Children Features:** 8 planned (27h), 8 completed
 - **Testing & Quality Assurance:** 6 planned (19h), 0 completed
-- **Code Quality & Architecture:** 8 planned (~34h), 26 completed
+- **Code Quality & Architecture:** 7 planned (~33h), 27 completed
 - **In Progress:** 0
 - **Blocked:** 1 (TICKET-071)
 - **Deferred/Accepted Risk:** 1 (TICKET-049)

@@ -1,3 +1,30 @@
+# frozen_string_literal: true
+
+# Represents a financial donation to the organization.
+#
+# A donation must have:
+# - Positive amount in cents (validates numericality > 0)
+# - Date (not in future)
+# - Associated donor (required)
+# - Optional project association
+# - Optional sponsorship association (required if project is sponsorship type)
+#
+# Features:
+# - Auto-restores archived donors/projects when creating donations
+# - Smart sponsorship creation via child_id virtual attribute
+# - Ransack filtering on amount, date, donor_id, project_id
+# - Validates sponsorship projects must have sponsorship_id
+#
+# @example Create a donation
+#   Donation.create!(amount: 10000, date: Date.today, donor: donor, project: project)
+#
+# @example Create donation with child_id (auto-creates sponsorship)
+#   Donation.create!(amount: 5000, date: Date.today, donor: donor, child_id: 1)
+#
+# @see Donor for donor relationship
+# @see Project for project relationship
+# @see Sponsorship for sponsorship relationship
+# @see TICKET-061 for auto-sponsorship creation
 class Donation < ApplicationRecord
   belongs_to :donor
   belongs_to :project, optional: true

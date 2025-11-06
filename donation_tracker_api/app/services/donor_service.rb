@@ -1,3 +1,33 @@
+# frozen_string_literal: true
+
+# Provides stateless donor lookup and matching logic.
+#
+# This service provides class methods for:
+# - Finding or creating donors by email with smart matching
+# - Finding donors by Stripe customer ID with merge chain following
+# - Email normalization for Anonymous donors
+# - Date-based conflict resolution (most recent update wins)
+#
+# Uses class method pattern for stateless operations.
+#
+# @example Find or create donor by email
+#   result = DonorService.find_or_update_by_email(
+#     { name: "John Doe", email: "john@example.com" },
+#     Time.current
+#   )
+#   # => { donor: <Donor>, created: true }
+#
+# @example Find donor by Stripe customer ID
+#   result = DonorService.find_or_update_by_email_or_stripe_customer(
+#     { name: "Jane Doe", email: "jane@example.com" },
+#     "cus_123456",
+#     Date.today
+#   )
+#   # => { donor: <Donor>, created: false, redirected: false }
+#
+# @see Donor model for donor attributes
+# @see DonorMergeService for merging duplicate donors
+# @see TICKET-075 for Stripe customer ID tracking
 class DonorService
   def self.find_or_update_by_email_or_stripe_customer(donor_attributes, stripe_customer_id, transaction_date)
     # Priority 1: Check for existing donor by stripe_customer_id

@@ -1,5 +1,20 @@
 # frozen_string_literal: true
 
+# Test-only controller for E2E test support.
+#
+# This controller provides:
+# - cleanup endpoint to delete all donations, sponsorships, donors, children, and non-system projects
+# - Only available in development and test environments (forbidden in production)
+# - Ensures clean database state for E2E test runs
+#
+# Deletes in correct order to avoid foreign key constraint violations.
+# System projects are preserved for application functionality.
+#
+# @example Clean database for E2E tests
+#   DELETE /api/test/cleanup
+#   # Returns: { message: "Database cleaned", donations_deleted: true, ... }
+#
+# @see Cypress E2E tests for usage
 module Api
   # Test-only controller for E2E test support
   # Only available in development and test environments

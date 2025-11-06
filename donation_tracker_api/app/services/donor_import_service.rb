@@ -1,5 +1,28 @@
+# frozen_string_literal: true
+
 require "csv"
 
+# Imports donors from CSV files with flexible format detection.
+#
+# This service handles:
+# - Automatic header detection (with or without headers)
+# - Smart email matching via DonorService
+# - Validation error handling with detailed error reporting
+# - Import statistics (created, updated, failed counts)
+#
+# Uses instance method pattern for complex multi-step operations.
+#
+# @example Import donors from CSV
+#   service = DonorImportService.new(csv_content)
+#   result = service.import
+#   # => {
+#   #   created_count: 10,
+#   #   updated_count: 5,
+#   #   failed_count: 2,
+#   #   errors: ["Row 3: Email is invalid"]
+#   # }
+#
+# @see DonorService for email matching logic
 class DonorImportService
   def initialize(csv_content)
     @csv_content = csv_content

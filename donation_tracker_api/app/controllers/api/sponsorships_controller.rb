@@ -1,3 +1,24 @@
+# frozen_string_literal: true
+
+# Handles CRUD operations for sponsorships via REST API endpoints.
+#
+# This controller provides:
+# - Index endpoint with pagination and filtering (Ransack)
+# - Optional child_id filtering for child-specific sponsorships
+# - Create endpoint with donor, child, and project associations
+# - Destroy endpoint that ends sponsorships by setting end_date (soft-end)
+#
+# All responses use SponsorshipPresenter for consistent JSON formatting
+# with computed fields like donor_name and child_name.
+#
+# @example Create a new sponsorship
+#   POST /api/sponsorships
+#   { "sponsorship": { "donor_id": 1, "child_id": 2, "monthly_amount": 5000, "start_date": "2025-01-01" } }
+#
+# @see SponsorshipPresenter for response format
+# @see PaginationConcern for pagination helpers
+# @see RansackFilterable for filtering logic
+# @see TICKET-064 for smart sponsorship detection
 class Api::SponsorshipsController < ApplicationController
   include PaginationConcern
   include RansackFilterable

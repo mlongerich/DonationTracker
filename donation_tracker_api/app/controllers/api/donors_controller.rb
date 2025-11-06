@@ -1,3 +1,28 @@
+# frozen_string_literal: true
+
+# Handles CRUD operations for donors via REST API endpoints.
+#
+# This controller provides:
+# - Index endpoint with pagination, filtering (Ransack), and archived donor support
+# - Create endpoint with smart email matching (find or create)
+# - Show, Update, Delete endpoints with soft-delete support
+# - Restore endpoint for unarchiving donors
+# - Merge endpoint for combining duplicate donors
+# - Bulk delete endpoint (development/test only)
+#
+# All responses use DonorPresenter for consistent JSON formatting.
+# Excludes merged donors (merged_into_id set) from index results.
+#
+# @example Create a new donor
+#   POST /api/donors
+#   { "donor": { "name": "John Doe", "email": "john@example.com" } }
+#
+# @see DonorPresenter for response format
+# @see DonorService for email matching logic
+# @see DonorMergeService for merge functionality
+# @see PaginationConcern for pagination helpers
+# @see RansackFilterable for filtering logic
+# @see TICKET-062 for soft-delete implementation
 class Api::DonorsController < ApplicationController
   include PaginationConcern
   include RansackFilterable

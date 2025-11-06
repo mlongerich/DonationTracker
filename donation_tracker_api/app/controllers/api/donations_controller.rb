@@ -1,4 +1,24 @@
+# frozen_string_literal: true
+
+# API namespace for all REST API controllers.
 module Api
+  # Handles CRUD operations for donations via REST API endpoints.
+  #
+  # This controller provides:
+  # - Index endpoint with pagination, filtering (Ransack), and date range validation
+  # - Create endpoint with donor, project, child, and sponsorship associations
+  # - Show endpoint for individual donation details
+  #
+  # All responses use DonationPresenter for consistent JSON formatting
+  # including computed fields like donor_name and project_title.
+  #
+  # @example Create a donation
+  #   POST /api/donations
+  #   { "donation": { "amount": 10000, "date": "2025-01-15", "donor_id": 1, "project_id": 2 } }
+  #
+  # @see DonationPresenter for response format
+  # @see PaginationConcern for pagination (25 per page default)
+  # @see RansackFilterable for filter syntax
   class DonationsController < ApplicationController
     include PaginationConcern
     include RansackFilterable

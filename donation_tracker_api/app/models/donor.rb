@@ -1,3 +1,26 @@
+# frozen_string_literal: true
+
+# Represents a donor who contributes to the organization.
+#
+# A donor must have:
+# - Name (defaults to "Anonymous" if blank)
+# - Email (validated with URI format, unique among non-archived donors)
+# - Defaults: Anonymous donors get auto-generated email (name@mailinator.com)
+#
+# Features:
+# - Soft-delete support via Discard gem (archive/restore)
+# - Version tracking via PaperTrail
+# - Cascade delete prevention (restrict if donations or sponsorships exist)
+# - Ransack filtering on name, email, and custom name_or_email searcher
+# - Prevents archiving if active sponsorships exist
+#
+# @example Create a donor
+#   Donor.create!(name: "John Doe", email: "john@example.com")
+#
+# @see Donation for donation relationship
+# @see Sponsorship for sponsorship relationship
+# @see DonorService for smart email matching logic
+# @see TICKET-062 for soft-delete implementation
 class Donor < ApplicationRecord
   include Discard::Model
 

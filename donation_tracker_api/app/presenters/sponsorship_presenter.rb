@@ -1,3 +1,23 @@
+# frozen_string_literal: true
+
+# Formats Sponsorship objects for JSON API responses.
+#
+# Adds computed fields:
+# - donor_name: Associated donor's name
+# - child_name: Associated child's name
+# - project_title: Associated project's title
+# - active: Boolean indicating if sponsorship has no end_date
+# - start_date: Calculated start date from first donation or explicit start_date
+#
+# Converts monthly_amount to string for precision.
+#
+# @example Format a sponsorship
+#   presenter = SponsorshipPresenter.new(sponsorship)
+#   presenter.as_json
+#   # => { id: 1, donor_name: "John Doe", child_name: "Maria", monthly_amount: "5000", active: true, ... }
+#
+# @see BasePresenter for inheritance pattern
+# @see Sponsorship model
 class SponsorshipPresenter < BasePresenter
   def as_json(options = {})
     {

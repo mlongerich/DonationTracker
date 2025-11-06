@@ -1,3 +1,24 @@
+# frozen_string_literal: true
+
+# Handles CRUD operations for projects via REST API endpoints.
+#
+# This controller provides:
+# - Index endpoint with pagination, filtering (Ransack), and archived project support
+# - Create endpoint with validation
+# - Show, Update, Delete endpoints with system project protection
+# - Archive and restore endpoints for project lifecycle management
+#
+# System projects cannot be updated or deleted (enforced at controller level).
+# All responses use ProjectPresenter for consistent JSON formatting.
+#
+# @example Create a new project
+#   POST /api/projects
+#   { "project": { "title": "Summer Campaign", "project_type": "campaign" } }
+#
+# @see ProjectPresenter for response format
+# @see PaginationConcern for pagination helpers
+# @see RansackFilterable for filtering logic
+# @see TICKET-038 for cascade delete and system project protection
 class Api::ProjectsController < ApplicationController
   include PaginationConcern
   include RansackFilterable

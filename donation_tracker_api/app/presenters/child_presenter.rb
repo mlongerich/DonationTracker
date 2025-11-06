@@ -1,3 +1,25 @@
+# frozen_string_literal: true
+
+# Formats Child objects for JSON API responses.
+#
+# Adds computed fields:
+# - can_be_deleted: Boolean indicating if child has no sponsorships
+# - sponsorships: Optional array of sponsorship details (when include_sponsorships: true)
+#
+# Includes discarded_at for soft-delete state tracking.
+#
+# @example Format a child
+#   presenter = ChildPresenter.new(child)
+#   presenter.as_json
+#   # => { id: 1, name: "Maria Rodriguez", can_be_deleted: true, discarded_at: nil, ... }
+#
+# @example Format a child with sponsorships
+#   presenter = ChildPresenter.new(child)
+#   presenter.as_json(include_sponsorships: true)
+#   # => { id: 1, name: "Maria", sponsorships: [{ donor_name: "John", ... }], ... }
+#
+# @see BasePresenter for inheritance pattern
+# @see Child model
 class ChildPresenter < BasePresenter
   def as_json(options = {})
     result = {

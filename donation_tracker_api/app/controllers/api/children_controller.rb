@@ -1,3 +1,24 @@
+# frozen_string_literal: true
+
+# Handles CRUD operations for children via REST API endpoints.
+#
+# This controller provides:
+# - Index endpoint with pagination, filtering (Ransack), and archived child support
+# - Optional sponsorship data inclusion with eager loading to avoid N+1 queries
+# - Create endpoint with validation
+# - Show, Update, Delete endpoints with soft-delete support
+# - Archive and restore endpoints for child lifecycle management
+#
+# All responses use ChildPresenter for consistent JSON formatting.
+#
+# @example Create a new child
+#   POST /api/children
+#   { "child": { "name": "Maria Rodriguez" } }
+#
+# @see ChildPresenter for response format
+# @see PaginationConcern for pagination helpers
+# @see RansackFilterable for filtering logic
+# @see TICKET-049 for soft-delete implementation
 class Api::ChildrenController < ApplicationController
   include PaginationConcern
   include RansackFilterable

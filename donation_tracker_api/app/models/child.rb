@@ -1,3 +1,22 @@
+# frozen_string_literal: true
+
+# Represents a child sponsored by donors.
+#
+# A child must have:
+# - Name (required)
+#
+# Features:
+# - Soft-delete support via Discard gem (archive/restore)
+# - Cascade delete prevention (restrict if sponsorships exist)
+# - Ransack filtering on name and discarded_at
+# - Prevents archiving if active sponsorships exist
+#
+# @example Create a child
+#   Child.create!(name: "Maria Rodriguez")
+#
+# @see Sponsorship for sponsorship relationship
+# @see Donor for donor relationship (through sponsorships)
+# @see TICKET-049 for soft-delete implementation
 class Child < ApplicationRecord
   include Discard::Model
 

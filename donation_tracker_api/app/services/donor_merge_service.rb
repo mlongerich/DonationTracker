@@ -1,11 +1,27 @@
-# Service for merging multiple donor records into a single donor.
-# Handles field selection, validation, and transactional merge operations.
+# frozen_string_literal: true
+
+# Merges multiple donor records into a single donor with field-level selection.
 #
-# Usage:
-#   DonorMergeService.new(
-#     donor_ids: [1, 2, 3],
+# This service handles:
+# - Validation of donor IDs and field selections
+# - Building merged donor attributes from field selections
+# - Reassigning donations and sponsorships from source donors to target donor
+# - Soft-deleting source donors with merged_into_id tracking
+# - Transaction safety (all-or-nothing merge)
+#
+# Uses instance method pattern for complex multi-step operations.
+#
+# @example Merge two donors
+#   service = DonorMergeService.new(
+#     donor_ids: [1, 2],
 #     field_selections: { name: 1, email: 2 }
-#   ).merge
+#   )
+#   result = service.merge
+#   # => { merged_donor: <Donor>, merged_count: 2 }
+#
+# @see Donor for donor model
+# @see Api::DonorsController#merge for API endpoint
+# @see TICKET-004 for donor merge implementation
 class DonorMergeService
   REQUIRED_FIELDS = [ :name, :email ].freeze
 

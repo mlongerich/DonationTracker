@@ -220,8 +220,61 @@ colima start --cpu 4 --memory 6 --disk 100
 - **RuboCop**: Style guide enforcement
 - **Brakeman**: Security scanning
 - **Bullet**: N+1 query detection
-- **No comments**: Self-documenting code
+- **Class documentation**: YARD-style comments required for all classes/modules
 - **Convention**: Follow Rails patterns
+
+#### Class Documentation Standards
+
+**All classes and modules require documentation comments** to improve maintainability and onboarding.
+
+**Required Elements:**
+1. **Purpose**: One-sentence description of what the class does
+2. **Responsibilities**: Key features/capabilities (if complex)
+3. **Usage Example**: Simple `@example` block with realistic code
+4. **Related Classes**: `@see` tags for discoverability
+
+**Format (YARD style):**
+```ruby
+# frozen_string_literal: true
+
+# Handles CRUD operations for donors via REST API endpoints.
+#
+# This controller provides:
+# - Index endpoint with pagination and filtering (Ransack)
+# - Create endpoint with validation and smart email matching
+# - Show, Update, Delete endpoints with soft-delete support
+#
+# All responses use DonorPresenter for consistent JSON formatting.
+#
+# @example Create a new donor
+#   POST /api/donors
+#   { "donor": { "name": "John Doe", "email": "john@example.com" } }
+#
+# @see DonorPresenter for response format
+# @see DonorService for email matching logic
+# @see PaginationConcern for pagination helpers
+module Api
+  class DonorsController < ApplicationController
+    # ...
+  end
+end
+```
+
+**Best Practices:**
+- Use present tense ("Handles", "Provides", "Formats")
+- Keep concise but complete
+- Update when behavior changes
+- Add `@see` tags for related classes
+
+**Applies to:**
+- Controllers (purpose + endpoints)
+- Models (validations + relationships)
+- Services (workflow + transaction safety)
+- Presenters (computed fields + format)
+- Concerns (methods provided + usage)
+- Jobs/Mailers (trigger + behavior)
+
+**See:** TICKET-042 for implementation details
 
 #### Global Error Handling
 
