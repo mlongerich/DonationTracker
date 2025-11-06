@@ -61,6 +61,7 @@ Current work items and user stories being actively developed.
 - [TICKET-005: Auto-Reassign Donations After Donor Merge](completed/TICKET-005-auto-reassign-donations-after-merge.md) - ✅ Complete (2025-11-05)
 - [TICKET-036: Implement React Error Boundary](completed/TICKET-036-implement-react-error-boundary.md) - ✅ Complete (2025-11-05)
 - [TICKET-042: Add Class-Level Documentation Comments](completed/TICKET-042-add-class-documentation-comments.md) - ✅ Complete (2025-11-06)
+- [TICKET-024: Separate Test and Development Database Environments](completed/TICKET-024-separate-test-dev-environments.md) - ✅ Complete (2025-11-06)
 
 ### 🔵 In Progress Tickets
 
@@ -80,7 +81,6 @@ Current work items and user stories being actively developed.
 - [TICKET-019: Multi-Page Architecture with React Router](TICKET-019-multi-page-architecture-react-router.md) - 📋 Planned
 - [TICKET-021: Quick Entity Creation (Donor/Project/Child) from Donation Page](TICKET-021-quick-entity-creation-from-donation-page.md) - 📋 Planned (🟡 Medium, L) - *Inline modal creation*
 - [TICKET-022: Anonymous Donation Support](TICKET-022-anonymous-donation-support.md) - 📋 Planned
-- [TICKET-024: Separate Test and Development Database Environments](TICKET-024-separate-test-dev-environments.md) - 📋 Planned
 - [TICKET-046: Add Project Filter to Donations Page](TICKET-046-donation-list-project-filter.md) - 📋 Planned
 - [TICKET-085: Donation Source & Payment Method Tracking](TICKET-085-donation-source-payment-method-tracking.md) - 📋 Planned (🔴 High, M) - *Stripe/check/cash/bank transfer*
 - [TICKET-086: Delete Donation Within 24-Hour Window](TICKET-086-delete-donation-24-hour-window.md) - 📋 Planned (🟡 Medium, S) - *Quick error correction*
@@ -142,10 +142,10 @@ Current work items and user stories being actively developed.
 ## Quick Stats
 
 - **Total Tickets:** 90
-- **Completed:** 43 (48%)
+- **Completed:** 44 (49%)
 - **In Progress:** 0
-- **Planned:** 45
-- **Estimated Hours Remaining:** ~167 hours (~4.2 weeks)
+- **Planned:** 44
+- **Estimated Hours Remaining:** ~163 hours (~4.1 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 

@@ -777,13 +777,46 @@ docker-compose exec api bundle exec skunk
 ### Frontend
 
 ```bash
+# Unit tests (Jest)
 docker-compose exec frontend npm test
 docker-compose exec frontend npm run vitest
 docker-compose exec frontend npm run vitest:ui
+
+# E2E tests (Cypress) - Development mode (uses dev database)
 docker-compose exec frontend npm run cypress:run
 docker-compose exec frontend npm run cypress:open
+
+# Linting
 docker-compose exec frontend npm run lint
 ```
+
+### E2E Testing (Isolated Test Environment)
+
+**⚠️ IMPORTANT:** E2E tests should run against test database to avoid data pollution.
+
+```bash
+# Start test API on port 3002 (isolated test database)
+cd donation_tracker_frontend
+docker-compose --profile e2e up -d
+
+# Run E2E tests (headless)
+npm run cypress:e2e
+
+# Run E2E tests with UI
+npm run cypress:e2e:open
+
+# Stop test API when done
+npm run cypress:e2e:down
+# OR: docker-compose --profile e2e down
+```
+
+**Environment Isolation:**
+- **Development API** (`localhost:3001`) → `donation_tracker_api_development` database
+- **Test API** (`localhost:3002`) → `donation_tracker_api_test` database
+- Cypress tests use `testApiUrl` environment variable (`localhost:3002`)
+- Test database is cleaned before each test run via `/api/test/cleanup` endpoint
+
+**See:** TICKET-024 for complete environment separation implementation
 
 ### Pre-commit Scripts
 
