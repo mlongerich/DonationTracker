@@ -106,6 +106,10 @@ donation_tracker_frontend/lerna-debug.log*
 # Vitest
 donation_tracker_frontend/.vitest/
 
+# Cypress test artifacts
+donation_tracker_frontend/cypress/screenshots/
+donation_tracker_frontend/cypress/videos/
+
 # Pact contracts and logs (generated during tests)
 donation_tracker_frontend/pacts/*.json
 donation_tracker_frontend/logs/pact.log*
