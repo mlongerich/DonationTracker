@@ -25,6 +25,7 @@ class ChildPresenter < BasePresenter
     result = {
       id: object.id,
       name: object.name,
+      gender: object.gender,
       created_at: object.created_at,
       updated_at: object.updated_at,
       can_be_deleted: object.can_be_deleted?,

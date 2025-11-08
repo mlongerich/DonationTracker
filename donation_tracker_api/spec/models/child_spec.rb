@@ -9,6 +9,24 @@ RSpec.describe Child, type: :model do
     end
   end
 
+  describe "gender" do
+    it "accepts gender as boy" do
+      child = Child.new(name: "Test", gender: "boy")
+      expect(child.gender).to eq("boy")
+    end
+
+    it "accepts gender as girl" do
+      child = Child.new(name: "Test", gender: "girl")
+      expect(child.gender).to eq("girl")
+    end
+
+    it "accepts nil gender (optional field)" do
+      child = Child.new(name: "Test", gender: nil)
+      expect(child.gender).to be_nil
+      expect(child).to be_valid
+    end
+  end
+
   describe "associations" do
     it "has many sponsorships" do
       expect(Child.new).to respond_to(:sponsorships)

@@ -49,5 +49,14 @@ RSpec.describe ChildPresenter do
 
       expect(json[:discarded_at]).not_to be_nil
     end
+
+    it "includes gender field" do
+      child = create(:child, gender: "girl")
+      presenter = described_class.new(child)
+
+      json = presenter.as_json
+
+      expect(json[:gender]).to eq("girl")
+    end
   end
 end
