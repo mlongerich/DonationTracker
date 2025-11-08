@@ -4,6 +4,7 @@
 export interface Child {
   id: number;
   name: string;
+  gender?: 'boy' | 'girl' | null;
   created_at: string;
   updated_at: string;
   can_be_deleted: boolean;
@@ -15,4 +16,5 @@ export interface Child {
  */
 export interface ChildFormData {
   name: string;
+  gender?: string;
 }

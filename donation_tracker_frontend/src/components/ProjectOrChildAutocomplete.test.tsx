@@ -181,11 +181,32 @@ describe('ProjectOrChildAutocomplete', () => {
     });
   });
 
-  it('renders ChildCare icon in child badge', async () => {
+  it('renders Boy icon for child with boy gender', async () => {
     const user = userEvent.setup();
     const mockData = {
       projects: [],
-      children: [{ id: 1, name: 'Maria Santos' }],
+      children: [{ id: 1, name: 'John', gender: 'boy' }],
+    };
+
+    (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
+
+    render(<ProjectOrChildAutocomplete value={null} onChange={() => {}} />);
+
+    const searchField = screen.getByRole('combobox');
+    await user.type(searchField, 'john');
+
+    // Wait for options and check for Boy icon (MUI icons have data-testid)
+    await waitFor(() => {
+      const icon = screen.getByTestId('BoyIcon');
+      expect(icon).toBeInTheDocument();
+    });
+  });
+
+  it('renders Girl icon for child with girl gender', async () => {
+    const user = userEvent.setup();
+    const mockData = {
+      projects: [],
+      children: [{ id: 2, name: 'Maria', gender: 'girl' }],
     };
 
     (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
@@ -195,14 +216,35 @@ describe('ProjectOrChildAutocomplete', () => {
     const searchField = screen.getByRole('combobox');
     await user.type(searchField, 'maria');
 
-    // Wait for options and check for ChildCare icon (MUI icons have data-testid)
+    // Wait for options and check for Girl icon
     await waitFor(() => {
-      const icon = screen.getByTestId('ChildCareIcon');
+      const icon = screen.getByTestId('GirlIcon');
       expect(icon).toBeInTheDocument();
     });
   });
 
-  it('renders Folder icon in project badge', async () => {
+  it('renders Boy icon for child with null gender (default)', async () => {
+    const user = userEvent.setup();
+    const mockData = {
+      projects: [],
+      children: [{ id: 3, name: 'Sam', gender: null }],
+    };
+
+    (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
+
+    render(<ProjectOrChildAutocomplete value={null} onChange={() => {}} />);
+
+    const searchField = screen.getByRole('combobox');
+    await user.type(searchField, 'sam');
+
+    // Wait for options and check for Boy icon (default)
+    await waitFor(() => {
+      const icon = screen.getByTestId('BoyIcon');
+      expect(icon).toBeInTheDocument();
+    });
+  });
+
+  it('renders Folder icon for general project', async () => {
     const user = userEvent.setup();
     const mockData = {
       projects: [{ id: 1, title: 'General Fund', project_type: 'general' }],
@@ -219,6 +261,27 @@ describe('ProjectOrChildAutocomplete', () => {
     // Wait for options and check for Folder icon
     await waitFor(() => {
       const icon = screen.getByTestId('FolderIcon');
+      expect(icon).toBeInTheDocument();
+    });
+  });
+
+  it('renders Campaign icon for campaign project', async () => {
+    const user = userEvent.setup();
+    const mockData = {
+      projects: [{ id: 2, title: 'Christmas Campaign', project_type: 'campaign' }],
+      children: [],
+    };
+
+    (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
+
+    render(<ProjectOrChildAutocomplete value={null} onChange={() => {}} />);
+
+    const searchField = screen.getByRole('combobox');
+    await user.type(searchField, 'christmas');
+
+    // Wait for options and check for Campaign icon
+    await waitFor(() => {
+      const icon = screen.getByTestId('CampaignIcon');
       expect(icon).toBeInTheDocument();
     });
   });

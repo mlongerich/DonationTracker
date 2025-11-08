@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Autocomplete, TextField, Chip } from '@mui/material';
-import ChildCareIcon from '@mui/icons-material/ChildCare';
+import Boy from '@mui/icons-material/Boy';
+import Girl from '@mui/icons-material/Girl';
+import Campaign from '@mui/icons-material/Campaign';
 import FolderIcon from '@mui/icons-material/Folder';
 import { useDebouncedValue } from '../hooks';
 import { searchProjectOrChild } from '../api/client';
@@ -11,6 +13,7 @@ interface Option {
   name: string;
   type: 'project' | 'child';
   project_type?: ProjectType;
+  gender?: 'boy' | 'girl' | null;
 }
 
 interface ProjectOrChildAutocompleteProps {
@@ -53,6 +56,7 @@ const ProjectOrChildAutocomplete = ({
             id: c.id,
             name: c.name,
             type: 'child' as const,
+            gender: c.gender,
           }));
           setOptions([...projectOptions, ...childOptions]);
         } catch (error) {
@@ -93,11 +97,19 @@ const ProjectOrChildAutocomplete = ({
         const { key, ...otherProps } = props as any;
         return (
           <li key={key} {...otherProps}>
-            {option.type === 'child' && (
+            {option.type === 'child' && option.gender === 'girl' && (
               <Chip
                 label="Child"
                 size="small"
-                icon={<ChildCareIcon />}
+                icon={<Girl />}
+                sx={{ mr: 1 }}
+              />
+            )}
+            {option.type === 'child' && option.gender !== 'girl' && (
+              <Chip
+                label="Child"
+                size="small"
+                icon={<Boy />}
                 sx={{ mr: 1 }}
               />
             )}
@@ -114,7 +126,7 @@ const ProjectOrChildAutocomplete = ({
                 <Chip
                   label="Campaign"
                   size="small"
-                  icon={<FolderIcon />}
+                  icon={<Campaign />}
                   sx={{ mr: 1 }}
                 />
               )}
