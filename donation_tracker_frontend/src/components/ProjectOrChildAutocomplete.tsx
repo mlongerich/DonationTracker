@@ -94,28 +94,45 @@ const ProjectOrChildAutocomplete = ({
         return (
           <li key={key} {...otherProps}>
             {option.type === 'child' && (
-              <Chip label="Child" size="small" icon={<ChildCareIcon />} sx={{ mr: 1 }} />
+              <Chip
+                label="Child"
+                size="small"
+                icon={<ChildCareIcon />}
+                sx={{ mr: 1 }}
+              />
             )}
             {option.type === 'project' && option.project_type === 'general' && (
-              <Chip label="General" size="small" icon={<FolderIcon />} sx={{ mr: 1 }} />
+              <Chip
+                label="General"
+                size="small"
+                icon={<FolderIcon />}
+                sx={{ mr: 1 }}
+              />
             )}
-            {option.type === 'project' && option.project_type === 'campaign' && (
-              <Chip label="Campaign" size="small" icon={<FolderIcon />} sx={{ mr: 1 }} />
-            )}
-            {option.type === 'project' && option.project_type === 'sponsorship' && (
-              <Chip label="Project" size="small" icon={<FolderIcon />} sx={{ mr: 1 }} />
-            )}
+            {option.type === 'project' &&
+              option.project_type === 'campaign' && (
+                <Chip
+                  label="Campaign"
+                  size="small"
+                  icon={<FolderIcon />}
+                  sx={{ mr: 1 }}
+                />
+              )}
+            {option.type === 'project' &&
+              option.project_type === 'sponsorship' && (
+                <Chip
+                  label="Project"
+                  size="small"
+                  icon={<FolderIcon />}
+                  sx={{ mr: 1 }}
+                />
+              )}
             {option.name}
           </li>
         );
       }}
       renderInput={(params) => (
-        <TextField
-          {...params}
-          label={label}
-          required={required}
-          size={size}
-        />
+        <TextField {...params} label={label} required={required} size={size} />
       )}
     />
   );
