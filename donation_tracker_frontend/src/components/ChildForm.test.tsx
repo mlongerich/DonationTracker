@@ -40,4 +40,24 @@ describe('ChildForm', () => {
     expect(screen.getByText(/name is required/i)).toBeInTheDocument();
     expect(mockSubmit).not.toHaveBeenCalled();
   });
+
+  it('renders optional gender dropdown field', () => {
+    render(<ChildForm onSubmit={jest.fn()} />);
+
+    expect(screen.getByLabelText(/gender/i)).toBeInTheDocument();
+  });
+
+  it('submits form with selected gender', async () => {
+    const mockSubmit = jest.fn();
+    const user = userEvent.setup();
+
+    render(<ChildForm onSubmit={mockSubmit} />);
+
+    await user.type(screen.getByLabelText(/name/i), 'Maria');
+    await user.click(screen.getByLabelText(/gender/i));
+    await user.click(screen.getByText('Girl'));
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    expect(mockSubmit).toHaveBeenCalledWith({ name: 'Maria', gender: 'girl' });
+  });
 });
