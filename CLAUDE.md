@@ -660,6 +660,65 @@ import { Donor } from '../types';
 
 **See:** docs/PATTERNS.md for full API and code examples (TICKET-032, TICKET-066)
 
+#### Grouped Autocomplete with Type Badges
+
+**Purpose:** Visual clarity for autocomplete options with multiple entity types (children vs projects)
+
+**Implementation (ProjectOrChildAutocomplete):**
+```typescript
+// src/components/ProjectOrChildAutocomplete.tsx
+import { Chip } from '@mui/material';
+import ChildCareIcon from '@mui/icons-material/ChildCare';
+import FolderIcon from '@mui/icons-material/Folder';
+
+<Autocomplete
+  groupBy={(option) => option.type === 'project' ? 'Projects' : 'Children'}
+  renderOption={(props, option) => (
+    <li {...props}>
+      {option.type === 'child' && (
+        <Chip label="Child" icon={<ChildCareIcon />} size="small" sx={{ mr: 1 }} />
+      )}
+      {option.type === 'project' && option.project_type === 'general' && (
+        <Chip label="General" icon={<FolderIcon />} size="small" sx={{ mr: 1 }} />
+      )}
+      {option.type === 'project' && option.project_type === 'campaign' && (
+        <Chip label="Campaign" icon={<FolderIcon />} size="small" sx={{ mr: 1 }} />
+      )}
+      {option.name}
+    </li>
+  )}
+  label="Donation For"
+/>
+```
+
+**Features:**
+- **Grouped results:** "Children" and "Projects" sections
+- **Type badges:** Visual distinction with icons (Child, General, Campaign)
+- **Project type differentiation:** Shows specific project type (general/campaign) instead of generic "Project"
+- **Spacing:** Badge has right margin (`mr: 1`) for visual separation from name
+- **Consistent labeling:** "Donation For" vs generic "Project or Child"
+
+**Usage in DonationForm:**
+```typescript
+const isChildSelected = selectedProjectOrChild?.type === 'child';
+
+{isChildSelected && (
+  <Alert severity="info">
+    This donation will create/update a sponsorship for {selectedProjectOrChild.name}
+  </Alert>
+)}
+```
+
+**Benefits:**
+- Clear visual distinction between entity types
+- Shows specific project types (General/Campaign) for better context
+- Proper spacing prevents badges from touching names
+- Helps prevent user errors (selecting wrong type)
+- Provides contextual information about backend behavior
+- Consistent with MUI design patterns
+
+**See:** TICKET-052 (Improve Sponsorship Donation Linking UX)
+
 #### Currency Utilities (DRY Pattern)
 
 **Purpose:** Single source of truth for currency conversion between cents (database) and dollars (display)

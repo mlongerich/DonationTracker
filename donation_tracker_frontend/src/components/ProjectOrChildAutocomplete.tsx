@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, TextField, Chip } from '@mui/material';
+import ChildCareIcon from '@mui/icons-material/ChildCare';
+import FolderIcon from '@mui/icons-material/Folder';
 import { useDebouncedValue } from '../hooks';
 import { searchProjectOrChild } from '../api/client';
-import { Project, Child } from '../types';
+import { Project, Child, ProjectType } from '../types';
 
 interface Option {
   id: number;
   name: string;
   type: 'project' | 'child';
+  project_type?: ProjectType;
 }
 
 interface ProjectOrChildAutocompleteProps {
@@ -21,7 +24,7 @@ interface ProjectOrChildAutocompleteProps {
 const ProjectOrChildAutocomplete = ({
   value,
   onChange,
-  label = 'Project or Child',
+  label = 'Donation For',
   size = 'small',
   required = false,
 }: ProjectOrChildAutocompleteProps) => {
@@ -43,6 +46,7 @@ const ProjectOrChildAutocomplete = ({
               id: p.id,
               name: p.title,
               type: 'project' as const,
+              project_type: p.project_type,
             })
           );
           const childOptions: Option[] = (children || []).map((c: Child) => ({
@@ -85,8 +89,33 @@ const ProjectOrChildAutocomplete = ({
         option.type === 'project' ? 'Projects' : 'Children'
       }
       getOptionLabel={(option) => option.name}
+      renderOption={(props, option) => {
+        const { key, ...otherProps } = props as any;
+        return (
+          <li key={key} {...otherProps}>
+            {option.type === 'child' && (
+              <Chip label="Child" size="small" icon={<ChildCareIcon />} sx={{ mr: 1 }} />
+            )}
+            {option.type === 'project' && option.project_type === 'general' && (
+              <Chip label="General" size="small" icon={<FolderIcon />} sx={{ mr: 1 }} />
+            )}
+            {option.type === 'project' && option.project_type === 'campaign' && (
+              <Chip label="Campaign" size="small" icon={<FolderIcon />} sx={{ mr: 1 }} />
+            )}
+            {option.type === 'project' && option.project_type === 'sponsorship' && (
+              <Chip label="Project" size="small" icon={<FolderIcon />} sx={{ mr: 1 }} />
+            )}
+            {option.name}
+          </li>
+        );
+      }}
       renderInput={(params) => (
-        <TextField {...params} label={label} required={required} size={size} />
+        <TextField
+          {...params}
+          label={label}
+          required={required}
+          size={size}
+        />
       )}
     />
   );

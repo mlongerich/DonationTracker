@@ -94,4 +94,137 @@ describe('ProjectOrChildAutocomplete', () => {
       }
     );
   });
+
+  it('renders "Child" badge for child options', async () => {
+    const user = userEvent.setup();
+    const mockData = {
+      projects: [],
+      children: [{ id: 1, name: 'Maria Santos' }],
+    };
+
+    (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
+
+    render(<ProjectOrChildAutocomplete value={null} onChange={() => {}} />);
+
+    const searchField = screen.getByRole('combobox');
+    await user.type(searchField, 'maria');
+
+    // Wait for options to appear and check for "Child" badge
+    await waitFor(() => {
+      const childBadge = screen.getByText('Child');
+      expect(childBadge).toBeInTheDocument();
+    });
+  });
+
+  it('renders "General" badge for general project options', async () => {
+    const user = userEvent.setup();
+    const mockData = {
+      projects: [{ id: 1, title: 'General Fund', project_type: 'general' }],
+      children: [],
+    };
+
+    (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
+
+    render(<ProjectOrChildAutocomplete value={null} onChange={() => {}} />);
+
+    const searchField = screen.getByRole('combobox');
+    await user.type(searchField, 'general');
+
+    // Wait for options to appear and check for "General" badge
+    await waitFor(() => {
+      const generalBadge = screen.getByText('General');
+      expect(generalBadge).toBeInTheDocument();
+    });
+  });
+
+  it('renders "Campaign" badge for campaign project options', async () => {
+    const user = userEvent.setup();
+    const mockData = {
+      projects: [{ id: 2, title: 'Christmas Campaign', project_type: 'campaign' }],
+      children: [],
+    };
+
+    (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
+
+    render(<ProjectOrChildAutocomplete value={null} onChange={() => {}} />);
+
+    const searchField = screen.getByRole('combobox');
+    await user.type(searchField, 'christmas');
+
+    // Wait for options to appear and check for "Campaign" badge
+    await waitFor(() => {
+      const campaignBadge = screen.getByText('Campaign');
+      expect(campaignBadge).toBeInTheDocument();
+    });
+  });
+
+  it('adds spacing between badge and name', async () => {
+    const user = userEvent.setup();
+    const mockData = {
+      projects: [],
+      children: [{ id: 1, name: 'Maria Santos' }],
+    };
+
+    (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
+
+    render(<ProjectOrChildAutocomplete value={null} onChange={() => {}} />);
+
+    const searchField = screen.getByRole('combobox');
+    await user.type(searchField, 'maria');
+
+    // Wait for options and check for right margin on badge
+    await waitFor(() => {
+      const badge = screen.getByText('Child').closest('.MuiChip-root');
+      expect(badge).toHaveStyle({ marginRight: '8px' }); // MUI theme spacing(1) = 8px
+    });
+  });
+
+  it('renders ChildCare icon in child badge', async () => {
+    const user = userEvent.setup();
+    const mockData = {
+      projects: [],
+      children: [{ id: 1, name: 'Maria Santos' }],
+    };
+
+    (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
+
+    render(<ProjectOrChildAutocomplete value={null} onChange={() => {}} />);
+
+    const searchField = screen.getByRole('combobox');
+    await user.type(searchField, 'maria');
+
+    // Wait for options and check for ChildCare icon (MUI icons have data-testid)
+    await waitFor(() => {
+      const icon = screen.getByTestId('ChildCareIcon');
+      expect(icon).toBeInTheDocument();
+    });
+  });
+
+  it('renders Folder icon in project badge', async () => {
+    const user = userEvent.setup();
+    const mockData = {
+      projects: [{ id: 1, title: 'General Fund', project_type: 'general' }],
+      children: [],
+    };
+
+    (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
+
+    render(<ProjectOrChildAutocomplete value={null} onChange={() => {}} />);
+
+    const searchField = screen.getByRole('combobox');
+    await user.type(searchField, 'general');
+
+    // Wait for options and check for Folder icon
+    await waitFor(() => {
+      const icon = screen.getByTestId('FolderIcon');
+      expect(icon).toBeInTheDocument();
+    });
+  });
+
+  it('uses "Donation For" as default label', () => {
+    render(<ProjectOrChildAutocomplete value={null} onChange={() => {}} />);
+
+    const label = screen.getByLabelText('Donation For');
+    expect(label).toBeInTheDocument();
+  });
 });

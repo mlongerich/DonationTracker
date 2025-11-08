@@ -155,13 +155,13 @@ describe('DonationForm', () => {
   it('renders project or child autocomplete field', () => {
     render(<DonationForm />);
 
-    expect(screen.getByLabelText(/project or child/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/donation for/i)).toBeInTheDocument();
   });
 
   it('defaults to General Donation on load', () => {
     render(<DonationForm />);
 
-    const field = screen.getByLabelText(/project or child/i);
+    const field = screen.getByLabelText(/donation for/i);
     expect(field).toHaveValue('General Donation');
   });
 
@@ -183,7 +183,7 @@ describe('DonationForm', () => {
   it('project or child field should be a Material-UI Autocomplete', () => {
     render(<DonationForm />);
 
-    const projectOrChildField = screen.getByLabelText(/project or child/i);
+    const projectOrChildField = screen.getByLabelText(/donation for/i);
     expect(projectOrChildField).toHaveClass('MuiInputBase-input');
   });
 
@@ -244,7 +244,7 @@ describe('DonationForm', () => {
     render(<DonationForm />);
 
     // Select child from project/child autocomplete
-    const projectField = screen.getByLabelText(/project or child/i);
+    const projectField = screen.getByLabelText(/donation for/i);
     await user.clear(projectField);
     await user.type(projectField, 'Eli');
     await waitFor(() =>
@@ -275,4 +275,32 @@ describe('DonationForm', () => {
       );
     });
   }, 10000); // Increase timeout for userEvent typing delays + debounced API calls
+
+  it('shows info alert when child is selected', async () => {
+    (searchProjectOrChild as jest.Mock).mockResolvedValue({
+      projects: [],
+      children: [{ id: 5, name: 'Maria' }],
+    });
+
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    // Select child from autocomplete
+    const projectField = screen.getByLabelText(/donation for/i);
+    await user.clear(projectField);
+    await user.type(projectField, 'Maria');
+    await waitFor(() =>
+      expect(searchProjectOrChild).toHaveBeenCalledWith('Maria')
+    );
+    const childOption = await screen.findByText(/Maria/);
+    await user.click(childOption);
+
+    // Check for info alert
+    await waitFor(() => {
+      const alert = screen.getByText(
+        /this donation will create\/update a sponsorship for Maria/i
+      );
+      expect(alert).toBeInTheDocument();
+    });
+  });
 });
