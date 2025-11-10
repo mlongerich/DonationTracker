@@ -98,20 +98,10 @@ const ProjectOrChildAutocomplete = ({
         return (
           <li key={key} {...otherProps}>
             {option.type === 'child' && option.gender === 'girl' && (
-              <Chip
-                label="Child"
-                size="small"
-                icon={<Girl />}
-                sx={{ mr: 1 }}
-              />
+              <Chip label="Child" size="small" icon={<Girl />} sx={{ mr: 1 }} />
             )}
             {option.type === 'child' && option.gender !== 'girl' && (
-              <Chip
-                label="Child"
-                size="small"
-                icon={<Boy />}
-                sx={{ mr: 1 }}
-              />
+              <Chip label="Child" size="small" icon={<Boy />} sx={{ mr: 1 }} />
             )}
             {option.type === 'project' && option.project_type === 'general' && (
               <Chip

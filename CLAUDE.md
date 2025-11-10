@@ -143,7 +143,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 **Testing Frameworks:**
 - **Backend**: RSpec, Factory Bot, Faker, SimpleCov, Shoulda Matchers
-- **Frontend**: Jest, Vitest, React Testing Library, Cypress, MSW
+- **Frontend**: Jest (unit tests), React Testing Library, Cypress (E2E tests)
 
 **Commands:**
 ```bash

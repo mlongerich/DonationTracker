@@ -268,7 +268,9 @@ describe('ProjectOrChildAutocomplete', () => {
   it('renders Campaign icon for campaign project', async () => {
     const user = userEvent.setup();
     const mockData = {
-      projects: [{ id: 2, title: 'Christmas Campaign', project_type: 'campaign' }],
+      projects: [
+        { id: 2, title: 'Christmas Campaign', project_type: 'campaign' },
+      ],
       children: [],
     };
 

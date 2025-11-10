@@ -48,8 +48,9 @@ if ! $RUNNER test:ci 2>&1 | tail -100; then
     exit 1
 fi
 
-echo "🎭 Running Cypress E2E tests..."
-if ! $RUNNER cypress:run 2>&1 | tail -100; then
+echo "🎭 Running Cypress E2E tests (isolated test environment)..."
+# cypress:e2e script handles starting/stopping the E2E API automatically
+if ! $RUNNER cypress:e2e 2>&1 | tail -100; then
     echo "❌ Cypress E2E tests failed - must fix before committing"
     exit 1
 fi

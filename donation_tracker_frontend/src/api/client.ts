@@ -6,9 +6,23 @@ import {
   Sponsorship,
 } from '../types';
 
+// Get API URL with runtime override support for Cypress E2E tests
+const getApiUrl = (): string => {
+  // Runtime override (set by Cypress E2E tests via window object)
+  if (typeof window !== 'undefined' && (window as any).REACT_APP_API_URL) {
+    return (window as any).REACT_APP_API_URL;
+  }
+  // Build-time environment variable
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  // Default to development API
+  return 'http://localhost:3001';
+};
+
 // Create axios instance with base configuration
 export const apiClient = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001',
+  baseURL: getApiUrl(),
   headers: {
     'Content-Type': 'application/json',
   },

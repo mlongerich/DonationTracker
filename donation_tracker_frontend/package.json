@@ -28,14 +28,10 @@
   "devDependencies": {
     "@testing-library/user-event": "^14.6.1",
     "@types/react-router-dom": "^5.3.3",
-    "@vitejs/plugin-react": "^4.0.0",
-    "@vitest/ui": "^1.0.0",
     "cypress": "^13.6.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
-    "msw": "^2.0.0",
-    "prettier": "^3.0.0",
-    "vitest": "^1.0.0"
+    "prettier": "^3.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -48,8 +44,6 @@
     "cypress:e2e": "cd .. && docker-compose --profile e2e up -d && cd donation_tracker_frontend && cypress run; EXIT_CODE=$?; cd .. && docker-compose --profile e2e down && exit $EXIT_CODE",
     "cypress:e2e:open": "cd .. && docker-compose --profile e2e up -d && cd donation_tracker_frontend && cypress open",
     "cypress:e2e:down": "cd .. && docker-compose --profile e2e down",
-    "vitest": "vitest",
-    "vitest:ui": "vitest --ui",
     "lint": "eslint src --ext .ts,.tsx",
     "lint:fix": "eslint src --ext .ts,.tsx --fix",
     "format": "prettier --write src/**/*.{ts,tsx,css,md}",
