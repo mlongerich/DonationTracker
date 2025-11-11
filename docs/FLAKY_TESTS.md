@@ -13,6 +13,26 @@ Track intermittent test failures to identify patterns and prioritize fixes.
 
 ## Logged Failures
 
+### 2025-11-11
+
+#### donation-filtering.cy.ts (E2E)
+- **Test:** `filters donations by payment method`
+- **Failure:** Test failed in first full suite run, passed on second run
+- **Context:** New E2E test for TICKET-085 payment method filter. Failed during initial cypress:e2e run (56/58 passing), passed on retry (7/7 in file passing)
+- **Root Cause:** Unknown - possible timing issue with payment method filter dropdown or API response
+- **Status:** ⚠️ Flaky - intermittent failure in E2E suite
+- **Frequency:** 1/2 runs failed
+- **Resolution:** Passed on retry. Needs investigation for race conditions.
+
+#### donation-stripe-badge.cy.ts (E2E)
+- **Test:** `displays Stripe badge for donations created via Stripe import` OR `does not display Stripe badge for manual donations`
+- **Failure:** One of the two tests failed in first full suite run, passed on second run
+- **Context:** New E2E test file for TICKET-085 Stripe badge display. Failed during initial cypress:e2e run (56/58 passing), passed on retry (2/2 in file passing)
+- **Root Cause:** Unknown - possible timing issue with badge rendering or API creation
+- **Status:** ⚠️ Flaky - intermittent failure in E2E suite
+- **Frequency:** 1/2 runs failed
+- **Resolution:** Passed on retry. Needs investigation for race conditions.
+
 ### 2025-11-07
 
 #### ProjectOrChildAutocomplete.test.tsx
