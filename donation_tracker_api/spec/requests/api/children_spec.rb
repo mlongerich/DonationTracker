@@ -142,6 +142,17 @@ RSpec.describe "/api/children", type: :request do
       expect(json["child"]).to have_key("can_be_deleted")
     end
 
+    it "creates a child with gender attribute" do
+      child_params = { child: { name: "Maria", gender: "girl" } }
+
+      post "/api/children", params: child_params
+
+      expect(response).to have_http_status(:created)
+      json = JSON.parse(response.body)
+      expect(json["child"]["name"]).to eq("Maria")
+      expect(json["child"]["gender"]).to eq("girl")
+    end
+
     it "returns errors for invalid attributes" do
       child_params = { child: { name: "" } }
 
@@ -179,6 +190,17 @@ RSpec.describe "/api/children", type: :request do
       expect(json).to have_key("child")
       expect(json["child"]["name"]).to eq("Maria Updated")
       expect(json["child"]).to have_key("can_be_deleted")
+    end
+
+    it "updates a child's gender attribute" do
+      child = create(:child, name: "Maria", gender: "boy")
+      update_params = { child: { gender: "girl" } }
+
+      put "/api/children/#{child.id}", params: update_params
+
+      expect(response).to have_http_status(:success)
+      json = JSON.parse(response.body)
+      expect(json["child"]["gender"]).to eq("girl")
     end
   end
 
