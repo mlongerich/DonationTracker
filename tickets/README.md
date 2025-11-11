@@ -62,6 +62,7 @@ Current work items and user stories being actively developed.
 - [TICKET-036: Implement React Error Boundary](completed/TICKET-036-implement-react-error-boundary.md) - ✅ Complete (2025-11-05)
 - [TICKET-042: Add Class-Level Documentation Comments](completed/TICKET-042-add-class-documentation-comments.md) - ✅ Complete (2025-11-06)
 - [TICKET-024: Separate Test and Development Database Environments](completed/TICKET-024-separate-test-dev-environments.md) - ✅ Complete (2025-11-06)
+- [TICKET-052: Improve Sponsorship Donation Linking UX](completed/TICKET-052-improve-sponsorship-donation-linking.md) - ✅ Complete (2025-11-11)
 
 ### 🔵 In Progress Tickets
 
@@ -70,6 +71,12 @@ Current work items and user stories being actively developed.
 ### ⏸️ Deferred - Accepted Risk
 
 - [TICKET-049: Child Model Soft Delete with Archive/Restore](TICKET-049-child-soft-delete-archive-restore.md) - ⏸️ Deferred (Frontend protection sufficient, backend API risk accepted)
+
+### ❌ Canceled Tickets
+
+*Tickets that were planned but decided against implementing.*
+
+- [TICKET-041: Add Test Coverage for API Client Methods](canceled/TICKET-041-api-client-test-coverage.md) - ❌ Canceled (2025-11-07) - E2E tests provide sufficient coverage, existing Jest mocks adequate for unit testing HTTP layer
 
 ### 📋 Planned Tickets
 
@@ -106,13 +113,14 @@ Current work items and user stories being actively developed.
 #### Sponsorship & Children Features
 - [TICKET-048: Stripe Sponsorship & Child Extraction](TICKET-048-stripe-sponsorship-child-extraction.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-051: Add Project Type Sort/Filter to Projects Page](TICKET-051-project-page-type-sort-filter.md) - 📋 Planned (🟡 Medium, S)
-- [TICKET-052: Improve Sponsorship Donation Linking](TICKET-052-improve-sponsorship-donation-linking.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-053: Sponsorships Page Filters & Pagination UI](TICKET-053-sponsorships-page-filters-pagination-ui.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-055: Sponsorship Management Actions](TICKET-055-sponsorship-reactivate-delete-actions.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-058: Donor Sponsorship List Endpoint](TICKET-058-donor-sponsorship-list-endpoint.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-059: Child Info Display on Donation Pages](TICKET-059-child-info-display-donation-pages.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-061: Auto-Create Sponsorship from Donation](TICKET-061-auto-create-sponsorship-from-donation.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-077: Last Donation Date Tracking](TICKET-077-last-donation-date-tracking.md) - 📋 Planned (🔴 High, M) - *Show last donation date for donors, children, sponsorships*
+- [TICKET-092: Child Name+Gender Uniqueness Validation](TICKET-092-child-name-gender-uniqueness-validation.md) - 📋 Planned (🟡 Medium, S) - *Prevent duplicate children*
+- [TICKET-093: Project Icons on Projects Page](TICKET-093-project-icons-on-projects-page.md) - 📋 Planned (🟢 Low, XS) - *Visual clarity*
 
 #### Testing & Quality Assurance
 
@@ -128,7 +136,6 @@ Current work items and user stories being actively developed.
 **Medium Priority:**
 - [TICKET-034: Create Query Objects for Complex Database Queries](TICKET-034-create-query-objects-complex-database-queries.md) - 📋 Planned (🟡 Medium, M) - *Updated with ChildrenController example*
 - [TICKET-037: Standardize Service Object Patterns](TICKET-037-standardize-service-object-patterns.md) - 📋 Planned (🟡 Medium, S) - *Updated with .call interface*
-- [TICKET-041: Add Test Coverage for API Client Methods](TICKET-041-api-client-test-coverage.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-033: Implement Policy Objects for Authorization](TICKET-033-implement-policy-objects-authorization.md) - 📋 Planned (🟡 Medium, M)
 
 **Low Priority:**
@@ -141,13 +148,14 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 90
-- **Completed:** 44 (49%)
+- **Total Tickets:** 93
+- **Completed:** 45 (48%)
 - **In Progress:** 0
-- **Planned:** 44
-- **Estimated Hours Remaining:** ~163 hours (~4.1 weeks)
+- **Planned:** 45
+- **Estimated Hours Remaining:** ~163 hours (~4.0 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
+- **Canceled:** 1
 
 ### By Category
 
@@ -156,12 +164,13 @@ Current work items and user stories being actively developed.
   - **PERMANENT:** ✅ TICKET-070 (core service - complete), TICKET-076 (failed payments tracking - planned)
   - **TEMPORARY:** TICKET-071 (batch import - blocked on user testing), TICKET-072 (error UI - optional)
   - **POST-MVP:** TICKET-026 (webhooks - post-MVP), TICKET-027 (mapping UI - future)
-- **Sponsorship & Children Features:** 8 planned (27h), 8 completed
+- **Sponsorship & Children Features:** 10 planned (~30h), 8 completed
 - **Testing & Quality Assurance:** 6 planned (19h), 0 completed
-- **Code Quality & Architecture:** 7 planned (~33h), 27 completed
+- **Code Quality & Architecture:** 6 planned (~30h), 27 completed
 - **In Progress:** 0
 - **Blocked:** 1 (TICKET-071)
 - **Deferred/Accepted Risk:** 1 (TICKET-049)
+- **Canceled:** 1 (TICKET-041)
 
 ### Code Lifecycle Guide
 

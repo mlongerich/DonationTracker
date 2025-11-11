@@ -13,6 +13,17 @@ Track intermittent test failures to identify patterns and prioritize fixes.
 
 ## Logged Failures
 
+### 2025-11-07
+
+#### ProjectOrChildAutocomplete.test.tsx
+- **Test:** `debounces search input (300ms)`
+- **Failure:** Timeout or assertion failure (exact error not captured)
+- **Context:** Failed during TICKET-052 implementation in full test suite run, passed on isolated re-run
+- **Root Cause:** Debounce timing issue in full suite context (300ms delay)
+- **Status:** ⚠️ Flaky - passes when run in isolation, fails intermittently in full suite
+- **Frequency:** 1/2 runs failed
+- **Resolution:** Test eventually passed after re-run. All 31 test suites passed.
+
 ### 2025-11-04
 
 #### DonationList.test.tsx

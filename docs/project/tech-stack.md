@@ -65,17 +65,23 @@
 ## Infrastructure
 
 **Containerization:** Docker + Docker Compose
-**Services:**
-- PostgreSQL 15-alpine
-- Redis 7-alpine
-- Rails API (port 3001)
+
+**Services & Ports:**
+- PostgreSQL 15-alpine (port 5432)
+- Redis 7-alpine (port 6379)
+- Rails API (port 3001) → `donation_tracker_api_development` database
+- Rails E2E Test API (port 3002) → `donation_tracker_api_test` database (isolated)
 - React Frontend (port 3000)
-- E2E Test API (port 3002)
 
 **Development Tools:**
 - Git with pre-commit hooks
 - TDD bash testing framework
 - Hot reload (WATCHPACK_POLLING=300ms)
+
+**macOS Development (Colima):**
+- Minimum requirements: 6GB RAM, 4 CPU cores
+- Setup command: `colima start --cpu 4 --memory 6 --disk 100`
+- Default 2GB/2CPU is insufficient for full stack
 
 ---
 
@@ -101,6 +107,82 @@
 - macOS with Colima (6GB RAM, 4 CPU cores)
 - Ubuntu 22.04+ (for deployment)
 - VS Code with Ruby/TypeScript extensions
+
+---
+
+## Development Commands
+
+### Backend
+
+```bash
+# Rails console
+docker-compose exec api rails console
+
+# Run tests
+docker-compose exec api bundle exec rspec
+
+# Code quality
+docker-compose exec api bundle exec rubocop
+docker-compose exec api bundle exec reek app/
+docker-compose exec api bundle exec rubycritic --no-browser app/
+docker-compose exec api bundle exec skunk
+```
+
+### Frontend
+
+```bash
+# Unit tests (Jest)
+docker-compose exec frontend npm test
+docker-compose exec frontend npm run vitest
+docker-compose exec frontend npm run vitest:ui
+
+# E2E tests (Cypress) - Development mode
+docker-compose exec frontend npm run cypress:run
+docker-compose exec frontend npm run cypress:open
+
+# Linting
+docker-compose exec frontend npm run lint
+```
+
+### E2E Testing (Isolated Test Environment)
+
+**Environment Isolation:**
+- Development API (port 3001) → `donation_tracker_api_development` database
+- Test API (port 3002) → `donation_tracker_api_test` database (isolated, cleaned before each run)
+
+**Commands:**
+```bash
+# Start test API on port 3002 (isolated test database)
+cd donation_tracker_frontend
+docker-compose --profile e2e up -d
+
+# Run E2E tests (headless)
+npm run cypress:e2e
+
+# Run E2E tests with UI
+npm run cypress:e2e:open
+
+# Stop test API when done
+npm run cypress:e2e:down
+# OR: docker-compose --profile e2e down
+```
+
+**Why Isolated Environment?**
+- E2E tests should NOT pollute development database
+- Test database cleaned via `/api/test/cleanup` endpoint before each run
+- Cypress uses `testApiUrl` environment variable (`localhost:3002`)
+
+**See:** TICKET-024 for complete implementation details
+
+### Pre-commit Scripts
+
+```bash
+bash scripts/check-documentation.sh           # Documentation reminder
+bash scripts/pre-commit-backend.sh           # RuboCop + Brakeman + RSpec
+bash scripts/pre-commit-frontend.sh          # ESLint + Prettier + TypeScript + Jest
+bash scripts/install-native-hooks.sh         # Install hooks
+bash scripts/recover-backup.sh               # View/restore backups
+```
 
 ---
 

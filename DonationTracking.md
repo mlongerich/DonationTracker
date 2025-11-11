@@ -17,9 +17,25 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2025-11-06
+**Last Updated:** 2025-11-11
 
 **Latest Milestones:**
+- TICKET-052 - Improve Sponsorship Donation Linking UX ✅ (2025-11-11)
+  - Added child gender field (optional: boy/girl/null) to Child model
+  - Backend: Gender validation, presenter support, API parameter permission
+  - Frontend: Gender dropdown in ChildForm with "Not specified" option
+  - Display Boy/Girl icons in ChildList (after name, hidden if null)
+  - Display Boy/Girl icons in ProjectOrChildAutocomplete (before name, null→Boy)
+  - Grouped autocomplete results: "Children" and "Projects" sections
+  - Type badges with icons (Child/General/Campaign) for visual distinction
+  - Updated label to "Donation For" for clarity
+  - Added 6 Jest unit tests (ChildForm: 3, ChildList: 3)
+  - Added 5 Cypress E2E tests (create boy/girl/null, edit gender, clear to null)
+  - Fixed bug: ChildForm sending undefined instead of null for empty gender
+  - Documentation: Optimized CLAUDE.md (1036 → 822 lines, 20% reduction)
+  - Documentation: Moved environment details to docs/project/tech-stack.md and deployment.md
+  - Created TICKET-092 (child name+gender uniqueness validation)
+  - Created TICKET-093 (project icons on projects page)
 - TICKET-024 - Separate Test and Development Database Environments ✅ (2025-11-06)
   - Fixed misconfigured E2E test infrastructure to use isolated test database
   - Updated docker-compose.yml database names to match database.yml (donation_tracker_api_test)
@@ -93,8 +109,8 @@
 - TICKET-064 - Smart Sponsorship Detection & Backend Logic ✅ (2025-10-31)
 - TICKET-032 - Custom Hooks Library (useDebouncedValue, usePagination, useRansackFilters) ✅ (2025-10-29)
 
-**Current Focus:** Bug fixes and testing infrastructure improvements complete (TICKET-078)
-**Next Feature:** TICKET-052 (Sponsorship Donation Linking) or TICKET-066 (useChildren hook refactoring)
+**Current Focus:** Child gender field and grouped autocomplete UX improvements complete (TICKET-052)
+**Next Feature:** TICKET-092 (Child uniqueness validation) or TICKET-093 (Project icons)
 
 **See [docs/project/README.md](docs/project/README.md#current-status) for detailed status**
 

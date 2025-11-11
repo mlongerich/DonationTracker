@@ -142,20 +142,8 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - **Coverage**: 90% backend, 80% frontend (Jest), 100% user flows (Cypress)
 
 **Testing Frameworks:**
-- **Backend**: RSpec, Factory Bot, Faker, SimpleCov, Shoulda Matchers
-- **Frontend**: Jest (unit tests), React Testing Library, Cypress (E2E tests)
-
-**Commands:**
-```bash
-# Backend
-docker-compose exec api bundle exec rspec
-
-# Frontend Unit
-docker-compose exec frontend npm test
-
-# Frontend E2E
-docker-compose exec frontend npm run cypress:run
-```
+- **Backend**: RSpec, Factory Bot, SimpleCov
+- **Frontend**: Jest, React Testing Library, Cypress
 
 ---
 
@@ -185,31 +173,9 @@ docker-compose exec frontend npm run cypress:run
 
 ## 🐳 Containerization
 
-### Development Environment
+**Development Environment:** Docker + Docker Compose
 
-```bash
-# Start all services
-docker-compose up
-
-# Service access
-docker-compose exec api bash      # Rails console
-docker-compose exec frontend sh   # React debugging
-```
-
-### Service Ports
-
-- PostgreSQL: 5432
-- Redis: 6379
-- Rails API: 3001
-- React Frontend: 3000
-
-### Colima Resource Requirements (macOS)
-
-```bash
-colima start --cpu 4 --memory 6 --disk 100
-```
-
-**Minimum:** 6GB RAM, 4 CPUs (default 2GB/2CPU insufficient)
+**See:** docs/project/tech-stack.md for ports, Colima setup, and development commands
 
 ---
 
@@ -217,10 +183,8 @@ colima start --cpu 4 --memory 6 --disk 100
 
 ### Backend (Rails)
 
-- **RuboCop**: Style guide enforcement
-- **Brakeman**: Security scanning
-- **Bullet**: N+1 query detection
-- **Class documentation**: YARD-style comments required for all classes/modules
+- **RuboCop**: Style guide enforcement, **Brakeman**: Security scanning, **Bullet**: N+1 query detection
+- **Class documentation**: YARD-style comments required (purpose, responsibilities, usage, @see tags)
 - **Convention**: Follow Rails patterns
 
 #### Class Documentation Standards
@@ -260,21 +224,11 @@ module Api
 end
 ```
 
-**Best Practices:**
-- Use present tense ("Handles", "Provides", "Formats")
-- Keep concise but complete
-- Update when behavior changes
-- Add `@see` tags for related classes
+**Best Practices:** Present tense, concise, update with changes, add `@see` tags
 
-**Applies to:**
-- Controllers (purpose + endpoints)
-- Models (validations + relationships)
-- Services (workflow + transaction safety)
-- Presenters (computed fields + format)
-- Concerns (methods provided + usage)
-- Jobs/Mailers (trigger + behavior)
+**Applies to:** Controllers, Models, Services, Presenters, Concerns, Jobs/Mailers
 
-**See:** TICKET-042 for implementation details
+**See:** TICKET-042
 
 #### Global Error Handling
 
@@ -311,13 +265,9 @@ def update
 end
 ```
 
-**Benefits:**
-- ✅ Controllers focus on happy path (no if/else blocks)
-- ✅ Consistent error format across all endpoints
-- ✅ Proper HTTP status codes (404, 422, 400 instead of 500)
-- ✅ Global handlers catch exceptions automatically
+**Benefits:** Happy path focus, consistent errors, proper HTTP codes
 
-**See:** TICKET-068 (Global Error Handling)
+**See:** TICKET-068
 
 #### Service Object Patterns
 
@@ -360,24 +310,19 @@ end
 - **Class methods**: Simple, stateless operations
 - **Instance methods**: Multi-step workflows, complex validation, state tracking
 
-#### Stripe CSV Import Pattern
+#### Stripe CSV Import Patterns
 
-**Pattern:** StripePaymentImportService handles CSV import with `stripe_invoices` abstraction for 1-to-many relationships.
-
-**Key Insights:**
-- Multi-child sponsorships share same invoice ID but different children
-- Idempotency: Check via sponsorship relationship, NOT child_id (virtual attribute)
+**StripePaymentImportService (TICKET-070 - PERMANENT):**
+- Uses `stripe_invoices` abstraction for 1-to-many relationships
+- Idempotency via sponsorship relationship, not child_id (virtual attribute)
 - Transaction-wrapped for data integrity
 
-**See:** docs/PATTERNS.md for full schema design and implementation details (TICKET-070)
+**StripeCsvBatchImporter (TICKET-071 - TEMPORARY):**
+- Maps CSV description → projects (10-step pattern matching)
+- Generic descriptions → "General Donation" system project
+- Delete after CSV import complete
 
-#### Stripe CSV Batch Import Pattern (TICKET-071)
-
-**Temporary code** until TICKET-026 webhooks complete. Maps CSV description text to projects using 10-step pattern matching (general, campaign, invoices, named items).
-
-**Key Insight:** Generic descriptions (phone numbers, "Subscription creation") → "General Donation" system project.
-
-**See:** docs/PATTERNS.md for full pattern order and implementation (TICKET-071)
+**See:** docs/PATTERNS.md for implementation details
 
 #### Controller Concerns
 
@@ -478,13 +423,9 @@ class Project < ApplicationRecord
 end
 ```
 
-**Implementation Details:**
-- **Soft Delete (Archive)**: Donor is marked as discarded (`discarded_at` timestamp), all associations preserved
-- **Hard Delete (Permanent)**: Prevented if any donations or sponsorships exist (raises `DeleteRestrictionError`)
-- **Rails 8**: Use `dependent: :restrict_with_exception` (not `restrict_with_error`)
-- **Frontend Integration**: API returns `can_be_deleted` field via Presenter
+**Implementation:** Soft delete (`discarded_at`), hard delete prevented if associations exist (`restrict_with_exception`)
 
-**See:** TICKET-062 (Donor), TICKET-038 (Project), TICKET-049 (Child)
+**See:** TICKET-062, TICKET-038, TICKET-049
 
 ### Frontend (React)
 
@@ -506,37 +447,11 @@ end
 </ErrorBoundary>
 ```
 
-**Features:**
-- Catches render errors, lifecycle errors, constructor errors
-- Shows user-friendly error message with "Try Again" and "Reload Page" buttons
-- Displays error details (stack trace) in development mode only
-- Hides technical details in production
-- Supports custom fallback UI via `fallback` prop
-- Logs errors to console (ready for Sentry/LogRocket integration)
+**Features:** Catches render/lifecycle errors, user-friendly UI, dev-only stack traces, custom fallback support
 
-**Limitations (use try-catch for these):**
-- Event handlers (use try-catch)
-- Asynchronous code (use .catch())
-- Server-side rendering errors
-- Errors in ErrorBoundary itself
+**Limitations:** Use try-catch for event handlers, async code, SSR errors
 
-**Granular Error Boundaries (optional):**
-```tsx
-// Page-level for better isolation
-<ErrorBoundary fallback={<CustomErrorMessage />}>
-  <DonorsPage />
-</ErrorBoundary>
-```
-
-**Manual Testing:**
-```tsx
-// Temporarily add to any page
-import ErrorTrigger from '../components/ErrorTrigger';
-
-<ErrorTrigger />  // Click button to test ErrorBoundary
-```
-
-**See:** TICKET-036 for full implementation details
+**See:** TICKET-036
 
 #### TypeScript Type Organization
 
@@ -660,14 +575,14 @@ import { Donor } from '../types';
 
 **See:** docs/PATTERNS.md for full API and code examples (TICKET-032, TICKET-066)
 
-#### Grouped Autocomplete with Type Badges
+#### Grouped Autocomplete with Type Badges & Gender Icons
 
-**Purpose:** Visual clarity for autocomplete options with multiple entity types (children vs projects)
+**Purpose:** Visual clarity for autocomplete options with multiple entity types (children vs projects) and child gender
 
 **Implementation (ProjectOrChildAutocomplete):**
 ```typescript
 // src/components/ProjectOrChildAutocomplete.tsx
-import { Chip } from '@mui/material';
+import { Chip, Boy, Girl } from '@mui/material';
 import ChildCareIcon from '@mui/icons-material/ChildCare';
 import FolderIcon from '@mui/icons-material/Folder';
 
@@ -675,15 +590,8 @@ import FolderIcon from '@mui/icons-material/Folder';
   groupBy={(option) => option.type === 'project' ? 'Projects' : 'Children'}
   renderOption={(props, option) => (
     <li {...props}>
-      {option.type === 'child' && (
-        <Chip label="Child" icon={<ChildCareIcon />} size="small" sx={{ mr: 1 }} />
-      )}
-      {option.type === 'project' && option.project_type === 'general' && (
-        <Chip label="General" icon={<FolderIcon />} size="small" sx={{ mr: 1 }} />
-      )}
-      {option.type === 'project' && option.project_type === 'campaign' && (
-        <Chip label="Campaign" icon={<FolderIcon />} size="small" sx={{ mr: 1 }} />
-      )}
+      <Chip label={option.type === 'child' ? 'Child' : option.project_type} size="small" sx={{ mr: 1 }} />
+      {option.type === 'child' && (option.gender === 'girl' ? <Girl /> : <Boy />)}
       {option.name}
     </li>
   )}
@@ -693,31 +601,17 @@ import FolderIcon from '@mui/icons-material/Folder';
 
 **Features:**
 - **Grouped results:** "Children" and "Projects" sections
-- **Type badges:** Visual distinction with icons (Child, General, Campaign)
-- **Project type differentiation:** Shows specific project type (general/campaign) instead of generic "Project"
-- **Spacing:** Badge has right margin (`mr: 1`) for visual separation from name
-- **Consistent labeling:** "Donation For" vs generic "Project or Child"
+- **Type badges:** Child/General/Campaign for visual distinction
+- **Gender icons:** Boy/Girl icons for children (null defaults to Boy)
+- **Spacing:** Badge + icon before name with proper margins
 
-**Usage in DonationForm:**
-```typescript
-const isChildSelected = selectedProjectOrChild?.type === 'child';
+**Child Gender Field Pattern:**
+- Optional field (boy/girl/null) on Child model
+- Icons displayed: Boy (<Boy />) for boy/null, Girl (<Girl />) for girl
+- Used in ChildList (after name, hidden if null) and autocomplete (before name)
+- Full validation and presenter support
 
-{isChildSelected && (
-  <Alert severity="info">
-    This donation will create/update a sponsorship for {selectedProjectOrChild.name}
-  </Alert>
-)}
-```
-
-**Benefits:**
-- Clear visual distinction between entity types
-- Shows specific project types (General/Campaign) for better context
-- Proper spacing prevents badges from touching names
-- Helps prevent user errors (selecting wrong type)
-- Provides contextual information about backend behavior
-- Consistent with MUI design patterns
-
-**See:** TICKET-052 (Improve Sponsorship Donation Linking UX)
+**See:** TICKET-052 (Grouped Autocomplete + Gender Field)
 
 #### Currency Utilities (DRY Pattern)
 
@@ -771,10 +665,44 @@ import { formatCurrency } from '../utils/currency';
 
 **Pattern:** App.tsx (router) → Layout (Outlet) → Pages (state)
 
-**Best Practices:**
-- Keep App.tsx minimal, page-level state, index route redirects, E2E tests for all routes
+**Implementation:**
+```tsx
+// src/App.tsx
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Layout from './components/Layout';
 
-**See:** docs/PATTERNS.md for file structure and full code examples
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Navigate to="/donors" replace />} />
+          <Route path="donors" element={<DonorsPage />} />
+          <Route path="donations" element={<DonationsPage />} />
+          <Route path="children" element={<ChildrenPage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+// src/components/Layout.tsx
+import { Outlet } from 'react-router-dom';
+
+function Layout() {
+  return (
+    <>
+      <Navigation />
+      <Outlet /> {/* Pages render here */}
+    </>
+  );
+}
+```
+
+**Best Practices:**
+- Keep App.tsx minimal (routing only), page-level state, index route redirects, E2E tests for all routes
+
+**See:** docs/PATTERNS.md for full code examples
 
 ### Pre-commit Requirements
 
@@ -822,70 +750,11 @@ import { formatCurrency } from '../utils/currency';
 
 ## 📚 Development Commands
 
-### Backend
-
-```bash
-docker-compose exec api rails console
-docker-compose exec api bundle exec rspec
-docker-compose exec api bundle exec rubocop
-docker-compose exec api bundle exec reek app/
-docker-compose exec api bundle exec rubycritic --no-browser app/
-docker-compose exec api bundle exec skunk
-```
-
-### Frontend
-
-```bash
-# Unit tests (Jest)
-docker-compose exec frontend npm test
-docker-compose exec frontend npm run vitest
-docker-compose exec frontend npm run vitest:ui
-
-# E2E tests (Cypress) - Development mode (uses dev database)
-docker-compose exec frontend npm run cypress:run
-docker-compose exec frontend npm run cypress:open
-
-# Linting
-docker-compose exec frontend npm run lint
-```
-
-### E2E Testing (Isolated Test Environment)
-
-**⚠️ IMPORTANT:** E2E tests should run against test database to avoid data pollution.
-
-```bash
-# Start test API on port 3002 (isolated test database)
-cd donation_tracker_frontend
-docker-compose --profile e2e up -d
-
-# Run E2E tests (headless)
-npm run cypress:e2e
-
-# Run E2E tests with UI
-npm run cypress:e2e:open
-
-# Stop test API when done
-npm run cypress:e2e:down
-# OR: docker-compose --profile e2e down
-```
-
-**Environment Isolation:**
-- **Development API** (`localhost:3001`) → `donation_tracker_api_development` database
-- **Test API** (`localhost:3002`) → `donation_tracker_api_test` database
-- Cypress tests use `testApiUrl` environment variable (`localhost:3002`)
-- Test database is cleaned before each test run via `/api/test/cleanup` endpoint
-
-**See:** TICKET-024 for complete environment separation implementation
-
-### Pre-commit Scripts
-
-```bash
-bash scripts/check-documentation.sh           # Documentation reminder
-bash scripts/pre-commit-backend.sh           # RuboCop + Brakeman + RSpec
-bash scripts/pre-commit-frontend.sh          # ESLint + Prettier + TypeScript + Jest
-bash scripts/install-native-hooks.sh         # Install hooks
-bash scripts/recover-backup.sh               # View/restore backups
-```
+**See:** docs/project/tech-stack.md for complete command reference including:
+- Backend commands (rails console, rspec, rubocop, reek, rubycritic)
+- Frontend commands (npm test, vitest, cypress, lint)
+- E2E testing (isolated test environment on port 3002)
+- Pre-commit scripts (documentation, backend, frontend, hooks, recovery)
 
 ---
 
@@ -893,59 +762,25 @@ bash scripts/recover-backup.sh               # View/restore backups
 
 ### Design Principles
 
-- **Mobile-first**: Design for small screens first
-- **Accessibility**: WCAG 2.1 AA compliance
-- **Performance**: Optimize for slow connections
-- **Usability**: Clear navigation, error messaging
-
-### Component Standards
-
-- All components responsive
-- Semantic HTML elements
-- Proper ARIA labels
-- Screen reader testing
+**Mobile-first**, **WCAG 2.1 AA** compliance, optimize for slow connections, clear navigation/errors, semantic HTML, proper ARIA labels
 
 ---
 
 ## 🔒 Security Requirements
 
-### Backend Security
+**Backend:** Input validation, parameterized queries, XSS protection, rate limiting, never commit secrets
 
-- Input validation on all endpoints
-- SQL injection prevention (parameterized queries)
-- XSS protection headers
-- Rate limiting
-- **Never commit master.key or credentials**
+**Frontend:** Sanitize inputs, secure token storage, HTTPS, CSP headers
 
-### Frontend Security
-
-- Sanitize user inputs
-- Secure API token storage
-- HTTPS enforcement
-- Content Security Policy headers
-
-### Key Management
-
-- **Rails master.key**: Local only, never in version control
-- **Environment variables**: Deployment-specific secrets
-- **Git history**: Audit for accidentally committed secrets
+**Keys:** master.key local only, environment variables for deployment, audit git history
 
 ---
 
 ## 📊 Monitoring & Debugging
 
-### Logging Standards
+**Logging:** Structured JSON, levels (DEBUG/INFO/WARN/ERROR), no sensitive data
 
-- Structured logging (JSON)
-- Log levels: DEBUG, INFO, WARN, ERROR
-- No sensitive data in logs
-
-### Performance Monitoring
-
-- Database queries (Bullet gem)
-- API response times
-- Frontend bundle sizes
-- Container resource usage
+**Performance:** Bullet gem (N+1), API response times, bundle sizes, container resources
 
 ---
 
@@ -953,19 +788,9 @@ bash scripts/recover-backup.sh               # View/restore backups
 
 *For efficient Claude Code interactions*
 
-### Response Verbosity
+**Response Verbosity:** Minimal explanations, skip preambles, 1-sentence confirmations, explain "why" only when asked
 
-- Minimal explanations unless requested
-- Skip preambles ("Sure, I'll help...")
-- Confirm completion in 1 sentence max
-- Explain "why" only when asked/critical
-
-### Tool Usage
-
-- Batch related operations
-- Avoid re-reading files already in context
-- Use targeted grep/glob vs reading full files
-- Run tests only when asked or after changes
+**Tool Usage:** Batch operations, avoid re-reading files, targeted grep/glob, run tests only when needed
 
 ---
 
@@ -973,64 +798,25 @@ bash scripts/recover-backup.sh               # View/restore backups
 
 **Optional deep-dives** (Claude can read these when needed, but CLAUDE.md is self-contained):
 
-### docs/ARCHITECTURE.md
-- Project structure diagrams (Mermaid)
-- Ticket management workflow
-- TDD workflow visualization
-- Vertical slice diagram
-- Pre-commit hooks flow
-- Service architecture
-
-### docs/PATTERNS.md
-- Full service object code examples
-- Controller concerns implementations
-- Presenter pattern details
-- Complete React Router examples
-- Shared component extraction guide
-- Cascade delete policy details
-
-### docs/TESTING.md
-- Testing framework setup
-- Backend testing stack details
-- Frontend testing stack details
-- Code smell detection tools
-- Design pattern registry
-- Test refactoring guidelines
-
-### docs/DOCKER.md
-- Container configuration
-- Colima setup details
-- Troubleshooting guides
-- Common issues/solutions
-
-### docs/CLAUDE-BEST-PRACTICES.md
-- Token optimization strategies
-- CLAUDE.md maintenance guidelines
-- Context management tools
-- File size best practices
-
-### docs/project/
-- data-models.md - Database schema, current indexes
-- tech-stack.md - Framework versions
-- api-endpoints.md - API documentation
-- roadmap.md - Feature planning
+- **docs/ARCHITECTURE.md** - Diagrams, workflows, service architecture
+- **docs/PATTERNS.md** - Code examples, concerns, presenters, React Router
+- **docs/TESTING.md** - Framework setup, testing stack, code smell tools
+- **docs/DOCKER.md** - Container configuration, troubleshooting
+- **docs/CLAUDE-BEST-PRACTICES.md** - Token optimization, maintenance
+- **docs/project/** - data-models.md, tech-stack.md, api-endpoints.md, roadmap.md
 
 ---
 
 ## 🔄 Deployment Considerations
 
-### Production Readiness Checklist
-
-- [ ] All tests passing
-- [ ] Security audit completed
-- [ ] Environment variables configured
-- [ ] Database migrations tested
-- [ ] SSL certificates configured
-- [ ] Backup strategy implemented
-- [ ] Monitoring systems active
+**See:** docs/project/deployment.md for complete production readiness checklist including:
+- Testing requirements (unit, E2E, QA)
+- Security checklist (SSL, firewall, secrets, audits)
+- Infrastructure setup (env vars, migrations, backups, monitoring)
+- Application configuration (database seeding, Stripe webhooks, email, error tracking)
 
 ---
 
 *This document is updated as practices evolve*
-*Last updated: 2025-11-04*
+*Last updated: 2025-11-11*
 *Target: 700-800 lines for optimal Claude Code performance (self-contained essentials)*

@@ -177,7 +177,55 @@ RAILS_ENV=production rails donors:import[stripe_export.csv]
 
 ---
 
+## Production Readiness Checklist
+
+**Testing:**
+- [ ] All unit tests passing (90% backend coverage, 80% frontend coverage)
+- [ ] All E2E tests passing (100% critical user flows)
+- [ ] Manual QA completed for all features
+
+**Security:**
+- [ ] Security audit completed (Brakeman, npm audit)
+- [ ] SSL/HTTPS enabled (Let's Encrypt configured)
+- [ ] Firewall configured (UFW with ports 80, 443, 22 only)
+- [ ] Database password strong and rotated
+- [ ] SSH key-only authentication
+- [ ] Rate limiting enabled
+- [ ] CORS properly configured
+- [ ] Environment variables secured (.env files not committed)
+- [ ] Secrets not in Git history (audit with git-secrets)
+- [ ] Regular security updates scheduled
+
+**Infrastructure:**
+- [ ] Environment variables configured (see "Environment Variables" section)
+- [ ] Database migrations tested in staging environment
+- [ ] SSL certificates configured and auto-renewal enabled
+- [ ] Backup strategy implemented (daily automated backups, 30-day retention)
+- [ ] Backup encryption enabled
+- [ ] Monitoring systems active (New Relic, UptimeRobot, Papertrail)
+- [ ] Database connection pooling configured
+- [ ] Redis memory limits configured
+- [ ] Nginx request size limits configured
+
+**Application:**
+- [ ] Production database seeded (system projects, initial data)
+- [ ] Stripe webhook endpoints configured and tested
+- [ ] Email delivery tested (SendGrid or similar)
+- [ ] Error tracking configured (Honeybadger or similar)
+- [ ] Log rotation configured (logrotate)
+- [ ] Asset compilation successful (Rails assets, React build)
+
+**Documentation:**
+- [ ] Deployment runbook updated
+- [ ] Rollback procedure tested
+- [ ] Team trained on deployment process
+- [ ] Monitoring alerts configured and tested
+
+---
+
 ## Security Checklist
+
+*Subset of Production Readiness - Security-specific items*
 
 - [ ] SSL/HTTPS enabled
 - [ ] Firewall configured (UFW)
