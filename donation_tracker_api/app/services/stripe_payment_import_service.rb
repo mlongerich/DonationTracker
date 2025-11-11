@@ -44,23 +44,12 @@ class StripePaymentImportService
   def import
     return skip_result("Status not succeeded") unless succeeded?
 
-    ActiveRecord::Base.transaction do
-      create_stripe_invoice
-      donor = find_or_create_donor
-      child_names = extract_child_names
-
-      if child_names.any?
-        create_sponsorship_donations(donor, child_names)
-      else
-        create_project_donation(donor)
-      end
-    end
-
+    perform_import_transaction
     return skip_result("Already imported") if @imported_donations.empty?
 
-    { success: true, donations: @imported_donations, skipped: false }
-  rescue StandardError => e
-    { success: false, donations: [], skipped: false, error: e.message }
+    success_result
+  rescue StandardError => error
+    error_result(error)
   end
 
   private
@@ -235,5 +224,27 @@ class StripePaymentImportService
       project.system = false
       project.description = "Auto-created from Stripe import. Original description: #{description_text}"
     end
+  end
+
+  def perform_import_transaction
+    ActiveRecord::Base.transaction do
+      create_stripe_invoice
+      donor = find_or_create_donor
+      child_names = extract_child_names
+
+      if child_names.any?
+        create_sponsorship_donations(donor, child_names)
+      else
+        create_project_donation(donor)
+      end
+    end
+  end
+
+  def success_result
+    { success: true, donations: @imported_donations, skipped: false }
+  end
+
+  def error_result(error)
+    { success: false, donations: [], skipped: false, error: error.message }
   end
 end

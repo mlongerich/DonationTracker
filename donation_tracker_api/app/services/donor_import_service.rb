@@ -29,42 +29,12 @@ class DonorImportService
   end
 
   def import
-    created_count = 0
-    updated_count = 0
-    failed_count = 0
-    errors = []
-    import_time = Time.current
-
-    # Detect format: check if first row looks like headers
+    stats = initialize_import_stats
     has_headers = detect_headers
 
-    CSV.parse(@csv_content, headers: has_headers).each_with_index do |row, index|
-      row_number = has_headers ? index + 2 : index + 1
+    process_csv_rows(has_headers, stats)
 
-      begin
-        donor_attributes = extract_donor_attributes(row, has_headers)
-        result = DonorService.find_or_update_by_email(donor_attributes, import_time)
-
-        if result[:created]
-          created_count += 1
-        else
-          updated_count += 1
-        end
-      rescue ActiveRecord::RecordInvalid => e
-        failed_count += 1
-        errors << { row: row_number, message: e.message }
-      rescue StandardError => e
-        failed_count += 1
-        errors << { row: row_number, message: e.message }
-      end
-    end
-
-    {
-      created: created_count,
-      updated: updated_count,
-      failed: failed_count,
-      errors: errors
-    }
+    build_result(stats)
   end
 
   private
@@ -97,5 +67,45 @@ class DonorImportService
       # No headers: column 0=name, column 1=email
       { name: row[0], email: row[1] }
     end
+  end
+
+  def initialize_import_stats
+    {
+      created_count: 0,
+      updated_count: 0,
+      failed_count: 0,
+      errors: [],
+      import_time: Time.current
+    }
+  end
+
+  def process_csv_rows(has_headers, stats)
+    CSV.parse(@csv_content, headers: has_headers).each_with_index do |row, index|
+      row_number = has_headers ? index + 2 : index + 1
+      process_single_row(row, row_number, has_headers, stats)
+    end
+  end
+
+  def process_single_row(row, row_number, has_headers, stats)
+    donor_attributes = extract_donor_attributes(row, has_headers)
+    result = DonorService.find_or_update_by_email(donor_attributes, stats[:import_time])
+
+    if result[:created]
+      stats[:created_count] += 1
+    else
+      stats[:updated_count] += 1
+    end
+  rescue ActiveRecord::RecordInvalid, StandardError => error
+    stats[:failed_count] += 1
+    stats[:errors] << { row: row_number, message: error.message }
+  end
+
+  def build_result(stats)
+    {
+      created: stats[:created_count],
+      updated: stats[:updated_count],
+      failed: stats[:failed_count],
+      errors: stats[:errors]
+    }
   end
 end

@@ -63,6 +63,8 @@ Current work items and user stories being actively developed.
 - [TICKET-042: Add Class-Level Documentation Comments](completed/TICKET-042-add-class-documentation-comments.md) - ✅ Complete (2025-11-06)
 - [TICKET-024: Separate Test and Development Database Environments](completed/TICKET-024-separate-test-dev-environments.md) - ✅ Complete (2025-11-06)
 - [TICKET-052: Improve Sponsorship Donation Linking UX](completed/TICKET-052-improve-sponsorship-donation-linking.md) - ✅ Complete (2025-11-11)
+- [TICKET-073: Refactor Methods with TooManyStatements](completed/TICKET-073-refactor-too-many-statements.md) - ✅ Complete (2025-11-11)
+- [TICKET-085: Donation Source & Payment Method Tracking](completed/TICKET-085-donation-source-payment-method-tracking.md) - ✅ Complete (2025-11-11)
 
 ### 🔵 In Progress Tickets
 
@@ -89,7 +91,6 @@ Current work items and user stories being actively developed.
 - [TICKET-021: Quick Entity Creation (Donor/Project/Child) from Donation Page](TICKET-021-quick-entity-creation-from-donation-page.md) - 📋 Planned (🟡 Medium, L) - *Inline modal creation*
 - [TICKET-022: Anonymous Donation Support](TICKET-022-anonymous-donation-support.md) - 📋 Planned
 - [TICKET-046: Add Project Filter to Donations Page](TICKET-046-donation-list-project-filter.md) - 📋 Planned
-- [TICKET-085: Donation Source & Payment Method Tracking](TICKET-085-donation-source-payment-method-tracking.md) - 📋 Planned (🔴 High, M) - *Stripe/check/cash/bank transfer*
 - [TICKET-086: Delete Donation Within 24-Hour Window](TICKET-086-delete-donation-24-hour-window.md) - 📋 Planned (🟡 Medium, S) - *Quick error correction*
 - [TICKET-087: Donor Bulk Operations](TICKET-087-donor-bulk-operations.md) - 📋 Planned (🟡 Medium, M) - *Archive/restore/export multiple donors*
 - [TICKET-088: Donor Export to CSV/Excel](TICKET-088-donor-export-csv-excel.md) - 📋 Planned (🟢 Low, S) - *Single export button*
@@ -149,24 +150,24 @@ Current work items and user stories being actively developed.
 ## Quick Stats
 
 - **Total Tickets:** 93
-- **Completed:** 45 (48%)
+- **Completed:** 47 (51%)
 - **In Progress:** 0
-- **Planned:** 45
-- **Estimated Hours Remaining:** ~163 hours (~4.0 weeks)
+- **Planned:** 43
+- **Estimated Hours Remaining:** ~155 hours (~3.9 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 - **Canceled:** 1
 
 ### By Category
 
-- **Feature Development:** 16 planned (~64h), 10 completed
+- **Feature Development:** 15 planned (~60h), 11 completed
 - **Stripe Integration:** 4 planned (~22h), 1 completed
   - **PERMANENT:** ✅ TICKET-070 (core service - complete), TICKET-076 (failed payments tracking - planned)
   - **TEMPORARY:** TICKET-071 (batch import - blocked on user testing), TICKET-072 (error UI - optional)
   - **POST-MVP:** TICKET-026 (webhooks - post-MVP), TICKET-027 (mapping UI - future)
 - **Sponsorship & Children Features:** 10 planned (~30h), 8 completed
 - **Testing & Quality Assurance:** 6 planned (19h), 0 completed
-- **Code Quality & Architecture:** 6 planned (~30h), 27 completed
+- **Code Quality & Architecture:** 6 planned (~26h), 29 completed
 - **In Progress:** 0
 - **Blocked:** 1 (TICKET-071)
 - **Deferred/Accepted Risk:** 1 (TICKET-049)

@@ -38,44 +38,10 @@ class StripeCsvBatchImporter
   end
 
   def import
-    CSV.foreach(@file_path, headers: true).with_index(2) do |row, row_number|
-      row_hash = row.to_h
-      service = StripePaymentImportService.new(row_hash)
-      result = service.import
-
-      if result[:success]
-        if result[:skipped]
-          @skipped_count += 1
-        else
-          @imported_count += result[:donations].size
-        end
-      else
-        @failed_count += 1
-        @errors << {
-          row: row_number,
-          message: result[:error],
-          data: sanitize_row_data(row_hash)
-        }
-      end
-    end
-
-    {
-      imported_count: @imported_count,
-      skipped_count: @skipped_count,
-      failed_count: @failed_count,
-      errors: @errors
-    }
-  rescue CSV::MalformedCSVError => e
-    {
-      imported_count: 0,
-      skipped_count: 0,
-      failed_count: 1,
-      errors: [ {
-        row: "N/A",
-        message: "CSV parsing error: #{e.message}",
-        data: nil
-      } ]
-    }
+    process_csv_rows
+    build_success_result
+  rescue CSV::MalformedCSVError => error
+    build_csv_error_result(error)
   end
 
   private
@@ -89,6 +55,61 @@ class StripeCsvBatchImporter
       nickname: row_hash["Cust Subscription Data Plan Nickname"],
       date: row_hash["Created Formatted"],
       status: row_hash["Status"]
+    }
+  end
+
+  def process_csv_rows
+    CSV.foreach(@file_path, headers: true).with_index(2) do |row, row_number|
+      row_hash = row.to_h
+      result = StripePaymentImportService.new(row_hash).import
+      handle_import_result(result, row_number, row_hash)
+    end
+  end
+
+  def handle_import_result(result, row_number, row_hash)
+    if result[:success]
+      handle_success_result(result)
+    else
+      handle_failed_result(result, row_number, row_hash)
+    end
+  end
+
+  def handle_success_result(result)
+    if result[:skipped]
+      @skipped_count += 1
+    else
+      @imported_count += result[:donations].size
+    end
+  end
+
+  def handle_failed_result(result, row_number, row_hash)
+    @failed_count += 1
+    @errors << {
+      row: row_number,
+      message: result[:error],
+      data: sanitize_row_data(row_hash)
+    }
+  end
+
+  def build_success_result
+    {
+      imported_count: @imported_count,
+      skipped_count: @skipped_count,
+      failed_count: @failed_count,
+      errors: @errors
+    }
+  end
+
+  def build_csv_error_result(error)
+    {
+      imported_count: 0,
+      skipped_count: 0,
+      failed_count: 1,
+      errors: [ {
+        row: "N/A",
+        message: "CSV parsing error: #{error.message}",
+        data: nil
+      } ]
     }
   end
 end
