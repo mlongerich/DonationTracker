@@ -16,6 +16,9 @@ const DonationsPage = () => {
     endDate: null,
   });
   const [selectedDonorId, setSelectedDonorId] = useState<number | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<
+    string | null
+  >(null);
 
   const { currentPage, paginationMeta, setPaginationMeta, handlePageChange } =
     usePagination();
@@ -33,6 +36,9 @@ const DonationsPage = () => {
       }
       if (selectedDonorId) {
         queryParams['q[donor_id_eq]'] = selectedDonorId;
+      }
+      if (selectedPaymentMethod) {
+        queryParams['q[payment_method_eq]'] = selectedPaymentMethod;
       }
 
       const params: Record<string, unknown> = {
@@ -52,7 +58,7 @@ const DonationsPage = () => {
   useEffect(() => {
     fetchDonations();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, dateRange, selectedDonorId]);
+  }, [currentPage, dateRange, selectedDonorId, selectedPaymentMethod]);
 
   const handleDateRangeChange = (
     startDate: string | null,
@@ -63,6 +69,10 @@ const DonationsPage = () => {
 
   const handleDonorFilterChange = (donorId: number | null) => {
     setSelectedDonorId(donorId);
+  };
+
+  const handlePaymentMethodFilterChange = (paymentMethod: string | null) => {
+    setSelectedPaymentMethod(paymentMethod);
   };
 
   return (
@@ -86,6 +96,7 @@ const DonationsPage = () => {
           donations={donations}
           onDateRangeChange={handleDateRangeChange}
           onDonorChange={handleDonorFilterChange}
+          onPaymentMethodChange={handlePaymentMethodFilterChange}
         />
       </Box>
       {paginationMeta && paginationMeta.total_pages > 1 && (

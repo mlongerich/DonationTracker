@@ -7,6 +7,11 @@ import Alert from '@mui/material/Alert';
 import Typography from '@mui/material/Typography';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
+import Chip from '@mui/material/Chip';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 import {
   DatePicker,
   DateValidationError,
@@ -26,6 +31,7 @@ interface DonationListProps {
     endDate: string | null
   ) => void;
   onDonorChange?: (donorId: number | null) => void;
+  onPaymentMethodChange?: (paymentMethod: string | null) => void;
 }
 
 const DonationList: React.FC<DonationListProps> = ({
@@ -34,6 +40,7 @@ const DonationList: React.FC<DonationListProps> = ({
   onPageChange,
   onDateRangeChange,
   onDonorChange,
+  onPaymentMethodChange,
 }) => {
   console.log(
     '[DonationList] Rendering with donations:',
@@ -44,6 +51,12 @@ const DonationList: React.FC<DonationListProps> = ({
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [dateError, setDateError] = useState<string | null>(null);
   const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
+  const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>('');
+
+  const getPaymentMethodLabel = (method?: string | null) => {
+    if (!method) return null;
+    return method.charAt(0).toUpperCase() + method.slice(1).replace('_', ' ');
+  };
 
   const validateDateRange = (
     start: Dayjs | null,
@@ -123,11 +136,15 @@ const DonationList: React.FC<DonationListProps> = ({
     setEndDate(null);
     setDateError(null);
     setSelectedDonor(null);
+    setPaymentMethodFilter('');
     if (onDateRangeChange) {
       onDateRangeChange(null, null);
     }
     if (onDonorChange) {
       onDonorChange(null);
+    }
+    if (onPaymentMethodChange) {
+      onPaymentMethodChange(null);
     }
   };
 
@@ -144,6 +161,29 @@ const DonationList: React.FC<DonationListProps> = ({
           onChange={handleDonorChange}
           size="small"
         />
+        <FormControl fullWidth size="small">
+          <InputLabel id="payment-method-filter-label">
+            Filter by Payment Method
+          </InputLabel>
+          <Select
+            labelId="payment-method-filter-label"
+            label="Filter by Payment Method"
+            value={paymentMethodFilter}
+            onChange={(e) => {
+              const value = e.target.value;
+              setPaymentMethodFilter(value);
+              if (onPaymentMethodChange) {
+                onPaymentMethodChange(value || null);
+              }
+            }}
+          >
+            <MenuItem value="">All</MenuItem>
+            <MenuItem value="stripe">Stripe</MenuItem>
+            <MenuItem value="check">Check</MenuItem>
+            <MenuItem value="cash">Cash</MenuItem>
+            <MenuItem value="bank_transfer">Bank Transfer</MenuItem>
+          </Select>
+        </FormControl>
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={2}
@@ -193,9 +233,17 @@ const DonationList: React.FC<DonationListProps> = ({
             {donations.map((donation) => (
               <Card key={donation.id} variant="outlined">
                 <CardContent>
-                  <Typography variant="subtitle1">
-                    {formatCurrency(Number(donation.amount))}
-                  </Typography>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Typography variant="subtitle1">
+                      {formatCurrency(Number(donation.amount))}
+                    </Typography>
+                    {donation.payment_method && (
+                      <Chip
+                        label={getPaymentMethodLabel(donation.payment_method)}
+                        size="small"
+                      />
+                    )}
+                  </Stack>
                   <Typography variant="body2" color="text.secondary">
                     {donation.date} -{' '}
                     {donation.donor_name || `Donor #${donation.donor_id}`}

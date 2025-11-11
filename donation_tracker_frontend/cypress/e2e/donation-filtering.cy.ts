@@ -318,4 +318,120 @@ describe('Donation Date Range Filtering', () => {
     cy.contains('$111.11').should('be.visible');
     cy.contains('$222.22').should('be.visible');
   });
+
+  it('filters donations by payment method', () => {
+    const timestamp = Date.now();
+    const checkDonorName = `Check Donor ${timestamp}`;
+    const cashDonorName = `Cash Donor ${timestamp}`;
+
+    // Create donor for check donation
+    cy.request('POST', `${Cypress.env('testApiUrl')}/api/donors`, {
+      donor: { name: checkDonorName, email: `check${timestamp}@example.com` },
+    });
+
+    // Create donor for cash donation
+    cy.request('POST', `${Cypress.env('testApiUrl')}/api/donors`, {
+      donor: { name: cashDonorName, email: `cash${timestamp}@example.com` },
+    });
+
+    cy.visit('/donations');
+
+    // Create check donation
+    cy.contains('h2', 'Record Donation')
+      .parent()
+      .contains('label', 'Donor')
+      .parent()
+      .find('input')
+      .type(checkDonorName);
+
+    cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
+    cy.get('[role="option"]').contains(checkDonorName).click();
+
+    cy.contains('h2', 'Record Donation')
+      .parent()
+      .contains('label', 'Amount')
+      .parent()
+      .find('input')
+      .type('100.00');
+
+    cy.contains('h2', 'Record Donation')
+      .parent()
+      .contains('label', 'Payment Method')
+      .parent()
+      .find('[role="combobox"]')
+      .click();
+
+    cy.get('[role="option"]').contains('Check').click();
+
+    cy.contains('h2', 'Record Donation')
+      .parent()
+      .contains('button', 'Create Donation')
+      .click();
+
+    cy.contains('Donation created successfully', { timeout: 5000 }).should('be.visible');
+
+    // Create cash donation
+    cy.contains('h2', 'Record Donation')
+      .parent()
+      .contains('label', 'Donor')
+      .parent()
+      .find('input')
+      .clear()
+      .type(cashDonorName);
+
+    cy.get('[role="listbox"]', { timeout: 5000 }).should('be.visible');
+    cy.get('[role="option"]').contains(cashDonorName).click();
+
+    cy.contains('h2', 'Record Donation')
+      .parent()
+      .contains('label', 'Amount')
+      .parent()
+      .find('input')
+      .clear()
+      .type('200.00');
+
+    cy.contains('h2', 'Record Donation')
+      .parent()
+      .contains('label', 'Payment Method')
+      .parent()
+      .find('[role="combobox"]')
+      .click();
+
+    cy.get('[role="option"]').contains('Cash').click();
+
+    cy.contains('h2', 'Record Donation')
+      .parent()
+      .contains('button', 'Create Donation')
+      .click();
+
+    cy.contains('Donation created successfully', { timeout: 5000 }).should('be.visible');
+
+    // Verify both donations visible initially
+    cy.contains('$100.00', { timeout: 5000 }).should('be.visible');
+    cy.contains('$200.00').should('be.visible');
+
+    // Filter by payment method: Check
+    cy.contains('h2', 'Recent Donations')
+      .parent()
+      .contains('label', 'Filter by Payment Method')
+      .parent()
+      .find('[role="combobox"]')
+      .click();
+
+    cy.get('[role="option"]').contains('Check').click();
+
+    cy.wait('@getDonations');
+
+    // Only check donation visible
+    cy.contains('$100.00').should('be.visible');
+    cy.contains('$200.00').should('not.exist');
+
+    // Clear filter
+    cy.contains('button', 'Clear Filters').click();
+    cy.wait('@getDonations');
+
+    // Both donations visible again
+    cy.contains('$100.00').should('be.visible');
+    cy.contains('$200.00').should('be.visible');
+  });
 });

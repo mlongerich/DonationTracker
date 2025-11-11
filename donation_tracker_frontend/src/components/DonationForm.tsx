@@ -3,6 +3,10 @@ import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import InputLabel from '@mui/material/InputLabel';
 import { createDonation } from '../api/client';
 import DonorAutocomplete, { Donor } from './DonorAutocomplete';
 import ProjectOrChildAutocomplete from './ProjectOrChildAutocomplete';
@@ -28,6 +32,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
       name: 'General Donation',
       type: 'project',
     });
+  const [paymentMethod, setPaymentMethod] = useState('check');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -60,6 +65,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
         donor_id: selectedDonor.id,
         project_id: projectId,
         child_id: childId,
+        payment_method: paymentMethod,
       });
 
       setSuccess(true);
@@ -120,6 +126,20 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
             },
           }}
         />
+        <FormControl fullWidth size="small" required>
+          <InputLabel id="payment-method-label">Payment Method</InputLabel>
+          <Select
+            labelId="payment-method-label"
+            label="Payment Method"
+            value={paymentMethod}
+            onChange={(e) => setPaymentMethod(e.target.value)}
+          >
+            <MenuItem value="stripe">Stripe</MenuItem>
+            <MenuItem value="check">Check</MenuItem>
+            <MenuItem value="cash">Cash</MenuItem>
+            <MenuItem value="bank_transfer">Bank Transfer</MenuItem>
+          </Select>
+        </FormControl>
         <Button
           type="submit"
           variant="contained"

@@ -457,4 +457,30 @@ describe('DonationsPage', () => {
       });
     }
   });
+
+  it('renders payment method filter dropdown', async () => {
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        donations: [],
+        meta: { total_count: 0, total_pages: 0, current_page: 1, per_page: 10 },
+      },
+    });
+
+    render(
+      <BrowserRouter>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DonationsPage />
+        </LocalizationProvider>
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(mockedApiClient.get).toHaveBeenCalled();
+    });
+
+    const paymentMethodFilter = screen.getByRole('combobox', {
+      name: /filter.*payment method/i,
+    });
+    expect(paymentMethodFilter).toBeInTheDocument();
+  });
 });

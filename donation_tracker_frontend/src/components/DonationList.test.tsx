@@ -379,4 +379,79 @@ describe('DonationList', () => {
     // Should display as $25.00, not $2500.00
     expect(screen.getByText(/\$25\.00/i)).toBeInTheDocument();
   });
+
+  it('displays payment method badge for stripe donation', () => {
+    const donations = [
+      {
+        id: 1,
+        amount: '10000',
+        date: '2024-01-15',
+        donor_id: 1,
+        donor_name: 'John Doe',
+        payment_method: 'stripe' as const,
+      },
+    ];
+
+    renderWithLocalization(<DonationList donations={donations} />);
+
+    expect(screen.getByText('Stripe')).toBeInTheDocument();
+  });
+
+  it('renders payment method filter dropdown', () => {
+    renderWithLocalization(<DonationList donations={[]} />);
+
+    const paymentMethodFilter = screen.getByRole('combobox', {
+      name: /filter.*payment method/i,
+    });
+    expect(paymentMethodFilter).toBeInTheDocument();
+  });
+
+  it('calls onPaymentMethodChange when payment method filter selected', async () => {
+    const mockOnPaymentMethodChange = jest.fn();
+    const user = userEvent.setup();
+
+    renderWithLocalization(
+      <DonationList
+        donations={[]}
+        onPaymentMethodChange={mockOnPaymentMethodChange}
+      />
+    );
+
+    const paymentMethodFilter = screen.getByRole('combobox', {
+      name: /filter.*payment method/i,
+    });
+    await user.click(paymentMethodFilter);
+
+    const stripeOption = await screen.findByRole('option', { name: 'Stripe' });
+    await user.click(stripeOption);
+
+    expect(mockOnPaymentMethodChange).toHaveBeenCalledWith('stripe');
+  });
+
+  it('clears payment method filter when clear filters is clicked', async () => {
+    const mockOnPaymentMethodChange = jest.fn();
+    const user = userEvent.setup();
+
+    renderWithLocalization(
+      <DonationList
+        donations={[]}
+        onPaymentMethodChange={mockOnPaymentMethodChange}
+      />
+    );
+
+    // Select a payment method
+    const paymentMethodFilter = screen.getByRole('combobox', {
+      name: /filter.*payment method/i,
+    });
+    await user.click(paymentMethodFilter);
+    const stripeOption = await screen.findByRole('option', { name: 'Stripe' });
+    await user.click(stripeOption);
+
+    // Clear filters
+    const clearButton = screen.getByRole('button', { name: /clear filters/i });
+    await user.click(clearButton);
+
+    // Verify payment method cleared
+    expect(mockOnPaymentMethodChange).toHaveBeenLastCalledWith(null);
+  });
 });

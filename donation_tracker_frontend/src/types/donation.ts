@@ -9,6 +9,7 @@ export interface Donation {
   donor_name?: string;
   project_id?: number | null;
   project_title?: string;
+  payment_method?: 'stripe' | 'check' | 'cash' | 'bank_transfer' | null;
   status?: string;
   description?: string;
 }
@@ -23,6 +24,7 @@ export interface DonationFormData {
   project_id?: number | null;
   sponsorship_id?: number | null;
   child_id?: number | null;
+  payment_method?: string;
   status?: string;
   description?: string;
 }

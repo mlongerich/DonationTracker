@@ -275,4 +275,53 @@ describe('DonationForm', () => {
       );
     });
   }, 10000); // Increase timeout for userEvent typing delays + debounced API calls
+
+  it('renders payment method dropdown', () => {
+    render(<DonationForm />);
+
+    expect(screen.getByLabelText(/payment method/i)).toBeInTheDocument();
+  });
+
+  it('defaults payment method to check', () => {
+    render(<DonationForm />);
+
+    const paymentMethodField = screen.getByRole('combobox', {
+      name: /payment method/i,
+    });
+    expect(paymentMethodField).toHaveTextContent('Check');
+  });
+
+  it('submits payment_method to API', async () => {
+    (createDonation as jest.Mock).mockResolvedValue({});
+    (apiClient.get as jest.Mock).mockResolvedValue({
+      data: {
+        donors: [{ id: 1, name: 'Test Donor', email: 'test@example.com' }],
+      },
+    });
+
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    // Fill out form
+    await user.type(screen.getByLabelText(/amount/i), '100');
+
+    // Select donor from autocomplete
+    const donorField = screen.getByLabelText(/donor/i);
+    await user.type(donorField, 'Test');
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalled());
+    const option = await screen.findByRole('option');
+    await user.click(option);
+
+    // Submit form
+    await user.click(screen.getByRole('button', { name: /create donation/i }));
+
+    // Check payment_method included in API call
+    await waitFor(() => {
+      expect(createDonation).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payment_method: 'check',
+        })
+      );
+    });
+  });
 });
