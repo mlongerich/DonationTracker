@@ -26,7 +26,7 @@ const ChildForm: React.FC<ChildFormProps> = ({ onSubmit, initialData }) => {
       return;
     }
     setError('');
-    onSubmit({ name, gender: gender || undefined });
+    onSubmit({ name, gender: gender === '' ? null : gender });
   };
 
   return (

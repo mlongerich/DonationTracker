@@ -118,9 +118,119 @@ describe('ChildrenPage', () => {
 
     await waitFor(() => {
       expect(mockedApiClient.post).toHaveBeenCalledWith('/api/children', {
-        child: { name: 'Maria' },
+        child: { name: 'Maria', gender: null },
       });
     });
+  }, 10000);
+
+  it('clears form after successful child creation', async () => {
+    const user = userEvent.setup();
+    mockedApiClient.get
+      .mockResolvedValueOnce({
+        data: {
+          children: [],
+          meta: {
+            total_count: 0,
+            total_pages: 0,
+            current_page: 1,
+            per_page: 25,
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          children: [
+            {
+              id: 1,
+              name: 'Maria',
+              created_at: '2025-01-01',
+              updated_at: '2025-01-01',
+              sponsorships: [],
+            },
+          ],
+          meta: {
+            total_count: 1,
+            total_pages: 1,
+            current_page: 1,
+            per_page: 25,
+          },
+        },
+      });
+    mockedApiClient.post.mockResolvedValue({
+      data: {
+        child: {
+          id: 1,
+          name: 'Maria',
+          created_at: '2025-01-01',
+          updated_at: '2025-01-01',
+        },
+      },
+    });
+
+    render(<ChildrenPage />);
+
+    // Type name in form
+    await waitFor(() => {
+      expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
+    });
+    await user.type(screen.getByLabelText(/name/i), 'Maria');
+
+    // Submit form
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    // Wait for API call to complete
+    await waitFor(() => {
+      expect(mockedApiClient.post).toHaveBeenCalled();
+    });
+
+    // Form should be cleared (name field should be empty)
+    await waitFor(() => {
+      expect(screen.getByLabelText(/name/i)).toHaveValue('');
+    });
+  }, 10000);
+
+  it('populates form with name and gender when edit button clicked', async () => {
+    const user = userEvent.setup();
+    const mockChildren = [
+      {
+        id: 1,
+        name: 'Maria',
+        gender: 'girl',
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+        sponsorships: [],
+      },
+    ];
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        children: mockChildren,
+        meta: {
+          total_count: 1,
+          total_pages: 1,
+          current_page: 1,
+          per_page: 25,
+        },
+      },
+    });
+
+    render(<ChildrenPage />);
+
+    // Wait for children to load
+    await waitFor(() => {
+      expect(screen.getByText('Maria')).toBeInTheDocument();
+    });
+
+    // Click Edit button
+    const editButtons = screen.getAllByRole('button', { name: /edit/i });
+    await user.click(editButtons[0]);
+
+    // Form should be populated with child's name AND gender
+    await waitFor(() => {
+      expect(screen.getByLabelText(/name/i)).toHaveValue('Maria');
+    });
+    // MUI Select uses a hidden input for the value
+    const genderSelect = screen.getByRole('combobox', { name: /gender/i });
+    expect(genderSelect).toHaveTextContent('Girl');
   }, 10000);
 
   it('updates an existing child', async () => {
@@ -192,7 +302,7 @@ describe('ChildrenPage', () => {
 
     await waitFor(() => {
       expect(mockedApiClient.put).toHaveBeenCalledWith('/api/children/1', {
-        child: { name: 'Maria Updated' },
+        child: { name: 'Maria Updated', gender: null },
       });
     });
   });

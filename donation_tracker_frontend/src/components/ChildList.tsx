@@ -14,6 +14,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ArchiveIcon from '@mui/icons-material/Archive';
 import UnarchiveIcon from '@mui/icons-material/Unarchive';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import Boy from '@mui/icons-material/Boy';
+import Girl from '@mui/icons-material/Girl';
 import { Child, Sponsorship } from '../types';
 import { formatCurrency } from '../utils/currency';
 
@@ -88,6 +90,15 @@ const ChildList: React.FC<ChildListProps> = ({
                     <Typography variant="subtitle1" component="div">
                       {child.name}
                     </Typography>
+                    {child.gender && (
+                      <>
+                        {child.gender === 'girl' ? (
+                          <Girl fontSize="small" color="action" />
+                        ) : (
+                          <Boy fontSize="small" color="action" />
+                        )}
+                      </>
+                    )}
                     {isArchived && (
                       <Chip label="Archived" size="small" color="default" />
                     )}

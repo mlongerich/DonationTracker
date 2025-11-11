@@ -156,4 +156,162 @@ describe('Children and Sponsorship Management', () => {
     cy.contains('Miguel Santos').should('be.visible');
     cy.contains('$75.00').should('be.visible');
   });
+
+  it('creates a child with boy gender and displays Boy icon', () => {
+    // Fill out name
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .find('input[type="text"]')
+      .first()
+      .type('Juan Martinez');
+
+    // Select Boy gender - click the MUI Select
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .find('[role="combobox"]')
+      .click();
+    cy.contains('li', 'Boy').click();
+
+    // Submit form
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .contains('button', /submit/i)
+      .click();
+
+    // Verify child appears in list with Boy icon
+    cy.contains('Juan Martinez', { timeout: 5000 }).should('be.visible');
+    cy.get('[data-testid="BoyIcon"]').should('be.visible');
+  });
+
+  it('creates a child with girl gender and displays Girl icon', () => {
+    // Fill out name
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .find('input[type="text"]')
+      .first()
+      .type('Ana Rodriguez');
+
+    // Select Girl gender
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .find('[role="combobox"]')
+      .click();
+    cy.contains('li', 'Girl').click();
+
+    // Submit form
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .contains('button', /submit/i)
+      .click();
+
+    // Verify child appears in list with Girl icon
+    cy.contains('Ana Rodriguez', { timeout: 5000 }).should('be.visible');
+    cy.get('[data-testid="GirlIcon"]').should('be.visible');
+  });
+
+  it('creates a child with no gender and displays no icon', () => {
+    // Fill out name only (no gender selected)
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .find('input[type="text"]')
+      .first()
+      .type('Sam Lee');
+
+    // Submit form
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .contains('button', /submit/i)
+      .click();
+
+    // Verify child appears in list with NO gender icon
+    cy.contains('Sam Lee', { timeout: 5000 }).should('be.visible');
+    cy.get('[data-testid="BoyIcon"]').should('not.exist');
+    cy.get('[data-testid="GirlIcon"]').should('not.exist');
+  });
+
+  it('edits a child to change gender from boy to girl', () => {
+    // Create child with boy gender
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .find('input[type="text"]')
+      .first()
+      .type('Alex Chen');
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .find('[role="combobox"]')
+      .click();
+    cy.contains('li', 'Boy').click();
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .contains('button', /submit/i)
+      .click();
+
+    // Verify Boy icon appears
+    cy.contains('Alex Chen', { timeout: 5000 }).should('be.visible');
+    cy.get('[data-testid="BoyIcon"]').should('be.visible');
+
+    // Click edit button
+    cy.get('[aria-label="edit"]').first().click();
+
+    // Change gender to girl
+    cy.contains('h2', 'Edit Child')
+      .parent()
+      .find('[role="combobox"]')
+      .click();
+    cy.contains('li', 'Girl').click();
+
+    // Submit
+    cy.contains('h2', 'Edit Child')
+      .parent()
+      .contains('button', /submit/i)
+      .click();
+
+    // Verify Girl icon appears (Boy icon gone)
+    cy.wait(1000); // Wait for update
+    cy.get('[data-testid="GirlIcon"]').should('be.visible');
+    cy.get('[data-testid="BoyIcon"]').should('not.exist');
+  });
+
+  it('edits a child to clear gender to null', () => {
+    // Create child with girl gender
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .find('input[type="text"]')
+      .first()
+      .type('Taylor Kim');
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .find('[role="combobox"]')
+      .click();
+    cy.contains('li', 'Girl').click();
+    cy.contains('h2', 'Add Child')
+      .parent()
+      .contains('button', /submit/i)
+      .click();
+
+    // Verify Girl icon appears
+    cy.contains('Taylor Kim', { timeout: 5000 }).should('be.visible');
+    cy.get('[data-testid="GirlIcon"]').should('be.visible');
+
+    // Click edit button
+    cy.get('[aria-label="edit"]').first().click();
+
+    // Clear gender to "Not specified"
+    cy.contains('h2', 'Edit Child')
+      .parent()
+      .find('[role="combobox"]')
+      .click();
+    cy.contains('li', 'Not specified').click();
+
+    // Submit
+    cy.contains('h2', 'Edit Child')
+      .parent()
+      .contains('button', /submit/i)
+      .click();
+
+    // Verify no gender icon appears
+    cy.wait(1000); // Wait for update
+    cy.get('[data-testid="BoyIcon"]').should('not.exist');
+    cy.get('[data-testid="GirlIcon"]').should('not.exist');
+  });
 });

@@ -31,8 +31,6 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const isChildSelected = selectedProjectOrChild?.type === 'child';
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccess(false);
@@ -92,12 +90,6 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
           onChange={setSelectedProjectOrChild}
           size="small"
         />
-        {isChildSelected && selectedProjectOrChild && (
-          <Alert severity="info">
-            This donation will create/update a sponsorship for{' '}
-            {selectedProjectOrChild.name}
-          </Alert>
-        )}
         <DonorAutocomplete
           value={selectedDonor}
           onChange={setSelectedDonor}

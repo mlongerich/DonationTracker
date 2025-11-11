@@ -18,7 +18,7 @@ describe('ChildForm', () => {
     await user.type(screen.getByLabelText(/name/i), 'Maria');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
-    expect(mockSubmit).toHaveBeenCalledWith({ name: 'Maria' });
+    expect(mockSubmit).toHaveBeenCalledWith({ name: 'Maria', gender: null });
   });
 
   it('populates form with initial data when provided', () => {
@@ -59,5 +59,19 @@ describe('ChildForm', () => {
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
     expect(mockSubmit).toHaveBeenCalledWith({ name: 'Maria', gender: 'girl' });
+  });
+
+  it('submits null for gender when "Not specified" is selected', async () => {
+    const mockSubmit = jest.fn();
+    const user = userEvent.setup();
+
+    render(<ChildForm onSubmit={mockSubmit} />);
+
+    await user.type(screen.getByLabelText(/name/i), 'Sam');
+    await user.click(screen.getByLabelText(/gender/i));
+    await user.click(screen.getByText(/not specified/i));
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    expect(mockSubmit).toHaveBeenCalledWith({ name: 'Sam', gender: null });
   });
 });

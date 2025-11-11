@@ -383,4 +383,74 @@ describe('ChildList', () => {
     const archiveButton = screen.getByRole('button', { name: /archive/i });
     expect(archiveButton).toBeInTheDocument();
   });
+
+  it('displays Boy icon for child with boy gender', () => {
+    const boyChild: Child[] = [
+      {
+        id: 1,
+        name: 'Juan',
+        gender: 'boy',
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+        can_be_deleted: true,
+      },
+    ];
+
+    render(
+      <ChildList children={boyChild} onEdit={jest.fn()} onArchive={jest.fn()} />
+    );
+
+    const boyIcon = screen.getByTestId('BoyIcon');
+    expect(boyIcon).toBeInTheDocument();
+  });
+
+  it('displays Girl icon for child with girl gender', () => {
+    const girlChild: Child[] = [
+      {
+        id: 1,
+        name: 'Maria',
+        gender: 'girl',
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+        can_be_deleted: true,
+      },
+    ];
+
+    render(
+      <ChildList
+        children={girlChild}
+        onEdit={jest.fn()}
+        onArchive={jest.fn()}
+      />
+    );
+
+    const girlIcon = screen.getByTestId('GirlIcon');
+    expect(girlIcon).toBeInTheDocument();
+  });
+
+  it('does not display icon for child with null gender', () => {
+    const nullGenderChild: Child[] = [
+      {
+        id: 1,
+        name: 'Sam',
+        gender: null,
+        created_at: '2025-01-01',
+        updated_at: '2025-01-01',
+        can_be_deleted: true,
+      },
+    ];
+
+    render(
+      <ChildList
+        children={nullGenderChild}
+        onEdit={jest.fn()}
+        onArchive={jest.fn()}
+      />
+    );
+
+    const boyIcon = screen.queryByTestId('BoyIcon');
+    const girlIcon = screen.queryByTestId('GirlIcon');
+    expect(boyIcon).not.toBeInTheDocument();
+    expect(girlIcon).not.toBeInTheDocument();
+  });
 });

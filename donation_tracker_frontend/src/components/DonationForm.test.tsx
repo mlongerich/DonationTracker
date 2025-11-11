@@ -275,32 +275,4 @@ describe('DonationForm', () => {
       );
     });
   }, 10000); // Increase timeout for userEvent typing delays + debounced API calls
-
-  it('shows info alert when child is selected', async () => {
-    (searchProjectOrChild as jest.Mock).mockResolvedValue({
-      projects: [],
-      children: [{ id: 5, name: 'Maria' }],
-    });
-
-    const user = userEvent.setup();
-    render(<DonationForm />);
-
-    // Select child from autocomplete
-    const projectField = screen.getByLabelText(/donation for/i);
-    await user.clear(projectField);
-    await user.type(projectField, 'Maria');
-    await waitFor(() =>
-      expect(searchProjectOrChild).toHaveBeenCalledWith('Maria')
-    );
-    const childOption = await screen.findByText(/Maria/);
-    await user.click(childOption);
-
-    // Check for info alert
-    await waitFor(() => {
-      const alert = screen.getByText(
-        /this donation will create\/update a sponsorship for Maria/i
-      );
-      expect(alert).toBeInTheDocument();
-    });
-  });
 });

@@ -16,5 +16,5 @@ export interface Child {
  */
 export interface ChildFormData {
   name: string;
-  gender?: string;
+  gender?: string | null;
 }

@@ -23,6 +23,7 @@ const ChildrenPage = () => {
   const [showArchived, setShowArchived] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [formKey, setFormKey] = useState(0);
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
 
   const { currentPage, handlePageChange, resetToFirstPage } = usePagination();
@@ -63,6 +64,7 @@ const ChildrenPage = () => {
 
   const handleCreate = async (data: ChildFormData) => {
     await apiClient.post('/api/children', { child: data });
+    setFormKey((prev) => prev + 1);
     refetchWithCurrentFilters();
   };
 
@@ -138,10 +140,13 @@ const ChildrenPage = () => {
         {editingChild ? (
           <ChildForm
             onSubmit={handleUpdate}
-            initialData={{ name: editingChild.name }}
+            initialData={{
+              name: editingChild.name,
+              gender: editingChild.gender || undefined,
+            }}
           />
         ) : (
-          <ChildForm onSubmit={handleCreate} />
+          <ChildForm key={formKey} onSubmit={handleCreate} />
         )}
       </Box>
 
