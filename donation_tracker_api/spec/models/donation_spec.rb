@@ -25,6 +25,29 @@ RSpec.describe Donation, type: :model do
       expect(donation).not_to be_valid
       expect(donation.errors[:date]).to include("cannot be in the future")
     end
+
+    it "requires payment_method for new donations" do
+      donation = build(:donation, payment_method: nil)
+      expect(donation).not_to be_valid
+      expect(donation.errors[:payment_method]).to include("can't be blank")
+    end
+
+    it "allows stripe payment_method" do
+      donation = build(:donation, payment_method: :stripe)
+      expect(donation).to be_valid
+    end
+
+    it "rejects invalid payment_method values" do
+      expect { build(:donation, payment_method: :invalid) }.to raise_error(ArgumentError)
+    end
+  end
+
+  describe "payment_method enum" do
+    it "provides predicate methods for stripe" do
+      donation = create(:donation, payment_method: :stripe)
+      expect(donation.payment_method_stripe?).to be true
+      expect(donation.payment_method_check?).to be false
+    end
   end
 
   describe "associations" do

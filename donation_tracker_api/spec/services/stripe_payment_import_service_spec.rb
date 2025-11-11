@@ -363,18 +363,17 @@ RSpec.describe StripePaymentImportService do
     context 'with merged donor' do
       it 'assigns donation to merged donor not original donor' do
         # Setup: Create donor1 with existing donation
-        donor1 = Donor.create!(name: "John Doe", email: "john@example.com")
-        project = Project.create!(title: "Test Project", project_type: :general)
-        Donation.create!(
+        donor1 = create(:donor, name: "John Doe", email: "john@example.com")
+        project = create(:project)
+        create(:donation, :stripe,
           donor: donor1,
           project: project,
           amount: 10000,
-          date: Date.today,
           stripe_customer_id: "cus_merged123"
         )
 
         # Setup: Create donor2 (merged donor)
-        donor2 = Donor.create!(name: "John Doe", email: "john.doe@example.com")
+        donor2 = create(:donor, name: "John Doe", email: "john.doe@example.com")
 
         # Setup: Simulate merge (donor1 → donor2)
         donor1.update_column(:merged_into_id, donor2.id)

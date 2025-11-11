@@ -51,7 +51,7 @@ module Api
     private
 
     def donation_params
-      params.require(:donation).permit(:amount, :date, :donor_id, :project_id, :sponsorship_id, :child_id, :status, :description)
+      params.require(:donation).permit(:amount, :date, :donor_id, :project_id, :sponsorship_id, :child_id, :payment_method, :status, :description)
     end
 
     def validate_date_range!

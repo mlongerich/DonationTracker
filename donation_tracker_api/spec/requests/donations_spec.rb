@@ -9,7 +9,8 @@ RSpec.describe "/api/donations", type: :request do
         donation: {
           amount: 100.50,
           date: Date.today,
-          donor_id: donor.id
+          donor_id: donor.id,
+          payment_method: 'check'
         }
       }
 
@@ -23,7 +24,8 @@ RSpec.describe "/api/donations", type: :request do
         donation: {
           amount: 50.00,
           date: Date.today,
-          donor_id: donor.id
+          donor_id: donor.id,
+          payment_method: 'check'
         }
       }
 
@@ -42,7 +44,8 @@ RSpec.describe "/api/donations", type: :request do
           amount: 100.00,
           date: Date.today,
           donor_id: donor.id,
-          project_id: project.id
+          project_id: project.id,
+          payment_method: 'check'
         }
       }
 
@@ -68,7 +71,8 @@ RSpec.describe "/api/donations", type: :request do
           date: Date.today,
           donor_id: donor.id,
           project_id: project.id,
-          sponsorship_id: sponsorship.id
+          sponsorship_id: sponsorship.id,
+          payment_method: 'check'
         }
       }
 

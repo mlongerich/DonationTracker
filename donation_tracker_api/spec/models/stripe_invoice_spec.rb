@@ -62,22 +62,20 @@ RSpec.describe StripeInvoice, type: :model do
         invoice_date: Date.today
       )
 
-      donor = Donor.create!(name: 'Test Donor', email: 'test@example.com')
-      project = Project.create!(title: 'Test Project', project_type: :general)
+      donor = create(:donor)
+      project = create(:project)
 
-      donation1 = Donation.create!(
+      donation1 = create(:donation, :stripe,
         donor: donor,
         project: project,
         amount: 5000,
-        date: Date.today,
         stripe_invoice_id: 'inv_test'
       )
 
-      donation2 = Donation.create!(
+      donation2 = create(:donation, :stripe,
         donor: donor,
         project: project,
         amount: 5000,
-        date: Date.today,
         stripe_invoice_id: 'inv_test'
       )
 

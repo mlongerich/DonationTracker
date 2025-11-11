@@ -26,6 +26,15 @@
 # @see Sponsorship for sponsorship relationship
 # @see TICKET-061 for auto-sponsorship creation
 class Donation < ApplicationRecord
+  PAYMENT_METHODS = %w[stripe check cash bank_transfer].freeze
+
+  enum :payment_method, {
+    stripe: "stripe",
+    check: "check",
+    cash: "cash",
+    bank_transfer: "bank_transfer"
+  }, prefix: true
+
   belongs_to :donor
   belongs_to :project, optional: true
   belongs_to :sponsorship, optional: true
@@ -38,11 +47,12 @@ class Donation < ApplicationRecord
 
   validates :amount, presence: true, numericality: { greater_than: 0 }
   validates :date, presence: true
+  validates :payment_method, presence: true, if: :new_record?
   validate :date_not_in_future
   validate :sponsorship_project_must_have_sponsorship_id
 
   def self.ransackable_attributes(_auth_object = nil)
-    [ "amount", "date", "donor_id", "project_id", "created_at", "updated_at" ]
+    [ "amount", "date", "donor_id", "project_id", "payment_method", "created_at", "updated_at" ]
   end
 
   private

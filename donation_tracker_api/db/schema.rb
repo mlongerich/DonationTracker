@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_08_074005) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_11_070927) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -38,9 +38,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_08_074005) do
     t.string "stripe_customer_id"
     t.string "stripe_subscription_id"
     t.string "stripe_invoice_id"
+    t.string "payment_method"
     t.index ["child_id"], name: "index_donations_on_child_id"
     t.index ["date"], name: "index_donations_on_date"
     t.index ["donor_id"], name: "index_donations_on_donor_id"
+    t.index ["payment_method"], name: "index_donations_on_payment_method"
     t.index ["project_id", "date"], name: "index_donations_on_project_id_and_date"
     t.index ["project_id"], name: "index_donations_on_project_id"
     t.index ["sponsorship_id"], name: "index_donations_on_sponsorship_id"

@@ -79,13 +79,12 @@ RSpec.describe DonorService, type: :service do
 
     it "finds donor by stripe_customer_id ignoring different email" do
       # Create donor with donation that has stripe_customer_id
-      donor = Donor.create!(name: "John Doe", email: "john@example.com")
-      project = Project.create!(title: "Test Project", project_type: :general)
-      Donation.create!(
+      donor = create(:donor, name: "John Doe", email: "john@example.com")
+      project = create(:project)
+      create(:donation, :stripe,
         donor: donor,
         project: project,
         amount: 10000,
-        date: Date.today,
         stripe_customer_id: "cus_123"
       )
 
@@ -104,18 +103,17 @@ RSpec.describe DonorService, type: :service do
 
     it "follows merge chain when donor was merged" do
       # Create original donor with donation
-      donor1 = Donor.create!(name: "John Doe", email: "john@example.com")
-      project = Project.create!(title: "Test Project", project_type: :general)
-      Donation.create!(
+      donor1 = create(:donor, name: "John Doe", email: "john@example.com")
+      project = create(:project)
+      create(:donation, :stripe,
         donor: donor1,
         project: project,
         amount: 10000,
-        date: Date.today,
         stripe_customer_id: "cus_123"
       )
 
       # Create merged donor
-      donor2 = Donor.create!(name: "John Doe", email: "john.doe@example.com")
+      donor2 = create(:donor, name: "John Doe", email: "john.doe@example.com")
 
       # Simulate merge: donor1 was merged into donor2
       donor1.update_column(:merged_into_id, donor2.id)
@@ -136,16 +134,15 @@ RSpec.describe DonorService, type: :service do
 
     it "follows multi-level merge chain (A→B→C)" do
       # Create donor chain: A → B → C
-      donor_a = Donor.create!(name: "Donor A", email: "a@example.com")
-      donor_b = Donor.create!(name: "Donor B", email: "b@example.com")
-      donor_c = Donor.create!(name: "Donor C", email: "c@example.com")
+      donor_a = create(:donor, name: "Donor A", email: "a@example.com")
+      donor_b = create(:donor, name: "Donor B", email: "b@example.com")
+      donor_c = create(:donor, name: "Donor C", email: "c@example.com")
 
-      project = Project.create!(title: "Test Project", project_type: :general)
-      Donation.create!(
+      project = create(:project)
+      create(:donation, :stripe,
         donor: donor_a,
         project: project,
         amount: 10000,
-        date: Date.today,
         stripe_customer_id: "cus_multi"
       )
 
