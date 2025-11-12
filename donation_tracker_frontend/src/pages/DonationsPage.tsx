@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Typography, Box, Pagination } from '@mui/material';
 import apiClient from '../api/client';
 import DonationForm from '../components/DonationForm';
@@ -23,7 +23,7 @@ const DonationsPage = () => {
   const { currentPage, paginationMeta, setPaginationMeta, handlePageChange } =
     usePagination();
 
-  const fetchDonations = async () => {
+  const fetchDonations = useCallback(async () => {
     try {
       // Build query params directly from state to avoid race condition (TICKET-078)
       const queryParams: Record<string, unknown> = {};
@@ -53,12 +53,17 @@ const DonationsPage = () => {
     } catch (error) {
       // Error silently handled - user will see empty list
     }
-  };
+  }, [
+    currentPage,
+    dateRange,
+    selectedDonorId,
+    selectedPaymentMethod,
+    setPaginationMeta,
+  ]);
 
   useEffect(() => {
     fetchDonations();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, dateRange, selectedDonorId, selectedPaymentMethod]);
+  }, [fetchDonations]);
 
   const handleDateRangeChange = (
     startDate: string | null,

@@ -13,6 +13,28 @@ Track intermittent test failures to identify patterns and prioritize fixes.
 
 ## Logged Failures
 
+### 2025-11-12
+
+#### children-sponsorship.cy.ts (E2E) - Infrastructure Flakiness
+- **Test:** All 10 tests in suite
+- **Failure:** `beforeEach` hook failed with "socket hang up" on `DELETE /api/test/cleanup` request
+- **Context:** Failed in full E2E suite run (15 specs), passed when run individually (10/10 passing in 24s)
+- **Root Cause:** Docker/API infrastructure timing issues - E2E API server not ready or timing out during cleanup between specs
+- **Status:** 🔴 Infrastructure flakiness - not test logic issue
+- **Frequency:** Fails intermittently in full suite runs, consistently passes individually
+- **Resolution:** Test logic is correct. Needs infrastructure fix (TICKET-108)
+
+#### donation-filtering.cy.ts (E2E) - Infrastructure Flakiness
+- **Test:** 1 of 7 tests (specific test unknown from full suite output)
+- **Failure:** Test timeout or assertion failure during full suite run
+- **Context:** Failed in full E2E suite run (15 specs), passed when run individually (7/7 passing in 42s)
+- **Root Cause:** Docker/API infrastructure timing issues - likely database state or API response delays under load
+- **Status:** 🔴 Infrastructure flakiness - not test logic issue
+- **Frequency:** Fails intermittently in full suite runs, consistently passes individually
+- **Resolution:** Test logic is correct. Needs infrastructure fix (TICKET-108)
+
+**Note:** These failures are pre-existing infrastructure issues, not caused by TICKET-097 (useCallback refactoring). All tests pass when run individually with proper Docker setup.
+
 ### 2025-11-11
 
 #### donation-filtering.cy.ts (E2E)

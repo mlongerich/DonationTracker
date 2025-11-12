@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -24,13 +24,7 @@ const SponsorshipsPage: React.FC = () => {
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
   const [showEnded, setShowEnded] = useState(false);
 
-  useEffect(() => {
-    fetchSponsorships();
-    // Disable exhaustive-deps: fetchSponsorships is stable but would cause infinite loop if added
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, debouncedQuery, showEnded]);
-
-  const fetchSponsorships = async () => {
+  const fetchSponsorships = useCallback(async () => {
     const params: any = { page, per_page: 25 };
 
     if (debouncedQuery.trim()) {
@@ -42,7 +36,11 @@ const SponsorshipsPage: React.FC = () => {
 
     const response = await apiClient.get('/api/sponsorships', { params });
     setSponsorships(response.data.sponsorships);
-  };
+  }, [page, debouncedQuery, showEnded]);
+
+  useEffect(() => {
+    fetchSponsorships();
+  }, [fetchSponsorships]);
 
   const handleEndSponsorship = async (id: number) => {
     await apiClient.delete(`/api/sponsorships/${id}`);

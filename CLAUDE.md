@@ -564,6 +564,36 @@ import { Donor } from '../types';
 
 **See:** TICKET-050 (ChildForm consistency improvements)
 
+#### React Hooks Best Practices
+
+**useCallback for Fetch Functions:**
+- Always wrap fetch functions in `useCallback` to stabilize references
+- Include all dependencies used inside the callback
+- Prevents infinite loops in useEffect hooks
+- No need to include setState functions (they're stable by default)
+
+**Pattern:**
+```typescript
+const fetchData = useCallback(async () => {
+  const response = await apiClient.get('/api/data', {
+    params: { page: currentPage, filter: searchQuery }
+  });
+  setData(response.data.items);
+  setPaginationMeta(response.data.meta);
+}, [currentPage, searchQuery, setPaginationMeta]); // ✅ Include all dependencies
+
+useEffect(() => {
+  fetchData();
+}, [fetchData]); // ✅ Safe to include - stable reference
+```
+
+**Common Pitfalls:**
+- ❌ Don't disable exhaustive-deps - fix the root cause instead
+- ❌ Avoid object/array deps that recreate every render (destructure primitives)
+- ✅ setState functions don't need to be in deps (stable by React)
+
+**See:** TICKET-097 (ESLint exhaustive-deps fix)
+
 #### Custom Hooks Library
 
 **When to Create:**

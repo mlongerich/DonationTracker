@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Typography,
   Box,
@@ -40,7 +40,7 @@ const DonorsPage = () => {
     resetToFirstPage();
   }, [debouncedQuery, resetToFirstPage]);
 
-  const fetchDonors = async () => {
+  const fetchDonors = useCallback(async () => {
     try {
       // Build query params - add search filter if debounced query exists
       const queryParams: Record<string, unknown> = {};
@@ -65,7 +65,7 @@ const DonorsPage = () => {
     } catch (error) {
       // Error silently handled - user will see empty list
     }
-  };
+  }, [currentPage, showArchived, debouncedQuery, setPaginationMeta]);
 
   const handleArchive = async (id: number) => {
     try {
@@ -103,8 +103,7 @@ const DonorsPage = () => {
 
   useEffect(() => {
     fetchDonors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, showArchived, debouncedQuery]);
+  }, [fetchDonors]);
 
   return (
     <Box>
