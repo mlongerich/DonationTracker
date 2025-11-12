@@ -4,9 +4,12 @@
 **Priority:** 🔴 High
 **Dependencies:** None
 **Created:** 2025-11-03
+**Updated:** 2025-11-12 (added TICKET-107 reference for projects)
 
 ### User Story
 As an admin, I want to see the last donation date for donors, children, and sponsorships so that I can identify inactive relationships and follow up proactively.
+
+**Note:** This ticket covers 3 of 4 entity types. TICKET-107 covers projects using the same pattern.
 
 ### Problem Statement
 Currently, admins cannot quickly see:
@@ -213,12 +216,16 @@ Last Donation: 2025-10-20
 
 ### Related Tickets
 
+- TICKET-107: Project Last Donation Date (complements this ticket - same pattern for projects) 📋 Planned
 - TICKET-011: Recurring Donation Tracking (shows payment frequency)
 - TICKET-076: Failed Payments Tracking (explains missing payments)
 
 ### Notes
 
+- **Scope**: This ticket covers **Donors, Children, and Sponsorships** (3 of 4 entity types)
+- **Projects**: See TICKET-107 for Project last donation date (same implementation pattern)
 - Use relative date display later: "2 days ago", "3 weeks ago" (future enhancement)
 - Add sorting by last_donation_date (future enhancement)
 - Consider highlighting "lapsed" donors (>90 days) in red (future enhancement)
 - For ended sponsorships, this helps identify when they actually stopped receiving payments
+- **Pattern consistency**: The computed method pattern used here is reused in TICKET-107 for projects

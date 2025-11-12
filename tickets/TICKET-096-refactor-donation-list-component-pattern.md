@@ -2,9 +2,10 @@
 
 **Status:** 🔵 In Progress
 **Priority:** 🟡 Medium
-**Effort:** M (Medium)
+**Effort:** M (Medium - 1-2 hours)
 **Created:** 2025-11-11
-**Dependencies:** None
+**Updated:** 2025-11-12 (clarified TICKET-095 dependency)
+**Dependencies:** TICKET-095 (removes console.log first) - Optional but recommended
 
 ### User Story
 As a developer, I want DonationList to follow the same component pattern as other List components so that filtering logic is consistently handled at the Page level.
@@ -29,6 +30,7 @@ const DonationList: React.FC<DonationListProps> = ({
   onDonorChange,          // ⚠️ Filter callback
   onPaymentMethodChange,  // ⚠️ Filter callback
 }) => {
+  console.log(/* ... */);  // ⚠️ Debug log (TICKET-095 removes this)
   const [startDate, setStartDate] = useState<Dayjs | null>(null);  // ⚠️ Local state
   const [endDate, setEndDate] = useState<Dayjs | null>(null);      // ⚠️ Local state
   const [dateError, setDateError] = useState<string | null>(null); // ⚠️ Local state
@@ -55,6 +57,8 @@ const DonationList: React.FC<DonationListProps> = ({
   );
 };
 ```
+
+**Note:** TICKET-095 removes the console.log statement (line 45) before this refactor. While not strictly required, it's recommended to do TICKET-095 first for a cleaner refactoring experience.
 
 #### ChildList (Correct Pattern - Pure Presentation)
 ```typescript
@@ -382,6 +386,7 @@ describe('DonationList', () => {
 8. [ ] Manual QA - verify all filtering still works
 
 ### Related Tickets
+- TICKET-095: Remove Debug Logging (removes console.log from DonationList first) - Recommended to do before this ticket
 - Part of CODE_SMELL_ANALYSIS initiative
 - Follows pattern used in ChildrenPage, DonorsPage, ProjectsPage
 - Identified in code smell review on 2025-11-11
@@ -391,3 +396,4 @@ describe('DonationList', () => {
 - Improves consistency with other List components
 - Makes DonationList reusable in other contexts (future donor details page)
 - Consider applying same pattern if other List components gain filtering in future
+- **TICKET-095 recommended first**: While not strictly required, removing the console.log statement in TICKET-095 first provides a cleaner starting point for this refactor

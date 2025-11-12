@@ -2,23 +2,24 @@
 
 **Status:** 🔵 In Progress
 **Priority:** 🔴 High
-**Effort:** XS (Extra Small)
+**Effort:** S (Small - expanded to all pages)
 **Created:** 2025-11-11
+**Updated:** 2025-11-12 (expanded scope to all console statements)
 **Dependencies:** None
 
 ### User Story
 As a developer, I want to remove console.log statements from production code so that the browser console is clean and performance is optimized.
 
 ### Problem Statement
-Debug logging statements (console.log) are still present in production code, causing console clutter and potential performance impact.
+Debug logging statements (console.log and console.error) are present throughout production code, causing console clutter and potential performance impact.
 
 **Code Smell:** Debug code left in production
-**Issue:** console.log statements in DonationList.tsx and ChildrenPage.tsx
-**Impact:** Console clutter, performance impact in production
+**Issue:** 1 console.log + 9 console.error statements across multiple files
+**Impact:** Console clutter, performance impact, unprofessional production environment
 
 ### Locations to Fix
 
-#### 1. DonationList.tsx (lines 45-49)
+#### 1. DonationList.tsx (lines 45-49) - console.log
 ```typescript
 // src/components/DonationList.tsx:45-49
 const DonationList: React.FC<DonationListProps> = ({
@@ -34,7 +35,7 @@ const DonationList: React.FC<DonationListProps> = ({
 };
 ```
 
-#### 2. ChildrenPage.tsx (line 100)
+#### 2. ChildrenPage.tsx (line 100) - console.error
 ```typescript
 // src/pages/ChildrenPage.tsx:100
 const handleArchive = async (id: number) => {
@@ -48,14 +49,117 @@ const handleArchive = async (id: number) => {
 };
 ```
 
-**Note:** The `console.error` in ChildrenPage is in an error handler and may be intentional, but should be evaluated.
+#### 3. DonorsPage.tsx (lines 66, 83, 92) - 3x console.error
+```typescript
+// src/pages/DonorsPage.tsx:66
+const fetchDonors = async () => {
+  try {
+    // ...
+  } catch (error) {
+    console.error('Failed to fetch donors:', error);
+  }
+};
+
+// src/pages/DonorsPage.tsx:83
+const handleArchive = async (id: number) => {
+  try {
+    // ...
+  } catch (err: any) {
+    console.error('Failed to archive donor:', err);
+  }
+};
+
+// src/pages/DonorsPage.tsx:92
+const handleRestore = async (id: number) => {
+  try {
+    // ...
+  } catch (error) {
+    console.error('Failed to restore donor:', error);
+  }
+};
+```
+
+#### 4. DonationsPage.tsx (line 54) - console.error
+```typescript
+// src/pages/DonationsPage.tsx:54
+const fetchDonations = async () => {
+  try {
+    // ...
+  } catch (error) {
+    console.error('Failed to fetch donations:', error);
+  }
+};
+```
+
+#### 5. SponsorshipsPage.tsx (line 66) - console.error
+```typescript
+// src/pages/SponsorshipsPage.tsx:66
+const handleSubmit = async (data: SponsorshipFormData) => {
+  try {
+    // ...
+  } catch (err: any) {
+    console.error('Failed to create sponsorship:', err);
+  }
+};
+```
+
+#### 6. ProjectsPage.tsx (lines 39, 70, 84, 110) - 4x console.error
+```typescript
+// src/pages/ProjectsPage.tsx:39
+const fetchProjects = async () => {
+  try {
+    // ...
+  } catch (error) {
+    console.error('Failed to fetch projects:', error);
+  }
+};
+
+// src/pages/ProjectsPage.tsx:70
+const handleSubmit = async (data: ProjectFormData) => {
+  try {
+    // ...
+  } catch (error) {
+    console.error('Failed to create/update project:', error);
+  }
+};
+
+// src/pages/ProjectsPage.tsx:84
+const handleDelete = async (id: number) => {
+  try {
+    // ...
+  } catch (error) {
+    console.error('Failed to delete project:', error);
+  }
+};
+
+// src/pages/ProjectsPage.tsx:110
+const handleArchive = async (id: number) => {
+  try {
+    // ...
+  } catch (err: any) {
+    console.error('Failed to archive project:', err);
+  }
+};
+```
+
+### Summary of All Console Statements
+
+**Total:** 10 console statements across 6 files
+- **1x console.log**: DonationList.tsx (line 45)
+- **9x console.error**: ChildrenPage (1), DonorsPage (3), DonationsPage (1), SponsorshipsPage (1), ProjectsPage (4)
+
+**Decision:** Remove ALL - errors are already shown to users via state management (Alert components)
 
 ### Acceptance Criteria
-- [ ] Remove all `console.log` statements from production code
-- [ ] Keep `console.error` only in error boundaries and critical error handlers (if needed)
-- [ ] Consider adding proper error logging service if needed
+- [ ] Remove console.log from DonationList.tsx (1 location)
+- [ ] Remove console.error from ChildrenPage.tsx (1 location)
+- [ ] Remove console.error from DonorsPage.tsx (3 locations)
+- [ ] Remove console.error from DonationsPage.tsx (1 location)
+- [ ] Remove console.error from SponsorshipsPage.tsx (1 location)
+- [ ] Remove console.error from ProjectsPage.tsx (4 locations)
+- [ ] Run `grep -r "console\." src/` to verify all removed
 - [ ] Run ESLint to catch any remaining console statements
-- [ ] All existing tests pass
+- [ ] All existing tests pass (no tests depend on console statements)
 
 ### Technical Approach
 
@@ -159,8 +263,12 @@ npm test
 ```
 
 ### Files to Modify
-- `src/components/DonationList.tsx` (REMOVE console.log)
-- `src/pages/ChildrenPage.tsx` (EVALUATE console.error)
+- `src/components/DonationList.tsx` (REMOVE 1 console.log)
+- `src/pages/ChildrenPage.tsx` (REMOVE 1 console.error)
+- `src/pages/DonorsPage.tsx` (REMOVE 3 console.error)
+- `src/pages/DonationsPage.tsx` (REMOVE 1 console.error)
+- `src/pages/SponsorshipsPage.tsx` (REMOVE 1 console.error)
+- `src/pages/ProjectsPage.tsx` (REMOVE 4 console.error)
 
 ### Alternative: Development-Only Logging
 
@@ -195,7 +303,9 @@ const DonationList: React.FC<DonationListProps> = ({ donations }) => {
 - Identified in code smell review on 2025-11-11
 
 ### Notes
-- Quick win - takes <10 minutes to fix
+- Takes ~15-20 minutes to fix all 10 locations
 - Should be done before deploying to production
+- All error handling already shown to users via Alert components
 - Consider setting up proper error monitoring (Sentry) in future
 - After this fix, run `grep -r "console\." src/` to ensure none remain
+- **Expanded scope 2025-11-12**: Originally identified 2 files, found 6 total files with console statements
