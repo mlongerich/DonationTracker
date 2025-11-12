@@ -53,4 +53,8 @@ Rails.application.configure do
 
   # Allow all hosts in test environment
   config.hosts.clear
+
+  # Increase timeout for E2E test cleanup operations (database-heavy operations)
+  # Default Rack timeout is 15s, increase to 30s for reliable cleanup
+  config.rack_timeout = 30 if defined?(Rack::Timeout)
 end

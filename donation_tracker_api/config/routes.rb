@@ -7,6 +7,9 @@ Rails.application.routes.draw do
 
   # API routes
   namespace :api do
+    # Health check endpoint for E2E test infrastructure
+    get "health", to: "health#index"
+
     resources :donors, only: [ :create, :show, :index, :update, :destroy ] do
       delete "all", action: :destroy_all, on: :collection
       post "merge", action: :merge, on: :collection
