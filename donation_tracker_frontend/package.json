@@ -41,7 +41,7 @@
     "test:ci": "react-scripts test --coverage --watchAll=false --ci",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "cypress:e2e": "cd .. && docker-compose --profile e2e up -d && cd donation_tracker_frontend && cypress run; EXIT_CODE=$?; cd .. && docker-compose --profile e2e down && exit $EXIT_CODE",
+    "cypress:e2e": "cd .. && docker-compose --profile e2e up -d && bash scripts/wait-for-api.sh && cd donation_tracker_frontend && cypress run; EXIT_CODE=$?; cd .. && docker-compose --profile e2e down && exit $EXIT_CODE",
     "cypress:e2e:open": "cd .. && docker-compose --profile e2e up -d && cd donation_tracker_frontend && cypress open",
     "cypress:e2e:down": "cd .. && docker-compose --profile e2e down",
     "lint": "eslint src --ext .ts,.tsx",
