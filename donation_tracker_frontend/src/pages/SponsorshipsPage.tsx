@@ -9,6 +9,7 @@ import {
   TextField,
   Checkbox,
   FormControlLabel,
+  Pagination,
 } from '@mui/material';
 import apiClient from '../api/client';
 import { Sponsorship, SponsorshipFormData } from '../types';
@@ -18,7 +19,9 @@ import { useDebouncedValue } from '../hooks';
 
 const SponsorshipsPage: React.FC = () => {
   const [sponsorships, setSponsorships] = useState<Sponsorship[]>([]);
-  const [page] = useState(1); // TODO: Implement pagination (TICKET-053)
+  const [page, setPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
@@ -36,11 +39,17 @@ const SponsorshipsPage: React.FC = () => {
 
     const response = await apiClient.get('/api/sponsorships', { params });
     setSponsorships(response.data.sponsorships);
+    setTotalCount(response.data.meta.total_count);
+    setTotalPages(response.data.meta.total_pages);
   }, [page, debouncedQuery, showEnded]);
 
   useEffect(() => {
     fetchSponsorships();
   }, [fetchSponsorships]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQuery, showEnded]);
 
   const handleEndSponsorship = async (id: number) => {
     await apiClient.delete(`/api/sponsorships/${id}`);
@@ -113,6 +122,22 @@ const SponsorshipsPage: React.FC = () => {
         sponsorships={sponsorships}
         onEndSponsorship={handleEndSponsorship}
       />
+
+      {totalCount > 0 && (
+        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            Showing {(page - 1) * 25 + 1}-{Math.min(page * 25, totalCount)} of {totalCount} sponsorships
+          </Typography>
+          {totalPages > 1 && (
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={(_e, value) => setPage(value)}
+              color="primary"
+            />
+          )}
+        </Box>
+      )}
     </Container>
   );
 };

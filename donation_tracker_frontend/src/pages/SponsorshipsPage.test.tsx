@@ -244,4 +244,110 @@ describe('SponsorshipsPage', () => {
       });
     });
   });
+
+  it('displays pagination metadata text when sponsorships exist', async () => {
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        sponsorships: [
+          { id: 1, donor_name: 'John', child_name: 'Alice', monthly_amount: 50, active: true },
+          { id: 2, donor_name: 'Jane', child_name: 'Bob', monthly_amount: 75, active: true },
+        ],
+        meta: { total_count: 50, total_pages: 2, current_page: 1, per_page: 25 },
+      },
+    });
+
+    render(<SponsorshipsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/showing 1-25 of 50 sponsorships/i)).toBeInTheDocument();
+    });
+  });
+
+  it('displays Pagination component when multiple pages exist', async () => {
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        sponsorships: [
+          { id: 1, donor_name: 'John', child_name: 'Alice', monthly_amount: 50, active: true },
+        ],
+        meta: { total_count: 50, total_pages: 2, current_page: 1, per_page: 25 },
+      },
+    });
+
+    render(<SponsorshipsPage />);
+
+    await waitFor(() => {
+      const pagination = screen.getByRole('navigation');
+      expect(pagination).toBeInTheDocument();
+    });
+  });
+
+  it('fetches page 2 when pagination button clicked', async () => {
+    const user = userEvent.setup();
+
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        sponsorships: [
+          { id: 1, donor_name: 'John', child_name: 'Alice', monthly_amount: 50, active: true },
+        ],
+        meta: { total_count: 50, total_pages: 2, current_page: 1, per_page: 25 },
+      },
+    });
+
+    render(<SponsorshipsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('navigation')).toBeInTheDocument();
+    });
+
+    const page2Button = screen.getByRole('button', { name: 'Go to page 2' });
+    await user.click(page2Button);
+
+    await waitFor(() => {
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/api/sponsorships', {
+        params: {
+          page: 2,
+          per_page: 25,
+          q: { end_date_null: true },
+        },
+      });
+    });
+  });
+
+  it('resets to page 1 when search filter changes', async () => {
+    const user = userEvent.setup();
+
+    mockedApiClient.get.mockResolvedValue({
+      data: {
+        sponsorships: [
+          { id: 1, donor_name: 'John', child_name: 'Alice', monthly_amount: 50, active: true },
+        ],
+        meta: { total_count: 50, total_pages: 2, current_page: 1, per_page: 25 },
+      },
+    });
+
+    render(<SponsorshipsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('navigation')).toBeInTheDocument();
+    });
+
+    // Click to page 2
+    const page2Button = screen.getByRole('button', { name: 'Go to page 2' });
+    await user.click(page2Button);
+
+    // Change search filter
+    const searchInput = screen.getByPlaceholderText(/search donor or child/i);
+    await user.type(searchInput, 'test');
+
+    // Should reset to page 1
+    await waitFor(() => {
+      expect(mockedApiClient.get).toHaveBeenCalledWith('/api/sponsorships', {
+        params: {
+          page: 1,
+          per_page: 25,
+          q: { donor_name_or_child_name_cont: 'test', end_date_null: true },
+        },
+      });
+    });
+  });
 });
