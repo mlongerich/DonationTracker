@@ -42,11 +42,6 @@ const DonationList: React.FC<DonationListProps> = ({
   onDonorChange,
   onPaymentMethodChange,
 }) => {
-  console.log(
-    '[DonationList] Rendering with donations:',
-    donations?.length,
-    'items'
-  );
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const [dateError, setDateError] = useState<string | null>(null);

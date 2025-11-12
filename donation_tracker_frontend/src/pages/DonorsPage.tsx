@@ -63,7 +63,7 @@ const DonorsPage = () => {
       setDonors(response.data.donors);
       setPaginationMeta(response.data.meta);
     } catch (error) {
-      console.error('Failed to fetch donors:', error);
+      // Error silently handled - user will see empty list
     }
   };
 
@@ -80,7 +80,6 @@ const DonorsPage = () => {
       } else {
         setError('Failed to archive donor');
       }
-      console.error('Failed to archive donor:', err);
     }
   };
 
@@ -89,7 +88,7 @@ const DonorsPage = () => {
       await apiClient.post(`/api/donors/${id}/restore`);
       fetchDonors();
     } catch (error) {
-      console.error('Failed to restore donor:', error);
+      // Error silently handled
     }
   };
 

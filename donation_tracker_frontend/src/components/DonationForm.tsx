@@ -79,7 +79,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
       setDate(new Date().toISOString().split('T')[0]);
       onSuccess?.(); // Notify parent to refresh donation list
     } catch (err) {
-      console.error('Failed to create donation:', err);
+      // Error silently handled
     } finally {
       setIsSubmitting(false);
     }

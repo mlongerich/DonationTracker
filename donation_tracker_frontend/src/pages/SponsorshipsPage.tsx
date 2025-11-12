@@ -63,7 +63,6 @@ const SponsorshipsPage: React.FC = () => {
       } else {
         setError('Failed to create sponsorship');
       }
-      console.error('Failed to create sponsorship:', err);
     }
   };
 

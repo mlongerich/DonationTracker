@@ -51,7 +51,7 @@ const DonationsPage = () => {
       setDonations(response.data.donations);
       setPaginationMeta(response.data.meta);
     } catch (error) {
-      console.error('Failed to fetch donations:', error);
+      // Error silently handled - user will see empty list
     }
   };
 

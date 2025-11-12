@@ -36,7 +36,7 @@ const ProjectsPage: React.FC = () => {
         const response = await apiClient.get('/api/projects', { params });
         setProjects(response.data.projects);
       } catch (error) {
-        console.error('Failed to fetch projects:', error);
+        // Error silently handled - user will see empty list
       }
     };
     loadProjects();
@@ -67,7 +67,7 @@ const ProjectsPage: React.FC = () => {
       // Auto-dismiss notification after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      console.error('Failed to create/update project:', error);
+      // Error silently handled
     }
   };
 
@@ -81,7 +81,7 @@ const ProjectsPage: React.FC = () => {
       // Auto-dismiss notification after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      console.error('Failed to delete project:', error);
+      // Error silently handled
     }
   };
 
@@ -107,7 +107,6 @@ const ProjectsPage: React.FC = () => {
       } else {
         setError('Failed to archive project');
       }
-      console.error('Failed to archive project:', err);
     }
   };
 
@@ -126,7 +125,6 @@ const ProjectsPage: React.FC = () => {
 
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      console.error('Failed to restore project:', error);
       setError('Failed to restore project');
     }
   };

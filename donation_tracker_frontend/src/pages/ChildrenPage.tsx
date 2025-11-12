@@ -97,7 +97,6 @@ const ChildrenPage = () => {
       } else {
         setLocalError('Failed to archive child');
       }
-      console.error('Failed to archive child:', err);
     }
   };
 

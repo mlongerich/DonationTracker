@@ -76,7 +76,6 @@ export const useChildren = (): UseChildrenReturn => {
         const errorMessage =
           err.response?.data?.error || 'Failed to fetch children';
         setError(errorMessage);
-        console.error('Failed to fetch children:', err);
       } finally {
         setLoading(false);
       }

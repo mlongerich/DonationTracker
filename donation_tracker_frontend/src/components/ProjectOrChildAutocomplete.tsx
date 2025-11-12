@@ -60,7 +60,6 @@ const ProjectOrChildAutocomplete = ({
           }));
           setOptions([...projectOptions, ...childOptions]);
         } catch (error) {
-          console.error('Failed to search:', error);
           setOptions([]);
         } finally {
           setLoading(false);

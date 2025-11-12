@@ -44,7 +44,6 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
           });
           setDonorOptions(response.data.donors || []);
         } catch (error) {
-          console.error('Failed to search donors:', error);
           setDonorOptions([]);
         } finally {
           setLoading(false);

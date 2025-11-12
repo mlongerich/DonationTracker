@@ -42,7 +42,6 @@ const ChildAutocomplete: React.FC<ChildAutocompleteProps> = ({
           });
           setChildOptions(response.data.children || []);
         } catch (error) {
-          console.error('Failed to search children:', error);
           setChildOptions([]);
         } finally {
           setLoading(false);
