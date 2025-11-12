@@ -1,43 +1,93 @@
-## [TICKET-051] Add Project Type Sort/Filter to Projects Page
+## [TICKET-051] Add Project Type Filter & Pagination to Projects Page
 
 **Status:** 📋 Planned
 **Priority:** 🟡 Medium
-**Effort:** S (Small - 1-2 hours)
+**Effort:** M (Medium - 2-3 hours)
 **Created:** 2025-10-21
+**Updated:** 2025-11-12 (Added pagination requirement for consistency)
 **Dependencies:** None
 
 ### User Story
-As a user, I want to sort and filter projects by type (General/Campaign/Sponsorship) on the Projects page so that I can easily find and manage specific categories of projects.
+As a user, I want to filter projects by type (General/Campaign/Sponsorship) and navigate through paginated results on the Projects page so that I can easily find and manage specific categories of projects, consistent with other pages in the application.
 
 ### Acceptance Criteria
+
+#### Type Filter (Client-Side)
 - [ ] Add dropdown filter above ProjectList for project type selection
 - [ ] Dropdown options: "All Types", "General", "Campaign", "Sponsorship"
 - [ ] Default selection: "All Types" (shows all projects)
 - [ ] Selecting a type filters the displayed project list client-side
 - [ ] Filter state resets when creating/editing/deleting projects
 - [ ] Visual consistency with other page filters (Material-UI Select component)
+
+#### Pagination (Backend Integration)
+- [ ] Migrate to server-side pagination using backend API
+- [ ] Use `usePagination` hook (like DonorsPage, ChildrenPage, SponsorshipsPage)
+- [ ] Extract pagination metadata from API response (totalPages, totalCount)
+- [ ] Add MUI Pagination component below ProjectList
+- [ ] Display "Showing X-Y of Z projects" metadata text
+- [ ] Pagination resets to page 1 when type filter changes
+- [ ] Backend already supports pagination (ProjectsController uses PaginationConcern)
+
+#### Testing
 - [ ] Jest unit tests validate filtering logic
+- [ ] Jest unit tests validate pagination behavior
 - [ ] Cypress E2E test validates type filtering workflow
+- [ ] Cypress E2E smoke tests validate pagination UI exists
 
 ### Technical Approach
 
-#### Frontend Changes (Client-Side Filtering)
+#### Phase 1: Add Pagination (Backend Integration)
 
-**1. ProjectsPage.tsx Updates:**
+**1. ProjectsPage.tsx - Add Pagination State:**
 ```typescript
+import { usePagination } from '../hooks';
+
+const { currentPage, paginationMeta, setPaginationMeta, handlePageChange } = usePagination();
 const [projectTypeFilter, setProjectTypeFilter] = useState<string>('all');
 
-// Filter projects based on selected type
-const filteredProjects = projectTypeFilter === 'all'
-  ? projects
-  : projects.filter(p => p.project_type === projectTypeFilter);
+// Fetch projects with pagination
+useEffect(() => {
+  const loadProjects = async () => {
+    const params: any = { page: currentPage, per_page: 25 };
+    if (showArchived) params.include_discarded = 'true';
+    if (projectTypeFilter !== 'all') params.q = { project_type_eq: projectTypeFilter };
 
-// Pass filtered list to ProjectList
-<ProjectList
-  projects={filteredProjects}
-  onEdit={setEditingProject}
-  onDelete={handleDelete}
-/>
+    const response = await apiClient.get('/api/projects', { params });
+    setProjects(response.data.projects);
+    setPaginationMeta(response.data.meta);
+  };
+  loadProjects();
+}, [currentPage, showArchived, projectTypeFilter, setPaginationMeta]);
+
+// Reset to page 1 when filter changes
+useEffect(() => {
+  handlePageChange(null, 1);
+}, [projectTypeFilter, showArchived, handlePageChange]);
+```
+
+**2. Add Pagination UI:**
+```typescript
+{paginationMeta && paginationMeta.total_pages > 1 && (
+  <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <Typography variant="body2" color="text.secondary">
+      Showing {(currentPage - 1) * 25 + 1}-{Math.min(currentPage * 25, paginationMeta.total_count)} of {paginationMeta.total_count} projects
+    </Typography>
+    <Pagination
+      count={paginationMeta.total_pages}
+      page={currentPage}
+      onChange={handlePageChange}
+      color="primary"
+    />
+  </Box>
+)}
+```
+
+#### Phase 2: Add Type Filter (Server-Side via Ransack)
+
+**1. Type Filter Dropdown:**
+```typescript
+const [projectTypeFilter, setProjectTypeFilter] = useState<string>('all');
 ```
 
 **2. UI Layout:**
@@ -65,13 +115,18 @@ const filteredProjects = projectTypeFilter === 'all'
 - Position above ProjectList component
 - Follow DonorsPage pattern for consistent layout
 
-### Alternative Approach: Server-Side Filtering
+### Backend Status
 
-**If project count grows large (100+ projects):**
-- Add Ransack filtering to backend: `q[project_type_eq]=<type>`
-- Follow DonationsPage pattern with pagination + filters
-- Add `PaginationConcern` and `RansackFilterable` to ProjectsController
-- **Not needed for MVP** - client-side filtering sufficient for now
+**Already Implemented:**
+- ✅ ProjectsController includes `PaginationConcern` (pagination support)
+- ✅ ProjectsController includes `RansackFilterable` (filtering support)
+- ✅ Project model has `ransackable_attributes` including `project_type`
+- ✅ Backend returns pagination `meta` object
+
+**What We Need:**
+- Frontend integration with `usePagination` hook
+- Frontend Ransack query: `?q[project_type_eq]=<type>`
+- Type filter dropdown UI
 
 ### Testing Strategy
 
@@ -123,18 +178,35 @@ const filteredProjects = projectTypeFilter === 'all'
 ```
 
 ### Estimated Time
-~1-2 hours (simple client-side filtering)
+~2-3 hours (pagination integration + type filtering)
+- Phase 1 (Pagination): 1-1.5 hours
+- Phase 2 (Type Filter): 0.5-1 hour
+- Testing: 0.5 hour
 
 ### Related Tickets
 - ✅ TICKET-009: Project-based donations (complete)
+- ✅ TICKET-053: Sponsorships page pagination (complete - pattern to follow)
 - 📋 TICKET-046: Donation list project filter (planned)
 
+### Pattern to Follow
+**Reference Implementation:** TICKET-053 (SponsorshipsPage)
+- Uses `usePagination` hook for state management
+- Extracts `meta` from API response
+- MUI Pagination component with metadata display
+- Resets to page 1 on filter change
+
+**Consistency Goal:**
+All 5 pages (Donors, Donations, Children, Sponsorships, Projects) should have:
+- Server-side pagination (25 items/page)
+- Pagination UI with metadata
+- Filter integration with pagination reset
+
 ### Notes
-- Client-side filtering chosen over server-side for simplicity
-- Current project count is low (<50 expected)
-- Can migrate to server-side Ransack filtering later if needed
-- Follows existing pattern from other pages
+- **Changed Approach:** Server-side pagination instead of client-side filtering
+- Backend already supports pagination + Ransack filtering (no backend changes needed)
+- Follows established pattern from DonorsPage, ChildrenPage, SponsorshipsPage
+- Ensures consistency across all list pages
 
 ---
 
-*This ticket addresses user request: "Can you sort project list by type"*
+*Updated 2025-11-12: Expanded scope to include pagination for consistency with other pages*

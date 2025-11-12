@@ -116,7 +116,7 @@ Current work items and user stories being actively developed.
 
 #### Sponsorship & Children Features
 - [TICKET-048: Stripe Sponsorship & Child Extraction](TICKET-048-stripe-sponsorship-child-extraction.md) - 📋 Planned (🟡 Medium, M)
-- [TICKET-051: Add Project Type Sort/Filter to Projects Page](TICKET-051-project-page-type-sort-filter.md) - 📋 Planned (🟡 Medium, S)
+- [TICKET-051: Add Project Type Filter & Pagination to Projects Page](TICKET-051-project-page-type-sort-filter.md) - 📋 Planned (🟡 Medium, M) - *Updated: Added pagination for consistency*
 - [TICKET-055: Sponsorship Management Actions](TICKET-055-sponsorship-reactivate-delete-actions.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-058: Donor Sponsorship List Endpoint](TICKET-058-donor-sponsorship-list-endpoint.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-059: Child Info Display on Donation Pages](TICKET-059-child-info-display-donation-pages.md) - 📋 Planned (🟡 Medium, S)
