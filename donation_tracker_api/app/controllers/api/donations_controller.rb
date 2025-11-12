@@ -39,7 +39,6 @@ module Api
     def create
       donation = Donation.new(donation_params)
       donation.save!  # Raises RecordInvalid if validation fails
-      donation.reload
       render json: { donation: DonationPresenter.new(donation).as_json }, status: :created
     end
 

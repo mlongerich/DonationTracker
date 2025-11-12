@@ -47,12 +47,8 @@ class Api::SponsorshipsController < ApplicationController
 
   def create
     sponsorship = Sponsorship.new(sponsorship_params)
-
-    if sponsorship.save
-      render json: { sponsorship: SponsorshipPresenter.new(sponsorship).as_json }, status: :created
-    else
-      render json: { errors: sponsorship.errors.full_messages }, status: :unprocessable_entity
-    end
+    sponsorship.save!  # Raises RecordInvalid if validation fails
+    render json: { sponsorship: SponsorshipPresenter.new(sponsorship).as_json }, status: :created
   end
 
   def destroy
