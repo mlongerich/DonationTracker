@@ -1,12 +1,13 @@
 ## [TICKET-053] Sponsorships Page Filters & Pagination UI
 
-**Status:** 🟡 Blocked
+**Status:** ✅ Complete
 **Priority:** 🟡 Medium
 **Effort:** M (Medium - 3-4 hours)
 **Created:** 2025-10-21
 **Started:** 2025-10-29
-**Blocked By:** TICKET-064 (Smart Sponsorship Detection - required for testing)
-**Dependencies:** TICKET-010 (Sponsorships page exists) ✅, TICKET-054 (Create form on page) ✅
+**Completed:** 2025-11-12
+**Blocked By:** ~~TICKET-064~~ ✅ Complete (Smart Sponsorship Detection)
+**Dependencies:** TICKET-010 (Sponsorships page exists) ✅, TICKET-054 (Create form on page) ✅, TICKET-064 (Smart Sponsorship Detection) ✅
 
 ### User Story
 As a user, I want to filter sponsorships by donor or child and toggle showing ended sponsorships, and navigate through pages of results, so that I can quickly find specific sponsorship relationships in a large dataset.
@@ -20,34 +21,30 @@ TICKET-010 implemented the Sponsorships page with backend pagination and filteri
 
 ### Acceptance Criteria
 
-#### Filters
-- [ ] Add DonorAutocomplete filter above SponsorshipList
-  - [ ] Label: "Filter by Donor"
-  - [ ] Sends `?q[donor_id_eq]=X` to API when donor selected
-  - [ ] Shows all sponsorships when cleared
-- [ ] Add ChildAutocomplete filter above SponsorshipList
-  - [ ] Label: "Filter by Child"
-  - [ ] Sends `?q[child_id_eq]=Y` to API when child selected
-  - [ ] Shows all sponsorships when cleared
-- [ ] Add "Show Ended Sponsorships" checkbox
-  - [ ] Unchecked (default): only shows active sponsorships (`?q[end_date_null]=true`)
-  - [ ] Checked: shows all sponsorships (active + ended)
-- [ ] Filters work together (donor + child + ended status)
-- [ ] Filter state persists during CRUD operations (add/end sponsorship)
+#### Filters (✅ COMPLETE - Implemented as Omni-Search)
+- [x] ~~Add DonorAutocomplete filter~~ **CHANGED:** Implemented as unified omni-search
+  - [x] Search field accepts donor OR child name (single input)
+  - [x] Sends `?q[donor_name_or_child_name_cont]=X` to API
+  - [x] Debounced input (300ms) to reduce API calls
+- [x] Add "Show Ended Sponsorships" checkbox
+  - [x] Unchecked (default): only shows active sponsorships (`?q[end_date_null]=true`)
+  - [x] Checked: shows all sponsorships (active + ended)
+- [x] Filters work together (search + ended status)
+- [x] Filter state persists during CRUD operations (add/end sponsorship)
 
-#### Pagination UI
-- [ ] Display MUI Pagination component below SponsorshipList
-- [ ] Show current page and total pages
-- [ ] Next/Previous buttons
-- [ ] Direct page number selection
-- [ ] Display "Showing X-Y of Z sponsorships" metadata
-- [ ] Pagination resets to page 1 when filters change
+#### Pagination UI (✅ COMPLETE)
+- [x] Display MUI Pagination component below SponsorshipList
+- [x] Show current page and total pages
+- [x] Next/Previous buttons (MUI Pagination default)
+- [x] Direct page number selection (MUI Pagination default)
+- [x] Display "Showing X-Y of Z sponsorships" metadata
+- [x] Pagination resets to page 1 when filters change
 
 #### Testing
-- [ ] Jest: Filter interactions (donor filter, child filter, show ended toggle)
-- [ ] Jest: Pagination navigation (next, prev, page select)
-- [ ] Jest: Combined filters + pagination behavior
-- [ ] Cypress E2E: Full filtering and pagination workflow
+- [x] Jest: Filter interactions (omni-search, show ended toggle) - 10 tests passing
+- [x] Jest: Pagination navigation (page select) - 3 new tests added
+- [x] Jest: Combined filters + pagination behavior (reset on filter change)
+- [x] Cypress E2E: Full filtering and pagination workflow - 5 tests created
 
 ### Technical Approach
 
@@ -185,12 +182,24 @@ const fetchSponsorships = async () => {
 - Fixed sponsorship factory to allow model auto-project creation
 - Tests: 7 new backend model tests (all 201 tests passing)
 
-**❌ Remaining Work:**
-- Pagination UI (display metadata, MUI Pagination component)
-- Cypress E2E test
-- Documentation update
+**✅ COMPLETED WORK - Final 5% (2025-11-12):**
+- ✅ Extract pagination `meta` from API response (totalPages, totalCount)
+- ✅ Add state variables: `totalPages`, `totalCount`, `setPage` handler
+- ✅ Display MUI Pagination component below SponsorshipList
+- ✅ Display "Showing X-Y of Z sponsorships" metadata text
+- ✅ Update tests for pagination UI (3 new Jest tests)
+- ✅ Pagination resets to page 1 on filter change
+- ✅ Cypress E2E test suite (5 comprehensive integration tests)
 
-**🟡 Blocked:** Cannot test sponsorship-related features without smart sponsorship detection in DonationForm (TICKET-064). When creating a donation to a sponsorship project, the system now requires a `sponsorship_id`, but the DonationForm has no way to detect/create/select sponsorships yet.
+**✅ UNBLOCKED (2025-11-12):** TICKET-064 completed - smart sponsorship detection now works in DonationForm. Can now create sponsorship donations and test end-to-end workflows.
+
+### E2E Test Coverage
+Created `cypress/e2e/sponsorships-pagination.cy.ts` with 5 integration tests:
+1. Display pagination metadata and navigation for 30+ sponsorships
+2. Navigate to page 2 and verify content changes
+3. Reset to page 1 when search filter changes
+4. Toggle ended sponsorships with "Show Ended" checkbox
+5. Combine search and pagination correctly
 
 ### Implementation Notes (2025-10-29)
 

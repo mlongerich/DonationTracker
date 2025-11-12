@@ -105,3 +105,54 @@ Migrate existing data without manual entry
 **Converted:** 2025-11-05
 
 ---
+
+### [E2E Pagination Testing Strategy]
+**Added:** 2025-11-12
+**Priority:** 🟢 Low
+**Effort:** M
+
+**Description:**
+Explore comprehensive E2E testing for pagination functionality across all paginated pages (donors, donations, children, sponsorships, projects).
+
+**Current State:**
+- Pagination logic fully tested in Jest (unit tests)
+- No pages currently test pagination in E2E tests
+- E2E tests focus on page load and filtering only
+
+**User Value:**
+- Confidence that pagination works end-to-end with real API
+- Catch integration bugs between frontend and backend pagination
+
+**Technical Approach:**
+**Option 1: Backend seed endpoint**
+```ruby
+# app/controllers/api/test_controller.rb
+def seed_sponsorships
+  count = params[:count].to_i
+  # Efficient bulk creation
+end
+```
+
+**Option 2: Cypress custom commands**
+```javascript
+Cypress.Commands.add('createSponsorships', (count) => {
+  cy.request('POST', '/api/test/seed_sponsorships', { count });
+});
+```
+
+**Option 3: Test smaller datasets**
+- Create 26 records (just over 25/page threshold)
+- Verify pagination UI appears
+- Don't test clicking through pages
+
+**Considerations:**
+- Trade-off: Speed vs coverage
+- Consistency: Apply to all pages or none
+- Maintenance: More E2E tests = more potential flakiness
+
+**Dependencies:**
+- None (can be explored independently)
+
+**Decision:** Deferred for now. Jest tests provide sufficient coverage for pagination logic. Revisit if pagination bugs are found in production.
+
+---

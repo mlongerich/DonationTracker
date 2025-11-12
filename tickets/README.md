@@ -67,6 +67,7 @@ Current work items and user stories being actively developed.
 - [TICKET-085: Donation Source & Payment Method Tracking](completed/TICKET-085-donation-source-payment-method-tracking.md) - ✅ Complete (2025-11-11)
 - [TICKET-094: Fix SponsorshipsController Error Handling Pattern](completed/TICKET-094-fix-sponsorships-controller-error-handling.md) - ✅ Complete (2025-11-12)
 - [TICKET-108: Fix E2E Test Infrastructure Flakiness](completed/TICKET-108-fix-e2e-test-flakiness.md) - ✅ Complete (2025-11-12)
+- [TICKET-053: Sponsorships Page Filters & Pagination UI](completed/TICKET-053-sponsorships-page-filters-pagination-ui.md) - ✅ Complete (2025-11-12)
 
 ### 🔵 In Progress Tickets
 
@@ -116,7 +117,6 @@ Current work items and user stories being actively developed.
 #### Sponsorship & Children Features
 - [TICKET-048: Stripe Sponsorship & Child Extraction](TICKET-048-stripe-sponsorship-child-extraction.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-051: Add Project Type Sort/Filter to Projects Page](TICKET-051-project-page-type-sort-filter.md) - 📋 Planned (🟡 Medium, S)
-- [TICKET-053: Sponsorships Page Filters & Pagination UI](TICKET-053-sponsorships-page-filters-pagination-ui.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-055: Sponsorship Management Actions](TICKET-055-sponsorship-reactivate-delete-actions.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-058: Donor Sponsorship List Endpoint](TICKET-058-donor-sponsorship-list-endpoint.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-059: Child Info Display on Donation Pages](TICKET-059-child-info-display-donation-pages.md) - 📋 Planned (🟡 Medium, S)
@@ -159,10 +159,10 @@ Current work items and user stories being actively developed.
 ## Quick Stats
 
 - **Total Tickets:** 101
-- **Completed:** 49 (49%)
+- **Completed:** 50 (50%)
 - **In Progress:** 1 (TICKET-077)
-- **Planned:** 48
-- **Estimated Hours Remaining:** ~184 hours (~4.6 weeks)
+- **Planned:** 47
+- **Estimated Hours Remaining:** ~181 hours (~4.5 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 - **Canceled:** 1
@@ -175,7 +175,7 @@ Current work items and user stories being actively developed.
   - **PERMANENT:** ✅ TICKET-070 (core service - complete), TICKET-076 (failed payments tracking - planned)
   - **TEMPORARY:** TICKET-071 (batch import - blocked on user testing), TICKET-072 (error UI - optional)
   - **POST-MVP:** TICKET-026 (webhooks - post-MVP), TICKET-027 (mapping UI - future)
-- **Sponsorship & Children Features:** 11 planned (~38h), 8 completed
+- **Sponsorship & Children Features:** 10 planned (~35h), 9 completed
   - New: TICKET-102 (Child Photos)
 - **Testing & Quality Assurance:** 5 planned (~15h), 1 completed
   - ✅ TICKET-108: E2E Test Infrastructure (complete)
