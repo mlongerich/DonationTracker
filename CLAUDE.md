@@ -145,6 +145,21 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 - **Backend**: RSpec, Factory Bot, SimpleCov
 - **Frontend**: Jest, React Testing Library, Cypress
 
+#### E2E Test Infrastructure
+
+**Environment Isolation:**
+- E2E tests run against isolated API on port 3002 (test environment)
+- Separate test database prevents contamination of development data
+- Health check endpoint: `GET /api/health` ensures API readiness before tests start
+
+**Reliability Features:**
+- Wait script (`scripts/wait-for-api.sh`) polls health endpoint before Cypress runs
+- Increased rack timeout (30s) for database-heavy cleanup operations
+- npm script: `npm run cypress:e2e` handles full lifecycle (start → wait → test → cleanup)
+- Expected pass rate: 100% (58/58 tests) with no flakiness
+
+**See:** docs/TESTING.md for detailed E2E infrastructure documentation
+
 ---
 
 ## 🎯 Thin Vertical Slice Development

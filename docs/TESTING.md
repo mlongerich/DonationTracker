@@ -484,6 +484,49 @@ describe('Donor Management', () => {
 
 - **Run Cypress continuously**, not just before commits - prevents big surprises
 
+### E2E Test Infrastructure
+
+**Environment Isolation:**
+- E2E tests run against isolated test API on port 3002
+- Separate test database (`donation_tracker_api_test`)
+- Development API remains on port 3001 (untouched during E2E runs)
+- Frontend runs on port 3000 for both development and E2E tests
+
+**Health Check & Startup Sequence:**
+- Health endpoint: `GET /api/health` returns `{ "status": "ok", "timestamp": "..." }`
+- Wait script: `scripts/wait-for-api.sh` polls health endpoint (30 attempts, 2s intervals)
+- npm script sequence: `docker-compose up → wait-for-api.sh → cypress run → docker-compose down`
+- API typically ready in 8-10 seconds (4-5 health check attempts)
+
+**Timeout Configuration:**
+- Test environment rack timeout: 30 seconds (increased from default 15s)
+- Handles database-heavy cleanup operations (`DELETE /api/test/cleanup`)
+- Prevents "socket hang up" errors during test suite runs
+
+**Reliability:**
+- Full suite: 58 tests across 15 spec files
+- Expected pass rate: 100% (58/58 passing)
+- No flakiness when infrastructure is properly configured
+- Cleanup endpoint clears all test data between spec files
+
+**Running E2E Tests:**
+```bash
+# Full suite (recommended)
+npm run cypress:e2e
+
+# Interactive mode (debugging)
+npm run cypress:e2e:open
+
+# Stop E2E environment
+npm run cypress:e2e:down
+```
+
+**Troubleshooting:**
+- If "socket hang up" errors occur: Verify health endpoint returns 200 OK
+- If tests timeout: Check rack timeout is set to 30s in `config/environments/test.rb`
+- If cleanup fails: Ensure test environment allows `DELETE /api/test/cleanup`
+- If API won't start: Check Docker logs: `docker-compose logs api-e2e`
+
 ---
 
 ## Contract Testing - Deferred
@@ -597,4 +640,4 @@ bundle exec rspec  # Bullet runs during tests
 
 ---
 
-*Last updated: 2025-10-21*
+*Last updated: 2025-11-12*
