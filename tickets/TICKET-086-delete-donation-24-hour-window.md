@@ -9,6 +9,8 @@
 ### User Story
 As a user, I want to delete donations that were accidentally created within the last 24 hours so that I can quickly correct mistakes without affecting historical financial records.
 
+**Note:** This 24-hour delete window is always enabled for all users. For admin override capability (delete any donation regardless of age), see TICKET-106.
+
 ### Problem Statement
 **Current State:**
 - No UI for deleting donations

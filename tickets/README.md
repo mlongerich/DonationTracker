@@ -119,9 +119,16 @@ Current work items and user stories being actively developed.
 - [TICKET-058: Donor Sponsorship List Endpoint](TICKET-058-donor-sponsorship-list-endpoint.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-059: Child Info Display on Donation Pages](TICKET-059-child-info-display-donation-pages.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-061: Auto-Create Sponsorship from Donation](TICKET-061-auto-create-sponsorship-from-donation.md) - 📋 Planned (🟡 Medium, M)
-- [TICKET-077: Last Donation Date Tracking](TICKET-077-last-donation-date-tracking.md) - 📋 Planned (🔴 High, M) - *Show last donation date for donors, children, sponsorships*
+- [TICKET-077: Last Donation Date Tracking](TICKET-077-last-donation-date-tracking.md) - 🔵 In Progress (🔴 High, M) - *Show last donation date for donors, children, sponsorships*
 - [TICKET-092: Child Name+Gender Uniqueness Validation](TICKET-092-child-name-gender-uniqueness-validation.md) - 📋 Planned (🟡 Medium, S) - *Prevent duplicate children*
 - [TICKET-093: Project Icons on Projects Page](TICKET-093-project-icons-on-projects-page.md) - 📋 Planned (🟢 Low, XS) - *Visual clarity*
+- [TICKET-100: Add Physical Address to Donor Records](TICKET-100-add-physical-address-donor-records.md) - 📋 Planned (🟡 Medium, M) - *Street, city, state, zip fields for tax receipts*
+- [TICKET-101: Donation Photo Upload (Check Images)](TICKET-101-donation-photo-upload-check-images.md) - 📋 Planned (🔴 High, L) - *Required photo for check donations*
+- [TICKET-102: Child Photo Upload](TICKET-102-child-photo-upload.md) - 📋 Planned (🟡 Medium, M) - *Optional profile photos for sponsored children*
+- [TICKET-103: Monthly Donation Report](TICKET-103-monthly-donation-report.md) - 📋 Planned (🔴 High, M) - *Individual row per donation with totals*
+- [TICKET-104: Quarterly Donation Report](TICKET-104-quarterly-donation-report.md) - 📋 Planned (🔴 High, M) - *Consolidated by donor with gross/net amounts*
+- [TICKET-105: Annual Donation Report](TICKET-105-annual-donation-report.md) - 📋 Planned (🔴 High, S) - *Year-end report for tax receipts*
+- [TICKET-106: Admin Override for Donation Deletion](TICKET-106-admin-override-donation-deletion.md) - 📋 Planned (🟡 Medium, M) - *Admin bypass for 24-hour delete restriction*
 
 #### Testing & Quality Assurance
 
@@ -149,26 +156,28 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 93
-- **Completed:** 47 (51%)
-- **In Progress:** 0
-- **Planned:** 43
-- **Estimated Hours Remaining:** ~155 hours (~3.9 weeks)
+- **Total Tickets:** 100
+- **Completed:** 47 (47%)
+- **In Progress:** 1 (TICKET-077)
+- **Planned:** 49
+- **Estimated Hours Remaining:** ~188 hours (~4.7 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 - **Canceled:** 1
 
 ### By Category
 
-- **Feature Development:** 15 planned (~60h), 11 completed
+- **Feature Development:** 22 planned (~93h), 11 completed
+  - New: TICKET-100 (Donor Address), TICKET-101 (Check Photos), TICKET-102 (Child Photos), TICKET-103/104/105 (Reports), TICKET-106 (Admin Delete Override)
 - **Stripe Integration:** 4 planned (~22h), 1 completed
   - **PERMANENT:** ✅ TICKET-070 (core service - complete), TICKET-076 (failed payments tracking - planned)
   - **TEMPORARY:** TICKET-071 (batch import - blocked on user testing), TICKET-072 (error UI - optional)
   - **POST-MVP:** TICKET-026 (webhooks - post-MVP), TICKET-027 (mapping UI - future)
-- **Sponsorship & Children Features:** 10 planned (~30h), 8 completed
+- **Sponsorship & Children Features:** 11 planned (~38h), 8 completed
+  - New: TICKET-102 (Child Photos)
 - **Testing & Quality Assurance:** 6 planned (19h), 0 completed
 - **Code Quality & Architecture:** 6 planned (~26h), 29 completed
-- **In Progress:** 0
+- **In Progress:** 1 (TICKET-077)
 - **Blocked:** 1 (TICKET-071)
 - **Deferred/Accepted Risk:** 1 (TICKET-049)
 - **Canceled:** 1 (TICKET-041)
