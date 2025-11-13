@@ -174,4 +174,21 @@ RSpec.describe Donor, type: :model do
       expect(donor.discarded?).to be true
     end
   end
+
+  describe "#last_donation_date" do
+    it "returns most recent donation date when donations exist" do
+      donor = create(:donor)
+      create(:donation, donor: donor, date: Date.new(2025, 1, 1))
+      create(:donation, donor: donor, date: Date.new(2025, 3, 15))
+      create(:donation, donor: donor, date: Date.new(2025, 2, 10))
+
+      expect(donor.last_donation_date).to eq(Date.new(2025, 3, 15))
+    end
+
+    it "returns nil when donor has no donations" do
+      donor = create(:donor)
+
+      expect(donor.last_donation_date).to be_nil
+    end
+  end
 end

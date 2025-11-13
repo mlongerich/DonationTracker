@@ -22,6 +22,7 @@ class Child < ApplicationRecord
 
   has_many :sponsorships, dependent: :restrict_with_exception
   has_many :donors, through: :sponsorships
+  has_many :donations, through: :sponsorships
 
   before_discard :check_active_sponsorships
 
@@ -37,6 +38,10 @@ class Child < ApplicationRecord
 
   def can_be_deleted?
     sponsorships.empty?
+  end
+
+  def last_donation_date
+    donations.maximum(:date)
   end
 
   private

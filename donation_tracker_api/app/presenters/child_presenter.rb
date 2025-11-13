@@ -29,6 +29,7 @@ class ChildPresenter < BasePresenter
       created_at: object.created_at,
       updated_at: object.updated_at,
       can_be_deleted: object.can_be_deleted?,
+      last_donation_date: object.last_donation_date,
       discarded_at: object.discarded_at
     }
 

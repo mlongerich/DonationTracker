@@ -58,6 +58,10 @@ class Sponsorship < ApplicationRecord
     donations.minimum(:date) || start_date || created_at&.to_date
   end
 
+  def last_donation_date
+    donations.maximum(:date)
+  end
+
   private
 
   def restore_archived_associations

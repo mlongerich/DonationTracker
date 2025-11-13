@@ -113,4 +113,23 @@ RSpec.describe Child, type: :model do
       expect(child.discarded?).to be true
     end
   end
+
+  describe "#last_donation_date" do
+    it "returns most recent donation date through sponsorships" do
+      child = create(:child)
+      donor = create(:donor)
+      sponsorship = create(:sponsorship, child: child, donor: donor, monthly_amount: 100)
+      create(:donation, donor: donor, sponsorship: sponsorship, date: Date.new(2025, 1, 1))
+      create(:donation, donor: donor, sponsorship: sponsorship, date: Date.new(2025, 3, 15))
+      create(:donation, donor: donor, sponsorship: sponsorship, date: Date.new(2025, 2, 10))
+
+      expect(child.last_donation_date).to eq(Date.new(2025, 3, 15))
+    end
+
+    it "returns nil when child has no donations" do
+      child = create(:child)
+
+      expect(child.last_donation_date).to be_nil
+    end
+  end
 end

@@ -53,6 +53,10 @@ class Donor < ApplicationRecord
     donations.empty? && sponsorships.empty?
   end
 
+  def last_donation_date
+    donations.maximum(:date)
+  end
+
   private
 
   def check_active_sponsorships

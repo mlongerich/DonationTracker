@@ -284,4 +284,25 @@ RSpec.describe Sponsorship, type: :model do
       expect(sponsorship.project).to eq(project)
     end
   end
+
+  describe "#last_donation_date" do
+    it "returns most recent donation date for sponsorship" do
+      donor = create(:donor)
+      child = create(:child)
+      sponsorship = create(:sponsorship, donor: donor, child: child, monthly_amount: 100)
+      create(:donation, donor: donor, sponsorship: sponsorship, date: Date.new(2025, 1, 1))
+      create(:donation, donor: donor, sponsorship: sponsorship, date: Date.new(2025, 3, 15))
+      create(:donation, donor: donor, sponsorship: sponsorship, date: Date.new(2025, 2, 10))
+
+      expect(sponsorship.last_donation_date).to eq(Date.new(2025, 3, 15))
+    end
+
+    it "returns nil when sponsorship has no donations" do
+      donor = create(:donor)
+      child = create(:child)
+      sponsorship = create(:sponsorship, donor: donor, child: child, monthly_amount: 100)
+
+      expect(sponsorship.last_donation_date).to be_nil
+    end
+  end
 end
