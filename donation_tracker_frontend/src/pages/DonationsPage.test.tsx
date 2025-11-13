@@ -201,6 +201,65 @@ describe('DonationsPage', () => {
     expect(pagination).toBeInTheDocument();
   });
 
+  it('does not render pagination when only one page', async () => {
+    const mockDonations = [
+      {
+        id: 1,
+        amount: 100,
+        donor_name: 'John Doe',
+        project_title: 'Project A',
+        date: '2024-01-01',
+        donor_id: 1,
+        project_id: 1,
+      },
+    ];
+
+    mockedApiClient.get.mockImplementation((url) => {
+      if (url === '/api/donations') {
+        return Promise.resolve({
+          data: {
+            donations: mockDonations,
+            meta: {
+              total_count: 5,
+              total_pages: 1,
+              current_page: 1,
+              per_page: 10,
+            },
+          },
+        });
+      }
+      if (url === '/api/donors') {
+        return Promise.resolve({
+          data: {
+            donors: [],
+            meta: {
+              total_count: 0,
+              total_pages: 0,
+              current_page: 1,
+              per_page: 10,
+            },
+          },
+        });
+      }
+      return Promise.resolve({ data: {} });
+    });
+
+    render(
+      <BrowserRouter>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DonationsPage />
+        </LocalizationProvider>
+      </BrowserRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText(/John Doe/)).toBeInTheDocument();
+    });
+
+    // Pagination should NOT be visible when total_pages === 1
+    expect(screen.queryByRole('navigation')).not.toBeInTheDocument();
+  });
+
   it('renders Record Donation heading', () => {
     mockedApiClient.get.mockResolvedValue({
       data: {

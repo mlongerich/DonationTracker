@@ -13,6 +13,49 @@ Track intermittent test failures to identify patterns and prioritize fixes.
 
 ## Logged Failures
 
+### 2025-11-13
+
+#### Jest Unit Test Suite - Timeout Failures Under Resource Contention
+- **Context:** Failed during TICKET-077 pre-commit hook (full suite of 300 tests), all passed when run individually
+- **Status:** ⚠️ Flaky - resource contention during full suite runs (not test logic issues)
+- **Frequency:** Intermittent timeouts in full suite, 100% pass rate when isolated
+
+**Failed Tests (all exceeded 5000ms timeout in full suite):**
+
+1. **ChildAutocomplete.test.tsx**
+   - **Test:** `shows "No results" when search returns empty`
+   - **Full Suite:** Timeout (>5000ms)
+   - **Isolated:** ✅ PASSED (2.9s total)
+
+2. **DonorAutocomplete.test.tsx**
+   - **Test:** `shows "No results" when search returns empty`
+   - **Full Suite:** Timeout (>5000ms)
+   - **Isolated:** ✅ PASSED (736ms, 3.4s total)
+
+3. **ProjectForm.test.tsx**
+   - **Test:** `calls onSubmit with form data when submitted`
+   - **Full Suite:** Timeout (>5000ms)
+   - **Isolated:** ✅ PASSED (602ms, 2.9s total)
+
+4. **DonationList.test.tsx**
+   - **Test:** `clears donor selection when clear filters is clicked`
+   - **Full Suite:** Timeout (>5000ms)
+   - **Isolated:** ✅ PASSED (1938ms, 6.7s total)
+
+5. **ProjectsPage.test.tsx**
+   - **Test:** `calls updateProject when editing project and form submitted`
+   - **Full Suite:** Timeout (>5000ms)
+   - **Isolated:** ✅ PASSED (489ms, 2.5s total)
+
+6. **ChildrenPage.test.tsx**
+   - **Test:** `updates an existing child`
+   - **Full Suite:** Timeout (>5000ms)
+   - **Isolated:** ✅ PASSED (390ms, 2.5s total)
+
+**Root Cause:** Resource contention when running 300 tests in parallel. Tests complete within 400-1900ms when isolated, but exceed 5000ms timeout in full suite due to CPU/memory pressure.
+
+**Recommendation:** Consider increasing Jest timeout for full suite runs or using `--maxWorkers=1` during pre-commit hooks to reduce parallelization.
+
 ### 2025-11-12
 
 #### children-sponsorship.cy.ts (E2E) - Infrastructure Flakiness

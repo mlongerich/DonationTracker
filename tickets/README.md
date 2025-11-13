@@ -69,6 +69,7 @@ Current work items and user stories being actively developed.
 - [TICKET-108: Fix E2E Test Infrastructure Flakiness](completed/TICKET-108-fix-e2e-test-flakiness.md) - ✅ Complete (2025-11-12)
 - [TICKET-053: Sponsorships Page Filters & Pagination UI](completed/TICKET-053-sponsorships-page-filters-pagination-ui.md) - ✅ Complete (2025-11-12)
 - [TICKET-077: Last Donation Date Tracking](completed/TICKET-077-last-donation-date-tracking.md) - ✅ Complete (2025-11-12)
+- [TICKET-096: Refactor DonationList Component Pattern](completed/TICKET-096-refactor-donation-list-component-pattern.md) - ✅ Complete (2025-11-13)
 
 ### 🔵 In Progress Tickets
 
@@ -158,11 +159,11 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 101
-- **Completed:** 51 (50%)
+- **Total Tickets:** 102
+- **Completed:** 52 (51%)
 - **In Progress:** 0
 - **Planned:** 47
-- **Estimated Hours Remaining:** ~181 hours (~4.5 weeks)
+- **Estimated Hours Remaining:** ~179 hours (~4.5 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 - **Canceled:** 1

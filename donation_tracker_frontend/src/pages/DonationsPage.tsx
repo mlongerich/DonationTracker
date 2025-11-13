@@ -3,6 +3,7 @@ import { Typography, Box, Pagination } from '@mui/material';
 import apiClient from '../api/client';
 import DonationForm from '../components/DonationForm';
 import DonationList from '../components/DonationList';
+import DonationFilters from '../components/DonationFilters';
 import { Donation } from '../types';
 import { usePagination } from '../hooks';
 
@@ -97,12 +98,12 @@ const DonationsPage = () => {
         <Typography variant="h6" component="h2" gutterBottom>
           Recent Donations
         </Typography>
-        <DonationList
-          donations={donations}
+        <DonationFilters
           onDateRangeChange={handleDateRangeChange}
           onDonorChange={handleDonorFilterChange}
           onPaymentMethodChange={handlePaymentMethodFilterChange}
         />
+        <DonationList donations={donations} />
       </Box>
       {paginationMeta && paginationMeta.total_pages > 1 && (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>

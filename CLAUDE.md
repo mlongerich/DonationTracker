@@ -520,9 +520,10 @@ import { Donor } from '../types';
 3. Refactor duplicates in existing components
 4. Verify integration
 
-**Example:** DonorAutocomplete
-- Extracted from: DonationForm, DonationList
-- Features: Debounced search, loading states, configurable
+**Example:** DonorAutocomplete, DonationFilters
+- DonorAutocomplete: Extracted from DonationForm, DonationsPage
+- DonationFilters: Extracted from DonationsPage (TICKET-096)
+- Features: Debounced search, loading states, date validation, configurable
 - Interface: `value`, `onChange`, `label`, `size`, `required`
 
 ```tsx
@@ -546,6 +547,39 @@ import { Donor } from '../types';
 ```
 
 **See:** TICKET-025
+
+#### List Component Pattern (Pure Presentation)
+
+**Standard:** All List components are pure presentation (no filter state)
+
+**Pattern:**
+
+```typescript
+// ✅ Correct: Pure presentation
+const DonationList: React.FC<{ donations: Donation[] }> = ({ donations }) => {
+  return <Stack>{donations.map(d => <Card>...</Card>)}</Stack>;
+};
+
+// ❌ Incorrect: Mixed concerns
+const DonationList = ({ donations, onFilterChange }) => {
+  const [filter, setFilter] = useState('');  // ❌ State in List
+  return <><Filters /><Stack>...</Stack></>;  // ❌ Filters in List
+};
+```
+
+**Implemented:**
+- DonationList (TICKET-096) - Pure presentation
+- ChildList - Pure presentation
+- DonorList - Pure presentation
+- ProjectList - Pure presentation
+- SponsorshipList - Pure presentation
+
+**Filter Pattern:**
+- Filters in separate component (e.g., DonationFilters)
+- Page manages filter state
+- Page passes filtered data to List
+
+**See:** TICKET-096 (DonationList refactor)
 
 #### Form Component Pattern
 
@@ -700,7 +734,7 @@ import { formatCurrency } from '../utils/currency';
 - SponsorshipForm.tsx (line 33)
 
 **Files using formatCurrency:**
-- DonationList.tsx (line 190)
+- DonationList.tsx (line 35)
 - ChildList.tsx (line 57)
 - SponsorshipList.tsx (line 43)
 

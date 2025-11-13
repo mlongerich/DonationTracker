@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { Stack, Select, MenuItem, FormControl, InputLabel, Button } from '@mui/material';
+import {
+  Stack,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Button,
+  Alert,
+} from '@mui/material';
 import {
   DatePicker,
   DateValidationError,
@@ -25,6 +33,7 @@ const DonationFilters: React.FC<DonationFiltersProps> = ({
   const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
   const [startDate, setStartDate] = useState<Dayjs | null>(null);
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
+  const [dateError, setDateError] = useState<string | null>(null);
   const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>('');
 
   const handleDonorChange = (newValue: Donor | null) => {
@@ -41,17 +50,38 @@ const DonationFilters: React.FC<DonationFiltersProps> = ({
     }
   };
 
+  const validateDateRange = (
+    start: Dayjs | null,
+    end: Dayjs | null
+  ): boolean => {
+    if (start && end && start.isAfter(end)) {
+      setDateError('End date must be after or equal to start date');
+      return false;
+    }
+    setDateError(null);
+    return true;
+  };
+
   const handleStartDateChange = (
     value: Dayjs | null,
     _context: PickerChangeHandlerContext<DateValidationError>
   ) => {
     setStartDate(value);
-    if (onDateRangeChange) {
-      const formattedStart =
-        value && value.isValid() ? value.format('YYYY-MM-DD') : null;
-      const formattedEnd =
-        endDate && endDate.isValid() ? endDate.format('YYYY-MM-DD') : null;
-      onDateRangeChange(formattedStart, formattedEnd);
+    if (
+      value &&
+      value.isValid() &&
+      validateDateRange(value, endDate) &&
+      onDateRangeChange
+    ) {
+      onDateRangeChange(
+        value.format('YYYY-MM-DD'),
+        endDate && endDate.isValid() ? endDate.format('YYYY-MM-DD') : null
+      );
+    } else if (!value && onDateRangeChange) {
+      onDateRangeChange(
+        null,
+        endDate && endDate.isValid() ? endDate.format('YYYY-MM-DD') : null
+      );
     }
   };
 
@@ -60,18 +90,32 @@ const DonationFilters: React.FC<DonationFiltersProps> = ({
     _context: PickerChangeHandlerContext<DateValidationError>
   ) => {
     setEndDate(value);
-    if (onDateRangeChange) {
-      const formattedStart =
-        startDate && startDate.isValid() ? startDate.format('YYYY-MM-DD') : null;
-      const formattedEnd =
-        value && value.isValid() ? value.format('YYYY-MM-DD') : null;
-      onDateRangeChange(formattedStart, formattedEnd);
+    if (
+      value &&
+      value.isValid() &&
+      validateDateRange(startDate, value) &&
+      onDateRangeChange
+    ) {
+      onDateRangeChange(
+        startDate && startDate.isValid()
+          ? startDate.format('YYYY-MM-DD')
+          : null,
+        value.format('YYYY-MM-DD')
+      );
+    } else if (!value && onDateRangeChange) {
+      onDateRangeChange(
+        startDate && startDate.isValid()
+          ? startDate.format('YYYY-MM-DD')
+          : null,
+        null
+      );
     }
   };
 
   const handleClearFilters = () => {
     setStartDate(null);
     setEndDate(null);
+    setDateError(null);
     setSelectedDonor(null);
     setPaymentMethodFilter('');
     if (onDateRangeChange) {
@@ -87,6 +131,11 @@ const DonationFilters: React.FC<DonationFiltersProps> = ({
 
   return (
     <Stack spacing={2} sx={{ mb: 2 }}>
+      {dateError && (
+        <Alert severity="error" onClose={() => setDateError(null)}>
+          {dateError}
+        </Alert>
+      )}
       <DonorAutocomplete
         value={selectedDonor}
         onChange={handleDonorChange}
@@ -109,7 +158,11 @@ const DonationFilters: React.FC<DonationFiltersProps> = ({
           <MenuItem value="bank_transfer">Bank Transfer</MenuItem>
         </Select>
       </FormControl>
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+      <Stack
+        direction={{ xs: 'column', sm: 'row' }}
+        spacing={2}
+        alignItems={{ xs: 'stretch', sm: 'center' }}
+      >
         <DatePicker
           label="Start Date"
           value={startDate}
@@ -118,6 +171,7 @@ const DonationFilters: React.FC<DonationFiltersProps> = ({
             textField: {
               size: 'small',
               fullWidth: true,
+              error: !!dateError,
             },
           }}
         />
@@ -129,6 +183,7 @@ const DonationFilters: React.FC<DonationFiltersProps> = ({
             textField: {
               size: 'small',
               fullWidth: true,
+              error: !!dateError,
             },
           }}
         />
