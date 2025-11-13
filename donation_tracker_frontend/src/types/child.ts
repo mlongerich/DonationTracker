@@ -8,6 +8,7 @@ export interface Child {
   created_at: string;
   updated_at: string;
   can_be_deleted: boolean;
+  last_donation_date?: string | null;
   discarded_at?: string | null;
 }
 

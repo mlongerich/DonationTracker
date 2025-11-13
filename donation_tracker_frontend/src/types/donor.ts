@@ -8,6 +8,7 @@ export interface Donor {
   displayable_email: string | null; // null for placeholder emails (@mailinator.com)
   discarded_at?: string | null;
   merged_into_id?: number | null;
+  last_donation_date?: string | null;
 }
 
 /**

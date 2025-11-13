@@ -104,6 +104,10 @@ const DonorList: React.FC<DonorListProps> = ({
                       ? donor.displayable_email
                       : '(No email provided)'}
                   </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Last Donation:{' '}
+                    {donor.last_donation_date || 'No donations yet'}
+                  </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 0.5 }}>
                   {!isArchived && (

@@ -106,6 +106,10 @@ const ChildList: React.FC<ChildListProps> = ({
                   <Typography variant="body2" color="text.secondary">
                     {sponsorshipText}
                   </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Last Donation:{' '}
+                    {child.last_donation_date || 'No donations yet'}
+                  </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 0.5 }}>
                   {!isArchived && (

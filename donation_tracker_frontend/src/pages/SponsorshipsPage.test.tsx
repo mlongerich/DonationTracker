@@ -249,17 +249,36 @@ describe('SponsorshipsPage', () => {
     mockedApiClient.get.mockResolvedValue({
       data: {
         sponsorships: [
-          { id: 1, donor_name: 'John', child_name: 'Alice', monthly_amount: 50, active: true },
-          { id: 2, donor_name: 'Jane', child_name: 'Bob', monthly_amount: 75, active: true },
+          {
+            id: 1,
+            donor_name: 'John',
+            child_name: 'Alice',
+            monthly_amount: 50,
+            active: true,
+          },
+          {
+            id: 2,
+            donor_name: 'Jane',
+            child_name: 'Bob',
+            monthly_amount: 75,
+            active: true,
+          },
         ],
-        meta: { total_count: 50, total_pages: 2, current_page: 1, per_page: 25 },
+        meta: {
+          total_count: 50,
+          total_pages: 2,
+          current_page: 1,
+          per_page: 25,
+        },
       },
     });
 
     render(<SponsorshipsPage />);
 
     await waitFor(() => {
-      expect(screen.getByText(/showing 1-25 of 50 sponsorships/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/showing 1-25 of 50 sponsorships/i)
+      ).toBeInTheDocument();
     });
   });
 
@@ -267,9 +286,20 @@ describe('SponsorshipsPage', () => {
     mockedApiClient.get.mockResolvedValue({
       data: {
         sponsorships: [
-          { id: 1, donor_name: 'John', child_name: 'Alice', monthly_amount: 50, active: true },
+          {
+            id: 1,
+            donor_name: 'John',
+            child_name: 'Alice',
+            monthly_amount: 50,
+            active: true,
+          },
         ],
-        meta: { total_count: 50, total_pages: 2, current_page: 1, per_page: 25 },
+        meta: {
+          total_count: 50,
+          total_pages: 2,
+          current_page: 1,
+          per_page: 25,
+        },
       },
     });
 
@@ -287,9 +317,20 @@ describe('SponsorshipsPage', () => {
     mockedApiClient.get.mockResolvedValue({
       data: {
         sponsorships: [
-          { id: 1, donor_name: 'John', child_name: 'Alice', monthly_amount: 50, active: true },
+          {
+            id: 1,
+            donor_name: 'John',
+            child_name: 'Alice',
+            monthly_amount: 50,
+            active: true,
+          },
         ],
-        meta: { total_count: 50, total_pages: 2, current_page: 1, per_page: 25 },
+        meta: {
+          total_count: 50,
+          total_pages: 2,
+          current_page: 1,
+          per_page: 25,
+        },
       },
     });
 
@@ -319,9 +360,20 @@ describe('SponsorshipsPage', () => {
     mockedApiClient.get.mockResolvedValue({
       data: {
         sponsorships: [
-          { id: 1, donor_name: 'John', child_name: 'Alice', monthly_amount: 50, active: true },
+          {
+            id: 1,
+            donor_name: 'John',
+            child_name: 'Alice',
+            monthly_amount: 50,
+            active: true,
+          },
         ],
-        meta: { total_count: 50, total_pages: 2, current_page: 1, per_page: 25 },
+        meta: {
+          total_count: 50,
+          total_pages: 2,
+          current_page: 1,
+          per_page: 25,
+        },
       },
     });
 

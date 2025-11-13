@@ -38,6 +38,7 @@ const SponsorshipList: React.FC<SponsorshipListProps> = ({
             <TableCell>Child</TableCell>
             <TableCell>Monthly Amount</TableCell>
             <TableCell>Start Date</TableCell>
+            <TableCell>Last Donation</TableCell>
             <TableCell>Status</TableCell>
             <TableCell>Actions</TableCell>
           </TableRow>
@@ -51,6 +52,9 @@ const SponsorshipList: React.FC<SponsorshipListProps> = ({
                 {formatCurrency(Number(sponsorship.monthly_amount))}
               </TableCell>
               <TableCell>{sponsorship.start_date || 'Not set'}</TableCell>
+              <TableCell>
+                {sponsorship.last_donation_date || 'No donations yet'}
+              </TableCell>
               <TableCell>{sponsorship.active ? 'Active' : 'Ended'}</TableCell>
               <TableCell>
                 {sponsorship.active && (

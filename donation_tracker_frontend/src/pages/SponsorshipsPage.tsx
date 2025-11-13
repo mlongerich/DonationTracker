@@ -124,9 +124,17 @@ const SponsorshipsPage: React.FC = () => {
       />
 
       {totalCount > 0 && (
-        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box
+          sx={{
+            mt: 3,
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           <Typography variant="body2" color="text.secondary">
-            Showing {(page - 1) * 25 + 1}-{Math.min(page * 25, totalCount)} of {totalCount} sponsorships
+            Showing {(page - 1) * 25 + 1}-{Math.min(page * 25, totalCount)} of{' '}
+            {totalCount} sponsorships
           </Typography>
           {totalPages > 1 && (
             <Pagination

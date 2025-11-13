@@ -13,6 +13,7 @@ export interface Sponsorship {
   start_date?: string;
   active: boolean;
   end_date?: string | null;
+  last_donation_date?: string | null;
 }
 
 /**
