@@ -2,8 +2,11 @@
 
 **Status:** 📋 Planned (Post-MVP)
 **Priority:** 🟢 Low (Future Enhancement)
-**Dependencies:** TICKET-070 (Stripe CSV Import Foundation) - **REQUIRED**
-**Created:** 2025-11-01 (Updated: 2025-11-04)
+**Dependencies:**
+- TICKET-070 (Stripe CSV Import Foundation) - **COMPLETE** ✅
+- TICKET-109, TICKET-110 (STRIPE_IMPORT_PLAN - donation status & metadata) - **REQUIRED** ⚠️
+**Created:** 2025-11-01
+**Updated:** 2025-11-14
 
 **⭐ CODE LIFECYCLE: PERMANENT - Long-Term Production Solution (Post-MVP)**
 
@@ -168,14 +171,16 @@ class Webhooks::StripeController < ApplicationController
   end
 
   # Transform Stripe charge object to CSV row hash format
-  # This allows 100% REUSE of StripePaymentImportService from TICKET-070
+  # This allows 100% REUSE of StripePaymentImportService from TICKET-070/110
   #
   # Why this works:
   # - CSV export contains same Stripe API fields (348 columns!)
   # - Webhooks return same Stripe objects (charge, customer, subscription)
   # - Transform webhook JSON → CSV hash format → reuse existing service
   # - ZERO code duplication for donation processing logic
-  def transform_charge_to_csv_format(charge)
+  #
+  # IMPORTANT: Must include metadata for child/project mapping (STRIPE_IMPORT_PLAN)
+  def transform_charge_to_csv_format(charge, invoice = nil, subscription = nil)
     {
       'Amount' => (charge.amount / 100.0).to_s, # Convert cents to dollars (CSV format)
       'Billing Details Name' => charge.billing_details&.name,
@@ -184,8 +189,15 @@ class Webhooks::StripeController < ApplicationController
       'Description' => charge.description,
       'Transaction ID' => charge.id,
       'Cust ID' => charge.customer,
-      'Status' => charge.status
-      # StripePaymentImportService from TICKET-070 handles the rest!
+      'Status' => charge.status,
+      'Invoice' => invoice&.id,
+      'Cust Subscription Data ID' => subscription&.id,
+      'Cust Subscription Data Plan Nickname' => subscription&.plan&.nickname,
+
+      # CRITICAL: Include metadata for child/project mapping (STRIPE_IMPORT_PLAN)
+      # Metadata is PRIMARY source, nickname/description are FALLBACK
+      'metadata' => charge.metadata.to_h.merge(invoice&.metadata&.to_h || {})
+      # StripePaymentImportService from TICKET-110 handles the rest!
     }
   end
 end

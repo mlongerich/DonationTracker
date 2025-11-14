@@ -6,20 +6,30 @@
 
 ## 📖 Documentation
 
-- **[Project Overview](docs/project/README.md)** - Status, architecture, quick start
-- **[Data Models](docs/project/data-models.md)** - Database schema and relationships
-- **[API Endpoints](docs/project/api-endpoints.md)** - Complete REST API reference
-- **[Tech Stack](docs/project/tech-stack.md)** - Frameworks, tools, versions
-- **[Development Roadmap](docs/project/roadmap.md)** - Vertical slice implementation plan
-- **[Deployment Guide](docs/project/deployment.md)** - Production infrastructure
+- **[Project Overview](project/README.md)** - Status, architecture, quick start
+- **[Data Models](project/data-models.md)** - Database schema and relationships
+- **[API Endpoints](project/api-endpoints.md)** - Complete REST API reference
+- **[Tech Stack](project/tech-stack.md)** - Frameworks, tools, versions
+- **[Development Roadmap](project/roadmap.md)** - Vertical slice implementation plan
+- **[Deployment Guide](project/deployment.md)** - Production infrastructure
 
 ---
 
 ## 🚀 Project Status
 
-**Last Updated:** 2025-11-11
+**Last Updated:** 2025-11-14
 
 **Latest Milestones:**
+- TICKET-076 → TICKET-109/110/111/112/113 - Stripe Import Redesign 🔄 (2025-11-14)
+  - Discovered fundamental design issues during TICKET-076 implementation
+  - Created comprehensive STRIPE_IMPORT_PLAN.md for redesigned approach
+  - Paused TICKET-076, preserved work in backup/ticket-076-complete branch
+  - Created 5-phase implementation plan (TICKET-109 through TICKET-113)
+  - New design: Add status field to donations (succeeded, failed, refunded, canceled, needs_attention)
+  - Metadata-first strategy for webhook alignment (TICKET-026)
+  - Branch-based workflow on feature/stripe-import-redesign
+  - Cleaned up feature branch (deleted old failed_stripe_payments code)
+  - See docs/STRIPE_IMPORT_PLAN.md for complete rationale
 - TICKET-052 - Improve Sponsorship Donation Linking UX ✅ (2025-11-11)
   - Added child gender field (optional: boy/girl/null) to Child model
   - Backend: Gender validation, presenter support, API parameter permission

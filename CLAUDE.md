@@ -21,7 +21,7 @@ Key locations:
 - `donation_tracker_api/` - Rails API backend
 - `donation_tracker_frontend/` - React frontend
 - `tickets/` - Active work items (see tickets/README.md for template)
-- `BACKLOG.md` - Future features
+- `docs/BACKLOG.md` - Future features
 - `docs/` - Detailed documentation (optional reference)
 - `scripts/` - Testing & validation tools
 
@@ -31,7 +31,7 @@ Key locations:
 
 ### Workflow
 
-1. **New idea during work?** → Add to BACKLOG.md, run `/compact`
+1. **New idea during work?** → Add to docs/BACKLOG.md, run `/compact`
 2. **Starting new work?** → Create ticket in tickets/TICKET-XXX-name.md
 3. **Implementing?** → Follow TDD workflow
 4. **Done?** → Update ticket, commit with ticket reference
@@ -82,7 +82,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ### ⚠️ MANDATORY PRE-COMMIT RULE
 
-**ALWAYS update DonationTracking.md and CLAUDE.md before ANY commit**
+**ALWAYS update docs/DonationTracking.md and CLAUDE.md before ANY commit**
 
 ---
 
@@ -174,7 +174,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 2. **API Layer**: RESTful endpoint
 3. **Frontend**: React component
 4. **Tests**: Unit and integration tests at each layer
-5. **Documentation**: Update DonationTracking.md and CLAUDE.md
+5. **Documentation**: Update docs/DonationTracking.md and CLAUDE.md
 
 ### Slice Selection
 
@@ -789,7 +789,7 @@ function Layout() {
 
 **Before committing:**
 
-1. **Documentation Update Rule**: Update DonationTracking.md and CLAUDE.md
+1. **Documentation Update Rule**: Update docs/DonationTracking.md and CLAUDE.md
 2. All tests pass (`bundle exec rspec`, `npm test`)
 3. Linting passes (RuboCop, ESLint)
 4. Security passes (Brakeman)
@@ -817,7 +817,7 @@ function Layout() {
 3. **TDD API**: Write failing tests, minimal endpoint
 4. **TDD Frontend**: Write failing tests, minimal component
 5. **Integration**: E2E testing across layers
-6. **Documentation**: Update DonationTracking.md and CLAUDE.md
+6. **Documentation**: Update docs/DonationTracking.md and CLAUDE.md
 7. **Demo**: Show feature, gather feedback
 
 ### Branch Strategy

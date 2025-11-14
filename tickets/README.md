@@ -87,6 +87,24 @@ Current work items and user stories being actively developed.
 
 ### 📋 Planned Tickets
 
+#### Stripe Import Redesign (STRIPE_IMPORT_PLAN)
+
+**Branch:** `feature/stripe-import-redesign`
+
+**Phase 1-5 Implementation:**
+- [TICKET-109: Donation Status Infrastructure](TICKET-109-donation-status-infrastructure.md) - 📋 Planned (🔴 High, M) - *Phase 1: Add status field to donations*
+- [TICKET-110: Import Service with Status & Metadata](TICKET-110-import-service-status-metadata.md) - 📋 Planned (🔴 High, L) - *Phase 2: Rewrite import service*
+- [TICKET-111: Pending Review Admin UI](TICKET-111-pending-review-admin-ui.md) - 📋 Planned (🟡 Medium, M) - *Phase 3: Admin section for non-succeeded donations*
+- [TICKET-112: Validation & Merge](TICKET-112-validation-and-merge.md) - 📋 Planned (🔴 High, S) - *Phase 4: Validate and merge to master*
+- [TICKET-113: Cleanup Old System](TICKET-113-cleanup-old-system.md) - 📋 Planned (🟢 Low, S) - *Phase 5: Remove old code*
+
+**Supersedes:**
+- TICKET-076: Failed Stripe Payments Tracking - ⏸️ **PAUSED** - Work preserved in `backup/ticket-076-complete` branch
+
+**See:** [docs/STRIPE_IMPORT_PLAN.md](../docs/STRIPE_IMPORT_PLAN.md) for complete redesign rationale
+
+---
+
 #### Feature Development
 - [TICKET-008: Basic Authentication with Google OAuth](TICKET-008-basic-authentication-google-oauth.md) - 📋 Planned
 - [TICKET-011: Recurring Donation Tracking](TICKET-011-recurring-donation-tracking.md) - 📋 Planned
@@ -106,7 +124,7 @@ Current work items and user stories being actively developed.
 #### Stripe Integration
 
 **⭐ PERMANENT (Production Code):**
-- [TICKET-076: Failed Stripe Payments Tracking](TICKET-076-failed-stripe-payments-tracking.md) - 📋 Planned (🔴 High, M) - *Track failed/refunded payments from CSV + webhooks*
+- [TICKET-076: Failed Stripe Payments Tracking](TICKET-076-failed-stripe-payments-tracking.md) - ⏸️ **Paused - Superseded by TICKET-109/110/111** (🔴 High, M) - *Work preserved in backup/ticket-076-complete branch*
 
 **🗑️ TEMPORARY (One-Time Use):**
 - [TICKET-071: Stripe CSV Batch Import Task](TICKET-071-stripe-csv-batch-import-task.md) - 🟡 Blocked - Pending User Testing (🔴 High, M) - *Throwaway: delete after CSV import*
@@ -159,11 +177,11 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 102
-- **Completed:** 52 (51%)
+- **Total Tickets:** 107
+- **Completed:** 52 (49%)
 - **In Progress:** 0
-- **Planned:** 47
-- **Estimated Hours Remaining:** ~179 hours (~4.5 weeks)
+- **Planned:** 52
+- **Estimated Hours Remaining:** ~195 hours (~5 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 - **Canceled:** 1
@@ -209,3 +227,5 @@ Current work items and user stories being actively developed.
 ---
 
 *For ticket template and conventions, see [CLAUDE.md](../CLAUDE.md)*
+
+*Project documentation has been moved to the [docs/](../docs/) folder for better organization.*
