@@ -20,6 +20,17 @@
 **Last Updated:** 2025-11-15
 
 **Latest Milestones:**
+- TICKET-110 - Stripe Payment Import with Status & Metadata Support ✅ (2025-11-15)
+  - **New Idempotency Logic**: subscription_id + child_id (sponsorships), charge_id + project_id (projects)
+  - **Status-based Counting**: Batch importer tracks succeeded_count, failed_count, needs_attention_count (donation status)
+  - **Metadata-first Extraction**: child_id/project_id from metadata (webhooks), fallback to parsing (CSV)
+  - **Duplicate Detection**: Flags duplicate subscriptions (same child, different subscription_id) as needs_attention
+  - Updated StripePaymentImportService: find_existing_donation method with 2-strategy lookup
+  - Updated StripeCsvBatchImporter: Status-based counters, error tracking with row numbers
+  - Updated rake task output: Displays succeeded/failed/needs_attention breakdown
+  - Full test coverage: 3 idempotency tests, 1 status counting test (strict TDD)
+  - Backend: All tests pass (90%+ coverage maintained)
+  - Ready for: CSV import testing with real data
 - TICKET-109 - Donation Status Infrastructure ✅ (2025-11-15)
   - Added comprehensive status tracking to donations table (succeeded, failed, refunded, canceled, needs_attention)
   - Migration: Added status (NOT NULL, default 'succeeded'), duplicate_subscription_detected, needs_attention_reason fields
@@ -33,7 +44,6 @@
   - Full test coverage: 41 passing tests (enum, scopes, validations, instance methods)
   - Followed strict TDD: RED-GREEN-REFACTOR for all 23 implementation cycles
   - Backend: All tests pass (90%+ coverage maintained)
-  - Ready for: TICKET-110 (Import Service can use new status field)
 - TICKET-076 → TICKET-109/110/111/112/113 - Stripe Import Redesign 🔄 (2025-11-14)
   - Discovered fundamental design issues during TICKET-076 implementation
   - Created comprehensive STRIPE_IMPORT_PLAN.md for redesigned approach
@@ -133,8 +143,8 @@
 - TICKET-064 - Smart Sponsorship Detection & Backend Logic ✅ (2025-10-31)
 - TICKET-032 - Custom Hooks Library (useDebouncedValue, usePagination, useRansackFilters) ✅ (2025-10-29)
 
-**Current Focus:** Child gender field and grouped autocomplete UX improvements complete (TICKET-052)
-**Next Feature:** TICKET-092 (Child uniqueness validation) or TICKET-093 (Project icons)
+**Current Focus:** Stripe import redesign complete (TICKET-109, TICKET-110)
+**Next Feature:** TICKET-111 (Rake task output updates) or TICKET-092 (Child uniqueness validation)
 
 **See [docs/project/README.md](docs/project/README.md#current-status) for detailed status**
 

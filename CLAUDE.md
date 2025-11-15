@@ -329,14 +329,17 @@ end
 
 #### Stripe CSV Import Patterns
 
-**StripePaymentImportService (TICKET-070 - PERMANENT):**
-- Uses `stripe_invoices` abstraction for 1-to-many relationships
-- Idempotency via sponsorship relationship, not child_id (virtual attribute)
+**StripePaymentImportService (TICKET-070, TICKET-110 - PERMANENT):**
+- **Idempotency**: subscription_id + child_id (sponsorships), charge_id + project_id (projects)
+- **Status determination**: Maps Stripe status (succeeded, failed, refunded, canceled) → donation status enum
+- **Metadata-first extraction**: child_id/project_id from metadata (webhooks), fallback to nickname/description parsing (CSV)
+- **Duplicate detection**: Flags duplicate subscriptions (same child, different subscription_id) as needs_attention
 - Transaction-wrapped for data integrity
 
-**StripeCsvBatchImporter (TICKET-071 - TEMPORARY):**
+**StripeCsvBatchImporter (TICKET-071, TICKET-110 - TEMPORARY):**
+- **Status-based counting**: succeeded_count, failed_count, needs_attention_count (tracks donation status)
+- **Error tracking**: Service exceptions (not status failures) go into errors array with row numbers
 - Maps CSV description → projects (10-step pattern matching)
-- Generic descriptions → "General Donation" system project
 - Delete after CSV import complete
 
 **See:** docs/PATTERNS.md for implementation details

@@ -1,9 +1,10 @@
 ## [TICKET-109] Donation Status Infrastructure
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 **Priority:** 🔴 High - Foundational Change
 **Dependencies:** None (first ticket in STRIPE_IMPORT_PLAN redesign)
 **Created:** 2025-11-14
+**Completed:** 2025-11-15
 **Branch:** `feature/stripe-import-redesign`
 
 **⭐ CODE LIFECYCLE: PERMANENT - Production Infrastructure**
@@ -31,31 +32,31 @@ As a developer, I want to add comprehensive status tracking to donations so that
 ### Acceptance Criteria
 
 **Backend Infrastructure:**
-- [ ] Migration: Add `status` column (string, not null, default: 'succeeded')
-- [ ] Migration: Add `stripe_subscription_id` column (string, nullable, indexed)
-- [ ] Migration: Add `duplicate_subscription_detected` column (boolean, default: false)
-- [ ] Migration: Add `needs_attention_reason` column (text, nullable)
-- [ ] Migration: Add composite unique index on `[stripe_subscription_id, child_id]` where both not null
-- [ ] Migration: Add index on `status` for filtering
-- [ ] Model: Add status enum with values: succeeded, failed, refunded, canceled, needs_attention
-- [ ] Model: Add scope `pending_review` (status != succeeded)
-- [ ] Model: Add scope `active` (status == succeeded)
-- [ ] Model: Add scope `for_subscription(subscription_id)`
-- [ ] Model: Add validation for status presence and inclusion
-- [ ] Model: Add conditional uniqueness validation for subscription_id + child_id (sponsorships only)
-- [ ] Model: Add `needs_review?` method
+- [x] Migration: Add `status` column (string, not null, default: 'succeeded')
+- [x] Migration: Add `stripe_subscription_id` column (string, nullable, indexed)
+- [x] Migration: Add `duplicate_subscription_detected` column (boolean, default: false)
+- [x] Migration: Add `needs_attention_reason` column (text, nullable)
+- [x] Migration: Add composite unique index on `[stripe_subscription_id, child_id]` where both not null
+- [x] Migration: Add index on `status` for filtering
+- [x] Model: Add status enum with values: succeeded, failed, refunded, canceled, needs_attention
+- [x] Model: Add scope `pending_review` (status != succeeded)
+- [x] Model: Add scope `active` (status == succeeded)
+- [x] Model: Add scope `for_subscription(subscription_id)`
+- [x] Model: Add validation for status presence and inclusion
+- [x] Model: Add conditional uniqueness validation for subscription_id + child_id (sponsorships only)
+- [x] Model: Add `needs_review?` method
 
 **Testing:**
-- [ ] RSpec: Status enum tests (valid values, invalid values)
-- [ ] RSpec: Scope tests (pending_review, active, for_subscription)
-- [ ] RSpec: Validation tests (status, uniqueness)
-- [ ] RSpec: `needs_review?` method tests
-- [ ] All tests pass (90% backend coverage)
+- [x] RSpec: Status enum tests (valid values, invalid values)
+- [x] RSpec: Scope tests (pending_review, active, for_subscription)
+- [x] RSpec: Validation tests (status, uniqueness)
+- [x] RSpec: `needs_review?` method tests
+- [x] All tests pass (90% backend coverage)
 
 **Documentation:**
-- [ ] Update docs/DonationTracking.md with new donation fields
-- [ ] Update CLAUDE.md if patterns change
-- [ ] Migration is reversible
+- [x] Update docs/DonationTracking.md with new donation fields
+- [x] Update CLAUDE.md if patterns change
+- [x] Migration is reversible
 
 ---
 
@@ -381,17 +382,17 @@ end
 ### Success Criteria
 
 **Definition of Done:**
-- [ ] Migration runs cleanly forward and backward
-- [ ] All RSpec tests pass (status enum, scopes, validations, methods)
-- [ ] Factory supports all status values
-- [ ] 90% backend coverage maintained
-- [ ] Can create donations with all status values
-- [ ] Ransack filtering works with new fields
-- [ ] Documentation updated
+- [x] Migration runs cleanly forward and backward
+- [x] All RSpec tests pass (status enum, scopes, validations, methods)
+- [x] Factory supports all status values
+- [x] 90% backend coverage maintained
+- [x] Can create donations with all status values
+- [x] Ransack filtering works with new fields
+- [x] Documentation updated
 
 **Ready for Next Ticket:**
-- [ ] TICKET-110 can use new status field in import service
-- [ ] TICKET-111 can query pending_review donations in UI
+- [x] TICKET-110 can use new status field in import service
+- [x] TICKET-111 can query pending_review donations in UI
 
 ---
 
