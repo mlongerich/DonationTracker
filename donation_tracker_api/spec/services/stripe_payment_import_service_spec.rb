@@ -58,7 +58,7 @@ RSpec.describe StripePaymentImportService do
         result = described_class.new(valid_csv_row).import
 
         expect(result[:skipped]).to be true
-        expect(result[:reason]).to eq('Already imported')
+        expect(result[:reason]).to include('Already imported')
         expect(result[:donations]).to be_empty
       end
 
@@ -139,14 +139,64 @@ RSpec.describe StripePaymentImportService do
       end
     end
 
-    context 'with failed transaction status' do
-      it 'skips non-succeeded transactions' do
-        failed_csv = valid_csv_row.merge('Status' => 'failed')
+    context 'with different payment statuses' do
+      it 'creates donation with succeeded status for succeeded payments' do
+        succeeded_csv = valid_csv_row.merge('Status' => 'succeeded')
+        result = described_class.new(succeeded_csv).import
+
+        expect(result[:success]).to be true
+        expect(result[:donations].first.status).to eq('succeeded')
+      end
+
+      it 'creates donation with failed status for failed payments' do
+        failed_csv = valid_csv_row.merge('Status' => 'failed', 'Transaction ID' => 'txn_failed123')
         result = described_class.new(failed_csv).import
 
-        expect(result[:skipped]).to be true
-        expect(result[:reason]).to eq('Status not succeeded')
-        expect(Donation.count).to eq(0)
+        expect(result[:success]).to be true
+        expect(result[:donations].first.status).to eq('failed')
+      end
+
+      it 'creates donation with refunded status for refunded payments' do
+        refunded_csv = valid_csv_row.merge('Status' => 'refunded', 'Transaction ID' => 'txn_refunded123')
+        result = described_class.new(refunded_csv).import
+
+        expect(result[:success]).to be true
+        expect(result[:donations].first.status).to eq('refunded')
+      end
+
+      it 'creates donation with canceled status for canceled payments' do
+        canceled_csv = valid_csv_row.merge('Status' => 'canceled', 'Transaction ID' => 'txn_canceled123')
+        result = described_class.new(canceled_csv).import
+
+        expect(result[:success]).to be true
+        expect(result[:donations].first.status).to eq('canceled')
+      end
+    end
+
+    context 'with metadata extraction' do
+      it 'uses metadata child_id over nickname parsing' do
+        child = Child.create!(id: 42, name: 'Buntita')
+        csv_row = valid_csv_row.merge(
+          'metadata' => { 'child_id' => '42' },
+          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for OtherChild',
+          'Transaction ID' => 'txn_metadata123'
+        )
+        result = described_class.new(csv_row).import
+
+        expect(result[:donations].first.child_id).to eq(42)
+      end
+
+      it 'uses metadata project_id over description parsing' do
+        project = Project.create!(id: 7, title: 'Water Project', project_type: :general)
+        csv_row = valid_csv_row.merge(
+          'metadata' => { 'project_id' => '7' },
+          'Cust Subscription Data Plan Nickname' => '',
+          'Description' => 'Some other description',
+          'Transaction ID' => 'txn_metadata_project123'
+        )
+        result = described_class.new(csv_row).import
+
+        expect(result[:donations].first.project_id).to eq(7)
       end
     end
 
@@ -360,10 +410,40 @@ RSpec.describe StripePaymentImportService do
       end
     end
 
+    context 'with duplicate subscriptions', use_transactional_fixtures: false do
+      it 'flags duplicate subscription as needs_attention' do
+        # First import creates child and donation
+        first_csv = valid_csv_row.merge(
+          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Sangwan',
+          'Cust Subscription Data ID' => 'sub_OLD123',
+          'Transaction ID' => 'txn_first123'
+        )
+        described_class.new(first_csv).import
+
+        # Second import with same child but different subscription should flag duplicate
+        csv_row = valid_csv_row.merge(
+          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Sangwan',
+          'Cust Subscription Data ID' => 'sub_NEW456',
+          'Transaction ID' => 'txn_duplicate123'
+        )
+
+        expect {
+          result = described_class.new(csv_row).import
+          @last_result = result
+        }.to change(Donation, :count).by(1)
+
+        donation = @last_result[:donations].first
+
+        expect(donation.status).to eq('needs_attention')
+        expect(donation.duplicate_subscription_detected).to be true
+        expect(donation.needs_attention_reason).to include('sub_OLD123')
+      end
+    end
+
     context 'with merged donor' do
       it 'assigns donation to merged donor not original donor' do
         # Setup: Create donor1 with existing donation
-        donor1 = create(:donor, name: "John Doe", email: "john@example.com")
+        donor1 = create(:donor, name: "Jane Smith", email: "jane@example.com")
         project = create(:project)
         create(:donation, :stripe,
           donor: donor1,
@@ -373,7 +453,7 @@ RSpec.describe StripePaymentImportService do
         )
 
         # Setup: Create donor2 (merged donor)
-        donor2 = create(:donor, name: "John Doe", email: "john.doe@example.com")
+        donor2 = create(:donor, name: "Jane Smith", email: "jane.smith@example.com")
 
         # Setup: Simulate merge (donor1 → donor2)
         donor1.update_column(:merged_into_id, donor2.id)
@@ -393,6 +473,84 @@ RSpec.describe StripePaymentImportService do
         # Should assign to merged donor (donor2), not original (donor1)
         expect(new_donation.donor_id).to eq(donor2.id)
         expect(new_donation.donor_id).not_to eq(donor1.id)
+      end
+    end
+
+    context 'with new idempotency logic (subscription_id + child_id)', use_transactional_fixtures: false do
+      it 'skips already-imported sponsorship by subscription_id + child_id' do
+        # First import: Create sponsorship donation
+        child = Child.create!(name: 'Buntita')
+        first_csv = valid_csv_row.merge(
+          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Buntita',
+          'Cust Subscription Data ID' => 'sub_ABC123',
+          'Transaction ID' => 'txn_first'
+        )
+        first_result = described_class.new(first_csv).import
+        first_donation = first_result[:donations].first
+
+        # Second import: Same subscription_id + child_id, different transaction_id
+        second_csv = valid_csv_row.merge(
+          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Buntita',
+          'Cust Subscription Data ID' => 'sub_ABC123',
+          'Transaction ID' => 'txn_second'
+        )
+
+        result = described_class.new(second_csv).import
+
+        expect(result[:skipped]).to be true
+        expect(result[:reason]).to include(first_donation.id.to_s)
+        expect(Donation.count).to eq(1) # Should not create duplicate
+      end
+
+      it 'skips already-imported project donation by charge_id + project_id' do
+        # First import: Create project donation
+        first_csv = valid_csv_row.merge(
+          'Cust Subscription Data Plan Nickname' => '',
+          'Description' => '$50 - General Monthly Donation',
+          'Cust Subscription Data ID' => '',
+          'Transaction ID' => 'ch_ABC123'
+        )
+        first_result = described_class.new(first_csv).import
+        first_donation = first_result[:donations].first
+
+        # Second import: Same charge_id + project_id
+        second_csv = valid_csv_row.merge(
+          'Cust Subscription Data Plan Nickname' => '',
+          'Description' => '$50 - General Monthly Donation',
+          'Cust Subscription Data ID' => '',
+          'Transaction ID' => 'ch_ABC123'
+        )
+
+        result = described_class.new(second_csv).import
+
+        expect(result[:skipped]).to be true
+        expect(result[:reason]).to include(first_donation.id.to_s)
+        expect(Donation.count).to eq(1) # Should not create duplicate
+      end
+
+      it 'allows same subscription_id with different child_id (multi-child sponsorship)' do
+        # First import: Child 1 with subscription
+        Child.create!(name: 'Buntita')
+        first_csv = valid_csv_row.merge(
+          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Buntita',
+          'Cust Subscription Data ID' => 'sub_MULTI123',
+          'Transaction ID' => 'txn_first'
+        )
+        described_class.new(first_csv).import
+
+        # Second import: Child 2 with SAME subscription (valid multi-child case)
+        Child.create!(name: 'Orawan')
+        second_csv = valid_csv_row.merge(
+          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Orawan',
+          'Cust Subscription Data ID' => 'sub_MULTI123',
+          'Transaction ID' => 'txn_second'
+        )
+
+        result = described_class.new(second_csv).import
+
+        expect(result[:skipped]).to be false
+        expect(result[:success]).to be true
+        expect(Donation.count).to eq(2) # Should create both donations
       end
     end
   end

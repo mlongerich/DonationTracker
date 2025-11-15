@@ -1,10 +1,11 @@
 ## [TICKET-110] Import Service with Status & Metadata Support
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 **Priority:** 🔴 High - Core Functionality
 **Dependencies:**
 - TICKET-109 (Donation Status Infrastructure) - **REQUIRED** ✅ (must complete first)
 **Created:** 2025-11-14
+**Completed:** 2025-11-15
 **Branch:** `feature/stripe-import-redesign`
 
 **⭐ CODE LIFECYCLE: PERMANENT - Production Import Logic**
@@ -41,44 +42,44 @@ As a developer, I want to enhance the Stripe import service to:
 ### Acceptance Criteria
 
 **Import Service Logic:**
-- [ ] Determine donation status from CSV row (succeeded, failed, refunded, canceled)
-- [ ] Extract child_id from metadata (primary), fallback to nickname parsing
-- [ ] Extract project_id from metadata (primary), fallback to description parsing
-- [ ] Set status='succeeded' for successful payments
-- [ ] Set status='failed' for failed payments
-- [ ] Set status='needs_attention' for validation issues
-- [ ] Set status='needs_attention' + duplicate_subscription_detected=true for duplicate subscriptions
-- [ ] Populate needs_attention_reason with human-readable explanation
-- [ ] Include stripe_subscription_id on all donations (not just sponsorships)
-- [ ] Accept all CSV rows (no early returns except already-imported)
-- [ ] Update idempotency check to use subscription_id + child_id where available
-- [ ] Update import summary to show breakdown by status
+- [x] Determine donation status from CSV row (succeeded, failed, refunded, canceled)
+- [x] Extract child_id from metadata (primary), fallback to nickname parsing
+- [x] Extract project_id from metadata (primary), fallback to description parsing
+- [x] Set status='succeeded' for successful payments
+- [x] Set status='failed' for failed payments
+- [x] Set status='needs_attention' for validation issues
+- [x] Set status='needs_attention' + duplicate_subscription_detected=true for duplicate subscriptions
+- [x] Populate needs_attention_reason with human-readable explanation
+- [x] Include stripe_subscription_id on all donations (not just sponsorships)
+- [x] Accept all CSV rows (no early returns except already-imported)
+- [x] Update idempotency check to use subscription_id + child_id where available
+- [x] Update import summary to show breakdown by status
 
 **Metadata Support:**
-- [ ] Read `metadata.child_id` if present
-- [ ] Read `metadata.project_id` if present
-- [ ] Fallback to nickname parsing if metadata missing
-- [ ] Fallback to description parsing if metadata missing
-- [ ] Log when using fallback vs metadata
+- [x] Read `metadata.child_id` if present
+- [x] Read `metadata.project_id` if present
+- [x] Fallback to nickname parsing if metadata missing
+- [x] Fallback to description parsing if metadata missing
+- [x] Log when using fallback vs metadata
 
 **Batch Importer Updates:**
-- [ ] Track counts per status (succeeded_count, failed_count, needs_attention_count)
-- [ ] Output summary with status breakdown
-- [ ] Update rake task output format
+- [x] Track counts per status (succeeded_count, failed_count, needs_attention_count)
+- [x] Output summary with status breakdown
+- [x] Update rake task output format
 
 **Testing:**
-- [ ] RSpec: Status determination tests (all status values)
-- [ ] RSpec: Metadata extraction tests (child_id, project_id)
-- [ ] RSpec: Fallback parsing tests (backwards compatibility)
-- [ ] RSpec: Duplicate subscription detection tests
-- [ ] RSpec: Idempotency tests (subscription_id + child_id)
-- [ ] RSpec: Import summary tests (status breakdown)
-- [ ] All tests pass (90% backend coverage)
+- [x] RSpec: Status determination tests (all status values)
+- [x] RSpec: Metadata extraction tests (child_id, project_id)
+- [x] RSpec: Fallback parsing tests (backwards compatibility)
+- [x] RSpec: Duplicate subscription detection tests
+- [x] RSpec: Idempotency tests (subscription_id + child_id)
+- [x] RSpec: Import summary tests (status breakdown)
+- [x] All tests pass (90% backend coverage)
 
 **Documentation:**
-- [ ] Update service comments with new behavior
-- [ ] Update CLAUDE.md if patterns change
-- [ ] Add examples of metadata format
+- [x] Update service comments with new behavior
+- [x] Update CLAUDE.md if patterns change
+- [x] Add examples of metadata format
 
 ---
 
@@ -500,19 +501,19 @@ end
 ### Success Criteria
 
 **Definition of Done:**
-- [ ] All CSV rows import successfully (no early returns)
-- [ ] Donations created with correct status (succeeded, failed, refunded, canceled, needs_attention)
-- [ ] Metadata extraction works (child_id, project_id)
-- [ ] Fallback parsing works (backwards compatible with current CSV)
-- [ ] Duplicate subscriptions flagged (not skipped)
-- [ ] Idempotency works (subscription_id + child_id)
-- [ ] Import summary shows status breakdown
-- [ ] All RSpec tests pass (90% coverage)
-- [ ] Can re-run import safely (no duplicates created)
+- [x] All CSV rows import successfully (no early returns)
+- [x] Donations created with correct status (succeeded, failed, refunded, canceled, needs_attention)
+- [x] Metadata extraction works (child_id, project_id)
+- [x] Fallback parsing works (backwards compatible with current CSV)
+- [x] Duplicate subscriptions flagged (not skipped)
+- [x] Idempotency works (subscription_id + child_id)
+- [x] Import summary shows status breakdown
+- [x] All RSpec tests pass (90% coverage)
+- [x] Can re-run import safely (no duplicates created)
 
 **Ready for Next Ticket:**
-- [ ] TICKET-111 can query donations by status for admin UI
-- [ ] Can import fresh CSV and see status distribution
+- [x] TICKET-111 can query donations by status for admin UI
+- [x] Can import fresh CSV and see status distribution
 
 ---
 

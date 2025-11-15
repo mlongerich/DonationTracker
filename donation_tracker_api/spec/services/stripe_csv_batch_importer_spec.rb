@@ -29,7 +29,7 @@ RSpec.describe StripeCsvBatchImporter do
       it "imports the transaction successfully" do
         result = importer.import
 
-        expect(result[:imported_count]).to eq(1)
+        expect(result[:succeeded_count]).to eq(1)
       end
     end
 
@@ -72,10 +72,10 @@ RSpec.describe StripeCsvBatchImporter do
         File.write(csv_file_path, csv_content)
       end
 
-      it "tracks failed count" do
+      it "tracks service errors" do
         result = importer.import
 
-        expect(result[:failed_count]).to eq(1)
+        expect(result[:errors].size).to eq(1)
       end
 
       it "collects error details with row number" do
@@ -108,8 +108,8 @@ RSpec.describe StripeCsvBatchImporter do
       it "continues processing after row failure" do
         result = importer.import
 
-        expect(result[:imported_count]).to eq(2)
-        expect(result[:failed_count]).to eq(1)
+        expect(result[:succeeded_count]).to eq(2)
+        expect(result[:errors].size).to eq(1)
       end
     end
 
@@ -126,7 +126,7 @@ RSpec.describe StripeCsvBatchImporter do
       it "counts multiple donations from two rows" do
         result = importer.import
 
-        expect(result[:imported_count]).to eq(2)
+        expect(result[:succeeded_count]).to eq(2)
         expect(result[:skipped_count]).to eq(0)
       end
     end
@@ -141,8 +141,29 @@ RSpec.describe StripeCsvBatchImporter do
       it "handles CSV parsing errors gracefully" do
         result = importer.import
 
-        expect(result[:failed_count]).to eq(1)
+        expect(result[:errors].size).to eq(1)
         expect(result[:errors].first[:message]).to include("CSV parsing error")
+      end
+    end
+
+    context "with status-based counting" do
+      it "tracks succeeded donations separately from failed donations" do
+        csv_content = <<~CSV
+          Amount,Billing Details Name,Cust Email,Created Formatted,Description,Transaction ID,Cust ID,Cust Subscription Data ID,Status,Cust Subscription Data Plan Nickname
+          100,Succeeded Donor,succeeded@example.com,2020-06-15 00:56:17 +0000,Invoice ABC,txn_succeeded,cus_001,sub_001,succeeded,$100 - General Monthly Donation
+          50,Failed Donor,failed@example.com,2020-06-16 00:56:17 +0000,Invoice DEF,txn_failed,cus_002,sub_002,failed,$50 - General Monthly Donation
+        CSV
+        File.write(csv_file_path, csv_content)
+
+        result = importer.import
+
+        # Should track status-based counts separately
+        expect(result[:succeeded_count]).to eq(1)
+        expect(result[:failed_count]).to eq(1)
+        expect(result[:needs_attention_count]).to eq(0)
+
+        # Old imported_count should be removed
+        expect(result).not_to have_key(:imported_count)
       end
     end
   end

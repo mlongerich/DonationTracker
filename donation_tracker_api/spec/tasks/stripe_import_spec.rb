@@ -52,9 +52,10 @@ RSpec.describe "stripe:import_csv rake task" do
         allow(File).to receive(:exist?).with(default_path).and_return(true)
         allow(StripeCsvBatchImporter).to receive(:new).with(default_path).and_call_original
         allow_any_instance_of(StripeCsvBatchImporter).to receive(:import).and_return({
-          imported_count: 0,
-          skipped_count: 0,
+          succeeded_count: 0,
           failed_count: 0,
+          needs_attention_count: 0,
+          skipped_count: 0,
           errors: []
         })
 
