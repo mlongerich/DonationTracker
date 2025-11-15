@@ -111,6 +111,8 @@ class Donation < ApplicationRecord
 
     self.sponsorship_id = sponsorship.id
     self.project_id = sponsorship.project_id
+    # Write child_id to database column for uniqueness validation and queries
+    write_attribute(:child_id, child_id)
   end
 
   def date_not_in_future
