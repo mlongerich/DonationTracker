@@ -124,6 +124,181 @@ RSpec.describe Donation, type: :model do
     end
   end
 
+  describe "status enum" do
+    it "allows succeeded status" do
+      donation = build(:donation, status: 'succeeded')
+      expect(donation).to be_valid
+      expect(donation).to be_succeeded
+    end
+
+    it "allows failed status" do
+      donation = build(:donation, status: 'failed')
+      expect(donation).to be_valid
+      expect(donation).to be_failed
+    end
+
+    it "allows refunded status" do
+      donation = build(:donation, status: 'refunded')
+      expect(donation).to be_valid
+      expect(donation).to be_refunded
+    end
+
+    it "allows canceled status" do
+      donation = build(:donation, status: 'canceled')
+      expect(donation).to be_valid
+      expect(donation).to be_canceled
+    end
+
+    it "allows needs_attention status" do
+      donation = build(:donation, status: 'needs_attention')
+      expect(donation).to be_valid
+      expect(donation).to be_needs_attention
+    end
+
+    it "rejects invalid status" do
+      expect {
+        build(:donation, status: 'invalid')
+      }.to raise_error(ArgumentError)
+    end
+
+    it "defaults to succeeded" do
+      donation = Donation.new(donor: create(:donor), amount: 10000, date: Date.today, payment_method: :stripe)
+      expect(donation.status).to eq('succeeded')
+    end
+  end
+
+  describe "scopes" do
+    describe ".pending_review" do
+      it "returns only non-succeeded donations" do
+        succeeded = create(:donation, status: 'succeeded')
+        failed = create(:donation, status: 'failed')
+        refunded = create(:donation, status: 'refunded')
+        canceled = create(:donation, status: 'canceled')
+        needs_attention = create(:donation, status: 'needs_attention')
+
+        results = Donation.pending_review
+
+        expect(results).to contain_exactly(failed, refunded, canceled, needs_attention)
+        expect(results).not_to include(succeeded)
+      end
+    end
+
+    describe ".active" do
+      it "returns only succeeded donations" do
+        succeeded = create(:donation, status: 'succeeded')
+        failed = create(:donation, status: 'failed')
+
+        results = Donation.active
+
+        expect(results).to contain_exactly(succeeded)
+        expect(results).not_to include(failed)
+      end
+    end
+
+    describe ".for_subscription" do
+      it "returns donations for given subscription_id" do
+        donation_with_sub = create(:donation, stripe_subscription_id: 'sub_123')
+        donation_without_sub = create(:donation, stripe_subscription_id: nil)
+        donation_different_sub = create(:donation, stripe_subscription_id: 'sub_456')
+
+        results = Donation.for_subscription('sub_123')
+
+        expect(results).to contain_exactly(donation_with_sub)
+      end
+    end
+  end
+
+  describe "validations" do
+    describe "stripe_subscription_id uniqueness" do
+      let(:child) { create(:child) }
+      let(:donor) { create(:donor) }
+      let(:sponsorship) { create(:sponsorship, donor: donor, child: child) }
+      let!(:existing) do
+        donation = build(:donation,
+                         donor: donor,
+                         stripe_subscription_id: 'sub_123',
+                         sponsorship: sponsorship,
+                         project: sponsorship.project)
+        donation.write_attribute(:child_id, child.id)
+        donation.save!
+        donation
+      end
+
+      it "prevents duplicate subscription_id + child_id" do
+        duplicate = build(:donation, stripe_subscription_id: 'sub_123')
+        duplicate.write_attribute(:child_id, child.id)
+        expect(duplicate).not_to be_valid
+        expect(duplicate.errors[:stripe_subscription_id]).to be_present
+      end
+
+      it "allows same subscription_id with different child" do
+        other_child = create(:child)
+        donor = create(:donor)
+        sponsorship = create(:sponsorship, donor: donor, child: other_child)
+        donation = build(:donation,
+                         donor: donor,
+                         stripe_subscription_id: 'sub_123',
+                         sponsorship: sponsorship,
+                         project: sponsorship.project)
+        donation.write_attribute(:child_id, other_child.id)
+        expect(donation).to be_valid
+      end
+
+      it "allows nil subscription_id" do
+        donation = build(:donation, stripe_subscription_id: nil, child_id: child.id)
+        donation.write_attribute(:child_id, child.id)
+        expect(donation).to be_valid
+      end
+
+      it "allows nil child_id" do
+        donation = build(:donation, stripe_subscription_id: 'sub_456', child_id: nil)
+        expect(donation).to be_valid
+      end
+    end
+  end
+
+  describe "#needs_review?" do
+    it "returns true for failed status" do
+      donation = build(:donation, status: 'failed')
+      expect(donation.needs_review?).to be true
+    end
+
+    it "returns true for refunded status" do
+      donation = build(:donation, status: 'refunded')
+      expect(donation.needs_review?).to be true
+    end
+
+    it "returns true for canceled status" do
+      donation = build(:donation, status: 'canceled')
+      expect(donation.needs_review?).to be true
+    end
+
+    it "returns true for needs_attention status" do
+      donation = build(:donation, status: 'needs_attention')
+      expect(donation.needs_review?).to be true
+    end
+
+    it "returns false for succeeded status" do
+      donation = build(:donation, status: 'succeeded')
+      expect(donation.needs_review?).to be false
+    end
+  end
+
+  describe "#sponsorship?" do
+    it "returns true when child_id present" do
+      child = create(:child)
+      donation = build(:donation)
+      donation.write_attribute(:child_id, child.id)
+      expect(donation.sponsorship?).to be true
+    end
+
+    it "returns false when child_id nil" do
+      donation = build(:donation)
+      donation.write_attribute(:child_id, nil)
+      expect(donation.sponsorship?).to be false
+    end
+  end
+
   describe "sponsorship auto-creation from child_id" do
     it "creates sponsorship when child_id provided and no sponsorship exists" do
       donor = create(:donor)

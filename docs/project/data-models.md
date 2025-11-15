@@ -21,23 +21,34 @@
 
 ### Donations
 - **Fields:**
-  - `id`, `donor_id`, `project_id` (nullable)
+  - `id`, `donor_id`, `project_id` (nullable), `sponsorship_id` (nullable), `child_id` (nullable)
   - `amount` (decimal, > 0), `date` (not in future)
-  - `donation_type`, `payment_method`
-  - `stripe_payment_intent_id` (nullable), `notes`
-  - `recurring` (boolean), `frequency` (enum: monthly/quarterly/annually)
-  - `last_received_date`, `expected_next_date`
-  - `missed_payments_count` (integer, default: 0)
-  - `status` (enum: active/late/overdue/at_risk/cancelled/paused)
-  - **Stripe Integration Fields (TICKET-070):**
-    - `stripe_charge_id` (string, unique index)
+  - `payment_method` (enum: stripe, check, cash, bank_transfer)
+  - **Status Infrastructure (TICKET-109):**
+    - `status` (enum: succeeded, failed, refunded, canceled, needs_attention) - default: 'succeeded', NOT NULL
+    - `duplicate_subscription_detected` (boolean, default: false)
+    - `needs_attention_reason` (text, nullable)
+  - **Stripe Integration Fields:**
+    - `stripe_charge_id` (string, indexed)
     - `stripe_customer_id` (string, indexed)
-    - `stripe_subscription_id` (string)
+    - `stripe_subscription_id` (string, indexed)
+    - `stripe_invoice_id` (string)
+    - **Unique Constraint:** `[stripe_subscription_id, child_id]` (partial index, where both NOT NULL)
   - `created_at`, `updated_at`
-- **Donation Types:** general, project, sponsorship
-- **Payment Methods:** stripe, check, cash, other
-- **Relationships:** `belongs_to :donor`, `belongs_to :project` (optional)
-- **Status:** ✅ Basic CRUD complete, Stripe integration pending (TICKET-070)
+- **Payment Methods:** stripe, check, cash, bank_transfer
+- **Relationships:**
+  - `belongs_to :donor` (required)
+  - `belongs_to :project` (optional)
+  - `belongs_to :sponsorship` (optional)
+  - `belongs_to :stripe_invoice` (optional)
+- **Scopes:**
+  - `pending_review` - Returns donations with status: failed, refunded, canceled, needs_attention
+  - `active` - Returns only succeeded donations
+  - `for_subscription(id)` - Filters by stripe_subscription_id
+- **Instance Methods:**
+  - `needs_review?` - Returns true for non-succeeded statuses
+  - `sponsorship?` - Returns true when child_id present
+- **Status:** ✅ Complete with status infrastructure (TICKET-109)
 
 ### Projects
 - **Fields:** `id`, `title`, `description`, `project_type`, `system`, `created_at`, `updated_at`

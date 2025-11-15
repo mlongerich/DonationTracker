@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_11_070927) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_14_172008) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,7 +27,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_11_070927) do
     t.decimal "amount"
     t.date "date"
     t.bigint "donor_id", null: false
-    t.string "status"
+    t.string "status", default: "succeeded", null: false
     t.text "description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -39,6 +39,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_11_070927) do
     t.string "stripe_subscription_id"
     t.string "stripe_invoice_id"
     t.string "payment_method"
+    t.boolean "duplicate_subscription_detected", default: false
+    t.text "needs_attention_reason"
     t.index ["child_id"], name: "index_donations_on_child_id"
     t.index ["date"], name: "index_donations_on_date"
     t.index ["donor_id"], name: "index_donations_on_donor_id"
@@ -50,6 +52,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_11_070927) do
     t.index ["stripe_charge_id"], name: "index_donations_on_stripe_charge_id"
     t.index ["stripe_customer_id"], name: "index_donations_on_stripe_customer_id"
     t.index ["stripe_invoice_id"], name: "index_donations_on_stripe_invoice_id"
+    t.index ["stripe_subscription_id", "child_id"], name: "index_donations_on_subscription_and_child", unique: true, where: "((child_id IS NOT NULL) AND (stripe_subscription_id IS NOT NULL))"
   end
 
   create_table "donors", force: :cascade do |t|
@@ -63,6 +66,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_11_070927) do
     t.index ["discarded_at"], name: "index_donors_on_discarded_at"
     t.index ["email"], name: "index_donors_on_email", unique: true
     t.index ["merged_into_id"], name: "index_donors_on_merged_into_id"
+  end
+
+  create_table "failed_stripe_payments", force: :cascade do |t|
+    t.string "stripe_transaction_id", null: false
+    t.string "donor_name"
+    t.string "donor_email"
+    t.integer "amount_cents", default: 0, null: false
+    t.date "payment_date", null: false
+    t.string "status", null: false
+    t.text "description"
+    t.jsonb "raw_data", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["payment_date"], name: "index_failed_stripe_payments_on_payment_date"
+    t.index ["status"], name: "index_failed_stripe_payments_on_status"
+    t.index ["stripe_transaction_id"], name: "index_failed_stripe_payments_on_stripe_transaction_id", unique: true
   end
 
   create_table "projects", force: :cascade do |t|

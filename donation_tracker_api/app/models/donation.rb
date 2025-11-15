@@ -6,25 +6,34 @@
 # - Positive amount in cents (validates numericality > 0)
 # - Date (not in future)
 # - Associated donor (required)
+# - Status (succeeded, failed, refunded, canceled, needs_attention)
 # - Optional project association
 # - Optional sponsorship association (required if project is sponsorship type)
 #
 # Features:
 # - Auto-restores archived donors/projects when creating donations
 # - Smart sponsorship creation via child_id virtual attribute
-# - Ransack filtering on amount, date, donor_id, project_id
+# - Status tracking for full payment lifecycle
+# - Duplicate subscription detection for child sponsorships
+# - Ransack filtering on amount, date, donor_id, project_id, status
 # - Validates sponsorship projects must have sponsorship_id
+# - Validates subscription_id + child_id uniqueness for sponsorships
 #
-# @example Create a donation
-#   Donation.create!(amount: 10000, date: Date.today, donor: donor, project: project)
+# @example Create a successful donation
+#   Donation.create!(amount: 10000, date: Date.today, donor: donor, project: project, status: :succeeded)
 #
 # @example Create donation with child_id (auto-creates sponsorship)
-#   Donation.create!(amount: 5000, date: Date.today, donor: donor, child_id: 1)
+#   Donation.create!(amount: 5000, date: Date.today, donor: donor, child_id: 1, status: :succeeded)
+#
+# @example Query donations needing review
+#   Donation.pending_review # Returns failed, refunded, canceled, needs_attention
+#   Donation.active # Returns only succeeded donations
 #
 # @see Donor for donor relationship
 # @see Project for project relationship
 # @see Sponsorship for sponsorship relationship
 # @see TICKET-061 for auto-sponsorship creation
+# @see TICKET-109 for status infrastructure
 class Donation < ApplicationRecord
   PAYMENT_METHODS = %w[stripe check cash bank_transfer].freeze
 
@@ -34,6 +43,18 @@ class Donation < ApplicationRecord
     cash: "cash",
     bank_transfer: "bank_transfer"
   }, prefix: true
+
+  enum :status, {
+    succeeded: "succeeded",
+    failed: "failed",
+    refunded: "refunded",
+    canceled: "canceled",
+    needs_attention: "needs_attention"
+  }
+
+  scope :pending_review, -> { where(status: [ :failed, :refunded, :canceled, :needs_attention ]) }
+  scope :active, -> { where(status: :succeeded) }
+  scope :for_subscription, ->(subscription_id) { where(stripe_subscription_id: subscription_id) }
 
   belongs_to :donor
   belongs_to :project, optional: true
@@ -48,11 +69,28 @@ class Donation < ApplicationRecord
   validates :amount, presence: true, numericality: { greater_than: 0 }
   validates :date, presence: true
   validates :payment_method, presence: true, if: :new_record?
+  validates :status, presence: true, inclusion: { in: statuses.keys }
+  validates :stripe_subscription_id,
+            uniqueness: { scope: :child_id },
+            allow_nil: true,
+            if: :sponsorship?
   validate :date_not_in_future
   validate :sponsorship_project_must_have_sponsorship_id
 
   def self.ransackable_attributes(_auth_object = nil)
-    [ "amount", "date", "donor_id", "project_id", "payment_method", "created_at", "updated_at" ]
+    [
+      "amount", "date", "donor_id", "project_id", "payment_method",
+      "status", "duplicate_subscription_detected", "stripe_subscription_id",
+      "created_at", "updated_at"
+    ]
+  end
+
+  def sponsorship?
+    read_attribute(:child_id).present?
+  end
+
+  def needs_review?
+    %w[failed refunded canceled needs_attention].include?(status)
   end
 
   private
