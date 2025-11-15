@@ -17,6 +17,7 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 # that will avoid rails generators crashing because migrations haven't been run yet
 # return unless Rails.env.test?
 require 'rspec/rails'
+require 'database_cleaner/active_record'
 # Add additional requires below this line. Rails is not loaded until this point!
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
@@ -63,7 +64,32 @@ RSpec.configure do |config|
   # If you're not using ActiveRecord, or you'd prefer not to run each of your
   # examples within a transaction, remove the following line or assign false
   # instead of true.
+  # Default to transactional fixtures for most tests
   config.use_transactional_fixtures = true
+
+  # DatabaseCleaner configuration for tests that need to see committed data
+  config.before(:suite) do
+    # Allow truncation in test environment (we're using Docker, not remote production DB)
+    DatabaseCleaner.allow_remote_database_url = true
+    DatabaseCleaner.clean_with(:truncation)
+  end
+
+  # Use around hook to completely bypass RSpec's transaction wrapper
+  config.around(:each) do |example|
+    if example.metadata[:use_transactional_fixtures] == false
+      # Completely disable transactional fixtures for this test
+      self.use_transactional_tests = false
+
+      # Use DatabaseCleaner with truncation strategy
+      DatabaseCleaner.strategy = :truncation
+      DatabaseCleaner.cleaning do
+        example.run
+      end
+    else
+      # Use default RSpec transactional behavior
+      example.run
+    end
+  end
 
   # You can uncomment this line to turn off ActiveRecord support entirely.
   # config.use_active_record = false
