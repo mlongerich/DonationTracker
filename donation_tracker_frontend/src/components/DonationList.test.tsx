@@ -26,6 +26,7 @@ describe('DonationList', () => {
         date: '2025-10-15',
         donor_id: 1,
         donor_name: 'John Doe',
+        status: 'succeeded' as const,
       },
     ];
 
@@ -44,6 +45,7 @@ describe('DonationList', () => {
         date: '2025-10-15',
         donor_id: 1,
         donor_name: 'John Doe',
+        status: 'succeeded' as const,
       },
     ];
 
@@ -63,6 +65,7 @@ describe('DonationList', () => {
         date: '2025-10-15',
         donor_id: 1,
         donor_name: 'John Doe',
+        status: 'succeeded' as const,
         project_title: 'Summer Campaign',
       },
     ];
@@ -80,6 +83,7 @@ describe('DonationList', () => {
         date: '2024-01-15',
         donor_id: 1,
         donor_name: 'John Doe',
+        status: 'succeeded' as const,
         project_title: 'Summer Campaign',
       },
     ];
@@ -97,6 +101,7 @@ describe('DonationList', () => {
         date: '2024-01-15',
         donor_id: 1,
         donor_name: 'John Doe',
+        status: 'succeeded' as const,
         project_title: undefined,
       },
     ];
@@ -116,6 +121,7 @@ describe('DonationList', () => {
         date: '2024-01-15',
         donor_id: 1,
         donor_name: 'Raymond McGaw',
+        status: 'succeeded' as const,
         project_title: 'General Donation',
       },
     ];
@@ -134,6 +140,7 @@ describe('DonationList', () => {
         date: '2024-01-15',
         donor_id: 1,
         donor_name: 'John Doe',
+        status: 'succeeded' as const,
         payment_method: 'stripe' as const,
       },
     ];
@@ -151,6 +158,7 @@ describe('DonationList', () => {
         date: '2024-01-15',
         donor_id: 1,
         donor_name: 'John Doe',
+        status: 'succeeded' as const,
         payment_method: 'check' as const,
       },
     ];
@@ -168,6 +176,7 @@ describe('DonationList', () => {
         date: '2024-01-15',
         donor_id: 1,
         donor_name: 'John Doe',
+        status: 'succeeded' as const,
         payment_method: 'bank_transfer' as const,
       },
     ];
@@ -185,6 +194,7 @@ describe('DonationList', () => {
         date: '2024-01-15',
         donor_id: 1,
         donor_name: 'John Doe',
+        status: 'succeeded' as const,
       },
       {
         id: 2,
@@ -192,6 +202,7 @@ describe('DonationList', () => {
         date: '2024-01-16',
         donor_id: 2,
         donor_name: 'Jane Smith',
+        status: 'succeeded' as const,
       },
     ];
 

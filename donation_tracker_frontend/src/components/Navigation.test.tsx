@@ -69,4 +69,14 @@ describe('Navigation', () => {
     expect(header).toBeInTheDocument();
     expect(header).toHaveClass('MuiAppBar-root');
   });
+
+  it('renders Admin link', () => {
+    render(
+      <BrowserRouter>
+        <Navigation />
+      </BrowserRouter>
+    );
+
+    expect(screen.getByRole('link', { name: /admin/i })).toBeInTheDocument();
+  });
 });

@@ -10,6 +10,7 @@ import DonorsPage from './pages/DonorsPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ChildrenPage from './pages/ChildrenPage';
 import SponsorshipsPage from './pages/SponsorshipsPage';
+import AdminPage from './pages/AdminPage';
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
               <Route path="children" element={<ChildrenPage />} />
               <Route path="sponsorships" element={<SponsorshipsPage />} />
               <Route path="projects" element={<ProjectsPage />} />
+              <Route path="admin" element={<AdminPage />} />
             </Route>
           </Routes>
         </BrowserRouter>

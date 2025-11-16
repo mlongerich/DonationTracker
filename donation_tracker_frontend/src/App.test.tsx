@@ -71,4 +71,11 @@ describe('App', () => {
     expect(screen.getByRole('link', { name: /donors/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /projects/i })).toBeInTheDocument();
   });
+
+  it('has /admin route', () => {
+    window.history.pushState({}, 'Admin Page', '/admin');
+    render(<App />);
+
+    expect(screen.getByRole('heading', { name: /admin/i })).toBeInTheDocument();
+  });
 });

@@ -10,8 +10,11 @@ export interface Donation {
   project_id?: number | null;
   project_title?: string;
   payment_method?: 'stripe' | 'check' | 'cash' | 'bank_transfer' | null;
-  status?: string;
+  status: 'succeeded' | 'failed' | 'refunded' | 'canceled' | 'needs_attention';
   description?: string;
+  stripe_subscription_id?: string | null;
+  duplicate_subscription_detected?: boolean;
+  needs_attention_reason?: string | null;
 }
 
 /**
