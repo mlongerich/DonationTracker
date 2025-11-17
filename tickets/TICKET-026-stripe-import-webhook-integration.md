@@ -1,36 +1,48 @@
 ## [TICKET-026] Stripe Webhook Integration (Real-time Sync)
 
-**Status:** 📋 Planned (Post-MVP)
-**Priority:** 🟢 Low (Future Enhancement)
+**Status:** 🟢 Ready to Implement
+**Priority:** 🟡 Medium (Production Enhancement)
 **Dependencies:**
 - TICKET-070 (Stripe CSV Import Foundation) - **COMPLETE** ✅
-- TICKET-109, TICKET-110 (STRIPE_IMPORT_PLAN - donation status & metadata) - **REQUIRED** ⚠️
+- TICKET-112 (Stripe Import Redesign - donation status & metadata) - **COMPLETE** ✅
 **Created:** 2025-11-01
-**Updated:** 2025-11-14
+**Updated:** 2025-11-17
 
-**⭐ CODE LIFECYCLE: PERMANENT - Long-Term Production Solution (Post-MVP)**
-
-**TIMING:** This feature is planned for **after MVP launch**. The current CSV import workflow (TICKET-071) is sufficient for initial production use.
+**⭐ CODE LIFECYCLE: PERMANENT - Production Real-Time Sync**
 
 **This ticket creates PERMANENT production infrastructure.**
 - Webhook endpoint runs forever (real-time donation sync)
-- **REUSES** `StripePaymentImportService` from TICKET-070 (no duplicate logic)
-- Replaces CSV import as the ongoing donation source
+- **REUSES** `StripePaymentImportService` from TICKET-112 (no duplicate logic)
+- Complements CSV import for ongoing donation tracking
+- Uses TICKET-112's idempotency strategy (stripe_invoice_id)
 
-**KEY INSIGHT:** Stripe CSV export = flattened webhook payload
-- CSV has 348 columns (all Stripe API fields)
-- Webhooks return same data as JSON objects
-- Transform webhook → CSV hash → reuse TICKET-070 service
-- **Zero code duplication**
+**KEY INSIGHT:** Stripe webhooks return same data structure as CSV
+- CSV has 348 columns (all Stripe API fields flattened)
+- Webhooks return same Stripe objects as structured JSON
+- Transform webhook → CSV hash → reuse existing service
+- **Zero code duplication** - 100% service reuse
+
+**TICKET-112 REDESIGN ALIGNMENT:**
+- ✅ Metadata-first extraction (child_id, project_id from metadata)
+- ✅ Status tracking (succeeded, failed, refunded, canceled, needs_attention)
+- ✅ Idempotency via stripe_invoice_id (StripeInvoice model)
+- ✅ Multi-child sponsorship support (same invoice, multiple children)
+- ✅ Duplicate detection (same child, different subscription_id)
 
 ### User Story
 As an admin, I want Stripe webhook integration so that new donations are automatically created in the system when customers donate through Stripe's hosted payment pages.
 
 ### Scope Note
-**CSV import has been moved to TICKET-070, TICKET-071, TICKET-072.**
-This ticket ONLY focuses on webhook integration for real-time donation sync.
+**CSV import is complete via TICKET-070, TICKET-071, TICKET-112.**
+This ticket adds webhook integration for **real-time** donation sync.
 
-**Post-MVP Enhancement:** This feature will be implemented after MVP launch. The current workflow uses periodic CSV exports from Stripe, which is sufficient for initial production use. Webhooks provide real-time automation but are not critical for MVP.
+**Why Now:** TICKET-112 redesign provides metadata-first extraction and robust idempotency.
+The webhook integration is now straightforward since `StripePaymentImportService` handles all edge cases:
+- Status determination (succeeded/failed/refunded/canceled/needs_attention)
+- Metadata extraction (child_id, project_id)
+- Duplicate subscription detection
+- Multi-child sponsorship handling
+- Same-invoice duplicate prevention
 
 ### Acceptance Criteria
 
@@ -43,9 +55,10 @@ This ticket ONLY focuses on webhook integration for real-time donation sync.
 - [ ] Backend: Handle webhook event: `customer.subscription.deleted` (subscription cancellations)
 
 **Service Reuse (NO DUPLICATION):**
-- [ ] Backend: **Reuse `StripePaymentImportService` from TICKET-070** for all processing
+- [ ] Backend: **Reuse `StripePaymentImportService` from TICKET-112** for all processing
 - [ ] Backend: Transform webhook payload → CSV hash format (adapter pattern)
-- [ ] Backend: Verify idempotency via stripe_charge_id (skip duplicates)
+- [ ] Backend: Idempotency via stripe_invoice_id (StripeInvoice unique index)
+- [ ] Backend: Include metadata hash in CSV format (metadata.child_id, metadata.project_id)
 - [ ] Backend: Document in service comments that it handles both CSV AND webhooks
 
 **Testing & Documentation:**
@@ -137,9 +150,11 @@ class Webhooks::StripeController < ApplicationController
     # Transform webhook payload to CSV-compatible format
     csv_row_hash = transform_charge_to_csv_format(charge)
 
-    # Reuse existing import service from TICKET-070
+    # Reuse existing import service from TICKET-112
     service = StripePaymentImportService.new(csv_row_hash)
-    service.import
+    result = service.import
+
+    log_import_result(result, 'charge.succeeded', charge.id)
   end
 
   # Handle recurring subscription payment
@@ -149,37 +164,54 @@ class Webhooks::StripeController < ApplicationController
 
     return unless charge
 
-    csv_row_hash = transform_charge_to_csv_format(charge)
-    csv_row_hash['Cust Subscription Data ID'] = invoice.subscription
+    # Fetch subscription for metadata
+    subscription = Stripe::Subscription.retrieve(invoice.subscription) if invoice.subscription
+
+    csv_row_hash = transform_charge_to_csv_format(charge, invoice, subscription)
 
     service = StripePaymentImportService.new(csv_row_hash)
-    service.import
+    result = service.import
+
+    log_import_result(result, 'invoice.payment_succeeded', invoice.id)
   end
 
   # Handle subscription cancellation
   def handle_subscription_deleted(subscription)
-    # Find sponsorship by stripe_subscription_id
+    # Find sponsorships by stripe_subscription_id via donations
     donations = Donation.where(stripe_subscription_id: subscription.id)
+                        .where.not(sponsorship_id: nil)
 
-    donations.each do |donation|
-      next unless donation.sponsorship
+    sponsorships_ended = 0
+    donations.group_by(&:sponsorship_id).each do |sponsorship_id, _|
+      sponsorship = Sponsorship.find_by(id: sponsorship_id)
+      next unless sponsorship&.active?
 
-      # End the sponsorship
-      donation.sponsorship.update(end_date: Date.today)
-      Rails.logger.info("Ended sponsorship #{donation.sponsorship.id} due to Stripe subscription cancellation")
+      sponsorship.update(end_date: Date.today, status: :inactive)
+      sponsorships_ended += 1
+      Rails.logger.info("Ended sponsorship #{sponsorship_id} due to Stripe subscription #{subscription.id} cancellation")
     end
+
+    Rails.logger.info("Ended #{sponsorships_ended} sponsorship(s) for subscription #{subscription.id}")
   end
 
   # Transform Stripe charge object to CSV row hash format
-  # This allows 100% REUSE of StripePaymentImportService from TICKET-070/110
+  # This allows 100% REUSE of StripePaymentImportService from TICKET-112
   #
   # Why this works:
   # - CSV export contains same Stripe API fields (348 columns!)
-  # - Webhooks return same Stripe objects (charge, customer, subscription)
+  # - Webhooks return same Stripe objects (charge, customer, subscription, invoice)
   # - Transform webhook JSON → CSV hash format → reuse existing service
   # - ZERO code duplication for donation processing logic
   #
-  # IMPORTANT: Must include metadata for child/project mapping (STRIPE_IMPORT_PLAN)
+  # TICKET-112 REDESIGN ALIGNMENT:
+  # - Metadata-first extraction (child_id, project_id from metadata)
+  # - Status tracking (charge.status → donation.status)
+  # - Idempotency (stripe_invoice_id via StripeInvoice model)
+  #
+  # @param charge [Stripe::Charge] The Stripe charge object
+  # @param invoice [Stripe::Invoice] Optional invoice for subscription payments
+  # @param subscription [Stripe::Subscription] Optional subscription for metadata
+  # @return [Hash] CSV-compatible hash for StripePaymentImportService
   def transform_charge_to_csv_format(charge, invoice = nil, subscription = nil)
     {
       'Amount' => (charge.amount / 100.0).to_s, # Convert cents to dollars (CSV format)
@@ -187,18 +219,32 @@ class Webhooks::StripeController < ApplicationController
       'Cust Email' => charge.billing_details&.email || charge.receipt_email,
       'Created Formatted' => Time.at(charge.created).utc.strftime('%Y-%m-%d %H:%M:%S +0000'),
       'Description' => charge.description,
-      'Transaction ID' => charge.id,
+      'Transaction ID' => charge.id, # stripe_charge_id
       'Cust ID' => charge.customer,
-      'Status' => charge.status,
+      'Status' => charge.status, # succeeded, failed, etc.
       'Invoice' => invoice&.id,
-      'Cust Subscription Data ID' => subscription&.id,
+      'Cust Subscription Data ID' => invoice&.subscription || subscription&.id,
       'Cust Subscription Data Plan Nickname' => subscription&.plan&.nickname,
 
-      # CRITICAL: Include metadata for child/project mapping (STRIPE_IMPORT_PLAN)
+      # CRITICAL: Include metadata for child/project mapping (TICKET-112 metadata-first strategy)
       # Metadata is PRIMARY source, nickname/description are FALLBACK
-      'metadata' => charge.metadata.to_h.merge(invoice&.metadata&.to_h || {})
-      # StripePaymentImportService from TICKET-110 handles the rest!
+      # Merge charge metadata + invoice metadata + subscription metadata
+      'metadata' => charge.metadata.to_h
+                          .merge(invoice&.metadata&.to_h || {})
+                          .merge(subscription&.metadata&.to_h || {})
+      # StripePaymentImportService from TICKET-112 handles the rest!
     }
+  end
+
+  # Log import result for debugging and monitoring
+  def log_import_result(result, event_type, stripe_id)
+    if result[:success] && !result[:skipped]
+      Rails.logger.info("Webhook #{event_type} (#{stripe_id}): Created #{result[:donations].size} donation(s)")
+    elsif result[:skipped]
+      Rails.logger.info("Webhook #{event_type} (#{stripe_id}): Skipped - #{result[:reason]}")
+    else
+      Rails.logger.error("Webhook #{event_type} (#{stripe_id}): Failed - #{result[:error]}")
+    end
   end
 end
 ```
@@ -220,10 +266,25 @@ Stripe → Webhook → Fetch charge → Transform → StripePaymentImportService
 Stripe → Webhook → Find sponsorship by subscription_id → Set end_date → Sponsorship ended
 ```
 
-### Idempotency
-- Webhook replays are safe (stripe_charge_id unique index prevents duplicates)
-- `StripePaymentImportService` checks `already_imported?` before processing
-- Multiple webhook deliveries = single donation created
+### Idempotency (TICKET-112 Redesign Strategy)
+
+**StripeInvoice Model (Primary Idempotency):**
+- `stripe_invoice_id` has unique index in StripeInvoice model
+- Service calls `create_stripe_invoice` which uses `find_or_create_by!`
+- Multiple webhook deliveries = single StripeInvoice record
+- Donations link to invoice via `stripe_invoice_id` (not unique, allows multi-child)
+
+**Multi-Child Sponsorship Handling:**
+- Same invoice can have multiple donations (one per child)
+- Idempotency: subscription_id + child_id combination
+- Service checks `donation_exists_for_invoice_and_child?` to prevent same-invoice duplicates
+- If same child appears twice in same invoice → flagged as `needs_attention`
+
+**Why This Works:**
+- Webhooks deliver same `invoice.id` on replay
+- `StripeInvoice.find_or_create_by!(stripe_invoice_id: invoice.id)` prevents duplicate invoices
+- Donation creation checks for existing invoice + child combination
+- Safe for webhook replays and CSV re-imports
 
 ### Testing Strategy
 
@@ -276,11 +337,13 @@ end
 ### Related Tickets
 
 **DEPENDS ON (REQUIRED):**
-- **TICKET-070: Stripe CSV Import Foundation** (⭐ PERMANENT - provides StripePaymentImportService)
+- **TICKET-112: Stripe Import Redesign** (✅ COMPLETE - provides enhanced StripePaymentImportService)
+  - Includes TICKET-070 (foundation), TICKET-109 (status), TICKET-110 (metadata), TICKET-111 (UI)
 
 **RELATED:**
-- TICKET-071: Stripe CSV Batch Import Task (🗑️ TEMPORARY - one-time historical import)
+- TICKET-071: Stripe CSV Batch Import Task (🗑️ TEMPORARY - delete after initial import)
 - TICKET-072: Import Error Recovery UI (🗑️ OPTIONAL - CSV error handling)
+- TICKET-113: Cleanup Old System (🧹 HOUSEKEEPING - remove failed_stripe_payments)
 - TICKET-027: Stripe Description Mapping Management (FUTURE - admin mapping UI)
 
 ### Code Lifecycle & Reusability
@@ -291,14 +354,18 @@ end
 - Webhook route in `routes.rb`
 - All tests for webhook controller
 
-**REUSED FROM TICKET-070 (Zero Duplication):**
+**REUSED FROM TICKET-112 (Zero Duplication):**
 - `StripePaymentImportService` - Core donation processing logic
-- Pattern matching (sponsorships, general, campaigns)
-- Multi-child sponsorship handling
-- Donor deduplication
+- **Status determination** (succeeded, failed, refunded, canceled, needs_attention)
+- **Metadata-first extraction** (child_id, project_id from metadata)
+- Pattern matching (sponsorships, general, campaigns) as fallback
+- Multi-child sponsorship handling (array of children from metadata or parsing)
+- Donor deduplication (find_or_create_by_email_or_stripe_customer)
 - Child/Project/Sponsorship auto-creation
-- Amount conversion
-- Idempotency (stripe_charge_id)
+- Amount conversion (cents ↔ dollars)
+- **Idempotency** (stripe_invoice_id via StripeInvoice model)
+- **Duplicate subscription detection** (same child, different subscription_id)
+- **Same-invoice duplicate prevention** (same child twice in same invoice)
 
 **WHY NO CODE DUPLICATION:**
 ```ruby
@@ -325,10 +392,15 @@ After implementing webhook endpoint:
 4. Copy webhook signing secret to Rails credentials
 
 ### Notes
-- **This is the PERMANENT production solution** (runs forever)
-- CSV import (TICKET-071) is **one-time throwaway code**
-- **100% service reuse** from TICKET-070 (no duplicate logic)
+- **This is PERMANENT production infrastructure** (runs forever)
+- CSV import (TICKET-071) is **one-time throwaway code** (delete after initial import)
+- **100% service reuse** from TICKET-112 (no duplicate logic)
 - Requires Stripe gem and webhook secret configuration
 - Handles subscription cancellations by ending sponsorships
+- **TICKET-112 redesign makes webhook implementation straightforward:**
+  - Metadata-first extraction (webhooks naturally include metadata)
+  - Status tracking (webhooks include charge.status)
+  - Idempotency (StripeInvoice model prevents duplicate imports)
+  - Duplicate detection (handles edge cases like same child in multiple subscriptions)
 - Future: TICKET-027 will add admin UI for description mapping rules
 - **After CSV import completes, delete TICKET-071 code but KEEP this!**

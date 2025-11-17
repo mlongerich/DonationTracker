@@ -85,6 +85,7 @@ Current work items and user stories being actively developed.
 *Tickets that were planned but decided against implementing.*
 
 - [TICKET-041: Add Test Coverage for API Client Methods](canceled/TICKET-041-api-client-test-coverage.md) - ❌ Canceled (2025-11-07) - E2E tests provide sufficient coverage, existing Jest mocks adequate for unit testing HTTP layer
+- [TICKET-051: Add Project Type Filter & Pagination to Projects Page](TICKET-051-project-page-type-sort-filter.md) - ❌ Superseded (2025-11-17) - TICKET-119 moves Projects to Admin tab instead
 
 ### 📋 Planned Tickets
 
@@ -112,6 +113,7 @@ Current work items and user stories being actively developed.
 - [TICKET-116: Add Archive Functionality to Admin Page](TICKET-116-admin-archive-donations.md) - 📋 Planned (🟡 Medium, S) - *Soft delete for invalid donations*
 - [TICKET-117: Standardize Admin Page Card Design](TICKET-117-admin-consistent-card-design.md) - 📋 Planned (🟢 Low, XS) - *Visual consistency*
 - [TICKET-118: Add Source Tracking to Donations](TICKET-118-donation-source-tracking.md) - 📋 Planned (🟡 Medium, S) - *CSV/webhook/manual audit trail*
+- [TICKET-119: Move Projects to Admin Page Tab](TICKET-119-move-projects-to-admin-tab.md) - 📋 Planned (🟡 Medium, S-M) - *Projects as admin tab instead of standalone page*
 
 #### Feature Development
 - [TICKET-008: Basic Authentication with Google OAuth](TICKET-008-basic-authentication-google-oauth.md) - 📋 Planned
@@ -139,12 +141,11 @@ Current work items and user stories being actively developed.
 - [TICKET-072: Import Error Recovery UI](TICKET-072-import-error-recovery-ui.md) - 📋 Planned (🟢 Low, M) - *Optional: skip if <10 failures*
 
 **POST-MVP (Future Enhancements):**
-- [TICKET-026: Stripe Webhook Integration](TICKET-026-stripe-import-webhook-integration.md) - 📋 Planned Post-MVP (🟢 Low, M) - *Real-time sync after MVP launch*
+- [TICKET-026: Stripe Webhook Integration](TICKET-026-stripe-import-webhook-integration.md) - 🟢 Ready to Implement (🟡 Medium, M) - *Updated for TICKET-112 redesign - Real-time sync*
 - [TICKET-027: Stripe Description Mapping Management](TICKET-027-stripe-description-mapping-management.md) - 📋 Planned (🟢 Low, S) - *Admin UI for mapping rules*
 
 #### Sponsorship & Children Features
 - [TICKET-048: Stripe Sponsorship & Child Extraction](TICKET-048-stripe-sponsorship-child-extraction.md) - 📋 Planned (🟡 Medium, M)
-- [TICKET-051: Add Project Type Filter & Pagination to Projects Page](TICKET-051-project-page-type-sort-filter.md) - 📋 Planned (🟡 Medium, M) - *Updated: Added pagination for consistency*
 - [TICKET-055: Sponsorship Management Actions](TICKET-055-sponsorship-reactivate-delete-actions.md) - 📋 Planned (🟡 Medium, S)
 - [TICKET-058: Donor Sponsorship List Endpoint](TICKET-058-donor-sponsorship-list-endpoint.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-059: Child Info Display on Donation Pages](TICKET-059-child-info-display-donation-pages.md) - 📋 Planned (🟡 Medium, S)
@@ -185,14 +186,14 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 107
-- **Completed:** 52 (49%)
+- **Total Tickets:** 108 (added TICKET-119)
+- **Completed:** 52 (48%)
 - **In Progress:** 0
-- **Planned:** 52
-- **Estimated Hours Remaining:** ~195 hours (~5 weeks)
+- **Planned:** 53
+- **Estimated Hours Remaining:** ~196 hours (~5 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
-- **Canceled:** 1
+- **Canceled/Superseded:** 2 (TICKET-041, TICKET-051)
 
 ### By Category
 
@@ -201,17 +202,21 @@ Current work items and user stories being actively developed.
 - **Stripe Integration:** 4 planned (~22h), 1 completed
   - **PERMANENT:** ✅ TICKET-070 (core service - complete), TICKET-076 (failed payments tracking - planned)
   - **TEMPORARY:** TICKET-071 (batch import - blocked on user testing), TICKET-072 (error UI - optional)
-  - **POST-MVP:** TICKET-026 (webhooks - post-MVP), TICKET-027 (mapping UI - future)
-- **Sponsorship & Children Features:** 9 planned (~35h), 10 completed
+  - **POST-MVP:** 🟢 TICKET-026 (webhooks - ready, updated for TICKET-112), TICKET-027 (mapping UI - future)
+- **Admin Page Improvements:** 6 planned (~7h)
+  - New: TICKET-119 (Move Projects to Admin Tab - 1-2h)
+  - TICKET-114/115/116/117/118 (filters, status edit, archive, design, source tracking)
+- **Sponsorship & Children Features:** 8 planned (~32h), 10 completed
   - ✅ TICKET-077: Last Donation Date Tracking (complete)
   - New: TICKET-102 (Child Photos)
+  - ❌ TICKET-051: Superseded by TICKET-119
 - **Testing & Quality Assurance:** 5 planned (~15h), 1 completed
   - ✅ TICKET-108: E2E Test Infrastructure (complete)
 - **Code Quality & Architecture:** 6 planned (~26h), 29 completed
 - **In Progress:** 0
 - **Blocked:** 1 (TICKET-071)
 - **Deferred/Accepted Risk:** 1 (TICKET-049)
-- **Canceled:** 1 (TICKET-041)
+- **Canceled/Superseded:** 2 (TICKET-041, TICKET-051)
 
 ### Code Lifecycle Guide
 
