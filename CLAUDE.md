@@ -834,8 +834,22 @@ function Layout() {
 
 ## 📚 Development Commands
 
+**Backend Testing:**
+```bash
+# Run all backend tests (isolated test environment)
+bash scripts/test-backend.sh
+
+# Run specific test file
+bash scripts/test-backend.sh spec/models/donation_spec.rb
+
+# Run specific test line
+bash scripts/test-backend.sh spec/models/donation_spec.rb:227
+```
+
+**IMPORTANT:** Always use `scripts/test-backend.sh` to ensure `RAILS_ENV=test` is set. Running `docker-compose exec api bundle exec rspec` directly will use development environment and pollute your development database.
+
 **See:** docs/project/tech-stack.md for complete command reference including:
-- Backend commands (rails console, rspec, rubocop, reek, rubycritic)
+- Backend commands (rails console, rubocop, reek, rubycritic)
 - Frontend commands (npm test, vitest, cypress, lint)
 - E2E testing (isolated test environment on port 3002)
 - Pre-commit scripts (documentation, backend, frontend, hooks, recovery)

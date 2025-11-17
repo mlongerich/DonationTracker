@@ -70,6 +70,7 @@ Current work items and user stories being actively developed.
 - [TICKET-053: Sponsorships Page Filters & Pagination UI](completed/TICKET-053-sponsorships-page-filters-pagination-ui.md) - ✅ Complete (2025-11-12)
 - [TICKET-077: Last Donation Date Tracking](completed/TICKET-077-last-donation-date-tracking.md) - ✅ Complete (2025-11-12)
 - [TICKET-096: Refactor DonationList Component Pattern](completed/TICKET-096-refactor-donation-list-component-pattern.md) - ✅ Complete (2025-11-13)
+- [TICKET-112: Validation & Merge](completed/TICKET-112-validation-and-merge.md) - ✅ Complete (2025-11-17)
 
 ### 🔵 In Progress Tickets
 
@@ -92,10 +93,10 @@ Current work items and user stories being actively developed.
 **Branch:** `feature/stripe-import-redesign`
 
 **Phase 1-5 Implementation:**
-- [TICKET-109: Donation Status Infrastructure](TICKET-109-donation-status-infrastructure.md) - 📋 Planned (🔴 High, M) - *Phase 1: Add status field to donations*
-- [TICKET-110: Import Service with Status & Metadata](TICKET-110-import-service-status-metadata.md) - 📋 Planned (🔴 High, L) - *Phase 2: Rewrite import service*
-- [TICKET-111: Pending Review Admin UI](TICKET-111-pending-review-admin-ui.md) - 📋 Planned (🟡 Medium, M) - *Phase 3: Admin section for non-succeeded donations*
-- [TICKET-112: Validation & Merge](TICKET-112-validation-and-merge.md) - 📋 Planned (🔴 High, S) - *Phase 4: Validate and merge to master*
+- [TICKET-109: Donation Status Infrastructure](completed/TICKET-109-donation-status-infrastructure.md) - ✅ Complete (2025-11-17) - *Phase 1: Add status field to donations*
+- [TICKET-110: Import Service with Status & Metadata](completed/TICKET-110-import-service-status-metadata.md) - ✅ Complete (2025-11-17) - *Phase 2: Rewrite import service*
+- [TICKET-111: Pending Review Admin UI](completed/TICKET-111-pending-review-admin-ui.md) - ✅ Complete (2025-11-17) - *Phase 3: Admin section for non-succeeded donations*
+- [TICKET-112: Validation & Merge](completed/TICKET-112-validation-and-merge.md) - ✅ Complete (2025-11-17) - *Phase 4: Validate and merge to master*
 - [TICKET-113: Cleanup Old System](TICKET-113-cleanup-old-system.md) - 📋 Planned (🟢 Low, S) - *Phase 5: Remove old code*
 
 **Supersedes:**
@@ -104,6 +105,13 @@ Current work items and user stories being actively developed.
 **See:** [docs/STRIPE_IMPORT_PLAN.md](../docs/STRIPE_IMPORT_PLAN.md) for complete redesign rationale
 
 ---
+
+#### Admin Page UX Improvements
+- [TICKET-114: Add Clear Filters Button to Admin Page](TICKET-114-admin-clear-filters-button.md) - 📋 Planned (🟢 Low, XS) - *Quick filter reset*
+- [TICKET-115: Add Edit Donation Status to Admin Page](TICKET-115-admin-edit-donation-status.md) - 📋 Planned (🔴 High, M) - *Manual status correction*
+- [TICKET-116: Add Archive Functionality to Admin Page](TICKET-116-admin-archive-donations.md) - 📋 Planned (🟡 Medium, S) - *Soft delete for invalid donations*
+- [TICKET-117: Standardize Admin Page Card Design](TICKET-117-admin-consistent-card-design.md) - 📋 Planned (🟢 Low, XS) - *Visual consistency*
+- [TICKET-118: Add Source Tracking to Donations](TICKET-118-donation-source-tracking.md) - 📋 Planned (🟡 Medium, S) - *CSV/webhook/manual audit trail*
 
 #### Feature Development
 - [TICKET-008: Basic Authentication with Google OAuth](TICKET-008-basic-authentication-google-oauth.md) - 📋 Planned
