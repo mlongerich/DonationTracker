@@ -49,31 +49,6 @@ RSpec.describe StripePaymentImportService do
       end
     end
 
-    context 'with duplicate import (idempotency)' do
-      before do
-        described_class.new(valid_csv_row).import
-      end
-
-      it 'skips already imported donation for same child' do
-        result = described_class.new(valid_csv_row).import
-
-        expect(result[:skipped]).to be true
-        expect(result[:reason]).to include('Already imported')
-        expect(result[:donations]).to be_empty
-      end
-
-      it 'creates StripeInvoice once and reuses it' do
-        # First import created the StripeInvoice
-        expect(StripeInvoice.count).to eq(1)
-
-        # Second import reuses the same StripeInvoice
-        expect {
-          described_class.new(valid_csv_row).import
-        }.not_to change(StripeInvoice, :count)
-
-        expect(StripeInvoice.count).to eq(1)
-      end
-    end
 
     context 'with multi-child sponsorship' do
       let(:multi_child_csv) do
@@ -410,35 +385,6 @@ RSpec.describe StripePaymentImportService do
       end
     end
 
-    context 'with duplicate subscriptions', use_transactional_fixtures: false do
-      it 'flags duplicate subscription as needs_attention' do
-        # First import creates child and donation
-        first_csv = valid_csv_row.merge(
-          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Sangwan',
-          'Cust Subscription Data ID' => 'sub_OLD123',
-          'Transaction ID' => 'txn_first123'
-        )
-        described_class.new(first_csv).import
-
-        # Second import with same child but different subscription should flag duplicate
-        csv_row = valid_csv_row.merge(
-          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Sangwan',
-          'Cust Subscription Data ID' => 'sub_NEW456',
-          'Transaction ID' => 'txn_duplicate123'
-        )
-
-        expect {
-          result = described_class.new(csv_row).import
-          @last_result = result
-        }.to change(Donation, :count).by(1)
-
-        donation = @last_result[:donations].first
-
-        expect(donation.status).to eq('needs_attention')
-        expect(donation.duplicate_subscription_detected).to be true
-        expect(donation.needs_attention_reason).to include('sub_OLD123')
-      end
-    end
 
     context 'with merged donor' do
       it 'assigns donation to merged donor not original donor' do
@@ -477,57 +423,6 @@ RSpec.describe StripePaymentImportService do
     end
 
     context 'with new idempotency logic (subscription_id + child_id)', use_transactional_fixtures: false do
-      it 'skips already-imported sponsorship by subscription_id + child_id' do
-        # First import: Create sponsorship donation
-        child = Child.create!(name: 'Buntita')
-        first_csv = valid_csv_row.merge(
-          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Buntita',
-          'Cust Subscription Data ID' => 'sub_ABC123',
-          'Transaction ID' => 'txn_first'
-        )
-        first_result = described_class.new(first_csv).import
-        first_donation = first_result[:donations].first
-
-        # Second import: Same subscription_id + child_id, different transaction_id
-        second_csv = valid_csv_row.merge(
-          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Buntita',
-          'Cust Subscription Data ID' => 'sub_ABC123',
-          'Transaction ID' => 'txn_second'
-        )
-
-        result = described_class.new(second_csv).import
-
-        expect(result[:skipped]).to be true
-        expect(result[:reason]).to include(first_donation.id.to_s)
-        expect(Donation.count).to eq(1) # Should not create duplicate
-      end
-
-      it 'skips already-imported project donation by charge_id + project_id' do
-        # First import: Create project donation
-        first_csv = valid_csv_row.merge(
-          'Cust Subscription Data Plan Nickname' => '',
-          'Description' => '$50 - General Monthly Donation',
-          'Cust Subscription Data ID' => '',
-          'Transaction ID' => 'ch_ABC123'
-        )
-        first_result = described_class.new(first_csv).import
-        first_donation = first_result[:donations].first
-
-        # Second import: Same charge_id + project_id
-        second_csv = valid_csv_row.merge(
-          'Cust Subscription Data Plan Nickname' => '',
-          'Description' => '$50 - General Monthly Donation',
-          'Cust Subscription Data ID' => '',
-          'Transaction ID' => 'ch_ABC123'
-        )
-
-        result = described_class.new(second_csv).import
-
-        expect(result[:skipped]).to be true
-        expect(result[:reason]).to include(first_donation.id.to_s)
-        expect(Donation.count).to eq(1) # Should not create duplicate
-      end
-
       it 'allows same subscription_id with different child_id (multi-child sponsorship)' do
         # First import: Child 1 with subscription
         Child.create!(name: 'Buntita')
@@ -551,6 +446,35 @@ RSpec.describe StripePaymentImportService do
         expect(result[:skipped]).to be false
         expect(result[:success]).to be true
         expect(Donation.count).to eq(2) # Should create both donations
+      end
+
+      it 'imports duplicate child in same invoice and flags as needs_attention' do
+        # First import: Buntita in invoice txn_SAME
+        Child.create!(name: 'Buntita')
+        first_csv = valid_csv_row.merge(
+          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Buntita',
+          'Cust Subscription Data ID' => 'sub_ABC123',
+          'Transaction ID' => 'txn_SAME'
+        )
+        first_result = described_class.new(first_csv).import
+        first_donation = first_result[:donations].first
+
+        # Second import: Same child, SAME invoice (duplicate within invoice)
+        second_csv = valid_csv_row.merge(
+          'Cust Subscription Data Plan Nickname' => 'Monthly Sponsorship Donation for Buntita',
+          'Cust Subscription Data ID' => 'sub_ABC123',
+          'Transaction ID' => 'txn_SAME'
+        )
+
+        result = described_class.new(second_csv).import
+
+        expect(result[:skipped]).to be false
+        expect(result[:success]).to be true
+        expect(Donation.count).to eq(2) # Both should be imported
+
+        second_donation = result[:donations].first
+        expect(second_donation.status).to eq('needs_attention')
+        expect(second_donation.needs_attention_reason).to include('Duplicate child in same invoice')
       end
     end
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_14_172008) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_17_035421) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -52,7 +52,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_14_172008) do
     t.index ["stripe_charge_id"], name: "index_donations_on_stripe_charge_id"
     t.index ["stripe_customer_id"], name: "index_donations_on_stripe_customer_id"
     t.index ["stripe_invoice_id"], name: "index_donations_on_stripe_invoice_id"
-    t.index ["stripe_subscription_id", "child_id"], name: "index_donations_on_subscription_and_child", unique: true, where: "((child_id IS NOT NULL) AND (stripe_subscription_id IS NOT NULL))"
   end
 
   create_table "donors", force: :cascade do |t|

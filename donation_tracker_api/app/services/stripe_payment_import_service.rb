@@ -7,22 +7,21 @@
 # - Payment status determination (succeeded, failed, refunded, canceled, needs_attention)
 # - Metadata-first child/project mapping (webhooks) with parsing fallback (CSV)
 # - Multi-child sponsorship detection via regex parsing
-# - Duplicate subscription detection (same child, different subscription_id)
-# - Idempotent imports via subscription_id + child_id or charge_id + project_id
+# - Same-invoice duplicate detection (same child appears twice in same invoice)
 # - Transaction safety for multi-donation sponsorships
 #
 # Metadata extraction priority:
 # 1. metadata.child_id / metadata.project_id (webhooks, future Stripe UI)
 # 2. Fallback to nickname/description parsing (current CSV exports)
 #
-# Idempotency strategy:
-# 1. Sponsorships: subscription_id + child_id (allows multi-child subscriptions)
-# 2. Projects: charge_id + project_id (one-time donations)
+# CSV Import Strategy:
+# - Use CLEAR_BEFORE_IMPORT=true flag to clear data before re-importing
+# - Same-invoice duplicates are imported and flagged as needs_attention
+# - CSV imports are meant to be run once for historical data, then use webhooks
 #
 # Status determination:
 # - Maps Stripe payment status → donation status enum
-# - Flags duplicate subscriptions as needs_attention
-# - Validates data and sets needs_attention for issues
+# - Flags same-invoice duplicates as needs_attention
 #
 # Uses instance method pattern for complex multi-step operations.
 #
@@ -62,12 +61,7 @@ class StripePaymentImportService
   def import
     @payment_status = determine_payment_status
 
-    # Check idempotency before importing
-    existing = find_existing_donation
-    return skip_result("Already imported (ID: #{existing.id})") if existing
-
     perform_import_transaction
-    return skip_result("Already imported") if @imported_donations.empty?
 
     success_result
   rescue StandardError => error
@@ -91,49 +85,6 @@ class StripePaymentImportService
     else
       "needs_attention"
     end
-  end
-
-  def find_existing_donation
-    subscription_id = @csv_row["Cust Subscription Data ID"]
-
-    # Strategy 1: Check by subscription_id + child_id (sponsorships)
-    if subscription_id.present?
-      child_or_children = get_child
-
-      if child_or_children.is_a?(Child)
-        existing = Donation.find_by(
-          stripe_subscription_id: subscription_id,
-          child_id: child_or_children.id
-        )
-        return existing if existing
-      elsif child_or_children.is_a?(Array)
-        # Multi-child: Check if ANY child already has this subscription
-        child_or_children.each do |child_name|
-          child = Child.find_by(name: child_name)
-          next unless child
-
-          existing = Donation.find_by(
-            stripe_subscription_id: subscription_id,
-            child_id: child.id
-          )
-          return existing if existing
-        end
-      end
-    end
-
-    # Strategy 2: Fall back to charge_id + project_id (project donations, one-time payments)
-    charge_id = @csv_row["Transaction ID"]
-    if charge_id.present?
-      project = get_project
-      existing = Donation.find_by(
-        stripe_charge_id: charge_id,
-        project_id: project&.id,
-        sponsorship_id: nil # Ensure we're looking at project donations only
-      )
-      return existing if existing
-    end
-
-    nil
   end
 
   def create_stripe_invoice
@@ -178,28 +129,13 @@ class StripePaymentImportService
   end
 
   def create_single_child_donation(donor, child)
-    return if sponsorship_donation_exists?(child.id)
-
     subscription_id = @csv_row["Cust Subscription Data ID"]
 
-    # Check for duplicate subscription (same child, different subscription ID)
-    duplicate_detected = false
-    needs_attention_reason = nil
+    # Check for same-invoice duplicate (same child appears twice in same invoice)
+    invoice_duplicate = donation_exists_for_invoice_and_child?(child.id)
 
-    if subscription_id.present?
-      existing_subscriptions = Donation.where(child_id: child.id)
-                                       .where.not(stripe_subscription_id: nil)
-                                       .where.not(stripe_subscription_id: subscription_id)
-                                       .pluck(:stripe_subscription_id)
-
-      if existing_subscriptions.any?
-        duplicate_detected = true
-        needs_attention_reason = "Duplicate subscription detected. Child #{child.name} already has subscription(s): #{existing_subscriptions.join(', ')}"
-      end
-    end
-
-    # Determine final status
-    final_status = duplicate_detected ? "needs_attention" : @payment_status
+    needs_attention_reason = "Duplicate child in same invoice" if invoice_duplicate
+    final_status = invoice_duplicate ? "needs_attention" : @payment_status
 
     donation = Donation.create!(
       donor: donor,
@@ -212,7 +148,7 @@ class StripePaymentImportService
       stripe_customer_id: @csv_row["Cust ID"],
       stripe_subscription_id: subscription_id,
       stripe_invoice_id: @csv_row["Transaction ID"],
-      duplicate_subscription_detected: duplicate_detected,
+      duplicate_subscription_detected: false,
       needs_attention_reason: needs_attention_reason
     )
 
@@ -225,26 +161,11 @@ class StripePaymentImportService
     child_names.each do |child_name|
       child = Child.find_or_create_by!(name: child_name)
 
-      next if sponsorship_donation_exists?(child.id)
+      # Check for same-invoice duplicate (same child appears twice in same invoice)
+      invoice_duplicate = donation_exists_for_invoice_and_child?(child.id)
 
-      # Check for duplicate subscription (same child, different subscription ID)
-      duplicate_detected = false
-      needs_attention_reason = nil
-
-      if subscription_id.present?
-        existing_subscriptions = Donation.where(child_id: child.id)
-                                         .where.not(stripe_subscription_id: nil)
-                                         .where.not(stripe_subscription_id: subscription_id)
-                                         .pluck(:stripe_subscription_id)
-
-        if existing_subscriptions.any?
-          duplicate_detected = true
-          needs_attention_reason = "Duplicate subscription detected. Child #{child.name} already has subscription(s): #{existing_subscriptions.join(', ')}"
-        end
-      end
-
-      # Determine final status
-      final_status = duplicate_detected ? "needs_attention" : @payment_status
+      needs_attention_reason = "Duplicate child in same invoice" if invoice_duplicate
+      final_status = invoice_duplicate ? "needs_attention" : @payment_status
 
       donation = Donation.create!(
         donor: donor,
@@ -257,7 +178,7 @@ class StripePaymentImportService
         stripe_customer_id: @csv_row["Cust ID"],
         stripe_subscription_id: subscription_id,
         stripe_invoice_id: @csv_row["Transaction ID"],
-        duplicate_subscription_detected: duplicate_detected,
+        duplicate_subscription_detected: false,
         needs_attention_reason: needs_attention_reason
       )
 
@@ -299,7 +220,7 @@ class StripePaymentImportService
     @imported_donations << donation
   end
 
-  def sponsorship_donation_exists?(child_id)
+  def donation_exists_for_invoice_and_child?(child_id)
     Donation
       .joins(:sponsorship)
       .where(stripe_invoice_id: @csv_row["Transaction ID"])

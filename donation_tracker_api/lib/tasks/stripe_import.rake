@@ -10,6 +10,16 @@ namespace :stripe do
       exit 1
     end
 
+    # Clear existing import data if flag is set
+    if ENV["CLEAR_BEFORE_IMPORT"] == "true"
+      puts "🗑️  Clearing existing import data..."
+      Donation.destroy_all
+      Sponsorship.destroy_all
+      StripeInvoice.destroy_all
+      puts "✅ Ready for fresh import"
+      puts ""
+    end
+
     puts "🚀 Starting Stripe CSV import from: #{file_path}"
     puts "=" * 80
 
@@ -24,8 +34,8 @@ namespace :stripe do
     puts "  Imported Total:     #{total_imported} donations"
     puts "  - Succeeded:        #{result[:succeeded_count]} donations"
     puts "  - Failed:           #{result[:failed_count]} donations"
-    puts "  - Needs Attention:  #{result[:needs_attention_count]} donations (duplicate subscriptions, refunded, canceled)"
-    puts "  Skipped:            #{result[:skipped_count]} (already imported)"
+    puts "  - Needs Attention:  #{result[:needs_attention_count]} donations (duplicate in invoice, refunded, canceled)"
+    puts "  Skipped:            #{result[:skipped_count]}"
     puts "  Errors:             #{result[:errors].size}"
 
     if result[:errors].size > 0

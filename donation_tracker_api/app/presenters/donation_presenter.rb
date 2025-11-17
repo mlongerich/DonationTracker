@@ -25,6 +25,8 @@ class DonationPresenter < BasePresenter
       project_title: object.project&.title || "General Donation",
       payment_method: object.payment_method,
       status: object.status,
+      duplicate_subscription_detected: object.duplicate_subscription_detected,
+      needs_attention_reason: object.needs_attention_reason,
       description: object.description,
       created_at: object.created_at,
       updated_at: object.updated_at

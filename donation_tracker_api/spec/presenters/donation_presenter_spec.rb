@@ -52,5 +52,25 @@ RSpec.describe DonationPresenter do
 
       expect(json[:project_title]).to eq("General Donation")
     end
+
+    it "includes duplicate_subscription_detected field" do
+      donor = create(:donor)
+      donation = create(:donation, :needs_attention, donor: donor)
+      presenter = described_class.new(donation)
+
+      json = presenter.as_json
+
+      expect(json[:duplicate_subscription_detected]).to be true
+    end
+
+    it "includes needs_attention_reason field" do
+      donor = create(:donor)
+      donation = create(:donation, :needs_attention, donor: donor, needs_attention_reason: "Missing child_id")
+      presenter = described_class.new(donation)
+
+      json = presenter.as_json
+
+      expect(json[:needs_attention_reason]).to eq("Missing child_id")
+    end
   end
 end

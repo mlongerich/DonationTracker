@@ -224,11 +224,10 @@ RSpec.describe Donation, type: :model do
         donation
       end
 
-      it "prevents duplicate subscription_id + child_id" do
+      it "allows duplicate subscription_id + child_id (multiple sponsorships)" do
         duplicate = build(:donation, stripe_subscription_id: 'sub_123')
         duplicate.write_attribute(:child_id, child.id)
-        expect(duplicate).not_to be_valid
-        expect(duplicate.errors[:stripe_subscription_id]).to be_present
+        expect(duplicate).to be_valid
       end
 
       it "allows same subscription_id with different child" do

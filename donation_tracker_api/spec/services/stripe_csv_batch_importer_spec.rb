@@ -33,35 +33,6 @@ RSpec.describe StripeCsvBatchImporter do
       end
     end
 
-    context "with already-imported transaction" do
-      before do
-        csv_content = <<~CSV
-          Amount,Billing Details Name,Cust Email,Created Formatted,Description,Transaction ID,Cust ID,Cust Subscription Data ID,Status,Cust Subscription Data Plan Nickname
-          100,John Doe,john@example.com,2020-06-15 00:56:17 +0000,Invoice ABC123,txn_002,cus_002,sub_002,succeeded,$100 - General Monthly Donation
-        CSV
-        File.write(csv_file_path, csv_content)
-
-        # Import once to create the record
-        StripePaymentImportService.new({
-          "Amount" => "100",
-          "Billing Details Name" => "John Doe",
-          "Cust Email" => "john@example.com",
-          "Created Formatted" => "2020-06-15 00:56:17 +0000",
-          "Description" => "Invoice ABC123",
-          "Transaction ID" => "txn_002",
-          "Cust ID" => "cus_002",
-          "Cust Subscription Data ID" => "sub_002",
-          "Status" => "succeeded",
-          "Cust Subscription Data Plan Nickname" => "$100 - General Monthly Donation"
-        }).import
-      end
-
-      it "tracks skipped count" do
-        result = importer.import
-
-        expect(result[:skipped_count]).to eq(1)
-      end
-    end
 
     context "with failed transaction" do
       before do

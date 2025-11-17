@@ -17,7 +17,6 @@
 # - Duplicate subscription detection for child sponsorships
 # - Ransack filtering on amount, date, donor_id, project_id, status
 # - Validates sponsorship projects must have sponsorship_id
-# - Validates subscription_id + child_id uniqueness for sponsorships
 #
 # @example Create a successful donation
 #   Donation.create!(amount: 10000, date: Date.today, donor: donor, project: project, status: :succeeded)
@@ -70,10 +69,6 @@ class Donation < ApplicationRecord
   validates :date, presence: true
   validates :payment_method, presence: true, if: :new_record?
   validates :status, presence: true, inclusion: { in: statuses.keys }
-  validates :stripe_subscription_id,
-            uniqueness: { scope: :child_id },
-            allow_nil: true,
-            if: :sponsorship?
   validate :date_not_in_future
   validate :sponsorship_project_must_have_sponsorship_id
 
