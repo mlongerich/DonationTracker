@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_11_17_035421) do
+ActiveRecord::Schema[8.0].define(version: 2025_11_17_153808) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -65,22 +65,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_17_035421) do
     t.index ["discarded_at"], name: "index_donors_on_discarded_at"
     t.index ["email"], name: "index_donors_on_email", unique: true
     t.index ["merged_into_id"], name: "index_donors_on_merged_into_id"
-  end
-
-  create_table "failed_stripe_payments", force: :cascade do |t|
-    t.string "stripe_transaction_id", null: false
-    t.string "donor_name"
-    t.string "donor_email"
-    t.integer "amount_cents", default: 0, null: false
-    t.date "payment_date", null: false
-    t.string "status", null: false
-    t.text "description"
-    t.jsonb "raw_data", default: {}
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["payment_date"], name: "index_failed_stripe_payments_on_payment_date"
-    t.index ["status"], name: "index_failed_stripe_payments_on_status"
-    t.index ["stripe_transaction_id"], name: "index_failed_stripe_payments_on_stripe_transaction_id", unique: true
   end
 
   create_table "projects", force: :cascade do |t|
