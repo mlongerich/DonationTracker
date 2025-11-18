@@ -20,7 +20,9 @@ Cypress.Commands.add('createDonor', (name: string, email: string) => {
   cy.get('input[type="text"]').first().type(name);
   cy.get('input[type="email"]').type(email);
   cy.contains('button', /submit/i).click();
-  cy.contains(/donor (created|updated) successfully/i, {
+
+  // Wait for Snackbar to appear (it's in a Portal, so need to search entire document)
+  cy.get('body').contains(/donor (created|updated) successfully/i, {
     timeout: 10000,
   }).should('be.visible');
 });

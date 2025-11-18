@@ -1,22 +1,18 @@
 import { useState, useEffect, FormEvent } from 'react';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
-import apiClient from '../api/client';
 import { Donor, DonorFormData } from '../types';
 
 interface DonorFormProps {
   donor?: Donor;
-  onSubmit?: (data: DonorFormData) => void;
+  onSubmit: (data: DonorFormData) => void;
   onCancel?: () => void;
 }
 
 function DonorForm({ donor, onSubmit, onCancel }: DonorFormProps) {
   const [name, setName] = useState(donor?.name || '');
   const [email, setEmail] = useState(donor?.email || '');
-  const [success, setSuccess] = useState<'created' | 'updated' | false>(false);
-  const [error, setError] = useState('');
 
   // Update form when donor prop changes
   useEffect(() => {
@@ -29,46 +25,14 @@ function DonorForm({ donor, onSubmit, onCancel }: DonorFormProps) {
     }
   }, [donor]);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    setSuccess(false);
-    setError('');
-
-    try {
-      const response = donor
-        ? await apiClient.patch(`/api/donors/${donor.id}`, {
-            donor: {
-              name,
-              email,
-            },
-          })
-        : await apiClient.post('/api/donors', {
-            donor: {
-              name,
-              email,
-            },
-          });
-
-      setSuccess(response.status === 201 ? 'created' : 'updated');
-      if (!donor) {
-        setName('');
-        setEmail('');
-      }
-      onSubmit?.({ name, email });
-    } catch (err: any) {
-      setError(
-        err.response?.data?.error || err.message || 'Failed to create donor'
-      );
-    }
+    onSubmit({ name, email });
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <Stack spacing={2}>
-        {success && (
-          <Alert severity="success">Donor {success} successfully!</Alert>
-        )}
-        {error && <Alert severity="error">{error}</Alert>}
         <TextField
           label="Name"
           value={name}

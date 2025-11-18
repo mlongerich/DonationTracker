@@ -1,17 +1,22 @@
 ## [TICKET-021] Quick Entity Creation (Donor/Project/Child) from Donation Page
 
-**Status:** 📋 Planned
+**Status:** 🔵 In Progress (Phase 0 ✅ Complete, ready for Phase 1)
 **Priority:** 🟡 Medium
-**Effort:** L (Large - 7-10 hours)
+**Effort:** XL (Extra Large - 8-11 hours including Phase 0)
 **Started:** 2025-10-15
-**Updated:** 2025-11-12 (reviewed and updated for current codebase patterns)
+**Updated:** 2025-11-18 (Phase 0 complete - DonorForm refactored to standard pattern)
 **Dependencies:** TICKET-017 (Autocomplete) ✅, TICKET-052 (ProjectOrChildAutocomplete) ✅, TICKET-054 (SponsorshipModal pattern) ✅
+**Phase 0 Note:** DonorForm currently makes API calls internally (lines 38-50) - will be refactored to follow ProjectForm/ChildForm pattern as first step
 
 ### User Story
 As a user, I want to create new donors, projects, or children while recording a donation so that I don't have to navigate away from the donation page when I need to create related entities on the fly.
 
 ### Problem Statement
-**Current Workflow:**
+
+**⚠️ PREREQUISITE (Phase 0 - 2025-11-18):**
+Before implementing quick entity creation, DonorForm must be refactored. It currently violates the established form pattern by making API calls internally (lines 38-50), while ProjectForm and ChildForm correctly delegate to parent components. QuickDonorCreateDialog needs DonorForm to follow the standard pattern where the dialog handles API calls. Phase 0 addresses this prerequisite.
+
+**User Workflow Problem:**
 1. User is recording a donation
 2. Realizes donor/project/child doesn't exist
 3. Must navigate to Donors/Projects/Children page
@@ -28,6 +33,39 @@ As a user, I want to create new donors, projects, or children while recording a 
 6. Continue with donation submission
 
 ### Acceptance Criteria
+
+#### Phase 0: DonorForm Refactor (✅ COMPLETE)
+- [x] Remove API calls from DonorForm (lines 38-50 in src/components/DonorForm.tsx)
+- [x] Change `onSubmit` prop to required (was optional callback)
+- [x] Update DonorForm to match ProjectForm/ChildForm pattern (only call onSubmit with data)
+- [x] Remove internal success/error state from DonorForm
+- [x] Update DonorsPage to handle API calls for create/update
+- [x] Add success Snackbar to DonorsPage (was missing - regression caught)
+- [x] Add formKey pattern to reset form after create (was missing - regression caught)
+- [x] Update all DonorForm tests to reflect new pattern
+- [x] Update DonorsPage tests for API call handling
+- [x] All tests pass (Jest + Cypress - 58/58 passing)
+- [x] Commit: `frontend: refactor DonorForm to follow standard form pattern (TICKET-021 Phase 0)`
+
+**Current Issue:**
+```tsx
+// ❌ DonorForm.tsx lines 38-50 (WRONG - makes API calls internally)
+const handleSubmit = async (e: FormEvent) => {
+  const response = donor
+    ? await apiClient.patch(`/api/donors/${donor.id}`, { donor: { name, email } })
+    : await apiClient.post('/api/donors', { donor: { name, email } });
+  onSubmit?.({ name, email }); // Optional callback
+};
+```
+
+**Target Pattern:**
+```tsx
+// ✅ ProjectForm.tsx line 28 (CORRECT - delegates to parent)
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  onSubmit({ title, description, project_type: projectType });
+};
+```
 
 #### Donor Quick Creation
 - [ ] Add icon button (AddIcon) next to Donor autocomplete
@@ -319,6 +357,23 @@ Payment:      [Check             ▼  ]
 
 ### Implementation Strategy
 
+**Phase 0: DonorForm Refactor (BLOCKER)** (1 hour)
+1. Write failing test for new DonorForm pattern (TDD)
+2. Refactor DonorForm.tsx:
+   - Remove API calls (lines 38-50)
+   - Remove success/error state (lines 18-19)
+   - Remove Alert components from render
+   - Change `onSubmit` to required prop returning void
+   - Call `onSubmit(data)` instead of making API calls
+3. Update DonorsPage.tsx to handle API calls:
+   - Create/update donors via API
+   - Handle success/error states
+   - Show Snackbar for errors
+4. Update DonorForm.test.tsx for new pattern
+5. Update DonorsPage.test.tsx for API handling
+6. Run all tests (Jest + Cypress)
+7. Commit: `frontend: refactor DonorForm to follow standard form pattern (TICKET-021 prep)`
+
 **Phase 1: Donor Quick Creation** (3-4 hours)
 1. Write tests for QuickDonorCreateDialog (TDD)
 2. Create `QuickDonorCreateDialog.tsx` component (~150 lines)
@@ -355,10 +410,18 @@ Payment:      [Check             ▼  ]
 - `src/components/QuickChildCreateDialog.test.tsx` (NEW ~50 lines)
 
 ### Files to Modify
+
+**Phase 0 (DonorForm Refactor):**
+- `src/components/DonorForm.tsx` (refactor -50 lines, simplify to match ProjectForm pattern)
+- `src/pages/DonorsPage.tsx` (+30 lines for API handling)
+- `src/components/DonorForm.test.tsx` (update tests for new pattern)
+- `src/pages/DonorsPage.test.tsx` (update tests for API handling)
+
+**Phase 1-3 (Quick Creation):**
 - `src/components/DonationForm.tsx` (+140 lines for all 3 dialogs)
 - `src/components/DonationForm.test.tsx` (+70 lines for integration tests)
 - `cypress/e2e/donation-entry.cy.ts` (+60 lines for E2E tests)
-- **No changes needed** to DonorForm, ProjectForm, ChildForm (already follow correct pattern)
+- **No changes needed** to ProjectForm, ChildForm (already follow correct pattern ✅)
 
 ### Testing Strategy
 
@@ -390,10 +453,11 @@ Payment:      [Check             ▼  ]
 
 ### Estimated Time
 
-- **Phase 1 (Donor):** 3-4 hours
-- **Phase 2 (Project):** 2-3 hours
-- **Phase 3 (Child):** 2-3 hours
-- **Total:** 7-10 hours
+- **Phase 0 (DonorForm Refactor):** 1 hour
+- **Phase 1 (Donor Quick Creation):** 3-4 hours
+- **Phase 2 (Project Quick Creation):** 2-3 hours
+- **Phase 3 (Child Quick Creation):** 2-3 hours
+- **Total:** 8-11 hours
 
 ### Related Tickets
 
@@ -401,31 +465,46 @@ Payment:      [Check             ▼  ]
 - TICKET-052: ProjectOrChildAutocomplete ✅ (grouped autocomplete)
 - TICKET-054: Create Sponsorship from Sponsorships Page ✅ (SponsorshipModal pattern reference)
 
-### Key Corrections from Original Ticket
+### Key Corrections from Original Ticket (2025-11-18 Update)
 
-1. ❌ **Removed:** `embedded` prop pattern (not needed, forms already correct)
-2. ✅ **Added:** Use SponsorshipModal pattern for consistency
-3. ✅ **Added:** Proper error handling with Snackbar (422 validation + network errors)
-4. ✅ **Updated:** Reference ProjectOrChildAutocomplete (current reality)
-5. ✅ **Added:** API client integration details
-6. ✅ **Updated:** Separate dialog components per entity (not generic)
-7. ✅ **Clarified:** No changes needed to existing form components
+1. 🚫 **BLOCKER IDENTIFIED:** DonorForm violates form pattern - makes API calls internally (must fix first)
+2. ✅ **Added Phase 0:** DonorForm refactor to match ProjectForm/ChildForm pattern
+3. ✅ **Updated Effort:** L → XL (7-10 hours → 8-11 hours with Phase 0)
+4. ✅ **Updated Status:** Planned → Blocked (until Phase 0 complete)
+5. ❌ **Removed:** `embedded` prop pattern (not needed, forms already correct)
+6. ✅ **Added:** Use SponsorshipModal pattern for consistency
+7. ✅ **Added:** Proper error handling with Snackbar (422 validation + network errors)
+8. ✅ **Updated:** Reference ProjectOrChildAutocomplete (current reality)
+9. ✅ **Added:** API client integration details
+10. ✅ **Updated:** Separate dialog components per entity (not generic)
 
 ### Notes
 
 - **Pattern Consistency**: Follows SponsorshipModal pattern for entity creation dialogs
-- **No Form Changes**: DonorForm, ProjectForm, ChildForm already follow correct pattern
+- **DonorForm Blocker**: Must refactor DonorForm FIRST (Phase 0) before implementing quick creation dialogs
+- **Form Pattern**: ProjectForm and ChildForm already follow correct pattern ✅
 - **State Management**: Use local component state (no global state needed)
-- **Form Reuse**: Existing forms work as-is in dialog context
+- **Form Reuse**: After Phase 0, all forms work as-is in dialog context
 - **Mobile Friendly**: Material-UI Dialog is responsive
 - **Type Safety**: Separate components per entity ensure proper TypeScript types
 - **Error Handling**: All modals handle 422 validation errors AND network errors properly
 
 ### Success Criteria
 
+**Phase 0 (✅ Complete):**
+- [x] DonorForm refactored to match ProjectForm/ChildForm pattern
+- [x] DonorForm no longer makes API calls internally
+- [x] DonorsPage handles all API calls (create/update)
+- [x] All DonorForm and DonorsPage tests passing (Jest + Cypress 58/58)
+
+**Phase 1-3 (Quick Creation):**
 - [ ] User can create donor/project/child without leaving donation page
 - [ ] Donation form state preserved during entity creation
 - [ ] Created entities immediately auto-selected in autocompletes
 - [ ] All tests passing (Jest + Cypress)
 - [ ] Error handling follows SponsorshipModal pattern (Snackbar)
-- [ ] UX matches Children page "Add Sponsor" pattern (PersonAddIcon)
+- [ ] UX matches Children page "Add Sponsor" pattern (AddIcon)
+
+**Overall:**
+- [ ] Documentation updated (CLAUDE.md with Quick Create pattern)
+- [ ] All 4 phases committed separately with clear commit messages

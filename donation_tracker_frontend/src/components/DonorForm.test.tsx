@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider } from '@mui/material/styles';
 import { theme } from '../theme';
@@ -12,7 +12,7 @@ describe('DonorForm', () => {
   it('renders name input field', () => {
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm />
+        <DonorForm onSubmit={jest.fn()} />
       </ThemeProvider>
     );
 
@@ -22,7 +22,7 @@ describe('DonorForm', () => {
   it('renders email input field', () => {
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm />
+        <DonorForm onSubmit={jest.fn()} />
       </ThemeProvider>
     );
 
@@ -32,22 +32,14 @@ describe('DonorForm', () => {
   it('renders submit button', () => {
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm />
+        <DonorForm onSubmit={jest.fn()} />
       </ThemeProvider>
     );
 
     expect(screen.getByRole('button', { name: /submit/i })).toBeInTheDocument();
   });
 
-  it('calls onSubmit with name and email when form is submitted', async () => {
-    mockedApiClient.post.mockResolvedValue({
-      data: { id: 1 },
-      status: 201,
-      statusText: 'Created',
-      headers: {},
-      config: {} as any,
-    });
-
+  it('calls onSubmit with name and email when form is submitted (NEW PATTERN)', async () => {
     const handleSubmit = jest.fn();
     const user = userEvent.setup();
 
@@ -61,28 +53,23 @@ describe('DonorForm', () => {
     await user.type(screen.getByLabelText(/email/i), 'john@example.com');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
-    await waitFor(() => {
-      expect(handleSubmit).toHaveBeenCalledWith({
-        name: 'John Doe',
-        email: 'john@example.com',
-      });
+    // NEW PATTERN: onSubmit should be called immediately without API calls
+    expect(handleSubmit).toHaveBeenCalledWith({
+      name: 'John Doe',
+      email: 'john@example.com',
     });
+
+    // NEW PATTERN: Form should NOT make API calls
+    expect(mockedApiClient.post).not.toHaveBeenCalled();
   });
 
-  it('posts donor data to API when submitted', async () => {
-    mockedApiClient.post.mockResolvedValue({
-      data: { id: 1, name: 'Jane Smith', email: 'jane@example.com' },
-      status: 201,
-      statusText: 'Created',
-      headers: {},
-      config: {} as any,
-    });
-
+  it('does not make API calls (NEW PATTERN - parent component responsibility)', async () => {
+    const handleSubmit = jest.fn();
     const user = userEvent.setup();
 
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm />
+        <DonorForm onSubmit={handleSubmit} />
       </ThemeProvider>
     );
 
@@ -90,100 +77,20 @@ describe('DonorForm', () => {
     await user.type(screen.getByLabelText(/email/i), 'jane@example.com');
     await user.click(screen.getByRole('button', { name: /submit/i }));
 
-    await waitFor(() => {
-      expect(mockedApiClient.post).toHaveBeenCalledWith('/api/donors', {
-        donor: {
-          name: 'Jane Smith',
-          email: 'jane@example.com',
-        },
-      });
-    });
+    // NEW PATTERN: Form should NOT make API calls (DonorsPage handles this)
+    expect(mockedApiClient.post).not.toHaveBeenCalled();
+    expect(mockedApiClient.patch).not.toHaveBeenCalled();
   });
 
-  it('shows success message after donor is created', async () => {
-    mockedApiClient.post.mockResolvedValue({
-      data: { id: 1, name: 'Jane Smith', email: 'jane@example.com' },
-      status: 201,
-      statusText: 'Created',
-      headers: {},
-      config: {} as any,
-    });
-
-    const user = userEvent.setup();
-
+  it('does not show success or error messages (NEW PATTERN - parent component responsibility)', () => {
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm />
+        <DonorForm onSubmit={jest.fn()} />
       </ThemeProvider>
     );
 
-    await user.type(screen.getByLabelText(/name/i), 'Jane Smith');
-    await user.type(screen.getByLabelText(/email/i), 'jane@example.com');
-    await user.click(screen.getByRole('button', { name: /submit/i }));
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(/donor created successfully/i)
-      ).toBeInTheDocument();
-    });
-  });
-
-  it('clears form fields after successful submission', async () => {
-    mockedApiClient.post.mockResolvedValue({
-      data: { id: 1, name: 'Test', email: 'test@example.com' },
-      status: 201,
-      statusText: 'Created',
-      headers: {},
-      config: {} as any,
-    });
-
-    const user = userEvent.setup();
-
-    render(
-      <ThemeProvider theme={theme}>
-        <DonorForm />
-      </ThemeProvider>
-    );
-
-    const nameInput = screen.getByLabelText(/name/i);
-    const emailInput = screen.getByLabelText(/email/i);
-
-    await user.type(nameInput, 'Test User');
-    await user.type(emailInput, 'test@example.com');
-    await user.click(screen.getByRole('button', { name: /submit/i }));
-
-    await waitFor(() => {
-      expect(nameInput).toHaveValue('');
-    });
-    expect(emailInput).toHaveValue('');
-  });
-
-  it('shows "updated" message when API returns 200 status', async () => {
-    mockedApiClient.post.mockResolvedValue({
-      data: { id: 1, name: 'Updated', email: 'test@example.com' },
-      status: 200,
-      statusText: 'OK',
-      headers: {},
-      config: {} as any,
-    });
-
-    const user = userEvent.setup();
-
-    render(
-      <ThemeProvider theme={theme}>
-        <DonorForm />
-      </ThemeProvider>
-    );
-
-    await user.type(screen.getByLabelText(/name/i), 'Updated Name');
-    await user.type(screen.getByLabelText(/email/i), 'test@example.com');
-    await user.click(screen.getByRole('button', { name: /submit/i }));
-
-    await waitFor(() => {
-      expect(
-        screen.getByText(/donor updated successfully/i)
-      ).toBeInTheDocument();
-    });
+    // NEW PATTERN: No Alert components in DonorForm
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('pre-fills form when donor prop is provided', () => {
@@ -196,7 +103,7 @@ describe('DonorForm', () => {
 
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm donor={donor} />
+        <DonorForm donor={donor} onSubmit={jest.fn()} />
       </ThemeProvider>
     );
 
@@ -214,7 +121,7 @@ describe('DonorForm', () => {
 
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm donor={donor} />
+        <DonorForm donor={donor} onSubmit={jest.fn()} />
       </ThemeProvider>
     );
 
@@ -224,26 +131,19 @@ describe('DonorForm', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('sends PATCH request when updating existing donor', async () => {
+  it('calls onSubmit with updated data when editing donor (NEW PATTERN)', async () => {
     const donor = {
       id: 1,
       name: 'Original Name',
       email: 'original@example.com',
       displayable_email: 'original@example.com',
     };
-    mockedApiClient.patch.mockResolvedValue({
-      data: { id: 1, name: 'Updated Name', email: 'original@example.com' },
-      status: 200,
-      statusText: 'OK',
-      headers: {},
-      config: {} as any,
-    });
-
+    const handleSubmit = jest.fn();
     const user = userEvent.setup();
 
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm donor={donor} />
+        <DonorForm donor={donor} onSubmit={handleSubmit} />
       </ThemeProvider>
     );
 
@@ -252,14 +152,12 @@ describe('DonorForm', () => {
     await user.type(nameInput, 'Updated Name');
     await user.click(screen.getByRole('button', { name: /update/i }));
 
-    await waitFor(() => {
-      expect(mockedApiClient.patch).toHaveBeenCalledWith('/api/donors/1', {
-        donor: {
-          name: 'Updated Name',
-          email: 'original@example.com',
-        },
-      });
+    // NEW PATTERN: onSubmit called with data, no API calls
+    expect(handleSubmit).toHaveBeenCalledWith({
+      name: 'Updated Name',
+      email: 'original@example.com',
     });
+    expect(mockedApiClient.patch).not.toHaveBeenCalled();
   });
 
   it('shows Cancel button when editing donor', () => {
@@ -272,7 +170,7 @@ describe('DonorForm', () => {
 
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm donor={donor} />
+        <DonorForm donor={donor} onSubmit={jest.fn()} />
       </ThemeProvider>
     );
 
@@ -282,7 +180,7 @@ describe('DonorForm', () => {
   it('does not show Cancel button when adding new donor', () => {
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm />
+        <DonorForm onSubmit={jest.fn()} />
       </ThemeProvider>
     );
 
@@ -303,7 +201,7 @@ describe('DonorForm', () => {
 
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm donor={donor} onCancel={handleCancel} />
+        <DonorForm donor={donor} onSubmit={jest.fn()} onCancel={handleCancel} />
       </ThemeProvider>
     );
 
