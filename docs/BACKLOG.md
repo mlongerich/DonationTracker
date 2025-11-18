@@ -156,3 +156,104 @@ Cypress.Commands.add('createSponsorships', (count) => {
 **Decision:** Deferred for now. Jest tests provide sufficient coverage for pagination logic. Revisit if pagination bugs are found in production.
 
 ---
+
+### [Frontend Repository Pattern for API Calls]
+**Status:** 💡 **Identified in CODE_SMELL_ANALYSIS - Consider for future**
+**Added:** 2025-11-18
+**Priority:** 🟢 Low
+**Effort:** M
+
+**Description:**
+Centralize API endpoint definitions using Repository pattern instead of scattered `apiClient.get/post/put` calls throughout page components.
+
+**Current State:**
+```tsx
+// Scattered across pages (DonorsPage, ChildrenPage, etc.)
+const response = await apiClient.get('/api/donors', { params });
+await apiClient.post('/api/children', { child: data });
+```
+
+**Proposed Pattern:**
+```tsx
+// src/repositories/DonorRepository.ts
+export const DonorRepository = {
+  list: (params) => apiClient.get('/api/donors', { params }),
+  create: (data) => apiClient.post('/api/donors', { donor: data }),
+  update: (id, data) => apiClient.patch(`/api/donors/${id}`, { donor: data }),
+  archive: (id) => apiClient.delete(`/api/donors/${id}`),
+  restore: (id) => apiClient.post(`/api/donors/${id}/restore`),
+};
+
+// Usage in pages
+const response = await DonorRepository.list({ page, per_page });
+```
+
+**User Value:**
+- Centralized API endpoint definitions (easier to maintain)
+- Type safety for API calls
+- Easier to mock for testing
+- DRY principle (no duplicate endpoint strings)
+
+**Technical Approach:**
+- Create `src/repositories/` directory
+- Extract repository for each entity (Donor, Child, Donation, Project, Sponsorship)
+- Update pages to use repositories instead of direct apiClient calls
+- Update tests to mock repositories
+
+**Considerations:**
+- Current `api/client.ts` already has some helpers (createDonation, mergeDonors)
+- Small codebase - current pattern is manageable
+- Could formalize pattern incrementally (one repository at a time)
+- Not documented in CLAUDE.md yet
+
+**Dependencies:**
+- None (can be implemented independently)
+
+**Decision:** Defer to backlog. Current pattern works well for small codebase. Revisit if:
+- API calls become harder to maintain (>5 endpoints per entity)
+- Type safety issues emerge
+- Team grows (need clearer API contract)
+
+---
+
+### [Error Handling Policy Documentation]
+**Status:** 💡 **Identified in CODE_SMELL_ANALYSIS - Document existing practice**
+**Added:** 2025-11-18
+**Priority:** 🟢 Low
+**Effort:** XS
+
+**Description:**
+Document the established error handling policy for frontend components in CLAUDE.md.
+
+**Current State (Implicit, not documented):**
+```tsx
+// Read operations - Silent error handling
+catch (error) {
+  // Error silently handled - user will see empty list
+}
+
+// Write operations - Show error messages
+catch (err: any) {
+  setError(err.response.data.errors?.join(', ') || 'Failed to archive donor');
+}
+```
+
+**User Value:**
+- Consistent error handling across components
+- Clear guidance for future development
+- Better user experience (know when to show errors vs silent handling)
+
+**Technical Approach:**
+- Add "Frontend Error Handling Policy" section to CLAUDE.md
+- Document existing patterns:
+  - **Read operations (GET):** Silent error handling, show empty state
+  - **Write operations (POST/PUT/PATCH):** Show Alert/Snackbar with error message
+  - **Critical operations (DELETE, MERGE):** Show detailed error messages with status codes
+- Reference existing implementations (DonorsPage, ChildrenPage, DonationsPage)
+
+**Dependencies:**
+- None (documentation only)
+
+**Decision:** Low priority. Current practice is consistent and working well. Document when doing other CLAUDE.md updates.
+
+---

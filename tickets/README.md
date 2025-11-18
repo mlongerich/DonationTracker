@@ -185,16 +185,18 @@ Current work items and user stories being actively developed.
 - [TICKET-040: Implement Context API for Donor/Donation State](TICKET-040-implement-context-api-donor-donation-state.md) - 📋 Planned (🟢 Low, L)
 - [TICKET-043: Refine Controller Concerns Implementation](TICKET-043-refine-controller-concerns-implementation.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-045: Refactor DonorImportService Complexity](TICKET-045-refactor-donor-import-service-complexity.md) - 📋 Planned (🟢 Low, M)
+- [TICKET-098: Evaluate Form Objects Pattern](TICKET-098-evaluate-form-objects-pattern.md) - 📋 Planned (🟢 Low, S) - *Research ticket for complex form validation*
+- [TICKET-120: Remove Cancel Button from DonorForm](TICKET-120-donorform-cancel-button-removal.md) - 📋 Planned (🟡 Medium, XS) - *Pattern consistency fix*
 
 ---
 
 ## Quick Stats
 
-- **Total Tickets:** 108 (added TICKET-119)
-- **Completed:** 57 (53%)
+- **Total Tickets:** 109 (added TICKET-120)
+- **Completed:** 57 (52%)
 - **In Progress:** 0
-- **Planned:** 48
-- **Estimated Hours Remaining:** ~191 hours (~5 weeks)
+- **Planned:** 49
+- **Estimated Hours Remaining:** ~191.5 hours (~5 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 - **Canceled/Superseded:** 2 (TICKET-041, TICKET-051)
@@ -216,7 +218,9 @@ Current work items and user stories being actively developed.
   - ❌ TICKET-051: Superseded by TICKET-119
 - **Testing & Quality Assurance:** 5 planned (~15h), 1 completed
   - ✅ TICKET-108: E2E Test Infrastructure (complete)
-- **Code Quality & Architecture:** 6 planned (~26h), 29 completed
+- **Code Quality & Architecture:** 8 planned (~26.5h), 29 completed
+  - New: TICKET-120 (DonorForm Cancel button removal - 0.5h)
+  - Existing: TICKET-098 (Form Objects research)
 - **In Progress:** 0
 - **Blocked:** 1 (TICKET-071)
 - **Deferred/Accepted Risk:** 1 (TICKET-049)
