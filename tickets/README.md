@@ -70,7 +70,11 @@ Current work items and user stories being actively developed.
 - [TICKET-053: Sponsorships Page Filters & Pagination UI](completed/TICKET-053-sponsorships-page-filters-pagination-ui.md) - ✅ Complete (2025-11-12)
 - [TICKET-077: Last Donation Date Tracking](completed/TICKET-077-last-donation-date-tracking.md) - ✅ Complete (2025-11-12)
 - [TICKET-096: Refactor DonationList Component Pattern](completed/TICKET-096-refactor-donation-list-component-pattern.md) - ✅ Complete (2025-11-13)
+- [TICKET-109: Donation Status Infrastructure](completed/TICKET-109-donation-status-infrastructure.md) - ✅ Complete (2025-11-17)
+- [TICKET-110: Import Service with Status & Metadata](completed/TICKET-110-import-service-status-metadata.md) - ✅ Complete (2025-11-17)
+- [TICKET-111: Pending Review Admin UI](completed/TICKET-111-pending-review-admin-ui.md) - ✅ Complete (2025-11-17)
 - [TICKET-112: Validation & Merge](completed/TICKET-112-validation-and-merge.md) - ✅ Complete (2025-11-17)
+- [TICKET-113: Cleanup Old Failed Payments System](completed/TICKET-113-cleanup-old-system.md) - ✅ Complete (2025-11-17)
 
 ### 🔵 In Progress Tickets
 
@@ -98,12 +102,12 @@ Current work items and user stories being actively developed.
 - [TICKET-110: Import Service with Status & Metadata](completed/TICKET-110-import-service-status-metadata.md) - ✅ Complete (2025-11-17) - *Phase 2: Rewrite import service*
 - [TICKET-111: Pending Review Admin UI](completed/TICKET-111-pending-review-admin-ui.md) - ✅ Complete (2025-11-17) - *Phase 3: Admin section for non-succeeded donations*
 - [TICKET-112: Validation & Merge](completed/TICKET-112-validation-and-merge.md) - ✅ Complete (2025-11-17) - *Phase 4: Validate and merge to master*
-- [TICKET-113: Cleanup Old System](TICKET-113-cleanup-old-system.md) - 📋 Planned (🟢 Low, S) - *Phase 5: Remove old code*
+- [TICKET-113: Cleanup Old System](completed/TICKET-113-cleanup-old-system.md) - ✅ Complete (2025-11-17) - *Phase 5: Remove old code*
 
 **Supersedes:**
-- TICKET-076: Failed Stripe Payments Tracking - ⏸️ **PAUSED** - Work preserved in `backup/ticket-076-complete` branch
+- TICKET-076: Failed Stripe Payments Tracking - ❌ **SUPERSEDED** - Work preserved in `backup/ticket-076-complete` branch
 
-**See:** [docs/STRIPE_IMPORT_PLAN.md](../docs/STRIPE_IMPORT_PLAN.md) for complete redesign rationale
+**See:** [docs/STRIPE_IMPORT_PLAN.md](../docs/STRIPE_IMPORT_PLAN.md) - ✅ COMPLETE (2025-11-17)
 
 ---
 
@@ -187,10 +191,10 @@ Current work items and user stories being actively developed.
 ## Quick Stats
 
 - **Total Tickets:** 108 (added TICKET-119)
-- **Completed:** 52 (48%)
+- **Completed:** 57 (53%)
 - **In Progress:** 0
-- **Planned:** 53
-- **Estimated Hours Remaining:** ~196 hours (~5 weeks)
+- **Planned:** 48
+- **Estimated Hours Remaining:** ~191 hours (~5 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 - **Canceled/Superseded:** 2 (TICKET-041, TICKET-051)
