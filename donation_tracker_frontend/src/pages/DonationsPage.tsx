@@ -1,14 +1,11 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { Typography, Box, Pagination } from '@mui/material';
-import apiClient from '../api/client';
 import DonationForm from '../components/DonationForm';
 import DonationList from '../components/DonationList';
 import DonationFilters from '../components/DonationFilters';
-import { Donation } from '../types';
-import { usePagination } from '../hooks';
+import { usePagination, useDonations } from '../hooks';
 
 const DonationsPage = () => {
-  const [donations, setDonations] = useState<Donation[]>([]);
   const [dateRange, setDateRange] = useState<{
     startDate: string | null;
     endDate: string | null;
@@ -21,50 +18,25 @@ const DonationsPage = () => {
     string | null
   >(null);
 
-  const { currentPage, paginationMeta, setPaginationMeta, handlePageChange } =
-    usePagination();
+  const { currentPage, handlePageChange } = usePagination();
 
-  const fetchDonations = useCallback(async () => {
-    try {
-      // Build query params directly from state to avoid race condition (TICKET-078)
-      const queryParams: Record<string, unknown> = {};
+  const { donations, paginationMeta, fetchDonations } = useDonations();
 
-      if (dateRange.startDate) {
-        queryParams['q[date_gteq]'] = dateRange.startDate;
-      }
-      if (dateRange.endDate) {
-        queryParams['q[date_lteq]'] = dateRange.endDate;
-      }
-      if (selectedDonorId) {
-        queryParams['q[donor_id_eq]'] = selectedDonorId;
-      }
-      if (selectedPaymentMethod) {
-        queryParams['q[payment_method_eq]'] = selectedPaymentMethod;
-      }
-
-      const params: Record<string, unknown> = {
-        page: currentPage,
-        per_page: 10,
-        ...queryParams,
-      };
-
-      const response = await apiClient.get('/api/donations', { params });
-      setDonations(response.data.donations);
-      setPaginationMeta(response.data.meta);
-    } catch (error) {
-      // Error silently handled - user will see empty list
-    }
+  useEffect(() => {
+    fetchDonations({
+      page: currentPage,
+      perPage: 10,
+      dateRange,
+      donorId: selectedDonorId,
+      paymentMethod: selectedPaymentMethod,
+    });
   }, [
     currentPage,
     dateRange,
     selectedDonorId,
     selectedPaymentMethod,
-    setPaginationMeta,
+    fetchDonations,
   ]);
-
-  useEffect(() => {
-    fetchDonations();
-  }, [fetchDonations]);
 
   const handleDateRangeChange = (
     startDate: string | null,
@@ -81,6 +53,16 @@ const DonationsPage = () => {
     setSelectedPaymentMethod(paymentMethod);
   };
 
+  const handleDonationSuccess = () => {
+    fetchDonations({
+      page: currentPage,
+      perPage: 10,
+      dateRange,
+      donorId: selectedDonorId,
+      paymentMethod: selectedPaymentMethod,
+    });
+  };
+
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
@@ -91,7 +73,7 @@ const DonationsPage = () => {
         <Typography variant="h6" component="h2" gutterBottom>
           Record Donation
         </Typography>
-        <DonationForm onSuccess={fetchDonations} />
+        <DonationForm onSuccess={handleDonationSuccess} />
       </Box>
 
       <Box sx={{ mb: 4 }}>

@@ -653,11 +653,51 @@ useEffect(() => {
 **When to Create:**
 - Logic duplicated in 2+ components, complex stateful logic, reduces 20+ lines
 
-**Implemented:** `useDebouncedValue`, `usePagination`, `useRansackFilters`, `useChildren`
+**Implemented Hooks:**
+- **Utility Hooks:**
+  - `useDebouncedValue` - Debounce input values (300ms default)
+  - `usePagination` - Pagination state management
+  - `useRansackFilters` - Ransack query building
+- **Entity Hooks (Data Fetching):**
+  - `useChildren` - Fetch children with sponsorships, search, pagination
+  - `useDonors` - Fetch donors with archive/restore, search, pagination
+  - `useDonations` - Fetch donations with filters (date, donor, payment method)
+  - `useSponsorships` - Fetch sponsorships with end action, search, pagination
+  - `useProjects` - Fetch projects with archive support, pagination
+
+**Pattern (Entity Hooks):**
+```typescript
+// Consistent return signature across all entity hooks
+const {
+  items,              // Array of entities
+  loading,            // Boolean loading state
+  error,              // Error string or null
+  paginationMeta,     // Pagination metadata
+  fetchItems,         // Fetch function with options
+  // ...entity-specific actions (archive, restore, end, etc.)
+} = useEntityHook();
+
+// Usage in page components
+useEffect(() => {
+  fetchItems({
+    page: currentPage,
+    perPage: 10,
+    search: debouncedQuery,
+    // ...entity-specific filters
+  });
+}, [currentPage, debouncedQuery, fetchItems]);
+```
+
+**Benefits:**
+- Consistent data fetching across all pages
+- Centralized error handling and loading states
+- Reusable across components
+- Easy to test in isolation
+- Reduces page component complexity
 
 **Location:** `src/hooks/` with barrel export
 
-**See:** docs/PATTERNS.md for full API and code examples (TICKET-032, TICKET-066)
+**See:** docs/PATTERNS.md for full API and code examples (TICKET-032, TICKET-066, TICKET-099)
 
 #### Grouped Autocomplete with Type Badges & Gender Icons
 

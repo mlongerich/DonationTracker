@@ -8,16 +8,16 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import ProjectForm from '../components/ProjectForm';
 import ProjectList from '../components/ProjectList';
-import apiClient, {
-  fetchProjects,
+import {
   createProject,
   updateProject,
   deleteProject,
 } from '../api/client';
+import apiClient from '../api/client';
 import { Project } from '../types';
+import { useProjects } from '../hooks';
 
 const ProjectsPage: React.FC = () => {
-  const [projects, setProjects] = useState<Project[]>([]);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formKey, setFormKey] = useState(0);
   const [success, setSuccess] = useState<
@@ -26,21 +26,11 @@ const ProjectsPage: React.FC = () => {
   const [showArchived, setShowArchived] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { projects, fetchProjects } = useProjects();
+
   useEffect(() => {
-    const loadProjects = async () => {
-      try {
-        const params: any = {};
-        if (showArchived) {
-          params.include_discarded = 'true';
-        }
-        const response = await apiClient.get('/api/projects', { params });
-        setProjects(response.data.projects);
-      } catch (error) {
-        // Error silently handled - user will see empty list
-      }
-    };
-    loadProjects();
-  }, [showArchived]);
+    fetchProjects({ includeDiscarded: showArchived });
+  }, [showArchived, fetchProjects]);
 
   const handleSubmit = async (data: {
     title: string;
@@ -56,15 +46,9 @@ const ProjectsPage: React.FC = () => {
         await createProject(data);
         setSuccess('created');
       }
-      const params: any = {};
-      if (showArchived) {
-        params.include_discarded = 'true';
-      }
-      const response = await apiClient.get('/api/projects', { params });
-      setProjects(response.data.projects);
-      setFormKey((prev) => prev + 1); // Reset form by changing key
+      fetchProjects({ includeDiscarded: showArchived });
+      setFormKey((prev) => prev + 1);
 
-      // Auto-dismiss notification after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       // Error silently handled
@@ -75,10 +59,8 @@ const ProjectsPage: React.FC = () => {
     try {
       await deleteProject(project.id);
       setSuccess('deleted');
-      const refreshed = await fetchProjects();
-      setProjects(refreshed.projects);
+      fetchProjects({ includeDiscarded: showArchived });
 
-      // Auto-dismiss notification after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
       // Error silently handled
@@ -91,12 +73,7 @@ const ProjectsPage: React.FC = () => {
       setSuccess('archived');
       setError(null);
 
-      const params: any = {};
-      if (showArchived) {
-        params.include_discarded = 'true';
-      }
-      const response = await apiClient.get('/api/projects', { params });
-      setProjects(response.data.projects);
+      fetchProjects({ includeDiscarded: showArchived });
 
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
@@ -116,12 +93,7 @@ const ProjectsPage: React.FC = () => {
       setSuccess('restored');
       setError(null);
 
-      const params: any = {};
-      if (showArchived) {
-        params.include_discarded = 'true';
-      }
-      const response = await apiClient.get('/api/projects', { params });
-      setProjects(response.data.projects);
+      fetchProjects({ includeDiscarded: showArchived });
 
       setTimeout(() => setSuccess(null), 3000);
     } catch (error) {

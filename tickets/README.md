@@ -75,6 +75,7 @@ Current work items and user stories being actively developed.
 - [TICKET-111: Pending Review Admin UI](completed/TICKET-111-pending-review-admin-ui.md) - ✅ Complete (2025-11-17)
 - [TICKET-112: Validation & Merge](completed/TICKET-112-validation-and-merge.md) - ✅ Complete (2025-11-17)
 - [TICKET-113: Cleanup Old Failed Payments System](completed/TICKET-113-cleanup-old-system.md) - ✅ Complete (2025-11-17)
+- [TICKET-099: Expand Custom Hooks Library](completed/TICKET-099-expand-custom-hooks-library.md) - ✅ Complete (2025-11-18)
 
 ### 🔵 In Progress Tickets
 
@@ -167,11 +168,16 @@ Current work items and user stories being actively developed.
 #### Testing & Quality Assurance
 
 **E2E Test Coverage:**
-- [TICKET-080: Sponsorship Management E2E Tests](TICKET-080-sponsorship-management-e2e-tests.md) - 📋 Planned (🔴 High, L) - *End/reactivate/delete actions + filters*
+- [TICKET-080: Sponsorship Management E2E Tests](TICKET-080-sponsorship-management-e2e-tests.md) - 📋 Planned (🔴 High, L) - *End/reactivate/delete actions + filters + duplicate detection*
 - [TICKET-081: Donor Archive/Restore Extended E2E Tests](TICKET-081-donor-archive-restore-extended-e2e-tests.md) - 📋 Planned (🟢 Low, S) - *Data preservation validation*
 - [TICKET-082: Smart Sponsorship Detection E2E Tests](TICKET-082-smart-sponsorship-detection-e2e-tests.md) - 📋 Planned (🟡 Medium, M) - *Auto-creation workflows*
 - [TICKET-083: Multi-Page Integration E2E Tests](TICKET-083-multi-page-integration-e2e-tests.md) - 📋 Planned (🟢 Low, S) - *State persistence + cross-page workflows*
 - [TICKET-084: Error Handling & Form Validation E2E Tests](TICKET-084-error-handling-validation-e2e-tests.md) - 📋 Planned (🟡 Medium, M) - *Validation + API errors*
+- [TICKET-121: Children Management E2E Tests](TICKET-121-children-management-e2e-tests.md) - 📋 Planned (🟡 Medium, S - 2-3h) - *Child CRUD, archive/restore, gender field, search/filtering*
+- [TICKET-122: Donations Extended E2E Tests](TICKET-122-donations-extended-e2e-tests.md) - 📋 Planned (🟡 Medium, M - 3-4h) - *Edit/delete, status filtering, payment method filtering, project/sponsorship linking*
+- [TICKET-123: Projects Extended E2E Tests](TICKET-123-projects-extended-e2e-tests.md) - 📋 Planned (🟢 Low, S - 1-2h) - *Archive/restore, type filtering, system project protection*
+- [TICKET-124: Cross-Feature Integration E2E Tests](TICKET-124-cross-feature-integration-e2e-tests.md) - 📋 Planned (🟡 Medium, M - 3h) - *Donation→Project, Donation→Sponsorship, cascade delete prevention*
+- [TICKET-125: Accessibility E2E Tests](TICKET-125-accessibility-e2e-tests.md) - 📋 Planned/POST-MVP (🟢 Low, M - 2-3h) - *Keyboard navigation, ARIA labels, focus management, WCAG 2.1 AA*
 
 #### Code Quality & Architecture Improvements
 
@@ -192,11 +198,11 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 109 (added TICKET-120)
-- **Completed:** 57 (52%)
+- **Total Tickets:** 114 (added TICKET-099✅, TICKET-121-125)
+- **Completed:** 58 (51%)
 - **In Progress:** 0
-- **Planned:** 49
-- **Estimated Hours Remaining:** ~191.5 hours (~5 weeks)
+- **Planned:** 54
+- **Estimated Hours Remaining:** ~203.5 hours (~5 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 - **Canceled/Superseded:** 2 (TICKET-041, TICKET-051)
@@ -216,9 +222,11 @@ Current work items and user stories being actively developed.
   - ✅ TICKET-077: Last Donation Date Tracking (complete)
   - New: TICKET-102 (Child Photos)
   - ❌ TICKET-051: Superseded by TICKET-119
-- **Testing & Quality Assurance:** 5 planned (~15h), 1 completed
+- **Testing & Quality Assurance:** 10 planned (~27h), 1 completed
   - ✅ TICKET-108: E2E Test Infrastructure (complete)
-- **Code Quality & Architecture:** 8 planned (~26.5h), 29 completed
+  - New: TICKET-121 (Children E2E), TICKET-122 (Donations E2E), TICKET-123 (Projects E2E), TICKET-124 (Cross-feature E2E), TICKET-125 (Accessibility E2E)
+- **Code Quality & Architecture:** 8 planned (~26.5h), 30 completed
+  - ✅ TICKET-099: Expand Custom Hooks Library (complete)
   - New: TICKET-120 (DonorForm Cancel button removal - 0.5h)
   - Existing: TICKET-098 (Form Objects research)
 - **In Progress:** 0

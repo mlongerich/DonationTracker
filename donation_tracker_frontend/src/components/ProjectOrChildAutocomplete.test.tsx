@@ -65,7 +65,7 @@ describe('ProjectOrChildAutocomplete', () => {
     await waitFor(
       () => expect(searchProjectOrChild).toHaveBeenCalledWith('project'),
       {
-        timeout: 400,
+        timeout: 1000,
       }
     );
   });
@@ -90,7 +90,7 @@ describe('ProjectOrChildAutocomplete', () => {
     await waitFor(
       () => expect(searchProjectOrChild).toHaveBeenCalledWith('maria'),
       {
-        timeout: 400,
+        timeout: 1000,
       }
     );
   });

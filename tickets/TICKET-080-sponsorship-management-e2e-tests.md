@@ -65,6 +65,12 @@ As a developer, I want comprehensive E2E tests for sponsorship management action
   - Verify "Delete" button changes to "End" button
   - Attempt to delete via API → verify 422 error
 
+- [ ] Prevent duplicate sponsorships (TICKET-109/110 feature)
+  - Create sponsorship for donor + child
+  - Attempt to create same sponsorship again
+  - Verify error message displayed
+  - Verify only one sponsorship exists in list
+
 - [ ] Conditional button logic
   - Scenario 1: Active sponsorship, no donations → "Delete" button
   - Scenario 2: Active sponsorship, has donations → "End" button

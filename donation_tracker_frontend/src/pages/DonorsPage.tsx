@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Typography,
   Box,
@@ -10,15 +10,14 @@ import {
   Alert,
   Snackbar,
 } from '@mui/material';
-import apiClient, { mergeDonors } from '../api/client';
+import { mergeDonors } from '../api/client';
 import DonorForm from '../components/DonorForm';
 import DonorList from '../components/DonorList';
 import DonorMergeModal from '../components/DonorMergeModal';
 import { Donor } from '../types';
-import { useDebouncedValue, usePagination } from '../hooks';
+import { useDebouncedValue, usePagination, useDonors } from '../hooks';
 
 const DonorsPage = () => {
-  const [donors, setDonors] = useState<Donor[]>([]);
   const [editingDonor, setEditingDonor] = useState<Donor | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
@@ -27,73 +26,55 @@ const DonorsPage = () => {
   const [showMergeModal, setShowMergeModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const { currentPage, handlePageChange, resetToFirstPage } = usePagination();
+
   const {
-    currentPage,
+    donors,
     paginationMeta,
-    setPaginationMeta,
-    handlePageChange,
-    resetToFirstPage,
-  } = usePagination();
+    fetchDonors,
+    archiveDonor,
+    restoreDonor,
+  } = useDonors();
 
   // Reset to page 1 when search changes
   useEffect(() => {
     resetToFirstPage();
   }, [debouncedQuery, resetToFirstPage]);
 
-  const fetchDonors = useCallback(async () => {
-    try {
-      // Build query params - add search filter if debounced query exists
-      const queryParams: Record<string, unknown> = {};
-      if (debouncedQuery) {
-        queryParams.q = { name_or_email_cont: debouncedQuery };
-      }
-
-      const params: Record<string, unknown> = {
-        page: currentPage,
-        per_page: 10,
-        ...queryParams,
-      };
-
-      // Include archived donors if toggle is on
-      if (showArchived) {
-        params.include_discarded = 'true';
-      }
-
-      const response = await apiClient.get('/api/donors', { params });
-      setDonors(response.data.donors);
-      setPaginationMeta(response.data.meta);
-    } catch (error) {
-      // Error silently handled - user will see empty list
-    }
-  }, [currentPage, showArchived, debouncedQuery, setPaginationMeta]);
-
   const handleArchive = async (id: number) => {
-    try {
-      await apiClient.delete(`/api/donors/${id}`);
-      fetchDonors();
+    const result = await archiveDonor(id);
+    if (result.success) {
+      fetchDonors({
+        page: currentPage,
+        perPage: 10,
+        search: debouncedQuery,
+        includeDiscarded: showArchived,
+      });
       setError(null);
-    } catch (err: any) {
-      if (err.response?.status === 422) {
-        setError(
-          err.response.data.errors?.join(', ') || 'Failed to archive donor'
-        );
-      } else {
-        setError('Failed to archive donor');
-      }
+    } else {
+      setError(result.error || 'Failed to archive donor');
     }
   };
 
   const handleRestore = async (id: number) => {
-    try {
-      await apiClient.post(`/api/donors/${id}/restore`);
-      fetchDonors();
-    } catch (error) {
-      // Error silently handled
+    const result = await restoreDonor(id);
+    if (result.success) {
+      fetchDonors({
+        page: currentPage,
+        perPage: 10,
+        search: debouncedQuery,
+        includeDiscarded: showArchived,
+      });
     }
   };
 
   const handleDonorSubmit = () => {
-    fetchDonors();
+    fetchDonors({
+      page: currentPage,
+      perPage: 10,
+      search: debouncedQuery,
+      includeDiscarded: showArchived,
+    });
     setEditingDonor(null);
   };
 
@@ -102,8 +83,13 @@ const DonorsPage = () => {
   };
 
   useEffect(() => {
-    fetchDonors();
-  }, [fetchDonors]);
+    fetchDonors({
+      page: currentPage,
+      perPage: 10,
+      search: debouncedQuery,
+      includeDiscarded: showArchived,
+    });
+  }, [currentPage, debouncedQuery, showArchived, fetchDonors]);
 
   return (
     <Box>

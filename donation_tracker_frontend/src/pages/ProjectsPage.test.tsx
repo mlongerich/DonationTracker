@@ -68,7 +68,11 @@ describe('ProjectsPage', () => {
 
     await waitFor(() => {
       expect(mockedApiClient.get).toHaveBeenCalledWith('/api/projects', {
-        params: {},
+        params: {
+          page: 1,
+          per_page: 10,
+          include_discarded: false,
+        },
       });
     });
   });
@@ -270,7 +274,11 @@ describe('ProjectsPage', () => {
     // Verify API called with include_discarded param
     await waitFor(() => {
       expect(mockedApiClient.get).toHaveBeenCalledWith('/api/projects', {
-        params: { include_discarded: 'true' },
+        params: {
+          page: 1,
+          per_page: 10,
+          include_discarded: true,
+        },
       });
     });
   });
@@ -305,7 +313,11 @@ describe('ProjectsPage', () => {
     // Verify API refresh called WITHOUT include_discarded (showArchived=false by default)
     await waitFor(() => {
       expect(mockedApiClient.get).toHaveBeenCalledWith('/api/projects', {
-        params: {},
+        params: {
+          page: 1,
+          per_page: 10,
+          include_discarded: false,
+        },
       });
     });
     expect(mockedApiClient.get).toHaveBeenCalledTimes(2); // mount + refresh

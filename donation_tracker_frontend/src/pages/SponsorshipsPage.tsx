@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -11,55 +11,54 @@ import {
   FormControlLabel,
   Pagination,
 } from '@mui/material';
-import apiClient from '../api/client';
-import { Sponsorship, SponsorshipFormData } from '../types';
+import { SponsorshipFormData } from '../types';
 import SponsorshipList from '../components/SponsorshipList';
 import SponsorshipForm from '../components/SponsorshipForm';
-import { useDebouncedValue } from '../hooks';
+import { useDebouncedValue, useSponsorships } from '../hooks';
+import apiClient from '../api/client';
 
 const SponsorshipsPage: React.FC = () => {
-  const [sponsorships, setSponsorships] = useState<Sponsorship[]>([]);
   const [page, setPage] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const debouncedQuery = useDebouncedValue(searchQuery, 300);
   const [showEnded, setShowEnded] = useState(false);
 
-  const fetchSponsorships = useCallback(async () => {
-    const params: any = { page, per_page: 25 };
-
-    if (debouncedQuery.trim()) {
-      params.q = { ...params.q, donor_name_or_child_name_cont: debouncedQuery };
-    }
-    if (!showEnded) {
-      params.q = { ...params.q, end_date_null: true };
-    }
-
-    const response = await apiClient.get('/api/sponsorships', { params });
-    setSponsorships(response.data.sponsorships);
-    setTotalCount(response.data.meta.total_count);
-    setTotalPages(response.data.meta.total_pages);
-  }, [page, debouncedQuery, showEnded]);
+  const { sponsorships, paginationMeta, fetchSponsorships, endSponsorship } =
+    useSponsorships();
 
   useEffect(() => {
-    fetchSponsorships();
-  }, [fetchSponsorships]);
+    fetchSponsorships({
+      page,
+      perPage: 25,
+      search: debouncedQuery,
+      showEnded,
+    });
+  }, [page, debouncedQuery, showEnded, fetchSponsorships]);
 
   useEffect(() => {
     setPage(1);
   }, [debouncedQuery, showEnded]);
 
   const handleEndSponsorship = async (id: number) => {
-    await apiClient.delete(`/api/sponsorships/${id}`);
-    fetchSponsorships();
+    await endSponsorship(id);
+    fetchSponsorships({
+      page,
+      perPage: 25,
+      search: debouncedQuery,
+      showEnded,
+    });
   };
 
   const handleCreateSponsorship = async (data: SponsorshipFormData) => {
     try {
       await apiClient.post('/api/sponsorships', { sponsorship: data });
-      fetchSponsorships();
+      fetchSponsorships({
+        page,
+        perPage: 25,
+        search: debouncedQuery,
+        showEnded,
+      });
       setError(null);
     } catch (err: any) {
       if (err.response?.status === 422) {
@@ -123,7 +122,7 @@ const SponsorshipsPage: React.FC = () => {
         onEndSponsorship={handleEndSponsorship}
       />
 
-      {totalCount > 0 && (
+      {paginationMeta && paginationMeta.total_count > 0 && (
         <Box
           sx={{
             mt: 3,
@@ -133,12 +132,13 @@ const SponsorshipsPage: React.FC = () => {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            Showing {(page - 1) * 25 + 1}-{Math.min(page * 25, totalCount)} of{' '}
-            {totalCount} sponsorships
+            Showing {(page - 1) * 25 + 1}-
+            {Math.min(page * 25, paginationMeta.total_count)} of{' '}
+            {paginationMeta.total_count} sponsorships
           </Typography>
-          {totalPages > 1 && (
+          {paginationMeta.total_pages > 1 && (
             <Pagination
-              count={totalPages}
+              count={paginationMeta.total_pages}
               page={page}
               onChange={(_e, value) => setPage(value)}
               color="primary"
