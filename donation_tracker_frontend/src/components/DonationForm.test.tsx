@@ -508,4 +508,187 @@ describe('DonationForm', () => {
       expect(screen.getByLabelText(/email/i)).toHaveValue('test@example.com');
     });
   });
+
+  it('clicking create project icon opens QuickProjectCreateDialog', async () => {
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    // Find and click the create project icon button
+    const createProjectButton = screen.getByRole('button', {
+      name: /create project/i,
+    });
+    await user.click(createProjectButton);
+
+    // Dialog should appear
+    expect(screen.getByText('Create New Project')).toBeInTheDocument();
+  });
+
+  it('created project auto-selects in ProjectOrChildAutocomplete', async () => {
+    const user = userEvent.setup();
+    const mockProject = {
+      id: 10,
+      title: 'New Campaign',
+      description: 'Campaign description',
+      project_type: 'campaign',
+    };
+
+    (apiClient.post as jest.Mock).mockResolvedValueOnce({
+      data: { project: mockProject },
+    });
+
+    render(<DonationForm />);
+
+    // Open dialog
+    const createProjectButton = screen.getByRole('button', {
+      name: /create project/i,
+    });
+    await user.click(createProjectButton);
+
+    // Fill out and submit form
+    await user.type(screen.getByLabelText(/title/i), 'New Campaign');
+    await user.type(
+      screen.getByLabelText(/description/i),
+      'Campaign description'
+    );
+    await user.click(screen.getByRole('button', { name: /create project/i }));
+
+    // Verify project is auto-selected in autocomplete
+    await waitFor(() => {
+      const projectField = screen.getByLabelText(/donation for/i);
+      expect(projectField).toHaveValue('New Campaign');
+    });
+  });
+
+  it('tracks project search input when user types in autocomplete', async () => {
+    const user = userEvent.setup();
+
+    render(<DonationForm />);
+
+    const projectField = screen.getByRole('combobox', { name: /donation for/i });
+    await user.type(projectField, 'Christmas');
+
+    // Verify internal state is tracking input (will be used for pre-fill later)
+    expect(projectField).toHaveValue('Christmas');
+  });
+
+  it('pre-fills project title in dialog when user searches and clicks create', async () => {
+    const user = userEvent.setup();
+    (apiClient.post as jest.Mock).mockResolvedValue({
+      data: { project: { id: 1, title: 'Christmas Campaign' } },
+    });
+
+    render(<DonationForm />);
+
+    // Type in project autocomplete
+    const projectField = screen.getByRole('combobox', { name: /donation for/i });
+    await user.type(projectField, 'Christmas Campaign');
+
+    // Click create project button
+    const createProjectButton = screen.getByRole('button', {
+      name: /create project/i,
+    });
+    await user.click(createProjectButton);
+
+    // Verify dialog opened with pre-filled title
+    await waitFor(() => {
+      expect(screen.getByText('Create New Project')).toBeInTheDocument();
+    });
+    const titleField = screen.getByLabelText(/title/i);
+    expect(titleField).toHaveValue('Christmas Campaign');
+  });
+
+  it('clears project search input after creating project', async () => {
+    const user = userEvent.setup();
+    const mockProject = {
+      id: 5,
+      title: 'New Campaign',
+      description: '',
+      project_type: 'campaign',
+    };
+
+    (apiClient.post as jest.Mock).mockResolvedValueOnce({
+      data: { project: mockProject },
+    });
+
+    render(<DonationForm />);
+
+    // Type in project autocomplete
+    const projectField = screen.getByRole('combobox', { name: /donation for/i });
+    await user.type(projectField, 'New Campaign');
+
+    // Open dialog and create project
+    await user.click(screen.getByRole('button', { name: /create project/i }));
+    await user.click(screen.getByRole('button', { name: /create project/i }));
+
+    // Wait for dialog to close
+    await waitFor(() => {
+      expect(screen.queryByText('Create New Project')).not.toBeInTheDocument();
+    });
+
+    // Open dialog again - should not have old search text pre-filled
+    await user.click(screen.getByRole('button', { name: /create project/i }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/title/i)).toHaveValue('');
+    });
+  });
+
+  it('clears pre-fill when dialog closes without creating project', async () => {
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    // Type in project autocomplete
+    const projectField = screen.getByRole('combobox', { name: /donation for/i });
+    await user.type(projectField, 'Test Project');
+
+    // Open dialog - should pre-fill title
+    await user.click(screen.getByRole('button', { name: /create project/i }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/title/i)).toHaveValue('Test Project');
+    });
+
+    // Close dialog without creating project
+    await user.click(screen.getByRole('button', { name: /close/i }));
+
+    // Wait for dialog to close
+    await waitFor(() => {
+      expect(screen.queryByText('Create New Project')).not.toBeInTheDocument();
+    });
+
+    // Reopen dialog - should be blank
+    await user.click(screen.getByRole('button', { name: /create project/i }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/title/i)).toHaveValue('');
+    });
+  });
+
+  it('project dialog can be canceled without losing donation form data', async () => {
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    // Fill out donation form with data
+    await user.type(screen.getByLabelText(/amount/i), '250');
+
+    // Open create project dialog
+    const createProjectButton = screen.getByRole('button', {
+      name: /create project/i,
+    });
+    await user.click(createProjectButton);
+
+    // Verify dialog is open
+    expect(screen.getByText('Create New Project')).toBeInTheDocument();
+
+    // Close dialog by pressing Escape
+    await user.keyboard('{Escape}');
+
+    // Verify dialog is closed
+    await waitFor(() => {
+      expect(screen.queryByText('Create New Project')).not.toBeInTheDocument();
+    });
+
+    // Verify donation form data is preserved
+    expect(screen.getByLabelText(/amount/i)).toHaveValue(250);
+  });
 });

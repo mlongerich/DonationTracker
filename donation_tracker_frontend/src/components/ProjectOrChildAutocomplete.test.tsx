@@ -294,4 +294,22 @@ describe('ProjectOrChildAutocomplete', () => {
     const label = screen.getByLabelText('Donation For');
     expect(label).toBeInTheDocument();
   });
+
+  it('calls onInputChange callback when user types', async () => {
+    const user = userEvent.setup();
+    const mockOnInputChange = jest.fn();
+
+    render(
+      <ProjectOrChildAutocomplete
+        value={null}
+        onChange={() => {}}
+        onInputChange={mockOnInputChange}
+      />
+    );
+
+    const searchField = screen.getByRole('combobox');
+    await user.type(searchField, 'test');
+
+    expect(mockOnInputChange).toHaveBeenCalledWith('test');
+  });
 });

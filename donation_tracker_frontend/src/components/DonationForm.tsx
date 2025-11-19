@@ -14,6 +14,7 @@ import { createDonation } from '../api/client';
 import DonorAutocomplete, { Donor } from './DonorAutocomplete';
 import ProjectOrChildAutocomplete from './ProjectOrChildAutocomplete';
 import QuickDonorCreateDialog from './QuickDonorCreateDialog';
+import QuickProjectCreateDialog from './QuickProjectCreateDialog';
 import { parseCurrency } from '../utils/currency';
 
 interface Option {
@@ -41,11 +42,20 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
   const [success, setSuccess] = useState(false);
   const [donorDialogOpen, setDonorDialogOpen] = useState(false);
   const [donorSearchInput, setDonorSearchInput] = useState('');
+  const [projectDialogOpen, setProjectDialogOpen] = useState(false);
+  const [projectSearchInput, setProjectSearchInput] = useState('');
 
   const handleDonorInputChange = (input: string) => {
     // Only update if input is not empty (MUI clears on blur)
     if (input.trim()) {
       setDonorSearchInput(input);
+    }
+  };
+
+  const handleProjectInputChange = (input: string) => {
+    // Only update if input is not empty (MUI clears on blur)
+    if (input.trim()) {
+      setProjectSearchInput(input);
     }
   };
 
@@ -117,6 +127,24 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
     return emailRegex.test(text);
   };
 
+  const handleProjectCreated = (newProject: any) => {
+    setSelectedProjectOrChild({
+      id: newProject.id,
+      name: newProject.title,
+      type: 'project',
+    });
+    setProjectSearchInput(''); // Clear search input after creating project
+  };
+
+  const handleOpenProjectDialog = () => {
+    setProjectDialogOpen(true);
+  };
+
+  const handleCloseProjectDialog = () => {
+    setProjectDialogOpen(false);
+    setProjectSearchInput(''); // Clear search input when dialog closes
+  };
+
   return (
     <>
       <form onSubmit={handleSubmit}>
@@ -124,11 +152,24 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
           {success && (
             <Alert severity="success">Donation created successfully!</Alert>
           )}
-          <ProjectOrChildAutocomplete
-            value={selectedProjectOrChild}
-            onChange={setSelectedProjectOrChild}
-            size="small"
-          />
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <Box sx={{ flex: 1 }}>
+              <ProjectOrChildAutocomplete
+                value={selectedProjectOrChild}
+                onChange={setSelectedProjectOrChild}
+                size="small"
+                onInputChange={handleProjectInputChange}
+              />
+            </Box>
+            <IconButton
+              aria-label="create project"
+              onClick={handleOpenProjectDialog}
+              size="small"
+              sx={{ flexShrink: 0 }}
+            >
+              <AddIcon />
+            </IconButton>
+          </Box>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <Box sx={{ flex: 1 }}>
               <DonorAutocomplete
@@ -211,6 +252,17 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
           selectedDonor || !isValidEmail(donorSearchInput)
             ? ''
             : donorSearchInput
+        }
+      />
+
+      <QuickProjectCreateDialog
+        open={projectDialogOpen}
+        onClose={handleCloseProjectDialog}
+        onSuccess={handleProjectCreated}
+        preFillTitle={
+          selectedProjectOrChild && selectedProjectOrChild.id > 0
+            ? ''
+            : projectSearchInput
         }
       />
     </>

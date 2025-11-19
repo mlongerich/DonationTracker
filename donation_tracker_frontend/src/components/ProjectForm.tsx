@@ -8,10 +8,11 @@ import { Project, ProjectFormData } from '../types';
 interface ProjectFormProps {
   onSubmit: (data: ProjectFormData) => void;
   project?: Project;
+  initialTitle?: string;
 }
 
-const ProjectForm: React.FC<ProjectFormProps> = ({ onSubmit, project }) => {
-  const [title, setTitle] = useState('');
+const ProjectForm: React.FC<ProjectFormProps> = ({ onSubmit, project, initialTitle }) => {
+  const [title, setTitle] = useState(initialTitle || '');
   const [description, setDescription] = useState('');
   const [projectType, setProjectType] = useState('general');
 

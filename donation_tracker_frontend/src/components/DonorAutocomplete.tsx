@@ -79,9 +79,11 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
       value={value}
       onChange={(_, newValue) => onChange(newValue)}
       inputValue={searchInput}
-      onInputChange={(_, newInputValue) => {
+      onInputChange={(_, newInputValue, reason) => {
         setSearchInput(newInputValue);
-        onInputChange?.(newInputValue);
+        if (reason === 'input') {
+          onInputChange?.(newInputValue);
+        }
       }}
       getOptionLabel={getOptionLabel}
       isOptionEqualToValue={(option, value) => option.id === value.id}

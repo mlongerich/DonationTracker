@@ -22,6 +22,7 @@ interface ProjectOrChildAutocompleteProps {
   label?: string;
   size?: 'small' | 'medium';
   required?: boolean;
+  onInputChange?: (input: string) => void;
 }
 
 const ProjectOrChildAutocomplete = ({
@@ -30,6 +31,7 @@ const ProjectOrChildAutocomplete = ({
   label = 'Donation For',
   size = 'small',
   required = false,
+  onInputChange,
 }: ProjectOrChildAutocompleteProps) => {
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -83,7 +85,12 @@ const ProjectOrChildAutocomplete = ({
       value={value}
       onChange={(_event, newValue) => onChange(newValue)}
       inputValue={inputValue}
-      onInputChange={(_event, newInputValue) => setInputValue(newInputValue)}
+      onInputChange={(_event, newInputValue, reason) => {
+        setInputValue(newInputValue);
+        if (reason === 'input') {
+          onInputChange?.(newInputValue);
+        }
+      }}
       options={options}
       loading={loading}
       noOptionsText={getNoOptionsText()}

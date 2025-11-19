@@ -57,4 +57,11 @@ describe('ProjectForm', () => {
     expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/project type/i)).toBeInTheDocument();
   });
+
+  it('pre-fills title field when initialTitle is provided', () => {
+    render(<ProjectForm onSubmit={jest.fn()} initialTitle="Christmas Campaign" />);
+
+    const titleField = screen.getByLabelText(/title/i);
+    expect(titleField).toHaveValue('Christmas Campaign');
+  });
 });

@@ -268,4 +268,98 @@ describe('Donation Entry', () => {
     // Verify donation form data is preserved
     cy.get('input[type="number"]').should('have.value', '350.75');
   });
+
+  it('creates project via quick create icon and completes donation', () => {
+    cy.visit('/donations');
+
+    // Click the create project icon button next to project/child autocomplete
+    cy.get('button[aria-label="create project"]').click();
+
+    // Verify QuickProjectCreateDialog appeared
+    cy.contains('Create New Project').should('be.visible');
+
+    // Fill out project form in dialog
+    const projectTitle = `Quick Project ${Date.now()}`;
+
+    cy.contains('Create New Project')
+      .parent()
+      .find('input')
+      .first()
+      .type(projectTitle);
+    cy.contains('Create New Project')
+      .parent()
+      .contains('button', /create project/i)
+      .click();
+
+    // Dialog should close and project should be auto-selected
+    cy.contains('Create New Project', { timeout: 10000 }).should('not.exist');
+
+    // Verify project is auto-selected in the autocomplete
+    cy.contains('label', 'Donation For')
+      .parent()
+      .find('input')
+      .should('have.value', projectTitle);
+
+    // Create a donor first
+    const donorName = `Project Donor ${Date.now()}`;
+    const donorEmail = `project${Date.now()}@example.com`;
+
+    cy.visit('/donors');
+    cy.get('input[type="text"]').first().type(donorName);
+    cy.get('input[type="email"]').first().type(donorEmail);
+    cy.contains('button', /submit/i).click();
+    cy.contains(/donor (created|updated) successfully/i, {
+      timeout: 10000,
+    }).should('be.visible');
+
+    // Navigate back to donations and complete the donation
+    cy.visit('/donations');
+
+    // Project should still be selected (from earlier creation)
+    cy.get('input[type="number"]').clear().type('150.00');
+
+    // Select donor from autocomplete
+    cy.contains('label', 'Donor')
+      .parent()
+      .find('input')
+      .click()
+      .type(donorName);
+
+    cy.get('[role="option"]', { timeout: 10000 }).should(
+      'have.length.at.least',
+      1
+    );
+    cy.get('[role="option"]').first().click();
+
+    // Submit donation
+    cy.contains('button', /create donation/i).click();
+
+    // Verify donation created successfully
+    cy.contains(/donation created successfully/i, {
+      timeout: 10000,
+    }).should('be.visible');
+  });
+
+  it('pre-fills project title when user searches before clicking create icon', () => {
+    cy.visit('/donations');
+
+    const searchText = 'Summer Campaign';
+
+    // Type in project autocomplete
+    cy.contains('label', 'Donation For')
+      .parent()
+      .find('input')
+      .type(searchText);
+
+    // Click create project icon
+    cy.get('button[aria-label="create project"]').click();
+
+    // Verify dialog opened with pre-filled title
+    cy.contains('Create New Project').should('be.visible');
+    cy.contains('Create New Project')
+      .parent()
+      .find('input[type="text"]')
+      .first()
+      .should('have.value', searchText);
+  });
 });
