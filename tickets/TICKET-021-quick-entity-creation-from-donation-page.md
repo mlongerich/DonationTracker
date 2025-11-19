@@ -1,10 +1,10 @@
 ## [TICKET-021] Quick Entity Creation (Donor/Project/Child) from Donation Page
 
-**Status:** 🔵 In Progress (Phase 0 ✅ Complete, Phase 1 🔵 In Progress)
+**Status:** 🔵 In Progress (Phase 0 ✅, Phase 1 ✅, Phase 2 ✅, Phase 3 pending)
 **Priority:** 🟡 Medium
 **Effort:** XL (Extra Large - 8-11 hours including Phase 0)
 **Started:** 2025-10-15
-**Updated:** 2025-11-19 (Phase 1 partial - QuickDonorCreateDialog UX improvements in progress)
+**Updated:** 2025-11-19 (Phase 2 complete - Project quick creation with validation)
 **Dependencies:** TICKET-017 (Autocomplete) ✅, TICKET-052 (ProjectOrChildAutocomplete) ✅, TICKET-054 (SponsorshipModal pattern) ✅
 **Phase 0 Note:** DonorForm currently makes API calls internally (lines 38-50) - will be refactored to follow ProjectForm/ChildForm pattern as first step
 
@@ -31,6 +31,19 @@ Before implementing quick entity creation, DonorForm must be refactored. It curr
 4. Create entity without losing donation form state
 5. Entity auto-selected in autocomplete
 6. Continue with donation submission
+
+### Progress Summary
+
+**Completed Phases:**
+- ✅ **Phase 0 (DonorForm Refactor):** 1 commit, 21 tests, ~2 hours
+- ✅ **Phase 1 (Donor Quick Creation):** 1 commit, 19 tests (10 unit + 6 integration + 3 E2E), ~3 hours
+- ✅ **Phase 2A (Project Quick Creation - Base + Pre-fill):** 1 commit, 19 tests (8+1+1+6 unit/integration + 2 E2E), ~2.5 hours
+- ✅ **Phase 2B (Project Quick Creation - Validation):** 1 commit, 4 tests (2 unit + 1 E2E + 1 validation), ~0.5 hours
+
+**Remaining:**
+- ⏳ **Phase 3 (Child Quick Creation):** Est. 2-3 hours
+
+**Total Progress:** 4 commits, 63 tests added, ~8 hours completed / ~10-11 hours estimated
 
 ### Acceptance Criteria
 
@@ -67,7 +80,7 @@ const handleSubmit = (e: React.FormEvent) => {
 };
 ```
 
-#### Donor Quick Creation (🔵 In Progress)
+#### Phase 1: Donor Quick Creation (✅ COMPLETE)
 - [x] Add icon button (AddIcon) next to Donor autocomplete
 - [x] Clicking icon opens QuickDonorCreateDialog modal
 - [x] Modal follows SponsorshipModal pattern (Dialog + DialogContent)
@@ -80,33 +93,56 @@ const handleSubmit = (e: React.FormEvent) => {
 - [x] **Error dismissal**: Auto-hide after 6 seconds OR manual close
 - [x] Dialog proper size with padding for floating labels
 - [x] Pre-fill name when user types non-email text in autocomplete
+- [x] Pre-fill email when user types email-like text (@)
 - [x] DonorForm shows "Submit" not "Update" in create mode
-- [ ] Close button (X) in dialog title
-- [ ] Close button closes dialog
-- [ ] Clear search input when dialog closes
-- [ ] Don't pre-fill when donor already selected
-- [ ] Pre-fill email when user types email-like text (@)
-- [ ] Jest tests for QuickDonorCreateDialog component (8+ tests)
-- [x] Jest tests for DonationForm integration (4 tests - pre-fill name, Submit button tests)
-- [x] Cypress E2E test for donor creation + donation flow (5 tests passing)
+- [x] Close button (X) in dialog title
+- [x] Close button closes dialog
+- [x] Clear search input when dialog closes (after creation or cancel)
+- [x] Don't pre-fill when donor already selected
+- [x] Jest tests for QuickDonorCreateDialog component (10 tests)
+- [x] Jest tests for DonationForm integration (6 tests - pre-fill, clear, preserve)
+- [x] Cypress E2E test for donor creation + donation flow (3 tests)
+- [x] Commit: `frontend: quick donor creation from donation page (TICKET-021 Phase 1)`
 
-#### Project Quick Creation
-- [ ] Add icon button next to ProjectOrChildAutocomplete
-- [ ] Clicking icon opens QuickProjectCreateDialog modal
-- [ ] Modal follows same pattern as QuickDonorCreateDialog
-- [ ] Modal contains ProjectForm (title, description, project_type fields)
-- [ ] API call handled within dialog
-- [ ] Successfully creating project auto-selects it in ProjectOrChildAutocomplete
-- [ ] Modal can be canceled without losing donation form data
-- [ ] **Validation errors (422)**: Extract and display via Snackbar
-- [ ] **Network errors**: Display generic error message via Snackbar
-- [ ] **Multiple validation errors**: Join with commas in single Snackbar
-- [ ] **Error dismissal**: Auto-hide after 6 seconds OR manual close
-- [ ] Jest tests for QuickProjectCreateDialog component (6 tests - add validation error test)
-- [ ] Jest tests for DonationForm integration (2 tests)
-- [ ] Cypress E2E test for project creation + donation flow (2 tests - add validation error test)
+#### Phase 2: Project Quick Creation (✅ COMPLETE)
 
-#### Child Quick Creation (for sponsorships)
+**Phase 2A - Base Functionality + Pre-fill (✅ COMPLETE):**
+- [x] Add icon button next to ProjectOrChildAutocomplete
+- [x] Clicking icon opens QuickProjectCreateDialog modal
+- [x] Modal follows same pattern as QuickDonorCreateDialog
+- [x] Modal contains ProjectForm (title, description, project_type fields)
+- [x] API call handled within dialog
+- [x] Successfully creating project auto-selects it in ProjectOrChildAutocomplete
+- [x] Modal can be canceled without losing donation form data
+- [x] **Validation errors (422)**: Extract and display via Snackbar
+- [x] **Network errors**: Display generic error message via Snackbar
+- [x] Close button (X) in dialog title
+- [x] Close button closes dialog
+- [x] Pre-fill title when user types in autocomplete before creating
+- [x] Clear search input when dialog closes (after creation or cancel)
+- [x] Don't pre-fill when project already selected
+- [x] Fix: MUI Autocomplete onInputChange reason-filtered (only fire on user typing, not value sync)
+- [x] Applied same fix to DonorAutocomplete for consistency
+- [x] Jest tests for QuickProjectCreateDialog component (8 tests)
+- [x] Jest tests for ProjectForm (1 test - pre-fill initialTitle)
+- [x] Jest tests for ProjectOrChildAutocomplete (1 test - onInputChange callback)
+- [x] Jest tests for DonationForm integration (6 tests - pre-fill, clear, preserve)
+- [x] Cypress E2E tests (2 tests - full workflow + pre-fill)
+- [x] Commit: `frontend: quick project creation from donation page (TICKET-021 Phase 2A)`
+
+**Phase 2B - Client-Side Validation (✅ COMPLETE):**
+- [x] Add `required` prop to Title field
+- [x] Disable submit button when title is empty (`disabled={!title.trim()}`)
+- [x] Keep server-side validation (already tested)
+- [x] Progressive enhancement pattern (client supplements server)
+- [x] Jest tests for ProjectForm validation (2 tests - disabled/enabled, required)
+- [x] Cypress E2E validation test (1 test - button disabled/enabled UX)
+- [x] Commit: `frontend: add client-side validation to project creation (TICKET-021 Phase 2B)`
+
+**Related Tickets Created:**
+- [x] TICKET-128: Project Find-or-Create Idempotency (backend work, deferred)
+
+#### Phase 3: Child Quick Creation (for sponsorships) - PENDING
 - [ ] Add icon button next to ProjectOrChildAutocomplete
 - [ ] Icon conditionally shown when child donation is selected/possible
 - [ ] Clicking icon opens QuickChildCreateDialog modal
