@@ -171,4 +171,101 @@ describe('Donation Entry', () => {
     // Verify Cash badge appears in donation list
     cy.contains('$75.00').parent().parent().contains('Cash').should('be.visible');
   });
+
+  it('creates donor via quick create icon and completes donation', () => {
+    cy.visit('/donations');
+
+    // Click the create donor icon button next to donor autocomplete
+    cy.get('button[aria-label="create donor"]').click();
+
+    // Verify QuickDonorCreateDialog appeared
+    cy.contains('Create New Donor').should('be.visible');
+
+    // Fill out donor form in dialog
+    const donorName = `Quick Donor ${Date.now()}`;
+    const donorEmail = `quick${Date.now()}@example.com`;
+
+    // Find inputs within the dialog
+    cy.contains('Create New Donor')
+      .parent()
+      .find('input[type="text"]')
+      .type(donorName);
+    cy.contains('Create New Donor')
+      .parent()
+      .find('input[type="email"]')
+      .type(donorEmail);
+    cy.contains('Create New Donor')
+      .parent()
+      .contains('button', /submit/i)
+      .click();
+
+    // Dialog should close and donor should be auto-selected in donation form
+    cy.contains('Create New Donor', { timeout: 10000 }).should('not.exist');
+
+    // Verify donor is auto-selected in the autocomplete
+    cy.contains('label', 'Donor')
+      .parent()
+      .find('input')
+      .should('have.value', `${donorName} (${donorEmail})`);
+
+    // Complete the donation
+    cy.get('input[type="number"]').clear().type('200.00');
+
+    // Click the Create Donation button
+    cy.contains('button', /create donation/i).click();
+
+    // Verify donation created successfully
+    cy.contains(/donation created successfully/i, {
+      timeout: 10000,
+    }).should('be.visible');
+  });
+
+  it('shows validation error in Snackbar when creating donor with invalid email', () => {
+    cy.visit('/donations');
+
+    // Click the create donor icon button
+    cy.get('button[aria-label="create donor"]').click();
+
+    // Fill out form with invalid email (find inputs within dialog)
+    cy.contains('Create New Donor')
+      .parent()
+      .find('input[type="text"]')
+      .type('Test Donor');
+    cy.contains('Create New Donor')
+      .parent()
+      .find('input[type="email"]')
+      .type('invalid-email');
+    cy.contains('Create New Donor')
+      .parent()
+      .contains('button', /submit/i)
+      .click();
+
+    // Verify validation error appears in Snackbar
+    cy.get('body').contains(/email/i, { timeout: 10000 }).should('be.visible');
+
+    // Dialog should remain open (not close on error)
+    cy.contains('Create New Donor').should('be.visible');
+  });
+
+  it('preserves donation form data when dialog is canceled', () => {
+    cy.visit('/donations');
+
+    // Fill out donation form with data
+    cy.get('input[type="number"]').type('350.75');
+
+    // Open create donor dialog
+    cy.get('button[aria-label="create donor"]').click();
+
+    // Verify dialog is open
+    cy.contains('Create New Donor').should('be.visible');
+
+    // Close dialog by pressing Escape
+    cy.get('body').type('{esc}');
+
+    // Verify dialog is closed
+    cy.contains('Create New Donor').should('not.exist');
+
+    // Verify donation form data is preserved
+    cy.get('input[type="number"]').should('have.value', '350.75');
+  });
 });

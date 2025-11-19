@@ -6,13 +6,21 @@ import { Donor, DonorFormData } from '../types';
 
 interface DonorFormProps {
   donor?: Donor;
+  initialName?: string;
+  initialEmail?: string;
   onSubmit: (data: DonorFormData) => void;
   onCancel?: () => void;
 }
 
-function DonorForm({ donor, onSubmit, onCancel }: DonorFormProps) {
-  const [name, setName] = useState(donor?.name || '');
-  const [email, setEmail] = useState(donor?.email || '');
+function DonorForm({
+  donor,
+  initialName = '',
+  initialEmail = '',
+  onSubmit,
+  onCancel,
+}: DonorFormProps) {
+  const [name, setName] = useState(donor?.name || initialName);
+  const [email, setEmail] = useState(donor?.email || initialEmail);
 
   // Update form when donor prop changes
   useEffect(() => {
@@ -20,10 +28,10 @@ function DonorForm({ donor, onSubmit, onCancel }: DonorFormProps) {
       setName(donor.name);
       setEmail(donor.email);
     } else {
-      setName('');
-      setEmail('');
+      setName(initialName);
+      setEmail(initialEmail);
     }
-  }, [donor]);
+  }, [donor, initialName, initialEmail]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();

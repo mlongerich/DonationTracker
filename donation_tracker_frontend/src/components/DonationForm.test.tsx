@@ -7,6 +7,7 @@ jest.mock('../api/client', () => ({
   __esModule: true,
   default: {
     get: jest.fn(),
+    post: jest.fn(),
   },
   searchProjectOrChild: jest.fn(),
   createDonation: jest.fn(),
@@ -31,7 +32,7 @@ describe('DonationForm', () => {
   it('renders donor field', () => {
     render(<DonationForm />);
 
-    expect(screen.getByLabelText(/donor/i)).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: /donor/i })).toBeInTheDocument();
   });
 
   it('renders submit button', () => {
@@ -45,7 +46,7 @@ describe('DonationForm', () => {
   it('renders autocomplete for donor search instead of dropdown', () => {
     render(<DonationForm />);
 
-    const autocomplete = screen.getByLabelText(/donor/i);
+    const autocomplete = screen.getByRole('combobox', { name: /donor/i });
     expect(autocomplete).toBeInTheDocument();
     expect(autocomplete.tagName).toBe('INPUT'); // Autocomplete uses input, not select
   });
@@ -60,7 +61,7 @@ describe('DonationForm', () => {
     const user = userEvent.setup();
     render(<DonationForm />);
 
-    const autocomplete = screen.getByLabelText(/donor/i);
+    const autocomplete = screen.getByRole('combobox', { name: /donor/i });
     await user.type(autocomplete, 'John');
 
     await waitFor(() => {
@@ -106,7 +107,7 @@ describe('DonationForm', () => {
     const user = userEvent.setup();
     render(<DonationForm />);
 
-    const autocomplete = screen.getByLabelText(/donor/i);
+    const autocomplete = screen.getByRole('combobox', { name: /donor/i });
 
     // Type slowly to ensure debounce completes
     await user.type(autocomplete, 'J');
@@ -211,7 +212,7 @@ describe('DonationForm', () => {
     await user.type(screen.getByLabelText(/amount/i), '100');
 
     // Select donor from autocomplete
-    const donorField = screen.getByLabelText(/donor/i);
+    const donorField = screen.getByRole('combobox', { name: /donor/i });
     await user.type(donorField, 'Test');
     await waitFor(() => expect(apiClient.get).toHaveBeenCalled());
     const option = await screen.findByRole('option');
@@ -254,7 +255,7 @@ describe('DonationForm', () => {
     await user.click(childOption);
 
     // Select donor
-    const donorField = screen.getByLabelText(/donor/i);
+    const donorField = screen.getByRole('combobox', { name: /donor/i });
     await user.type(donorField, 'John');
     await waitFor(() => expect(apiClient.get).toHaveBeenCalled());
     const donorOption = await screen.findByText(/John Doe/);
@@ -306,7 +307,7 @@ describe('DonationForm', () => {
     await user.type(screen.getByLabelText(/amount/i), '100');
 
     // Select donor from autocomplete
-    const donorField = screen.getByLabelText(/donor/i);
+    const donorField = screen.getByRole('combobox', { name: /donor/i });
     await user.type(donorField, 'Test');
     await waitFor(() => expect(apiClient.get).toHaveBeenCalled());
     const option = await screen.findByRole('option');
@@ -322,6 +323,189 @@ describe('DonationForm', () => {
           payment_method: 'check',
         })
       );
+    });
+  });
+
+  it('clicking create donor icon button opens QuickDonorCreateDialog', async () => {
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    // Find and click the create donor icon button
+    const createDonorButton = screen.getByRole('button', {
+      name: /create donor/i,
+    });
+    await user.click(createDonorButton);
+
+    // Dialog should appear
+    expect(screen.getByText('Create New Donor')).toBeInTheDocument();
+  });
+
+  it('created donor auto-selects in DonorAutocomplete', async () => {
+    const user = userEvent.setup();
+    const mockDonor = {
+      id: 5,
+      name: 'New Donor',
+      email: 'new@example.com',
+      displayable_email: 'new@example.com', // Backend provides this for real emails
+      discarded_at: null,
+    };
+
+    (apiClient.post as jest.Mock).mockResolvedValueOnce({
+      data: { donor: mockDonor },
+    });
+
+    render(<DonationForm />);
+
+    // Open dialog
+    const createDonorButton = screen.getByRole('button', {
+      name: /create donor/i,
+    });
+    await user.click(createDonorButton);
+
+    // Fill out and submit form
+    await user.type(screen.getByLabelText(/name/i), 'New Donor');
+    await user.type(screen.getByLabelText(/email/i), 'new@example.com');
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    // Verify donor is auto-selected in autocomplete
+    // DonorAutocomplete displays "Name (displayable_email)" format
+    await waitFor(() => {
+      const donorField = screen.getByRole('combobox', { name: /donor/i });
+      expect(donorField).toHaveValue('New Donor (new@example.com)');
+    });
+  });
+
+  it('dialog can be canceled without losing donation form data', async () => {
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    // Fill out donation form with data
+    await user.type(screen.getByLabelText(/amount/i), '150');
+
+    // Open create donor dialog
+    const createDonorButton = screen.getByRole('button', {
+      name: /create donor/i,
+    });
+    await user.click(createDonorButton);
+
+    // Verify dialog is open
+    expect(screen.getByText('Create New Donor')).toBeInTheDocument();
+
+    // Close dialog by pressing Escape
+    await user.keyboard('{Escape}');
+
+    // Verify dialog is closed
+    await waitFor(() => {
+      expect(screen.queryByText('Create New Donor')).not.toBeInTheDocument();
+    });
+
+    // Verify donation form data is preserved
+    expect(screen.getByLabelText(/amount/i)).toHaveValue(150);
+  });
+
+  it('pre-fills name in dialog when typed text does not contain @', async () => {
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    // Type name in donor autocomplete
+    const donorField = screen.getByRole('combobox', { name: /donor/i });
+    await user.type(donorField, 'John Doe');
+
+    // Open create donor dialog
+    const createDonorButton = screen.getByRole('button', {
+      name: /create donor/i,
+    });
+    await user.click(createDonorButton);
+
+    // Verify dialog opened with name pre-filled
+    await waitFor(() => {
+      expect(screen.getByLabelText(/name/i)).toHaveValue('John Doe');
+    });
+  });
+
+  it('clears search input when dialog closes', async () => {
+    const user = userEvent.setup();
+    const mockDonor = {
+      id: 15,
+      name: 'Created Donor',
+      email: 'created@example.com',
+      displayable_email: 'created@example.com',
+      discarded_at: null,
+    };
+
+    (apiClient.post as jest.Mock).mockResolvedValueOnce({
+      data: { donor: mockDonor },
+    });
+
+    render(<DonationForm />);
+
+    // Type in donor autocomplete
+    const donorField = screen.getByRole('combobox', { name: /donor/i });
+    await user.type(donorField, 'Created Donor');
+
+    // Open dialog and create donor
+    await user.click(screen.getByRole('button', { name: /create donor/i }));
+    await user.type(screen.getByLabelText(/email/i), 'created@example.com');
+    await user.click(screen.getByRole('button', { name: /submit/i }));
+
+    // Wait for dialog to close
+    await waitFor(() => {
+      expect(screen.queryByText('Create New Donor')).not.toBeInTheDocument();
+    });
+
+    // Open dialog again - should not have old search text pre-filled
+    await user.click(screen.getByRole('button', { name: /create donor/i }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/name/i)).toHaveValue('');
+    });
+  });
+
+  it('clears pre-fill data when dialog closes without creating donor', async () => {
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    // Type in donor autocomplete
+    const donorField = screen.getByRole('combobox', { name: /donor/i });
+    await user.type(donorField, 'Test Name');
+
+    // Open dialog - should pre-fill name
+    await user.click(screen.getByRole('button', { name: /create donor/i }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/name/i)).toHaveValue('Test Name');
+    });
+
+    // Close dialog without creating donor
+    await user.click(screen.getByRole('button', { name: /close/i }));
+
+    // Wait for dialog to close
+    await waitFor(() => {
+      expect(screen.queryByText('Create New Donor')).not.toBeInTheDocument();
+    });
+
+    // Reopen dialog - should be blank
+    await user.click(screen.getByRole('button', { name: /create donor/i }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/name/i)).toHaveValue('');
+    });
+  });
+
+  it('pre-fills email when typed text is valid email', async () => {
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    // Type valid email in donor autocomplete
+    const donorField = screen.getByRole('combobox', { name: /donor/i });
+    await user.type(donorField, 'test@example.com');
+
+    // Open create donor dialog
+    await user.click(screen.getByRole('button', { name: /create donor/i }));
+
+    // Verify email pre-filled
+    await waitFor(() => {
+      expect(screen.getByLabelText(/email/i)).toHaveValue('test@example.com');
     });
   });
 });

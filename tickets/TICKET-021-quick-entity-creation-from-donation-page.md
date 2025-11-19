@@ -1,10 +1,10 @@
 ## [TICKET-021] Quick Entity Creation (Donor/Project/Child) from Donation Page
 
-**Status:** 🔵 In Progress (Phase 0 ✅ Complete, ready for Phase 1)
+**Status:** 🔵 In Progress (Phase 0 ✅ Complete, Phase 1 🔵 In Progress)
 **Priority:** 🟡 Medium
 **Effort:** XL (Extra Large - 8-11 hours including Phase 0)
 **Started:** 2025-10-15
-**Updated:** 2025-11-18 (Phase 0 complete - DonorForm refactored to standard pattern)
+**Updated:** 2025-11-19 (Phase 1 partial - QuickDonorCreateDialog UX improvements in progress)
 **Dependencies:** TICKET-017 (Autocomplete) ✅, TICKET-052 (ProjectOrChildAutocomplete) ✅, TICKET-054 (SponsorshipModal pattern) ✅
 **Phase 0 Note:** DonorForm currently makes API calls internally (lines 38-50) - will be refactored to follow ProjectForm/ChildForm pattern as first step
 
@@ -67,21 +67,28 @@ const handleSubmit = (e: React.FormEvent) => {
 };
 ```
 
-#### Donor Quick Creation
-- [ ] Add icon button (AddIcon) next to Donor autocomplete
-- [ ] Clicking icon opens QuickDonorCreateDialog modal
-- [ ] Modal follows SponsorshipModal pattern (Dialog + DialogContent)
-- [ ] Modal contains DonorForm (name and email fields)
-- [ ] API call handled within dialog (not in DonorForm)
-- [ ] Successfully creating donor auto-selects them in autocomplete
-- [ ] Modal can be canceled without losing donation form data
-- [ ] **Validation errors (422)**: Extract and display via Snackbar
-- [ ] **Network errors**: Display generic error message via Snackbar
-- [ ] **Multiple validation errors**: Join with commas in single Snackbar
-- [ ] **Error dismissal**: Auto-hide after 6 seconds OR manual close
-- [ ] Jest tests for QuickDonorCreateDialog component (6 tests - add validation error test)
-- [ ] Jest tests for DonationForm integration (3 tests)
-- [ ] Cypress E2E test for donor creation + donation flow (3 tests - add validation error test)
+#### Donor Quick Creation (🔵 In Progress)
+- [x] Add icon button (AddIcon) next to Donor autocomplete
+- [x] Clicking icon opens QuickDonorCreateDialog modal
+- [x] Modal follows SponsorshipModal pattern (Dialog + DialogContent)
+- [x] Modal contains DonorForm (name and email fields)
+- [x] API call handled within dialog (not in DonorForm)
+- [x] Successfully creating donor auto-selects them in autocomplete
+- [x] **Validation errors (422)**: Extract and display via Snackbar
+- [x] **Network errors**: Display generic error message via Snackbar
+- [x] **Multiple validation errors**: Join with commas in single Snackbar
+- [x] **Error dismissal**: Auto-hide after 6 seconds OR manual close
+- [x] Dialog proper size with padding for floating labels
+- [x] Pre-fill name when user types non-email text in autocomplete
+- [x] DonorForm shows "Submit" not "Update" in create mode
+- [ ] Close button (X) in dialog title
+- [ ] Close button closes dialog
+- [ ] Clear search input when dialog closes
+- [ ] Don't pre-fill when donor already selected
+- [ ] Pre-fill email when user types email-like text (@)
+- [ ] Jest tests for QuickDonorCreateDialog component (8+ tests)
+- [x] Jest tests for DonationForm integration (4 tests - pre-fill name, Submit button tests)
+- [x] Cypress E2E test for donor creation + donation flow (5 tests passing)
 
 #### Project Quick Creation
 - [ ] Add icon button next to ProjectOrChildAutocomplete

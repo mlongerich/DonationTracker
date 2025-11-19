@@ -5,6 +5,7 @@ import {
   DialogContent,
   Snackbar,
   Alert,
+  Box,
 } from '@mui/material';
 import SponsorshipForm from './SponsorshipForm';
 import { SponsorshipFormData } from '../types';
@@ -49,14 +50,16 @@ const SponsorshipModal: React.FC<SponsorshipModalProps> = ({
 
   return (
     <>
-      <Dialog open={open} onClose={onClose}>
+      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
         <DialogTitle>Add Sponsor for {childName}</DialogTitle>
-        <DialogContent>
-          <SponsorshipForm
-            childId={childId}
-            onSubmit={handleSubmit}
-            onCancel={onClose}
-          />
+        <DialogContent sx={{ pt: 3 }}>
+          <Box sx={{ mt: 1 }}>
+            <SponsorshipForm
+              childId={childId}
+              onSubmit={handleSubmit}
+              onCancel={onClose}
+            />
+          </Box>
         </DialogContent>
       </Dialog>
       <Snackbar

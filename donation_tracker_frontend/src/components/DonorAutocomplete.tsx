@@ -13,6 +13,7 @@ interface DonorAutocompleteProps {
   required?: boolean;
   size?: 'small' | 'medium';
   fullWidth?: boolean;
+  onInputChange?: (input: string) => void;
 }
 
 const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
@@ -22,6 +23,7 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
   required = false,
   size = 'medium',
   fullWidth = true,
+  onInputChange,
 }) => {
   const [donorOptions, setDonorOptions] = useState<Donor[]>([]);
   const [searchInput, setSearchInput] = useState('');
@@ -77,7 +79,10 @@ const DonorAutocomplete: React.FC<DonorAutocompleteProps> = ({
       value={value}
       onChange={(_, newValue) => onChange(newValue)}
       inputValue={searchInput}
-      onInputChange={(_, newInputValue) => setSearchInput(newInputValue)}
+      onInputChange={(_, newInputValue) => {
+        setSearchInput(newInputValue);
+        onInputChange?.(newInputValue);
+      }}
       getOptionLabel={getOptionLabel}
       isOptionEqualToValue={(option, value) => option.id === value.id}
       noOptionsText={getNoOptionsText()}
