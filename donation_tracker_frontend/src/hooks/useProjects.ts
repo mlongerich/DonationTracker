@@ -20,28 +20,33 @@ export const useProjects = (): UseProjectsReturn => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
+  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(
+    null
+  );
 
-  const fetchProjects = useCallback(async (options: UseProjectsOptions = {}) => {
-    setLoading(true);
-    setError(null);
+  const fetchProjects = useCallback(
+    async (options: UseProjectsOptions = {}) => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const params: Record<string, unknown> = {
-        page: options.page || 1,
-        per_page: options.perPage || 10,
-        include_discarded: options.includeDiscarded || false,
-      };
+      try {
+        const params: Record<string, unknown> = {
+          page: options.page || 1,
+          per_page: options.perPage || 10,
+          include_discarded: options.includeDiscarded || false,
+        };
 
-      const response = await apiClient.get('/api/projects', { params });
-      setProjects(response.data.projects);
-      setPaginationMeta(response.data.meta);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to fetch projects');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+        const response = await apiClient.get('/api/projects', { params });
+        setProjects(response.data.projects);
+        setPaginationMeta(response.data.meta);
+      } catch (err: any) {
+        setError(err.response?.data?.error || 'Failed to fetch projects');
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   return {
     projects,

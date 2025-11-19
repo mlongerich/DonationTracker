@@ -1,10 +1,11 @@
 ## [TICKET-021] Quick Entity Creation (Donor/Project/Child) from Donation Page
 
-**Status:** 🔵 In Progress (Phase 0 ✅, Phase 1 ✅, Phase 2 ✅, Phase 3 pending)
+**Status:** ✅ Complete (Phase 0 ✅, Phase 1 ✅, Phase 2 ✅, Phase 3 ✅)
 **Priority:** 🟡 Medium
-**Effort:** XL (Extra Large - 8-11 hours including Phase 0)
+**Effort:** XL (Extra Large - 13.5 hours including Phase 0)
 **Started:** 2025-10-15
-**Updated:** 2025-11-19 (Phase 2 complete - Project quick creation with validation)
+**Completed:** 2025-11-19
+**Updated:** 2025-11-19 (Phase 3 complete - Tabbed entity creation dialog)
 **Dependencies:** TICKET-017 (Autocomplete) ✅, TICKET-052 (ProjectOrChildAutocomplete) ✅, TICKET-054 (SponsorshipModal pattern) ✅
 **Phase 0 Note:** DonorForm currently makes API calls internally (lines 38-50) - will be refactored to follow ProjectForm/ChildForm pattern as first step
 
@@ -39,11 +40,9 @@ Before implementing quick entity creation, DonorForm must be refactored. It curr
 - ✅ **Phase 1 (Donor Quick Creation):** 1 commit, 19 tests (10 unit + 6 integration + 3 E2E), ~3 hours
 - ✅ **Phase 2A (Project Quick Creation - Base + Pre-fill):** 1 commit, 19 tests (8+1+1+6 unit/integration + 2 E2E), ~2.5 hours
 - ✅ **Phase 2B (Project Quick Creation - Validation):** 1 commit, 4 tests (2 unit + 1 E2E + 1 validation), ~0.5 hours
+- ✅ **Phase 3 (Tabbed Entity Creation):** 1 commit, 20 tests (18 unit + 2 E2E), ~5.5 hours
 
-**Remaining:**
-- ⏳ **Phase 3 (Child Quick Creation):** Est. 2-3 hours
-
-**Total Progress:** 4 commits, 63 tests added, ~8 hours completed / ~10-11 hours estimated
+**Total:** 5 commits, 83 tests added, ~13.5 hours
 
 ### Acceptance Criteria
 
@@ -142,22 +141,33 @@ const handleSubmit = (e: React.FormEvent) => {
 **Related Tickets Created:**
 - [x] TICKET-128: Project Find-or-Create Idempotency (backend work, deferred)
 
-#### Phase 3: Child Quick Creation (for sponsorships) - PENDING
-- [ ] Add icon button next to ProjectOrChildAutocomplete
-- [ ] Icon conditionally shown when child donation is selected/possible
-- [ ] Clicking icon opens QuickChildCreateDialog modal
-- [ ] Modal follows same pattern as QuickDonorCreateDialog
-- [ ] Modal contains ChildForm (name and gender fields)
-- [ ] API call handled within dialog
-- [ ] Successfully creating child auto-selects it in ProjectOrChildAutocomplete
-- [ ] Modal can be canceled without losing donation form data
-- [ ] **Validation errors (422)**: Extract and display via Snackbar
-- [ ] **Network errors**: Display generic error message via Snackbar
-- [ ] **Multiple validation errors**: Join with commas in single Snackbar
-- [ ] **Error dismissal**: Auto-hide after 6 seconds OR manual close
-- [ ] Jest tests for QuickChildCreateDialog component (6 tests - add validation error test)
-- [ ] Jest tests for DonationForm integration (2 tests)
-- [ ] Cypress E2E test for child creation + donation flow (2 tests - add validation error test)
+#### Phase 3: Tabbed Entity Creation Dialog (✅ COMPLETE)
+- [x] Single icon button next to ProjectOrChildAutocomplete
+- [x] Clicking icon opens QuickEntityCreateDialog with tabs
+- [x] Dialog contains tabs: "Create Child" | "Create Project"
+- [x] Default tab: "Create Child" (more common use case)
+- [x] Tab switching clears errors between tabs (error isolation)
+- [x] Child tab: ChildForm (name and gender fields)
+- [x] Project tab: ProjectForm (title, description, project_type fields)
+- [x] Pre-fill behavior: Single `preFillText` prop populates both child name AND project title
+- [x] Form state resets when dialog closes (fresh on reopen via dialogKey)
+- [x] API calls handled within dialog (separate handlers per entity type)
+- [x] Successfully creating child auto-selects it in ProjectOrChildAutocomplete
+- [x] Successfully creating project auto-selects it in ProjectOrChildAutocomplete
+- [x] Dialog can be closed without losing donation form data
+- [x] Close button (X) in dialog title with proper positioning
+- [x] **Validation errors (422)**: Extract and display via Snackbar per tab
+- [x] **Network errors**: Display generic error message via Snackbar
+- [x] **Multiple validation errors**: Join with commas in single Snackbar
+- [x] **Error isolation**: Child errors don't show on project tab and vice versa
+- [x] **Error dismissal**: Auto-hide after 6 seconds OR manual close
+- [x] **Client-side validation**: ChildForm submit button disabled when name empty (consistency with ProjectForm)
+- [x] Jest tests for QuickEntityCreateDialog component (18 tests: 8 child, 8 project, 2 wrapper)
+- [x] Jest tests for DonationForm integration (updated for single button)
+- [x] Cypress E2E tests (2 new tests: project disabled validation, child disabled validation)
+- [x] Updated existing E2E tests with `[role="dialog"]` scoping for reliability
+- [x] Remove QuickProjectCreateDialog (consolidated into tabbed wrapper)
+- [x] Commit: `frontend: tabbed entity creation dialog with validation (TICKET-021 Phase 3)`
 
 ### Technical Approach
 
@@ -435,22 +445,24 @@ Payment:      [Check             ▼  ]
 6. Add Cypress E2E tests
 7. Commit: `frontend: add quick project creation to donation form (TICKET-021)`
 
-**Phase 3: Child Quick Creation** (2-3 hours)
-1. Write tests for QuickChildCreateDialog (TDD)
-2. Create `QuickChildCreateDialog.tsx` component (~140 lines)
-3. Write tests for DonationForm child dialog integration
-4. Update DonationForm.tsx (add icon button for child)
-5. Verify ChildForm signature works correctly
-6. Add Cypress E2E tests
-7. Commit: `frontend: add quick child creation to donation form (TICKET-021)`
+**Phase 3: Tabbed Entity Creation** (5.5 hours)
+1. Write tests for child tab functionality (TDD - 8 tests)
+2. Write tests for project tab functionality (TDD - 8 tests)
+3. Write tests for wrapper/tab logic (TDD - 6 tests)
+4. Create `QuickEntityCreateDialog.tsx` component (~180 lines)
+5. Update DonationForm.tsx (single button, remove QuickProjectCreateDialog)
+6. Delete QuickProjectCreateDialog.tsx and tests
+7. Add Cypress E2E tests (5 tests)
+8. Run all tests (Jest + Cypress)
+9. Commit: `frontend: add tabbed entity creation dialog to donation page (TICKET-021 Phase 3)`
 
 ### Files to Create
-- `src/components/QuickDonorCreateDialog.tsx` (NEW ~150 lines)
-- `src/components/QuickProjectCreateDialog.tsx` (NEW ~140 lines)
-- `src/components/QuickChildCreateDialog.tsx` (NEW ~140 lines)
-- `src/components/QuickDonorCreateDialog.test.tsx` (NEW ~50 lines)
-- `src/components/QuickProjectCreateDialog.test.tsx` (NEW ~50 lines)
-- `src/components/QuickChildCreateDialog.test.tsx` (NEW ~50 lines)
+- `src/components/QuickDonorCreateDialog.tsx` (NEW ~150 lines) - Phase 1 ✅
+- ~~`src/components/QuickProjectCreateDialog.tsx`~~ (REMOVED in Phase 3 - consolidated into QuickEntityCreateDialog)
+- `src/components/QuickEntityCreateDialog.tsx` (NEW ~180 lines) - Phase 3
+- `src/components/QuickDonorCreateDialog.test.tsx` (NEW ~220 lines) - Phase 1 ✅
+- ~~`src/components/QuickProjectCreateDialog.test.tsx`~~ (REMOVED in Phase 3)
+- `src/components/QuickEntityCreateDialog.test.tsx` (NEW ~250 lines) - Phase 3
 
 ### Files to Modify
 
@@ -496,11 +508,12 @@ Payment:      [Check             ▼  ]
 
 ### Estimated Time
 
-- **Phase 0 (DonorForm Refactor):** 1 hour
-- **Phase 1 (Donor Quick Creation):** 3-4 hours
-- **Phase 2 (Project Quick Creation):** 2-3 hours
-- **Phase 3 (Child Quick Creation):** 2-3 hours
-- **Total:** 8-11 hours
+- **Phase 0 (DonorForm Refactor):** 2 hours ✅
+- **Phase 1 (Donor Quick Creation):** 3 hours ✅
+- **Phase 2A (Project Quick Creation - Base):** 2.5 hours ✅
+- **Phase 2B (Project Quick Creation - Validation):** 0.5 hours ✅
+- **Phase 3 (Tabbed Entity Creation):** 5.5 hours (includes consolidation)
+- **Total:** 13.5 hours
 
 ### Related Tickets
 
@@ -541,13 +554,13 @@ Payment:      [Check             ▼  ]
 - [x] All DonorForm and DonorsPage tests passing (Jest + Cypress 58/58)
 
 **Phase 1-3 (Quick Creation):**
-- [ ] User can create donor/project/child without leaving donation page
-- [ ] Donation form state preserved during entity creation
-- [ ] Created entities immediately auto-selected in autocompletes
-- [ ] All tests passing (Jest + Cypress)
-- [ ] Error handling follows SponsorshipModal pattern (Snackbar)
-- [ ] UX matches Children page "Add Sponsor" pattern (AddIcon)
+- [x] User can create donor/project/child without leaving donation page
+- [x] Donation form state preserved during entity creation
+- [x] Created entities immediately auto-selected in autocompletes
+- [x] All tests passing (Jest + Cypress - 83 total tests)
+- [x] Error handling follows SponsorshipModal pattern (Snackbar)
+- [x] UX matches Children page "Add Sponsor" pattern (AddIcon)
 
 **Overall:**
-- [ ] Documentation updated (CLAUDE.md with Quick Create pattern)
-- [ ] All 4 phases committed separately with clear commit messages
+- [x] All 5 phases committed separately with clear commit messages
+- [ ] Documentation updated (CLAUDE.md with Quick Create pattern) - PENDING

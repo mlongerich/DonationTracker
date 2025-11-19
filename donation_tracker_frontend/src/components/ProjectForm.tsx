@@ -11,7 +11,11 @@ interface ProjectFormProps {
   initialTitle?: string;
 }
 
-const ProjectForm: React.FC<ProjectFormProps> = ({ onSubmit, project, initialTitle }) => {
+const ProjectForm: React.FC<ProjectFormProps> = ({
+  onSubmit,
+  project,
+  initialTitle,
+}) => {
   const [title, setTitle] = useState(initialTitle || '');
   const [description, setDescription] = useState('');
   const [projectType, setProjectType] = useState('general');

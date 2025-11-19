@@ -785,6 +785,147 @@ import { formatCurrency } from '../utils/currency';
 
 **See:** TICKET-071 (currency standardization)
 
+#### Quick Create Dialog Pattern (Modal Entity Creation)
+
+**Purpose:** Create entities (donors, projects, children) without leaving current page, preserving form state
+
+**When to Use:**
+- User needs to create related entity mid-workflow (e.g., creating donation but donor doesn't exist)
+- Prevents context switching and data loss from page navigation
+- Follows "Add Sponsor" pattern from Children page
+
+**Pattern Components:**
+
+1. **Icon Button Next to Autocomplete:**
+```tsx
+<Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+  <DonorAutocomplete value={donor} onChange={setDonor} size="small" />
+  <IconButton aria-label="create donor" onClick={() => setDialogOpen(true)}>
+    <AddIcon />
+  </IconButton>
+</Box>
+```
+
+2. **Dialog Component Structure:**
+```tsx
+// Single entity dialog (QuickDonorCreateDialog)
+const QuickDonorCreateDialog: React.FC<Props> = ({ open, onClose, onSuccess, preFillData }) => {
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (data: FormData) => {
+    try {
+      const response = await apiClient.post('/api/donors', { donor: data });
+      onSuccess(response.data.donor); // Auto-select in autocomplete
+      onClose();
+    } catch (err: any) {
+      // Handle 422 validation errors and network errors
+      setError(extractErrorMessage(err));
+    }
+  };
+
+  return (
+    <>
+      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Create New Donor</DialogTitle>
+        <DialogContent>
+          <DonorForm onSubmit={handleSubmit} initialData={preFillData} />
+        </DialogContent>
+      </Dialog>
+      <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
+        <Alert severity="error">{error}</Alert>
+      </Snackbar>
+    </>
+  );
+};
+```
+
+3. **Tabbed Multi-Entity Dialog (QuickEntityCreateDialog - TICKET-021):**
+```tsx
+// Tabs for multiple entity types (Child/Project)
+const QuickEntityCreateDialog: React.FC<Props> = ({
+  open, onClose, onChildCreated, onProjectCreated, preFillText
+}) => {
+  const [currentTab, setCurrentTab] = useState<'child' | 'project'>('child');
+  const [childError, setChildError] = useState<string | null>(null);
+  const [projectError, setProjectError] = useState<string | null>(null);
+  const [dialogKey, setDialogKey] = useState(0); // Reset forms on close
+
+  // Separate handlers per entity type
+  const handleChildSubmit = async (data: ChildFormData) => { /* ... */ };
+  const handleProjectSubmit = async (data: ProjectFormData) => { /* ... */ };
+
+  const handleTabChange = (newTab: 'child' | 'project') => {
+    setChildError(null); // Clear errors on tab switch
+    setProjectError(null);
+    setCurrentTab(newTab);
+  };
+
+  useEffect(() => {
+    if (!open) {
+      setDialogKey(prev => prev + 1); // Reset forms when dialog closes
+      setCurrentTab('child');
+      setChildError(null);
+      setProjectError(null);
+    }
+  }, [open]);
+
+  return (
+    <>
+      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Create New Entity</DialogTitle>
+        <Tabs value={currentTab} onChange={handleTabChange}>
+          <Tab label="Create Child" value="child" />
+          <Tab label="Create Project" value="project" />
+        </Tabs>
+        <DialogContent key={dialogKey}>
+          <Box sx={{ display: currentTab === 'child' ? 'block' : 'none' }}>
+            <ChildForm onSubmit={handleChildSubmit} initialData={{ name: preFillText }} />
+          </Box>
+          <Box sx={{ display: currentTab === 'project' ? 'block' : 'none' }}>
+            <ProjectForm onSubmit={handleProjectSubmit} initialTitle={preFillText} />
+          </Box>
+        </DialogContent>
+      </Dialog>
+      {/* Separate Snackbar per tab for error isolation */}
+      <Snackbar open={!!childError}><Alert>{childError}</Alert></Snackbar>
+      <Snackbar open={!!projectError}><Alert>{projectError}</Alert></Snackbar>
+    </>
+  );
+};
+```
+
+**Key Features:**
+
+- **Pre-fill Support:** Pass search input to dialog (e.g., user types "John Doe" → pre-fills name field)
+- **Auto-selection:** Created entity immediately selected in autocomplete
+- **Error Handling:** 422 validation errors + network errors via Snackbar
+- **Error Isolation (Tabbed):** Separate error states per tab, cleared on tab switch
+- **Form Reset:** `dialogKey` pattern resets all forms when dialog closes (fresh state on reopen)
+- **State Preservation:** Parent form data preserved during entity creation
+- **No Cancel Button:** User closes via X or ESC (consistent with form pattern)
+- **API in Dialog:** Dialog handles API calls, form only returns data (follows SponsorshipModal pattern)
+
+**Implementation Checklist:**
+
+- [ ] Icon button with aria-label (accessibility)
+- [ ] Dialog with close button (X) in title
+- [ ] Pre-fill from autocomplete search input
+- [ ] Clear search input after creation
+- [ ] Auto-select created entity in autocomplete
+- [ ] Handle 422 validation errors (extract array, join with commas)
+- [ ] Handle network errors (generic message)
+- [ ] Snackbar auto-hide after 6 seconds
+- [ ] Jest tests (dialog + integration with parent form)
+- [ ] Cypress E2E tests (full workflow + validation)
+
+**Files (TICKET-021):**
+- Single entity: `QuickDonorCreateDialog.tsx` (150 lines)
+- Tabbed: `QuickEntityCreateDialog.tsx` (180 lines)
+- Integration: `DonationForm.tsx` (uses both dialogs)
+- Tests: 18 unit tests + 8 E2E tests
+
+**See:** TICKET-021 (Quick Entity Creation), TICKET-054 (SponsorshipModal reference pattern)
+
 #### React Router Multi-Page Architecture
 
 **Pattern:** App.tsx (router) → Layout (Outlet) → Pages (state)

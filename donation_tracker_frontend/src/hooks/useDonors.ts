@@ -23,7 +23,9 @@ export const useDonors = (): UseDonorsReturn => {
   const [donors, setDonors] = useState<Donor[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
+  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(
+    null
+  );
 
   const fetchDonors = useCallback(async (options: UseDonorsOptions = {}) => {
     setLoading(true);

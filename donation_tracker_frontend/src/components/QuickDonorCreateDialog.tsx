@@ -32,11 +32,14 @@ const QuickDonorCreateDialog: React.FC<QuickDonorCreateDialogProps> = ({
 
   const handleSubmit = async (data: DonorFormData) => {
     try {
+      console.log('QuickDonorCreateDialog: Submitting donor', data);
       const response = await apiClient.post('/api/donors', { donor: data });
+      console.log('QuickDonorCreateDialog: Success response', response.data);
       const newDonor = response.data.donor;
       onSuccess(newDonor);
       onClose();
     } catch (err: any) {
+      console.error('QuickDonorCreateDialog: Error creating donor', err);
       if (err.response?.status === 422) {
         const validationErrors = err.response.data.errors;
         const errorMessage = Array.isArray(validationErrors)

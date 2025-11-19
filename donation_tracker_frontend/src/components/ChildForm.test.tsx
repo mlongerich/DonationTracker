@@ -29,16 +29,22 @@ describe('ChildForm', () => {
     expect(screen.getByLabelText(/name/i)).toHaveValue('Maria');
   });
 
-  it('shows validation error when name is empty', async () => {
-    const mockSubmit = jest.fn();
+  it('disables submit button when name is empty', () => {
+    render(<ChildForm onSubmit={jest.fn()} />);
+
+    const submitButton = screen.getByRole('button', { name: /submit/i });
+    expect(submitButton).toBeDisabled();
+  });
+
+  it('enables submit button when name is provided', async () => {
     const user = userEvent.setup();
+    render(<ChildForm onSubmit={jest.fn()} />);
 
-    render(<ChildForm onSubmit={mockSubmit} />);
+    const submitButton = screen.getByRole('button', { name: /submit/i });
+    expect(submitButton).toBeDisabled();
 
-    await user.click(screen.getByRole('button', { name: /submit/i }));
-
-    expect(screen.getByText(/name is required/i)).toBeInTheDocument();
-    expect(mockSubmit).not.toHaveBeenCalled();
+    await user.type(screen.getByLabelText(/name/i), 'Maria');
+    expect(submitButton).toBeEnabled();
   });
 
   it('renders optional gender dropdown field', () => {

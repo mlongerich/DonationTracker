@@ -32,7 +32,9 @@ describe('DonationForm', () => {
   it('renders donor field', () => {
     render(<DonationForm />);
 
-    expect(screen.getByRole('combobox', { name: /donor/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('combobox', { name: /donor/i })
+    ).toBeInTheDocument();
   });
 
   it('renders submit button', () => {
@@ -509,18 +511,18 @@ describe('DonationForm', () => {
     });
   });
 
-  it('clicking create project icon opens QuickProjectCreateDialog', async () => {
+  it('clicking create project icon opens QuickEntityCreateDialog', async () => {
     const user = userEvent.setup();
     render(<DonationForm />);
 
-    // Find and click the create project icon button
-    const createProjectButton = screen.getByRole('button', {
-      name: /create project/i,
+    // Find and click the create entity icon button
+    const createButton = screen.getByRole('button', {
+      name: /create project or child/i,
     });
-    await user.click(createProjectButton);
+    await user.click(createButton);
 
     // Dialog should appear
-    expect(screen.getByText('Create New Project')).toBeInTheDocument();
+    expect(screen.getByText('Create New Entity')).toBeInTheDocument();
   });
 
   it('created project auto-selects in ProjectOrChildAutocomplete', async () => {
@@ -539,12 +541,19 @@ describe('DonationForm', () => {
     render(<DonationForm />);
 
     // Open dialog
-    const createProjectButton = screen.getByRole('button', {
-      name: /create project/i,
+    const createButton = screen.getByRole('button', {
+      name: /create project or child/i,
     });
-    await user.click(createProjectButton);
+    await user.click(createButton);
+
+    // Switch to project tab
+    const projectTab = screen.getByRole('tab', { name: /create project/i });
+    await user.click(projectTab);
 
     // Fill out and submit form
+    await waitFor(() => {
+      expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
+    });
     await user.type(screen.getByLabelText(/title/i), 'New Campaign');
     await user.type(
       screen.getByLabelText(/description/i),
@@ -564,7 +573,9 @@ describe('DonationForm', () => {
 
     render(<DonationForm />);
 
-    const projectField = screen.getByRole('combobox', { name: /donation for/i });
+    const projectField = screen.getByRole('combobox', {
+      name: /donation for/i,
+    });
     await user.type(projectField, 'Christmas');
 
     // Verify internal state is tracking input (will be used for pre-fill later)
@@ -580,21 +591,31 @@ describe('DonationForm', () => {
     render(<DonationForm />);
 
     // Type in project autocomplete
-    const projectField = screen.getByRole('combobox', { name: /donation for/i });
+    const projectField = screen.getByRole('combobox', {
+      name: /donation for/i,
+    });
     await user.type(projectField, 'Christmas Campaign');
 
-    // Click create project button
-    const createProjectButton = screen.getByRole('button', {
-      name: /create project/i,
+    // Click create button
+    const createButton = screen.getByRole('button', {
+      name: /create project or child/i,
     });
-    await user.click(createProjectButton);
+    await user.click(createButton);
 
-    // Verify dialog opened with pre-filled title
+    // Verify dialog opened with tabbed interface
     await waitFor(() => {
-      expect(screen.getByText('Create New Project')).toBeInTheDocument();
+      expect(screen.getByText('Create New Entity')).toBeInTheDocument();
     });
-    const titleField = screen.getByLabelText(/title/i);
-    expect(titleField).toHaveValue('Christmas Campaign');
+
+    // Switch to project tab
+    const projectTab = screen.getByRole('tab', { name: /create project/i });
+    await user.click(projectTab);
+
+    // Verify title field is pre-filled
+    await waitFor(() => {
+      const titleField = screen.getByLabelText(/title/i);
+      expect(titleField).toHaveValue('Christmas Campaign');
+    });
   });
 
   it('clears project search input after creating project', async () => {
@@ -613,20 +634,35 @@ describe('DonationForm', () => {
     render(<DonationForm />);
 
     // Type in project autocomplete
-    const projectField = screen.getByRole('combobox', { name: /donation for/i });
+    const projectField = screen.getByRole('combobox', {
+      name: /donation for/i,
+    });
     await user.type(projectField, 'New Campaign');
 
     // Open dialog and create project
-    await user.click(screen.getByRole('button', { name: /create project/i }));
+    await user.click(
+      screen.getByRole('button', { name: /create project or child/i })
+    );
+
+    // Switch to project tab
+    const projectTab = screen.getByRole('tab', { name: /create project/i });
+    await user.click(projectTab);
+
+    // Submit to create project
     await user.click(screen.getByRole('button', { name: /create project/i }));
 
     // Wait for dialog to close
     await waitFor(() => {
-      expect(screen.queryByText('Create New Project')).not.toBeInTheDocument();
+      expect(screen.queryByText('Create New Entity')).not.toBeInTheDocument();
     });
 
     // Open dialog again - should not have old search text pre-filled
-    await user.click(screen.getByRole('button', { name: /create project/i }));
+    await user.click(
+      screen.getByRole('button', { name: /create project or child/i })
+    );
+
+    // Switch to project tab
+    await user.click(screen.getByRole('tab', { name: /create project/i }));
 
     await waitFor(() => {
       expect(screen.getByLabelText(/title/i)).toHaveValue('');
@@ -638,11 +674,19 @@ describe('DonationForm', () => {
     render(<DonationForm />);
 
     // Type in project autocomplete
-    const projectField = screen.getByRole('combobox', { name: /donation for/i });
+    const projectField = screen.getByRole('combobox', {
+      name: /donation for/i,
+    });
     await user.type(projectField, 'Test Project');
 
     // Open dialog - should pre-fill title
-    await user.click(screen.getByRole('button', { name: /create project/i }));
+    await user.click(
+      screen.getByRole('button', { name: /create project or child/i })
+    );
+
+    // Switch to project tab
+    const projectTab = screen.getByRole('tab', { name: /create project/i });
+    await user.click(projectTab);
 
     await waitFor(() => {
       expect(screen.getByLabelText(/title/i)).toHaveValue('Test Project');
@@ -653,11 +697,16 @@ describe('DonationForm', () => {
 
     // Wait for dialog to close
     await waitFor(() => {
-      expect(screen.queryByText('Create New Project')).not.toBeInTheDocument();
+      expect(screen.queryByText('Create New Entity')).not.toBeInTheDocument();
     });
 
     // Reopen dialog - should be blank
-    await user.click(screen.getByRole('button', { name: /create project/i }));
+    await user.click(
+      screen.getByRole('button', { name: /create project or child/i })
+    );
+
+    // Switch to project tab
+    await user.click(screen.getByRole('tab', { name: /create project/i }));
 
     await waitFor(() => {
       expect(screen.getByLabelText(/title/i)).toHaveValue('');
@@ -671,21 +720,21 @@ describe('DonationForm', () => {
     // Fill out donation form with data
     await user.type(screen.getByLabelText(/amount/i), '250');
 
-    // Open create project dialog
-    const createProjectButton = screen.getByRole('button', {
-      name: /create project/i,
+    // Open create entity dialog
+    const createButton = screen.getByRole('button', {
+      name: /create project or child/i,
     });
-    await user.click(createProjectButton);
+    await user.click(createButton);
 
     // Verify dialog is open
-    expect(screen.getByText('Create New Project')).toBeInTheDocument();
+    expect(screen.getByText('Create New Entity')).toBeInTheDocument();
 
     // Close dialog by pressing Escape
     await user.keyboard('{Escape}');
 
     // Verify dialog is closed
     await waitFor(() => {
-      expect(screen.queryByText('Create New Project')).not.toBeInTheDocument();
+      expect(screen.queryByText('Create New Entity')).not.toBeInTheDocument();
     });
 
     // Verify donation form data is preserved

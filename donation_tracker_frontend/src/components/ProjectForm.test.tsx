@@ -59,7 +59,9 @@ describe('ProjectForm', () => {
   });
 
   it('pre-fills title field when initialTitle is provided', () => {
-    render(<ProjectForm onSubmit={jest.fn()} initialTitle="Christmas Campaign" />);
+    render(
+      <ProjectForm onSubmit={jest.fn()} initialTitle="Christmas Campaign" />
+    );
 
     const titleField = screen.getByLabelText(/title/i);
     expect(titleField).toHaveValue('Christmas Campaign');
@@ -68,7 +70,9 @@ describe('ProjectForm', () => {
   it('disables submit button when title is empty', () => {
     render(<ProjectForm onSubmit={jest.fn()} />);
 
-    const submitButton = screen.getByRole('button', { name: /create project/i });
+    const submitButton = screen.getByRole('button', {
+      name: /create project/i,
+    });
     expect(submitButton).toBeDisabled();
   });
 

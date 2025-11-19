@@ -8,11 +8,7 @@ import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import ProjectForm from '../components/ProjectForm';
 import ProjectList from '../components/ProjectList';
-import {
-  createProject,
-  updateProject,
-  deleteProject,
-} from '../api/client';
+import { createProject, updateProject, deleteProject } from '../api/client';
 import apiClient from '../api/client';
 import { Project } from '../types';
 import { useProjects } from '../hooks';

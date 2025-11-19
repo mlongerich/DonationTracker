@@ -14,7 +14,7 @@ import { createDonation } from '../api/client';
 import DonorAutocomplete, { Donor } from './DonorAutocomplete';
 import ProjectOrChildAutocomplete from './ProjectOrChildAutocomplete';
 import QuickDonorCreateDialog from './QuickDonorCreateDialog';
-import QuickProjectCreateDialog from './QuickProjectCreateDialog';
+import QuickEntityCreateDialog from './QuickEntityCreateDialog';
 import { parseCurrency } from '../utils/currency';
 
 interface Option {
@@ -42,8 +42,8 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
   const [success, setSuccess] = useState(false);
   const [donorDialogOpen, setDonorDialogOpen] = useState(false);
   const [donorSearchInput, setDonorSearchInput] = useState('');
-  const [projectDialogOpen, setProjectDialogOpen] = useState(false);
-  const [projectSearchInput, setProjectSearchInput] = useState('');
+  const [entityDialogOpen, setEntityDialogOpen] = useState(false);
+  const [entitySearchInput, setEntitySearchInput] = useState('');
 
   const handleDonorInputChange = (input: string) => {
     // Only update if input is not empty (MUI clears on blur)
@@ -52,10 +52,10 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
     }
   };
 
-  const handleProjectInputChange = (input: string) => {
+  const handleEntityInputChange = (input: string) => {
     // Only update if input is not empty (MUI clears on blur)
     if (input.trim()) {
-      setProjectSearchInput(input);
+      setEntitySearchInput(input);
     }
   };
 
@@ -133,16 +133,25 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
       name: newProject.title,
       type: 'project',
     });
-    setProjectSearchInput(''); // Clear search input after creating project
+    setEntitySearchInput(''); // Clear search input after creating project
   };
 
-  const handleOpenProjectDialog = () => {
-    setProjectDialogOpen(true);
+  const handleChildCreated = (newChild: any) => {
+    setSelectedProjectOrChild({
+      id: newChild.id,
+      name: newChild.name,
+      type: 'child',
+    });
+    setEntitySearchInput(''); // Clear search input after creating child
   };
 
-  const handleCloseProjectDialog = () => {
-    setProjectDialogOpen(false);
-    setProjectSearchInput(''); // Clear search input when dialog closes
+  const handleOpenEntityDialog = () => {
+    setEntityDialogOpen(true);
+  };
+
+  const handleCloseEntityDialog = () => {
+    setEntityDialogOpen(false);
+    setEntitySearchInput(''); // Clear search input when dialog closes
   };
 
   return (
@@ -158,12 +167,12 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
                 value={selectedProjectOrChild}
                 onChange={setSelectedProjectOrChild}
                 size="small"
-                onInputChange={handleProjectInputChange}
+                onInputChange={handleEntityInputChange}
               />
             </Box>
             <IconButton
-              aria-label="create project"
-              onClick={handleOpenProjectDialog}
+              aria-label="create project or child"
+              onClick={handleOpenEntityDialog}
               size="small"
               sx={{ flexShrink: 0 }}
             >
@@ -255,14 +264,15 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
         }
       />
 
-      <QuickProjectCreateDialog
-        open={projectDialogOpen}
-        onClose={handleCloseProjectDialog}
-        onSuccess={handleProjectCreated}
-        preFillTitle={
+      <QuickEntityCreateDialog
+        open={entityDialogOpen}
+        onClose={handleCloseEntityDialog}
+        onProjectCreated={handleProjectCreated}
+        onChildCreated={handleChildCreated}
+        preFillText={
           selectedProjectOrChild && selectedProjectOrChild.id > 0
             ? ''
-            : projectSearchInput
+            : entitySearchInput
         }
       />
     </>

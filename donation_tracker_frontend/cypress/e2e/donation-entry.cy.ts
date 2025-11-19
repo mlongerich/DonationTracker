@@ -199,7 +199,7 @@ describe('Donation Entry', () => {
       .contains('button', /submit/i)
       .click();
 
-    // Dialog should close and donor should be auto-selected in donation form
+    // Dialog should close after successful creation (no success message shown)
     cy.contains('Create New Donor', { timeout: 10000 }).should('not.exist');
 
     // Verify donor is auto-selected in the autocomplete
@@ -272,27 +272,33 @@ describe('Donation Entry', () => {
   it('creates project via quick create icon and completes donation', () => {
     cy.visit('/donations');
 
-    // Click the create project icon button next to project/child autocomplete
-    cy.get('button[aria-label="create project"]').click();
+    // Click the create entity icon button next to project/child autocomplete
+    cy.get('button[aria-label="create project or child"]').click();
 
-    // Verify QuickProjectCreateDialog appeared
-    cy.contains('Create New Project').should('be.visible');
+    // Verify QuickEntityCreateDialog appeared with tabs
+    cy.contains('Create New Entity').should('be.visible');
+
+    // Switch to project tab
+    cy.contains('button[role="tab"]', /create project/i).click();
 
     // Fill out project form in dialog
     const projectTitle = `Quick Project ${Date.now()}`;
 
-    cy.contains('Create New Project')
-      .parent()
-      .find('input')
+    // Find the visible required input (project title) within the dialog
+    cy.get('[role="dialog"]')
+      .find('input[required]')
+      .filter(':visible')
       .first()
       .type(projectTitle);
-    cy.contains('Create New Project')
-      .parent()
-      .contains('button', /create project/i)
+
+    // Submit project creation using the dialog's submit button
+    cy.get('[role="dialog"]')
+      .find('button[type="submit"]')
       .click();
 
-    // Dialog should close and project should be auto-selected
-    cy.contains('Create New Project', { timeout: 10000 }).should('not.exist');
+    // Wait for API call and dialog to close
+    cy.contains('Create New Entity', { timeout: 10000 }).should('not.exist');
+    cy.get('[role="dialog"]').should('not.exist');
 
     // Verify project is auto-selected in the autocomplete
     cy.contains('label', 'Donation For')
@@ -315,13 +321,17 @@ describe('Donation Entry', () => {
     // Navigate back to donations and complete the donation
     cy.visit('/donations');
 
+    // Ensure no dialogs are open
+    cy.contains('Create New Entity').should('not.exist');
+    cy.contains('Create New Donor').should('not.exist');
+
     // Project should still be selected (from earlier creation)
     cy.get('input[type="number"]').clear().type('150.00');
 
-    // Select donor from autocomplete
+    // Select donor from autocomplete (be specific to avoid clicking create donor button)
     cy.contains('label', 'Donor')
       .parent()
-      .find('input')
+      .find('input[role="combobox"]')
       .click()
       .type(donorName);
 
@@ -351,44 +361,216 @@ describe('Donation Entry', () => {
       .find('input')
       .type(searchText);
 
-    // Click create project icon
-    cy.get('button[aria-label="create project"]').click();
+    // Click create entity icon
+    cy.get('button[aria-label="create project or child"]').click();
 
-    // Verify dialog opened with pre-filled title
-    cy.contains('Create New Project').should('be.visible');
-    cy.contains('Create New Project')
+    // Verify dialog opened
+    cy.contains('Create New Entity').should('be.visible');
+
+    // Switch to project tab
+    cy.contains('button[role="tab"]', /create project/i).click();
+
+    // Verify title is pre-filled
+    cy.contains('label', /title/i)
       .parent()
-      .find('input[type="text"]')
-      .first()
+      .find('input')
       .should('have.value', searchText);
   });
 
   it('disables create button when project title is empty', () => {
     cy.visit('/donations');
 
-    // Click create project icon
-    cy.get('button[aria-label="create project"]').click();
+    // Click create entity icon
+    cy.get('button[aria-label="create project or child"]').click();
 
-    // Verify dialog opened
-    cy.contains('Create New Project').should('be.visible');
+    // Verify dialog opened with tabs
+    cy.contains('Create New Entity').should('be.visible');
 
-    // Submit button should be disabled when title is empty
-    cy.contains('Create New Project')
-      .parent()
-      .contains('button', /create project/i)
+    // Switch to project tab
+    cy.contains('button[role="tab"]', /create project/i).click();
+
+    // Wait for form to appear, then find the submit button (NOT the tab button)
+    cy.get('[role="dialog"]')
+      .find('button[type="submit"]')
       .should('be.disabled');
 
     // Type in title field
-    cy.contains('Create New Project')
+    cy.contains('label', /title/i)
       .parent()
-      .find('input[type="text"]')
-      .first()
+      .find('input')
       .type('Valid Title');
 
     // Submit button should now be enabled
-    cy.contains('Create New Project')
-      .parent()
-      .contains('button', /create project/i)
+    cy.get('[role="dialog"]')
+      .find('button[type="submit"]')
       .should('not.be.disabled');
+  });
+
+  it('disables create button when child name is empty', () => {
+    cy.visit('/donations');
+
+    // Click create entity icon
+    cy.get('button[aria-label="create project or child"]').click();
+
+    // Verify dialog opened with child tab as default
+    cy.contains('Create New Entity').should('be.visible');
+    cy.contains('button[role="tab"]', /create child/i).should('have.attr', 'aria-selected', 'true');
+
+    // Submit button should be disabled when name is empty
+    cy.get('[role="dialog"]')
+      .find('button[type="submit"]')
+      .should('be.disabled');
+
+    // Type in name field
+    cy.contains('label', /name/i)
+      .parent()
+      .find('input')
+      .type('Maria');
+
+    // Submit button should now be enabled
+    cy.get('[role="dialog"]')
+      .find('button[type="submit"]')
+      .should('not.be.disabled');
+  });
+
+  it('creates child via tabbed dialog and completes donation', () => {
+    cy.visit('/donations');
+
+    // Click the create entity icon
+    cy.get('button[aria-label="create project or child"]').click();
+
+    // Verify dialog appeared with tabs (defaults to child tab)
+    cy.contains('Create New Entity').should('be.visible');
+    cy.contains('button[role="tab"]', /create child/i).should('have.attr', 'aria-selected', 'true');
+
+    // Fill out child form
+    const childName = `Quick Child ${Date.now()}`;
+    cy.contains('label', /name/i)
+      .parent()
+      .find('input')
+      .type(childName);
+
+    // Submit child creation
+    cy.contains('button', /submit/i).click();
+
+    // Dialog should close and child should be auto-selected
+    cy.contains('Create New Entity', { timeout: 10000 }).should('not.exist');
+
+    // Verify child is auto-selected in the autocomplete
+    cy.contains('label', 'Donation For')
+      .parent()
+      .find('input')
+      .should('have.value', childName);
+  });
+
+  it('switches between tabs and preserves form state', () => {
+    cy.visit('/donations');
+
+    // Open dialog
+    cy.get('button[aria-label="create project or child"]').click();
+
+    // Fill child form
+    cy.contains('label', /name/i)
+      .parent()
+      .find('input')
+      .type('Test Child');
+
+    // Switch to project tab
+    cy.contains('button[role="tab"]', /create project/i).click();
+
+    // Fill project form
+    cy.contains('label', /title/i)
+      .parent()
+      .find('input')
+      .type('Test Project');
+
+    // Switch back to child tab
+    cy.contains('button[role="tab"]', /create child/i).click();
+
+    // Verify child form state preserved
+    cy.contains('label', /name/i)
+      .parent()
+      .find('input')
+      .should('have.value', 'Test Child');
+
+    // Switch to project tab again
+    cy.contains('button[role="tab"]', /create project/i).click();
+
+    // Verify project form state preserved
+    cy.contains('label', /title/i)
+      .parent()
+      .find('input')
+      .should('have.value', 'Test Project');
+  });
+
+  it('pre-fills entity name from search input', () => {
+    cy.visit('/donations');
+
+    // Type in project/child autocomplete
+    cy.contains('label', 'Donation For')
+      .parent()
+      .find('input')
+      .type('Christmas Campaign');
+
+    // Click create entity button
+    cy.get('button[aria-label="create project or child"]').click();
+
+    // Verify dialog opened
+    cy.contains('Create New Entity').should('be.visible');
+
+    // Child tab is default - verify child name is pre-filled
+    cy.contains('label', /name/i)
+      .parent()
+      .find('input')
+      .should('have.value', 'Christmas Campaign');
+
+    // Switch to project tab
+    cy.contains('button[role="tab"]', /create project/i).click();
+
+    // Verify project title is also pre-filled
+    cy.contains('label', /title/i)
+      .parent()
+      .find('input')
+      .should('have.value', 'Christmas Campaign');
+  });
+
+  it('resets form state when dialog closes and reopens', () => {
+    cy.visit('/donations');
+
+    // Open dialog
+    cy.get('button[aria-label="create project or child"]').click();
+
+    // Fill child form
+    cy.contains('label', /name/i)
+      .parent()
+      .find('input')
+      .type('Temp Child');
+
+    // Switch to project tab and fill
+    cy.contains('button[role="tab"]', /create project/i).click();
+    cy.contains('label', /title/i)
+      .parent()
+      .find('input')
+      .type('Temp Project');
+
+    // Close dialog
+    cy.get('body').type('{esc}');
+    cy.contains('Create New Entity').should('not.exist');
+
+    // Reopen dialog
+    cy.get('button[aria-label="create project or child"]').click();
+
+    // Verify child form is reset (default tab)
+    cy.contains('label', /name/i)
+      .parent()
+      .find('input')
+      .should('have.value', '');
+
+    // Switch to project tab and verify it's reset
+    cy.contains('button[role="tab"]', /create project/i).click();
+    cy.contains('label', /title/i)
+      .parent()
+      .find('input')
+      .should('have.value', '');
   });
 });

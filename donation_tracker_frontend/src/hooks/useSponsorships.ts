@@ -23,45 +23,50 @@ export const useSponsorships = (): UseSponsorshipsReturn => {
   const [sponsorships, setSponsorships] = useState<Sponsorship[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(null);
+  const [paginationMeta, setPaginationMeta] = useState<PaginationMeta | null>(
+    null
+  );
 
-  const fetchSponsorships = useCallback(async (options: UseSponsorshipsOptions = {}) => {
-    setLoading(true);
-    setError(null);
+  const fetchSponsorships = useCallback(
+    async (options: UseSponsorshipsOptions = {}) => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const params: Record<string, unknown> = {
-        page: options.page || 1,
-        per_page: options.perPage || 25,
-      };
+      try {
+        const params: Record<string, unknown> = {
+          page: options.page || 1,
+          per_page: options.perPage || 25,
+        };
 
-      const queryParams: Record<string, unknown> = {};
+        const queryParams: Record<string, unknown> = {};
 
-      if (options.search?.trim()) {
-        queryParams.donor_name_or_child_name_cont = options.search;
+        if (options.search?.trim()) {
+          queryParams.donor_name_or_child_name_cont = options.search;
+        }
+
+        if (!options.showEnded) {
+          queryParams.end_date_null = true;
+        }
+
+        if (Object.keys(queryParams).length > 0) {
+          params.q = queryParams;
+        }
+
+        if (options.childId) {
+          params.child_id = options.childId;
+        }
+
+        const response = await apiClient.get('/api/sponsorships', { params });
+        setSponsorships(response.data.sponsorships);
+        setPaginationMeta(response.data.meta);
+      } catch (err: any) {
+        setError(err.response?.data?.error || 'Failed to fetch sponsorships');
+      } finally {
+        setLoading(false);
       }
-
-      if (!options.showEnded) {
-        queryParams.end_date_null = true;
-      }
-
-      if (Object.keys(queryParams).length > 0) {
-        params.q = queryParams;
-      }
-
-      if (options.childId) {
-        params.child_id = options.childId;
-      }
-
-      const response = await apiClient.get('/api/sponsorships', { params });
-      setSponsorships(response.data.sponsorships);
-      setPaginationMeta(response.data.meta);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to fetch sponsorships');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   const endSponsorship = useCallback(async (id: number) => {
     try {

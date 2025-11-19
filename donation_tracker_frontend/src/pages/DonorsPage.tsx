@@ -30,13 +30,8 @@ const DonorsPage = () => {
 
   const { currentPage, handlePageChange, resetToFirstPage } = usePagination();
 
-  const {
-    donors,
-    paginationMeta,
-    fetchDonors,
-    archiveDonor,
-    restoreDonor,
-  } = useDonors();
+  const { donors, paginationMeta, fetchDonors, archiveDonor, restoreDonor } =
+    useDonors();
 
   // Reset to page 1 when search changes
   useEffect(() => {
@@ -90,19 +85,21 @@ const DonorsPage = () => {
         setFormKey((prev) => prev + 1); // Reset form after create
       }
 
-      // Refresh donor list
-      fetchDonors({
+      setError(null);
+
+      // Refresh donor list after state updates
+      await fetchDonors({
         page: currentPage,
         perPage: 10,
         search: debouncedQuery,
         includeDiscarded: showArchived,
       });
-      setError(null);
     } catch (err: any) {
       const errorMessage =
         err.response?.data?.error ||
         err.response?.data?.errors?.[0] ||
         `Failed to ${editingDonor ? 'update' : 'create'} donor`;
+      console.error('Donor submit error:', errorMessage, err);
       setError(errorMessage);
     }
   };
@@ -216,6 +213,7 @@ const DonorsPage = () => {
         autoHideDuration={6000}
         onClose={() => setSuccessMessage(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        data-testid="success-snackbar"
       >
         <Alert severity="success" onClose={() => setSuccessMessage(null)}>
           {successMessage}

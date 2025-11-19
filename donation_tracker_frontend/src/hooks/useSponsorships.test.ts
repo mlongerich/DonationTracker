@@ -20,8 +20,20 @@ describe('useSponsorships', () => {
 
   it('fetches sponsorships successfully', async () => {
     const mockSponsorships = [
-      { id: 1, donor_id: 1, child_id: 1, amount: 5000, start_date: '2024-01-01' },
-      { id: 2, donor_id: 2, child_id: 2, amount: 7500, start_date: '2024-01-15' },
+      {
+        id: 1,
+        donor_id: 1,
+        child_id: 1,
+        amount: 5000,
+        start_date: '2024-01-01',
+      },
+      {
+        id: 2,
+        donor_id: 2,
+        child_id: 2,
+        amount: 7500,
+        start_date: '2024-01-15',
+      },
     ];
     const mockMeta = { total_pages: 1, current_page: 1, total_count: 2 };
 
