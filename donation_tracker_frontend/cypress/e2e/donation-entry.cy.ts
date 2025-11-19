@@ -362,4 +362,33 @@ describe('Donation Entry', () => {
       .first()
       .should('have.value', searchText);
   });
+
+  it('disables create button when project title is empty', () => {
+    cy.visit('/donations');
+
+    // Click create project icon
+    cy.get('button[aria-label="create project"]').click();
+
+    // Verify dialog opened
+    cy.contains('Create New Project').should('be.visible');
+
+    // Submit button should be disabled when title is empty
+    cy.contains('Create New Project')
+      .parent()
+      .contains('button', /create project/i)
+      .should('be.disabled');
+
+    // Type in title field
+    cy.contains('Create New Project')
+      .parent()
+      .find('input[type="text"]')
+      .first()
+      .type('Valid Title');
+
+    // Submit button should now be enabled
+    cy.contains('Create New Project')
+      .parent()
+      .contains('button', /create project/i)
+      .should('not.be.disabled');
+  });
 });

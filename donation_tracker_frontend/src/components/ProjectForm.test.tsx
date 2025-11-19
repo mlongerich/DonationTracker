@@ -64,4 +64,18 @@ describe('ProjectForm', () => {
     const titleField = screen.getByLabelText(/title/i);
     expect(titleField).toHaveValue('Christmas Campaign');
   });
+
+  it('disables submit button when title is empty', () => {
+    render(<ProjectForm onSubmit={jest.fn()} />);
+
+    const submitButton = screen.getByRole('button', { name: /create project/i });
+    expect(submitButton).toBeDisabled();
+  });
+
+  it('shows required indicator on title field', () => {
+    render(<ProjectForm onSubmit={jest.fn()} />);
+
+    const titleField = screen.getByLabelText(/title/i);
+    expect(titleField).toBeRequired();
+  });
 });

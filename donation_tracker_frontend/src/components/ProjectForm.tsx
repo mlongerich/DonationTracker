@@ -42,6 +42,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSubmit, project, initialTit
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           size="small"
+          required
         />
         <TextField
           label="Description"
@@ -64,7 +65,7 @@ const ProjectForm: React.FC<ProjectFormProps> = ({ onSubmit, project, initialTit
           <MenuItem value="campaign">Campaign</MenuItem>
           <MenuItem value="sponsorship">Sponsorship</MenuItem>
         </TextField>
-        <Button type="submit" variant="contained">
+        <Button type="submit" variant="contained" disabled={!title.trim()}>
           {project ? 'Update Project' : 'Create Project'}
         </Button>
       </Stack>
