@@ -83,10 +83,17 @@ class ProjectService
   #   result[:project] # => #<Project id: 5, title: "Christmas Campaign">
   #   result[:created] # => false (found existing)
   def self.find_or_update_by_title(project_attributes, transaction_date)
-    title = project_attributes[:title]
-    existing = Project.where("LOWER(title) = LOWER(?)", title).first
+    title = project_attributes[:title]&.strip
+    return create_new_project(project_attributes, transaction_date) if title.blank?
+
+    existing = Project.kept.where("LOWER(title) = LOWER(?)", title).first
 
     if existing
+      # Don't update system projects
+      if existing.system?
+        return { project: existing, created: false }
+      end
+
       # Update if newer
       if existing.updated_at.nil? || transaction_date > existing.updated_at
         existing.update!(
@@ -97,13 +104,22 @@ class ProjectService
       end
       { project: existing, created: false }
     else
-      # Create new
-      project = Project.create!(project_attributes.merge(
-        created_at: transaction_date,
-        updated_at: transaction_date
-      ))
-      { project: project, created: true }
+      create_new_project(project_attributes, transaction_date)
     end
+  end
+
+  private
+
+  def self.create_new_project(project_attributes, transaction_date)
+    # Strip title before creating
+    attrs = project_attributes.dup
+    attrs[:title] = attrs[:title]&.strip
+
+    project = Project.create!(attrs.merge(
+      created_at: transaction_date,
+      updated_at: transaction_date
+    ))
+    { project: project, created: true }
   end
 end
 ```
@@ -196,15 +212,18 @@ end
 **System Projects:**
 - "General Donation" is a system project (`system: true`)
 - Should NOT be updated by find-or-create
-- Consider adding check: `existing.system? ? create_new : update_existing`
+- **Decision:** Skip update if `existing.system?` returns true (preserve system project data)
+- Only return existing system project, never modify it
 
 **Whitespace/Trimming:**
 - Titles should be trimmed and normalized
 - "  Christmas  " should match "Christmas"
+- **Decision:** Use `.strip` on title before comparison
 
 **Soft-Deleted Projects:**
 - Should `discarded_at IS NULL` be part of the query?
-- Or should we restore soft-deleted projects?
+- **Decision:** Only find kept (non-discarded) projects - use `Project.kept.where(...)`
+- Discarded projects should not be restored automatically (requires explicit user action)
 
 ### Files to Create/Modify
 

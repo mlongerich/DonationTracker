@@ -1,11 +1,10 @@
 ## [TICKET-071] Stripe CSV Batch Import Task
 
-**Status:** 🟡 Blocked - Pending User Testing
+**Status:** ✅ Ready for User Testing
 **Priority:** 🔴 High
-**Dependencies:** TICKET-070 (Stripe CSV Import Foundation)
-**Blocked By:** User acceptance testing
+**Dependencies:** TICKET-070 (Stripe CSV Import Foundation) ✅, TICKET-110 (Status Tracking) ✅
 **Created:** 2025-11-01
-**Updated:** 2025-11-03
+**Updated:** 2025-11-19
 
 **🔄 CODE LIFECYCLE: MVP - Temporary Until Webhooks (TICKET-026)**
 
@@ -17,6 +16,25 @@
 
 **PERMANENT code is in TICKET-070 (StripePaymentImportService).**
 Delete this ticket's code ONLY AFTER TICKET-026 (webhooks) is complete and stable.
+
+---
+
+## 🎯 Quick Summary
+
+**Implementation:** ✅ **COMPLETE** (All code implemented in TICKET-110)
+
+**What's Left:** User testing only - run the import and verify results
+
+**How to Test:**
+```bash
+docker-compose exec api rails stripe:import_csv
+```
+
+Then check http://localhost:3001/admin to review imported donations.
+
+**Expected Result:** ~1,200-1,300 donations imported with status breakdown (succeeded/failed/needs_attention)
+
+---
 
 ### User Story
 As an admin, I want to run a rake task to import the entire Stripe CSV file so that I can bulk-load all historical transactions with progress tracking and error reporting.
@@ -31,21 +49,31 @@ TICKET-070 provides `StripePaymentImportService` for importing single payment re
 - Generate import summary report
 
 ### Acceptance Criteria
+
+#### Implementation (✅ Complete - TICKET-110)
 - [x] Backend: Rake task `rails stripe:import_csv[file_path]`
 - [x] Backend: Read CSV with headers correctly
-- [x] Backend: Filter for 'succeeded' status only
 - [x] Backend: Process each row using `StripePaymentImportService`
-- [x] Backend: Track counts (imported, skipped, failed)
+- [x] Backend: **Status-based counting** (succeeded/failed/needs_attention)
+- [x] Backend: Track skipped count (idempotent re-runs)
 - [x] Backend: Continue processing on row failures (don't abort)
-- [x] Backend: Capture error details (row number, error message, row data)
-- [x] Backend: Display progress (removed - not needed for one-time use)
-- [x] Backend: Print summary report at end
+- [x] Backend: Capture service error details (row number, error message, row data)
+- [x] Backend: Print summary report with status breakdown
 - [x] Backend: Default file path to `Rails.root.join('PFAOnlinePayments-Stripe.csv')`
 - [x] Backend: Validate file exists before processing
-- [x] Backend: RSpec tests for rake task (using test CSV fixtures)
-- [x] All tests pass (91% coverage - acceptable for temporary code)
+- [x] Backend: RSpec tests (8 examples, 0 failures)
 - [x] Update CLAUDE.md with batch import task pattern
 - [x] **BONUS:** Enhanced project pattern mapping (blank, numbers, subscription, payment app, stripe app → General Donation)
+- [x] **BONUS:** CLEAR_BEFORE_IMPORT env flag for fresh imports
+
+#### User Testing (🔵 Pending)
+- [ ] Run import with production CSV file (PFAOnlinePayments-Stripe.csv)
+- [ ] Verify succeeded donations created correctly
+- [ ] Verify failed/refunded/canceled donations flagged as needs_attention
+- [ ] Verify duplicate detection (idempotent re-runs work)
+- [ ] Review any service errors and determine if data issues or bugs
+- [ ] Validate sponsorship auto-creation from subscription payments
+- [ ] Confirm project mapping accuracy (General Donation vs named projects)
 
 ### Technical Approach
 
@@ -392,12 +420,53 @@ end
 - Provides value over weeks/months, not just once
 - Delete only after replacement (webhooks) proven stable
 
+### Testing Instructions
+
+**1. Run the import:**
+```bash
+docker-compose exec api rails stripe:import_csv
+```
+
+**2. Review output:**
+```
+✅ Import complete!
+
+Summary:
+  Imported Total:     1285 donations
+  - Succeeded:        1200 donations
+  - Failed:           50 donations
+  - Needs Attention:  35 donations (duplicate in invoice, refunded, canceled)
+  Skipped:            115
+  Errors:             3
+```
+
+**3. Check donations in Admin tab:**
+- Navigate to http://localhost:3001/admin
+- Verify succeeded donations appear with correct amounts/dates
+- Check "Needs Attention" tab for failed/refunded/canceled donations
+- Look for service errors and report any data issues
+
+**4. Test idempotency (re-run):**
+```bash
+docker-compose exec api rails stripe:import_csv
+```
+- Should show all donations as "Skipped"
+- No duplicates created
+
+**5. Fresh import (optional):**
+```bash
+CLEAR_BEFORE_IMPORT=true docker-compose exec api rails stripe:import_csv
+```
+- ⚠️ **DESTRUCTIVE**: Deletes all donations, sponsorships, stripe_invoices
+- Use for testing only, not production
+
 ### Notes
-- CSV file: `PFAOnlinePayments-Stripe.csv` (1,445 rows, 1,303 succeeded)
-- Actual: 1,225 donations created (some multi-child split into 2+ donations, some skipped)
-- Runtime: ~30 seconds for full import
-- Safe to re-run multiple times (idempotent via stripe_invoice_id checking)
-- Failed rows can be tracked via TICKET-076 (Failed Payments Tracking)
+- CSV file: `PFAOnlinePayments-Stripe.csv` (3 MB, ~1,445 rows)
+- Expected: ~1,200-1,300 donations created (some multi-child split, some skipped)
+- Runtime: ~30-60 seconds for full import
+- Safe to re-run multiple times (idempotent via stripe_invoice_id/charge_id checking)
+- **Status tracking via TICKET-110** (succeeded/failed/needs_attention)
+- **Admin UI via TICKET-111** (review needs_attention donations)
 - **MVP in production: Will be run regularly with new CSV exports until TICKET-026 complete**
 - **Webhooks (TICKET-026) use StripePaymentImportService directly**
 - **Estimated lifespan: Several weeks/months until webhooks stable**
