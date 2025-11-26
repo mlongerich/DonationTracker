@@ -1,12 +1,26 @@
 ## [TICKET-120] Add Cancel Button to All Edit Forms for UX Consistency
 
-**Status:** 📋 Planned
+**Status:** ❌ Canceled
 **Priority:** 🟡 Medium
 **Effort:** S (Small - 1-2 hours)
 **Created:** 2025-11-18
 **Updated:** 2025-11-18 (reversed direction - ADD Cancel buttons instead of removing)
+**Canceled:** 2025-11-26
 **Dependencies:** None
 **Identified By:** CODE_SMELL_ANALYSIS (2025-11-18) + User Feedback
+
+### Cancellation Reason
+
+**Canceled by:** CODE_SMELL_ANALYSIS (2025-11-26)
+
+**Reason:** Design decision reversed. Project pattern is **"No Cancel Buttons"** on forms (per TICKET-050 and CLAUDE.md conventions).
+
+**New Direction:**
+- Remove Cancel buttons from DonorForm and SponsorshipForm (opposite of this ticket's goal)
+- Use close X button on dialogs instead of Cancel buttons
+- See TICKET-127 for implementation of correct pattern
+
+**Original Intent:** This ticket proposed adding Cancel buttons to ChildForm and ProjectForm to match DonorForm's pattern. However, the project standard is to NOT have Cancel buttons on forms.
 
 ### User Story
 As a user, I want a Cancel button when editing entities so that I can easily exit edit mode without having to submit changes or navigate away from the page.

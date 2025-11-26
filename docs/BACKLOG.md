@@ -158,102 +158,23 @@ Cypress.Commands.add('createSponsorships', (count) => {
 ---
 
 ### [Frontend Repository Pattern for API Calls]
-**Status:** 💡 **Identified in CODE_SMELL_ANALYSIS - Consider for future**
+**Status:** ✅ **Converted to TICKET-131** (Different approach: Custom Hooks)
 **Added:** 2025-11-18
-**Priority:** 🟢 Low
-**Effort:** M
+**Converted:** 2025-11-26
 
-**Description:**
-Centralize API endpoint definitions using Repository pattern instead of scattered `apiClient.get/post/put` calls throughout page components.
+**Note:** Instead of Repository pattern, we're extending custom hooks (useDonors, useChildren, useProjects) with CRUD methods. This achieves the same goals (centralize API calls, DRY principle) while leveraging existing hook infrastructure.
 
-**Current State:**
-```tsx
-// Scattered across pages (DonorsPage, ChildrenPage, etc.)
-const response = await apiClient.get('/api/donors', { params });
-await apiClient.post('/api/children', { child: data });
-```
-
-**Proposed Pattern:**
-```tsx
-// src/repositories/DonorRepository.ts
-export const DonorRepository = {
-  list: (params) => apiClient.get('/api/donors', { params }),
-  create: (data) => apiClient.post('/api/donors', { donor: data }),
-  update: (id, data) => apiClient.patch(`/api/donors/${id}`, { donor: data }),
-  archive: (id) => apiClient.delete(`/api/donors/${id}`),
-  restore: (id) => apiClient.post(`/api/donors/${id}/restore`),
-};
-
-// Usage in pages
-const response = await DonorRepository.list({ page, per_page });
-```
-
-**User Value:**
-- Centralized API endpoint definitions (easier to maintain)
-- Type safety for API calls
-- Easier to mock for testing
-- DRY principle (no duplicate endpoint strings)
-
-**Technical Approach:**
-- Create `src/repositories/` directory
-- Extract repository for each entity (Donor, Child, Donation, Project, Sponsorship)
-- Update pages to use repositories instead of direct apiClient calls
-- Update tests to mock repositories
-
-**Considerations:**
-- Current `api/client.ts` already has some helpers (createDonation, mergeDonors)
-- Small codebase - current pattern is manageable
-- Could formalize pattern incrementally (one repository at a time)
-- Not documented in CLAUDE.md yet
-
-**Dependencies:**
-- None (can be implemented independently)
-
-**Decision:** Defer to backlog. Current pattern works well for small codebase. Revisit if:
-- API calls become harder to maintain (>5 endpoints per entity)
-- Type safety issues emerge
-- Team grows (need clearer API contract)
+**See:** TICKET-131 - Extend Custom Hooks with CRUD Methods
 
 ---
 
 ### [Error Handling Policy Documentation]
-**Status:** 💡 **Identified in CODE_SMELL_ANALYSIS - Document existing practice**
+**Status:** ✅ **Covered by TICKET-127** (CLAUDE.md update)
 **Added:** 2025-11-18
-**Priority:** 🟢 Low
-**Effort:** XS
+**Covered:** 2025-11-26
 
-**Description:**
-Document the established error handling policy for frontend components in CLAUDE.md.
+**Note:** TICKET-127 includes a CLAUDE.md documentation update for Form Component Pattern. Error handling policy will be documented as part of that ticket's broader pattern documentation.
 
-**Current State (Implicit, not documented):**
-```tsx
-// Read operations - Silent error handling
-catch (error) {
-  // Error silently handled - user will see empty list
-}
-
-// Write operations - Show error messages
-catch (err: any) {
-  setError(err.response.data.errors?.join(', ') || 'Failed to archive donor');
-}
-```
-
-**User Value:**
-- Consistent error handling across components
-- Clear guidance for future development
-- Better user experience (know when to show errors vs silent handling)
-
-**Technical Approach:**
-- Add "Frontend Error Handling Policy" section to CLAUDE.md
-- Document existing patterns:
-  - **Read operations (GET):** Silent error handling, show empty state
-  - **Write operations (POST/PUT/PATCH):** Show Alert/Snackbar with error message
-  - **Critical operations (DELETE, MERGE):** Show detailed error messages with status codes
-- Reference existing implementations (DonorsPage, ChildrenPage, DonationsPage)
-
-**Dependencies:**
-- None (documentation only)
-
-**Decision:** Low priority. Current practice is consistent and working well. Document when doing other CLAUDE.md updates.
+**See:** TICKET-127 - Form & Dialog UX Consistency (includes CLAUDE.md documentation update)
 
 ---

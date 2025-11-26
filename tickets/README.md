@@ -92,6 +92,7 @@ Current work items and user stories being actively developed.
 
 - [TICKET-041: Add Test Coverage for API Client Methods](canceled/TICKET-041-api-client-test-coverage.md) - ❌ Canceled (2025-11-07) - E2E tests provide sufficient coverage, existing Jest mocks adequate for unit testing HTTP layer
 - [TICKET-051: Add Project Type Filter & Pagination to Projects Page](TICKET-051-project-page-type-sort-filter.md) - ❌ Superseded (2025-11-17) - TICKET-119 moves Projects to Admin tab instead
+- [TICKET-120: Add Cancel Button to All Edit Forms](canceled/TICKET-120-form-cancel-button-standardization.md) - ❌ Canceled (2025-11-26) - Wrong direction, project pattern is "No Cancel Buttons" (see TICKET-127)
 
 ### 📋 Planned Tickets
 
@@ -185,6 +186,8 @@ Current work items and user stories being actively developed.
 - [TICKET-034: Create Query Objects for Complex Database Queries](TICKET-034-create-query-objects-complex-database-queries.md) - 📋 Planned (🟡 Medium, M) - *Updated with ChildrenController example*
 - [TICKET-037: Standardize Service Object Patterns](TICKET-037-standardize-service-object-patterns.md) - 📋 Planned (🟡 Medium, S) - *Updated with .call interface*
 - [TICKET-033: Implement Policy Objects for Authorization](TICKET-033-implement-policy-objects-authorization.md) - 📋 Planned (🟡 Medium, M)
+- [TICKET-127: Form & Dialog UX Consistency (No Cancel Buttons)](TICKET-127-sponsorshipmodal-dialog-consistency.md) - 📋 Planned (🟡 Medium, M - 2-3h) - *Remove Cancel buttons, add dialog close X, fullWidth fixes*
+- [TICKET-131: Extend Custom Hooks with CRUD Methods](TICKET-131-extend-custom-hooks-crud-methods.md) - 📋 Planned (🟡 Medium, M - 3-4h) - *Move API calls from pages to hooks (DRY)*
 
 **Low Priority:**
 - [TICKET-039: Add Donation Status Enum Validation](TICKET-039-add-donation-status-enum-validation.md) - 📋 Planned (🟢 Low, S)
@@ -192,20 +195,20 @@ Current work items and user stories being actively developed.
 - [TICKET-043: Refine Controller Concerns Implementation](TICKET-043-refine-controller-concerns-implementation.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-045: Refactor DonorImportService Complexity](TICKET-045-refactor-donor-import-service-complexity.md) - 📋 Planned (🟢 Low, M)
 - [TICKET-098: Evaluate Form Objects Pattern](TICKET-098-evaluate-form-objects-pattern.md) - 📋 Planned (🟢 Low, S) - *Research ticket for complex form validation*
-- [TICKET-120: Remove Cancel Button from DonorForm](TICKET-120-donorform-cancel-button-removal.md) - 📋 Planned (🟡 Medium, XS) - *Pattern consistency fix*
+- [TICKET-132: Add Inline Comments to Ransackable Methods](TICKET-132-add-ransackable-method-comments.md) - 📋 Planned (🟢 Low, XS - 30min) - *Document security purpose in models*
 
 ---
 
 ## Quick Stats
 
-- **Total Tickets:** 114 (added TICKET-099✅, TICKET-021✅, TICKET-121-125)
-- **Completed:** 59 (52%)
+- **Total Tickets:** 117 (added TICKET-127, TICKET-131, TICKET-132 from CODE_SMELL_ANALYSIS)
+- **Completed:** 59 (50%)
 - **In Progress:** 0
-- **Planned:** 53
-- **Estimated Hours Remaining:** ~189.5 hours (~4.7 weeks)
+- **Planned:** 55
+- **Estimated Hours Remaining:** ~195.5 hours (~4.9 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
-- **Canceled/Superseded:** 2 (TICKET-041, TICKET-051)
+- **Canceled/Superseded:** 3 (TICKET-041, TICKET-051, TICKET-120)
 
 ### By Category
 
@@ -225,14 +228,17 @@ Current work items and user stories being actively developed.
 - **Testing & Quality Assurance:** 10 planned (~27h), 1 completed
   - ✅ TICKET-108: E2E Test Infrastructure (complete)
   - New: TICKET-121 (Children E2E), TICKET-122 (Donations E2E), TICKET-123 (Projects E2E), TICKET-124 (Cross-feature E2E), TICKET-125 (Accessibility E2E)
-- **Code Quality & Architecture:** 8 planned (~26.5h), 30 completed
+- **Code Quality & Architecture:** 10 planned (~32.5h), 30 completed
   - ✅ TICKET-099: Expand Custom Hooks Library (complete)
-  - New: TICKET-120 (DonorForm Cancel button removal - 0.5h)
-  - Existing: TICKET-098 (Form Objects research)
+  - ❌ TICKET-120: Canceled (wrong direction - adds Cancel buttons)
+  - New from CODE_SMELL_ANALYSIS (2025-11-26):
+    - TICKET-127: Form & Dialog UX Consistency (2-3h)
+    - TICKET-131: Extend Custom Hooks with CRUD Methods (3-4h)
+    - TICKET-132: Add Ransackable Method Comments (0.5h)
 - **In Progress:** 0
 - **Blocked:** 1 (TICKET-071)
 - **Deferred/Accepted Risk:** 1 (TICKET-049)
-- **Canceled/Superseded:** 2 (TICKET-041, TICKET-051)
+- **Canceled/Superseded:** 3 (TICKET-041, TICKET-051, TICKET-120)
 
 ### Code Lifecycle Guide
 
