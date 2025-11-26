@@ -990,6 +990,33 @@ function Layout() {
 
 **See:** docs/PATTERNS.md for full backup system details
 
+#### Documentation Check Bypass Options
+
+**Pre-commit hook validates documentation updates** for CLAUDE.md, DonationTracking.md, README.md, and ticket files when TICKET-XXX detected in changes.
+
+**Bypass when appropriate:**
+- Hotfixes requiring immediate deployment
+- Work-in-progress commits
+- Doc-only changes
+- Cases where docs truly don't need updating
+
+**Option 1: Environment Variable (one-off)**
+```bash
+SKIP_DOC_CHECK=1 git commit -m "hotfix: urgent bug fix"
+```
+
+**Option 2: Commit Message Tag (documented exception)**
+```bash
+git commit -m "wip: partial implementation [skip-docs]"
+```
+
+**Option 3: Bypass All Hooks (use sparingly)**
+```bash
+git commit --no-verify -m "your commit message"
+```
+
+**See:** TICKET-126 for implementation details
+
 ---
 
 ## 🚀 Development Workflow

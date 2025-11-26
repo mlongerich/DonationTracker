@@ -17,9 +17,20 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2025-11-17
+**Last Updated:** 2025-11-26
 
 **Latest Milestones:**
+- TICKET-126 - Intelligent Pre-Commit Documentation Validation ✅ (2025-11-26)
+  - **Active validation replaces passive warning** - blocks commits when docs missing
+  - Intelligent ticket detection from git changes (modified + untracked files)
+  - Validates CLAUDE.md, DonationTracking.md, tickets/README.md, and ticket file
+  - Handles both tickets/ and tickets/completed/ directories
+  - **Bypass options**: SKIP_DOC_CHECK=1 (env var), [skip-docs] (commit tag), --no-verify (all hooks)
+  - Blocking pre-commit hook with helpful error messages showing all bypass options
+  - 17 passing tests (100% coverage) - strict TDD approach (RED-GREEN-REFACTOR)
+  - Script executes in <100ms (fast, non-intrusive)
+  - Updated CLAUDE.md with bypass documentation
+  - See TICKET-126 for implementation details and bypass usage
 - TICKET-113 - Cleanup Old Failed Payments System ✅ (2025-11-17)
   - **Final phase of Stripe import redesign - removed old failed_stripe_payments system**
   - Created verification script: scripts/verify-cleanup.sh (checks for old code references)

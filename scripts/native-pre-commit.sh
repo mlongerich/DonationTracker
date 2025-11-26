@@ -43,10 +43,20 @@ echo ""
 find "$BACKUP_DIR" -name "pre-commit_*.patch" -type f | sort -r | tail -n +21 | xargs rm -f 2>/dev/null || true
 
 # ============================================================================
-# DOCUMENTATION CHECK (Non-blocking warning)
+# DOCUMENTATION CHECK (Blocking validation)
 # ============================================================================
 echo -e "${BLUE}📋 Documentation Check${NC}"
-bash scripts/check-documentation.sh || true
+if bash scripts/check-documentation.sh; then
+  echo -e "${GREEN}✓ Documentation validation passed${NC}"
+else
+  echo -e "${RED}✗ Documentation validation failed${NC}"
+  echo ""
+  echo -e "${YELLOW}💡 Bypass options:${NC}"
+  echo -e "${YELLOW}   • SKIP_DOC_CHECK=1 git commit -m \"message\"${NC}"
+  echo -e "${YELLOW}   • git commit -m \"message [skip-docs]\"${NC}"
+  echo -e "${YELLOW}   • git commit --no-verify (skips ALL hooks)${NC}"
+  exit 1
+fi
 echo ""
 
 # ============================================================================
