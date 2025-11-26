@@ -1,6 +1,8 @@
 # Code Smell Analysis - November 11, 2025
 
-**Analysis Date:** 2025-11-11
+**⚠️ ARCHIVED: This analysis is outdated. See CODE_SMELL_ANALYSIS.md for current analysis.**
+
+**Analysis Date:** 2025-11-11 (archived 2025-11-26)
 **Analyst:** Claude Code
 **Scope:** Full codebase review (backend + frontend)
 **Methodology:** Pattern compliance check, design pattern evaluation, code smell detection

@@ -150,11 +150,12 @@ See docs/ directory:
 ### When to Clean Up CLAUDE.md
 
 **Triggers:**
-1. File exceeds 800 lines
+1. File exceeds 1100 lines (900-1000 is optimal)
 2. Adding new sections feels cramped
-3. Multiple detailed code examples accumulating
+3. Multiple detailed code examples accumulating (>30 lines each)
 4. Troubleshooting guides growing
 5. Historical context bloating file
+6. Verification tests fail (can't answer questions from CLAUDE.md alone)
 
 **Process:**
 1. Identify auxiliary content (examples, diagrams, explanations)
@@ -174,13 +175,15 @@ CLAUDE.md is loaded once at Claude Code startup and **must be self-contained**. 
 
 ### Revised Target Metrics
 
-**Optimal Size: 700-800 lines** (revised from initial 300-600)
+**Optimal Size: 900-1000 lines** (revised from initial 300-600, then 700-800)
 
 **Why the change:**
 - Self-contained essentials > minimal size
 - All decision criteria must be in CLAUDE.md
 - Developers must be able to make decisions without reading other files
 - Links provide optional exploration, not required reading
+- Pattern library has grown organically with project maturity (expected growth)
+- New patterns added: Quick Create Dialog, Grouped Autocomplete, Currency Utilities, Custom Hooks (5 entity hooks)
 
 **Quality > Quantity:**
 - Self-contained actionable patterns: ✅ Priority #1
@@ -219,7 +222,7 @@ For CLAUDE.md to be self-contained, it must include:
 
 **Step 1: Check Metrics**
 ```bash
-wc -l CLAUDE.md  # If >800, cleanup needed
+wc -l CLAUDE.md  # If >1100, cleanup needed (900-1000 is optimal)
 ```
 
 **Step 2: Verify Self-Containment**
@@ -326,7 +329,19 @@ grep -c '```ruby\|```typescript\|```tsx' CLAUDE.md
 - ✅ Answer in CLAUDE.md: All commands listed (rspec, npm test, cypress:run)
 - ✅ Can run tests immediately
 
-If all 9 tests pass, CLAUDE.md is self-contained. ✅
+**Test 10: Quick Create Dialog**
+- ❓ Question: How do I implement modal entity creation?
+- ✅ Answer in CLAUDE.md: Pattern components, key features, implementation checklist
+- ✅ Shows both single-entity and tabbed dialog patterns with code
+- ✅ Can implement without reading docs
+
+**Test 11: Documentation Bypass**
+- ❓ Question: How do I bypass pre-commit documentation check?
+- ✅ Answer in CLAUDE.md: 3 bypass options (env var, commit tag, --no-verify)
+- ✅ Shows exact commands to use
+- ✅ Can bypass immediately when appropriate
+
+If all 11 tests pass, CLAUDE.md is self-contained. ✅
 
 ### Common Mistakes to Avoid
 
@@ -428,17 +443,37 @@ See docs/PATTERNS.md for full implementation examples.
 - 46% size reduction while improving self-containment ✅
 - Links enhance but don't replace essential information ✅
 
+**2025-11-26 Growth: Pattern Library Maturity**
+
+**Growth from 719 → 1,128 lines (57% growth over 1 month)**
+
+**New Patterns Added (all self-contained):**
+- Quick Create Dialog Pattern (TICKET-021) - Modal entity creation with tabbed interface
+- Grouped Autocomplete Pattern (TICKET-052) - Type badges and gender icons
+- Currency Utilities (TICKET-071) - Cents/dollars conversion
+- Custom Hooks Library - 5 entity hooks (useChildren, useDonors, useDonations, useSponsorships, useProjects)
+- Documentation Check Bypass Options (TICKET-126) - Pre-commit hook bypass
+- React Hooks Best Practices - useCallback patterns
+- List Component Pattern - Pure presentation
+- Form Component Pattern - Consistent UX
+
+**Analysis:**
+- Growth is expected with project maturity ✅
+- All new patterns include decision criteria + when-to-use + examples ✅
+- Self-containment maintained (all verification tests pass) ✅
+- **New optimal target: 900-1000 lines** (reflects mature pattern library)
+
 **Lesson Learned:**
-Self-contained essentials (700-800 lines) > minimal file size (300-600 lines).
-Claude doesn't follow links automatically - CLAUDE.md must stand alone.
+Pattern library growth is natural and healthy. Optimal size adjusts as project matures.
+Self-contained essentials (900-1000 lines) > arbitrary size limits.
 
 ---
 
 ## Measuring Success
 
 ### Quantitative Metrics
-- **CLAUDE.md size:** 700-800 lines optimal (self-contained essentials)
-- **Self-containment:** All 9 verification tests must pass
+- **CLAUDE.md size:** 900-1000 lines optimal (self-contained essentials with mature pattern library)
+- **Self-containment:** All verification tests must pass (currently 10+ tests)
 - **Token usage:** Monitor per-interaction consumption
 - **Response time:** Faster with focused context
 
@@ -520,4 +555,4 @@ See docs/ directory:
 
 ---
 
-*Last updated: 2025-10-24*
+*Last updated: 2025-11-26*

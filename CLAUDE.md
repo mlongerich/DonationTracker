@@ -703,87 +703,51 @@ useEffect(() => {
 
 **Purpose:** Visual clarity for autocomplete options with multiple entity types (children vs projects) and child gender
 
-**Implementation (ProjectOrChildAutocomplete):**
+**Pattern:**
 ```typescript
-// src/components/ProjectOrChildAutocomplete.tsx
-import { Chip, Boy, Girl } from '@mui/material';
-import ChildCareIcon from '@mui/icons-material/ChildCare';
-import FolderIcon from '@mui/icons-material/Folder';
-
 <Autocomplete
   groupBy={(option) => option.type === 'project' ? 'Projects' : 'Children'}
   renderOption={(props, option) => (
     <li {...props}>
-      <Chip label={option.type === 'child' ? 'Child' : option.project_type} size="small" sx={{ mr: 1 }} />
+      <Chip label={option.type === 'child' ? 'Child' : option.project_type} />
       {option.type === 'child' && (option.gender === 'girl' ? <Girl /> : <Boy />)}
       {option.name}
     </li>
   )}
-  label="Donation For"
 />
 ```
 
 **Features:**
-- **Grouped results:** "Children" and "Projects" sections
-- **Type badges:** Child/General/Campaign for visual distinction
-- **Gender icons:** Boy/Girl icons for children (null defaults to Boy)
-- **Spacing:** Badge + icon before name with proper margins
+- Grouped results ("Children" and "Projects" sections)
+- Type badges (Child/General/Campaign)
+- Gender icons (Boy/Girl, null defaults to Boy)
+- Child gender field: Optional (boy/girl/null) with full validation
 
-**Child Gender Field Pattern:**
-- Optional field (boy/girl/null) on Child model
-- Icons displayed: Boy (<Boy />) for boy/null, Girl (<Girl />) for girl
-- Used in ChildList (after name, hidden if null) and autocomplete (before name)
-- Full validation and presenter support
-
-**See:** TICKET-052 (Grouped Autocomplete + Gender Field)
+**See:** TICKET-052, docs/PATTERNS.md for full implementation
 
 #### Currency Utilities (DRY Pattern)
 
 **Purpose:** Single source of truth for currency conversion between cents (database) and dollars (display)
 
-**Why Cents?**
-- Industry standard (Stripe, PayPal, all payment processors)
-- Avoids floating-point precision errors
-- Integer math is accurate (no $10.999 issues)
-- Future-proof for Stripe webhooks (send cents)
+**Why Cents?** Industry standard (Stripe, PayPal), avoids floating-point errors, integer math accuracy
 
 **Implementation:**
 ```typescript
 // src/utils/currency.ts
 export const formatCurrency = (cents: number): string => {
-  return `$${(cents / 100).toFixed(2)}`;
+  return `$${(cents / 100).toFixed(2)}`;  // 10000 → "$100.00"
 };
 
 export const parseCurrency = (dollars: string | number): number => {
-  return Math.round(parseFloat(String(dollars)) * 100);
+  return Math.round(parseFloat(String(dollars)) * 100);  // "100" → 10000
 };
 ```
 
 **Usage:**
-```typescript
-// Forms (input: dollars → output: cents)
-import { parseCurrency } from '../utils/currency';
-await createDonation({
-  amount: parseCurrency(amount), // "100" → 10000 cents
-});
+- **Forms:** `parseCurrency(amount)` - Convert input to cents for API
+- **Display:** `formatCurrency(donation.amount)` - Format cents as dollars
 
-// Display (input: cents → output: formatted string)
-import { formatCurrency } from '../utils/currency';
-<Typography>{formatCurrency(donation.amount)}</Typography> // 10000 → "$100.00"
-```
-
-**Files using parseCurrency:**
-- DonationForm.tsx (line 57)
-- SponsorshipForm.tsx (line 33)
-
-**Files using formatCurrency:**
-- DonationList.tsx (line 35)
-- ChildList.tsx (line 57)
-- SponsorshipList.tsx (line 43)
-
-**Tests:** 4 passing tests in `currency.test.ts`
-
-**See:** TICKET-071 (currency standardization)
+**See:** TICKET-071
 
 #### Quick Create Dialog Pattern (Modal Entity Creation)
 
@@ -794,137 +758,36 @@ import { formatCurrency } from '../utils/currency';
 - Prevents context switching and data loss from page navigation
 - Follows "Add Sponsor" pattern from Children page
 
-**Pattern Components:**
-
-1. **Icon Button Next to Autocomplete:**
+**Pattern (Icon Button + Dialog):**
 ```tsx
-<Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+// Icon button next to autocomplete
+<Box sx={{ display: 'flex', gap: 1 }}>
   <DonorAutocomplete value={donor} onChange={setDonor} size="small" />
   <IconButton aria-label="create donor" onClick={() => setDialogOpen(true)}>
     <AddIcon />
   </IconButton>
 </Box>
-```
 
-2. **Dialog Component Structure:**
-```tsx
-// Single entity dialog (QuickDonorCreateDialog)
+// Dialog component handles API calls and error states
 const QuickDonorCreateDialog: React.FC<Props> = ({ open, onClose, onSuccess, preFillData }) => {
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (data: FormData) => {
-    try {
-      const response = await apiClient.post('/api/donors', { donor: data });
-      onSuccess(response.data.donor); // Auto-select in autocomplete
-      onClose();
-    } catch (err: any) {
-      // Handle 422 validation errors and network errors
-      setError(extractErrorMessage(err));
-    }
-  };
-
-  return (
-    <>
-      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Donor</DialogTitle>
-        <DialogContent>
-          <DonorForm onSubmit={handleSubmit} initialData={preFillData} />
-        </DialogContent>
-      </Dialog>
-      <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
-        <Alert severity="error">{error}</Alert>
-      </Snackbar>
-    </>
-  );
-};
-```
-
-3. **Tabbed Multi-Entity Dialog (QuickEntityCreateDialog - TICKET-021):**
-```tsx
-// Tabs for multiple entity types (Child/Project)
-const QuickEntityCreateDialog: React.FC<Props> = ({
-  open, onClose, onChildCreated, onProjectCreated, preFillText
-}) => {
-  const [currentTab, setCurrentTab] = useState<'child' | 'project'>('child');
-  const [childError, setChildError] = useState<string | null>(null);
-  const [projectError, setProjectError] = useState<string | null>(null);
-  const [dialogKey, setDialogKey] = useState(0); // Reset forms on close
-
-  // Separate handlers per entity type
-  const handleChildSubmit = async (data: ChildFormData) => { /* ... */ };
-  const handleProjectSubmit = async (data: ProjectFormData) => { /* ... */ };
-
-  const handleTabChange = (newTab: 'child' | 'project') => {
-    setChildError(null); // Clear errors on tab switch
-    setProjectError(null);
-    setCurrentTab(newTab);
-  };
-
-  useEffect(() => {
-    if (!open) {
-      setDialogKey(prev => prev + 1); // Reset forms when dialog closes
-      setCurrentTab('child');
-      setChildError(null);
-      setProjectError(null);
-    }
-  }, [open]);
-
-  return (
-    <>
-      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Entity</DialogTitle>
-        <Tabs value={currentTab} onChange={handleTabChange}>
-          <Tab label="Create Child" value="child" />
-          <Tab label="Create Project" value="project" />
-        </Tabs>
-        <DialogContent key={dialogKey}>
-          <Box sx={{ display: currentTab === 'child' ? 'block' : 'none' }}>
-            <ChildForm onSubmit={handleChildSubmit} initialData={{ name: preFillText }} />
-          </Box>
-          <Box sx={{ display: currentTab === 'project' ? 'block' : 'none' }}>
-            <ProjectForm onSubmit={handleProjectSubmit} initialTitle={preFillText} />
-          </Box>
-        </DialogContent>
-      </Dialog>
-      {/* Separate Snackbar per tab for error isolation */}
-      <Snackbar open={!!childError}><Alert>{childError}</Alert></Snackbar>
-      <Snackbar open={!!projectError}><Alert>{projectError}</Alert></Snackbar>
-    </>
-  );
+  // Error state in dialog, form only returns data
+  // Auto-select created entity via onSuccess callback
+  // Snackbar for 422 validation + network errors
 };
 ```
 
 **Key Features:**
-
-- **Pre-fill Support:** Pass search input to dialog (e.g., user types "John Doe" → pre-fills name field)
+- **Pre-fill Support:** Pass search input to dialog
 - **Auto-selection:** Created entity immediately selected in autocomplete
-- **Error Handling:** 422 validation errors + network errors via Snackbar
-- **Error Isolation (Tabbed):** Separate error states per tab, cleared on tab switch
-- **Form Reset:** `dialogKey` pattern resets all forms when dialog closes (fresh state on reopen)
-- **State Preservation:** Parent form data preserved during entity creation
-- **No Cancel Button:** User closes via X or ESC (consistent with form pattern)
-- **API in Dialog:** Dialog handles API calls, form only returns data (follows SponsorshipModal pattern)
+- **Error Handling:** 422 validation + network errors via Snackbar
+- **Form Reset:** `dialogKey` pattern resets forms on close
+- **API in Dialog:** Dialog handles API calls, form only returns data
 
-**Implementation Checklist:**
+**Variants:**
+- **Single Entity:** QuickDonorCreateDialog (one form)
+- **Tabbed Multi-Entity:** QuickEntityCreateDialog (Child/Project tabs with separate error states)
 
-- [ ] Icon button with aria-label (accessibility)
-- [ ] Dialog with close button (X) in title
-- [ ] Pre-fill from autocomplete search input
-- [ ] Clear search input after creation
-- [ ] Auto-select created entity in autocomplete
-- [ ] Handle 422 validation errors (extract array, join with commas)
-- [ ] Handle network errors (generic message)
-- [ ] Snackbar auto-hide after 6 seconds
-- [ ] Jest tests (dialog + integration with parent form)
-- [ ] Cypress E2E tests (full workflow + validation)
-
-**Files (TICKET-021):**
-- Single entity: `QuickDonorCreateDialog.tsx` (150 lines)
-- Tabbed: `QuickEntityCreateDialog.tsx` (180 lines)
-- Integration: `DonationForm.tsx` (uses both dialogs)
-- Tests: 18 unit tests + 8 E2E tests
-
-**See:** TICKET-021 (Quick Entity Creation), TICKET-054 (SponsorshipModal reference pattern)
+**See:** docs/PATTERNS.md for full implementation code (TICKET-021)
 
 #### React Router Multi-Page Architecture
 
@@ -1124,5 +987,5 @@ bash scripts/test-backend.sh spec/models/donation_spec.rb:227
 ---
 
 *This document is updated as practices evolve*
-*Last updated: 2025-11-12*
-*Target: 700-800 lines for optimal Claude Code performance (self-contained essentials)*
+*Last updated: 2025-11-26*
+*Target: 900-1000 lines for optimal Claude Code performance (self-contained essentials with mature pattern library)*

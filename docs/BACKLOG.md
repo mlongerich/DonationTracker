@@ -34,6 +34,39 @@ What needs to be done first?
 
 ## Prioritized Backlog
 
+### [Define Purpose and Structure of DonationTracking.md]
+**Added:** 2025-11-26
+**Priority:** 🟡 Medium
+**Effort:** S
+
+**Description:**
+DonationTracking.md was originally intended as a high-level project progress document, but its current usage may have drifted. Need to clarify:
+- What is the intended purpose of this document?
+- Is it a project status tracker, milestone log, or something else?
+- Should it be renamed to better reflect its purpose?
+- Is the current structure (Latest Milestones section) aligned with its purpose?
+- Are we duplicating information that exists elsewhere (tickets/README.md)?
+
+**User Value:**
+Clear documentation structure helps developers know where to find information and where to add updates. Reduces confusion about which doc to update when.
+
+**Technical Approach:**
+1. Review current content and usage patterns
+2. Compare with tickets/README.md to identify overlap
+3. Define clear purpose and scope
+4. Potentially restructure or rename if needed
+5. Update CLAUDE.md to document the purpose and when to update it
+6. Consider if "Latest Milestones" should be somewhere else (tickets/README.md?)
+
+**Dependencies:**
+None - documentation improvement
+
+**Related:**
+- CLAUDE.md pre-commit documentation requirements
+- tickets/README.md structure
+
+---
+
 ### [Donor Bulk Operations]
 **Status:** ✅ **Converted to TICKET-087**
 **Added:** 2025-10-07

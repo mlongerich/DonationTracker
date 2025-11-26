@@ -1393,4 +1393,529 @@ bash scripts/recover-backup.sh .git/backups/pre-commit_YYYYMMDD_HHMMSS.patch
 
 ---
 
-*Last updated: 2025-11-04*
+### Quick Create Dialog Pattern (Modal Entity Creation)
+
+**Purpose:** Create entities (donors, projects, children) without leaving current page, preserving parent form state.
+
+**When to Use:**
+- User creating donation but donor doesn't exist yet
+- Prevents context switching and data loss
+- Modal workflow for related entity creation
+
+#### Single Entity Dialog
+
+**Pattern:** QuickDonorCreateDialog (one form)
+
+**Implementation:**
+```tsx
+// src/components/QuickDonorCreateDialog.tsx
+import React, { useState } from 'react';
+import { Dialog, DialogTitle, DialogContent, Snackbar, Alert } from '@mui/material';
+import DonorForm from './DonorForm';
+import { DonorFormData, Donor } from '../types';
+import apiClient from '../api/client';
+
+interface QuickDonorCreateDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onSuccess: (donor: Donor) => void;
+  preFillData?: Partial<DonorFormData>;
+}
+
+const QuickDonorCreateDialog: React.FC<QuickDonorCreateDialogProps> = ({
+  open,
+  onClose,
+  onSuccess,
+  preFillData,
+}) => {
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (data: DonorFormData) => {
+    try {
+      const response = await apiClient.post('/api/donors', { donor: data });
+      onSuccess(response.data.donor); // Auto-select in parent autocomplete
+      onClose();
+    } catch (err: any) {
+      // Handle 422 validation errors and network errors
+      if (err.response?.status === 422) {
+        const errors = err.response.data.errors;
+        setError(Array.isArray(errors) ? errors.join(', ') : errors);
+      } else {
+        setError('Failed to create donor. Please try again.');
+      }
+    }
+  };
+
+  return (
+    <>
+      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Create New Donor</DialogTitle>
+        <DialogContent>
+          <DonorForm onSubmit={handleSubmit} initialData={preFillData} />
+        </DialogContent>
+      </Dialog>
+      <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      </Snackbar>
+    </>
+  );
+};
+
+export default QuickDonorCreateDialog;
+```
+
+**Usage in Parent Form:**
+```tsx
+// src/components/DonationForm.tsx
+import QuickDonorCreateDialog from './QuickDonorCreateDialog';
+
+const DonationForm: React.FC = () => {
+  const [donor, setDonor] = useState<Donor | null>(null);
+  const [donorDialogOpen, setDonorDialogOpen] = useState(false);
+  const [donorSearchInput, setDonorSearchInput] = useState('');
+
+  return (
+    <>
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
+        <DonorAutocomplete
+          value={donor}
+          onChange={setDonor}
+          onInputChange={(_, value) => setDonorSearchInput(value)}
+          size="small"
+          required
+        />
+        <IconButton
+          aria-label="create donor"
+          onClick={() => setDonorDialogOpen(true)}
+        >
+          <AddIcon />
+        </IconButton>
+      </Box>
+
+      <QuickDonorCreateDialog
+        open={donorDialogOpen}
+        onClose={() => setDonorDialogOpen(false)}
+        onSuccess={(newDonor) => {
+          setDonor(newDonor);  // Auto-select in autocomplete
+          setDonorSearchInput('');  // Clear search
+        }}
+        preFillData={{ name: donorSearchInput }}  // Pre-fill from search
+      />
+    </>
+  );
+};
+```
+
+#### Tabbed Multi-Entity Dialog
+
+**Pattern:** QuickEntityCreateDialog (Child/Project tabs)
+
+**Implementation:**
+```tsx
+// src/components/QuickEntityCreateDialog.tsx
+import React, { useState, useEffect } from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  Tabs,
+  Tab,
+  Box,
+  Snackbar,
+  Alert,
+} from '@mui/material';
+import ChildForm from './ChildForm';
+import ProjectForm from './ProjectForm';
+import { ChildFormData, Child, ProjectFormData, Project } from '../types';
+import apiClient from '../api/client';
+
+interface QuickEntityCreateDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onChildCreated?: (child: Child) => void;
+  onProjectCreated?: (project: Project) => void;
+  preFillText?: string;
+}
+
+const QuickEntityCreateDialog: React.FC<QuickEntityCreateDialogProps> = ({
+  open,
+  onClose,
+  onChildCreated,
+  onProjectCreated,
+  preFillText = '',
+}) => {
+  const [currentTab, setCurrentTab] = useState<'child' | 'project'>('child');
+  const [childError, setChildError] = useState<string | null>(null);
+  const [projectError, setProjectError] = useState<string | null>(null);
+  const [dialogKey, setDialogKey] = useState(0);
+
+  // Reset state when dialog closes
+  useEffect(() => {
+    if (!open) {
+      setDialogKey((prev) => prev + 1);  // Force form reset
+      setCurrentTab('child');
+      setChildError(null);
+      setProjectError(null);
+    }
+  }, [open]);
+
+  const handleTabChange = (newTab: 'child' | 'project') => {
+    setChildError(null);  // Clear errors on tab switch
+    setProjectError(null);
+    setCurrentTab(newTab);
+  };
+
+  const handleChildSubmit = async (data: ChildFormData) => {
+    try {
+      const response = await apiClient.post('/api/children', { child: data });
+      if (onChildCreated) onChildCreated(response.data.child);
+      onClose();
+    } catch (err: any) {
+      if (err.response?.status === 422) {
+        const errors = err.response.data.errors;
+        setChildError(Array.isArray(errors) ? errors.join(', ') : errors);
+      } else {
+        setChildError('Failed to create child. Please try again.');
+      }
+    }
+  };
+
+  const handleProjectSubmit = async (data: ProjectFormData) => {
+    try {
+      const response = await apiClient.post('/api/projects', { project: data });
+      if (onProjectCreated) onProjectCreated(response.data.project);
+      onClose();
+    } catch (err: any) {
+      if (err.response?.status === 422) {
+        const errors = err.response.data.errors;
+        setProjectError(Array.isArray(errors) ? errors.join(', ') : errors);
+      } else {
+        setProjectError('Failed to create project. Please try again.');
+      }
+    }
+  };
+
+  return (
+    <>
+      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Create New Entity</DialogTitle>
+        <Tabs value={currentTab} onChange={(_, value) => handleTabChange(value)}>
+          <Tab label="Create Child" value="child" />
+          <Tab label="Create Project" value="project" />
+        </Tabs>
+        <DialogContent key={dialogKey}>
+          <Box sx={{ display: currentTab === 'child' ? 'block' : 'none' }}>
+            <ChildForm
+              onSubmit={handleChildSubmit}
+              initialData={{ name: preFillText }}
+            />
+          </Box>
+          <Box sx={{ display: currentTab === 'project' ? 'block' : 'none' }}>
+            <ProjectForm
+              onSubmit={handleProjectSubmit}
+              initialTitle={preFillText}
+            />
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Separate Snackbar per tab for error isolation */}
+      <Snackbar open={!!childError} autoHideDuration={6000} onClose={() => setChildError(null)}>
+        <Alert severity="error" onClose={() => setChildError(null)}>
+          {childError}
+        </Alert>
+      </Snackbar>
+      <Snackbar open={!!projectError} autoHideDuration={6000} onClose={() => setProjectError(null)}>
+        <Alert severity="error" onClose={() => setProjectError(null)}>
+          {projectError}
+        </Alert>
+      </Snackbar>
+    </>
+  );
+};
+
+export default QuickEntityCreateDialog;
+```
+
+**Key Features:**
+- **Pre-fill Support:** Pass search input to pre-fill name/title
+- **Auto-selection:** Created entity immediately selected in parent autocomplete
+- **Error Handling:** 422 validation errors + network errors via Snackbar
+- **Error Isolation (Tabbed):** Separate error states per tab, cleared on tab switch
+- **Form Reset:** `dialogKey` pattern forces form reset when dialog closes (fresh state on reopen)
+- **State Preservation:** Parent form data preserved during entity creation
+- **No Cancel Button:** User closes via X or ESC (consistent with form pattern)
+- **API in Dialog:** Dialog handles API calls, form only returns data
+
+**See:** TICKET-021 (Quick Entity Creation), TICKET-054 (SponsorshipModal reference)
+
+---
+
+### Grouped Autocomplete with Type Badges & Gender Icons
+
+**Purpose:** Visual clarity for autocomplete options with multiple entity types (children vs projects) and child gender.
+
+**Pattern:** ProjectOrChildAutocomplete
+
+**Implementation:**
+```tsx
+// src/components/ProjectOrChildAutocomplete.tsx
+import React, { useState, useEffect } from 'react';
+import { Autocomplete, TextField, Chip, CircularProgress } from '@mui/material';
+import { Boy, Girl } from '@mui/icons-material';
+import apiClient from '../api/client';
+import { Child, Project } from '../types';
+
+type ProjectOrChild = (Child & { type: 'child' }) | (Project & { type: 'project' });
+
+interface ProjectOrChildAutocompleteProps {
+  value: ProjectOrChild | null;
+  onChange: (value: ProjectOrChild | null) => void;
+  label?: string;
+  size?: 'small' | 'medium';
+  required?: boolean;
+}
+
+const ProjectOrChildAutocomplete: React.FC<ProjectOrChildAutocompleteProps> = ({
+  value,
+  onChange,
+  label = 'Donation For',
+  size = 'medium',
+  required = false,
+}) => {
+  const [open, setOpen] = useState(false);
+  const [options, setOptions] = useState<ProjectOrChild[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Fetch both children and projects
+  useEffect(() => {
+    if (!open) return;
+
+    const timer = setTimeout(() => {
+      fetchOptions(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, open]);
+
+  const fetchOptions = async (query: string) => {
+    setLoading(true);
+    try {
+      const [childrenRes, projectsRes] = await Promise.all([
+        apiClient.get('/api/children', {
+          params: { q: { name_cont: query }, page: 1, per_page: 25 },
+        }),
+        apiClient.get('/api/projects', {
+          params: { q: { title_cont: query }, page: 1, per_page: 25 },
+        }),
+      ]);
+
+      const children = childrenRes.data.children.map((c: Child) => ({ ...c, type: 'child' as const }));
+      const projects = projectsRes.data.projects.map((p: Project) => ({
+        ...p,
+        name: p.title,  // Normalize to 'name' for getOptionLabel
+        type: 'project' as const,
+      }));
+
+      setOptions([...children, ...projects]);
+    } catch (error) {
+      console.error('Failed to fetch options:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Autocomplete
+      open={open}
+      onOpen={() => setOpen(true)}
+      onClose={() => setOpen(false)}
+      value={value}
+      onChange={(_, newValue) => onChange(newValue)}
+      onInputChange={(_, newInputValue) => setSearchQuery(newInputValue)}
+      options={options}
+      getOptionLabel={(option) => option.name}
+      groupBy={(option) => (option.type === 'project' ? 'Projects' : 'Children')}
+      loading={loading}
+      size={size}
+      renderOption={(props, option) => (
+        <li {...props}>
+          <Chip
+            label={option.type === 'child' ? 'Child' : option.project_type}
+            size="small"
+            color={option.type === 'child' ? 'primary' : 'secondary'}
+            sx={{ mr: 1 }}
+          />
+          {option.type === 'child' && (
+            option.gender === 'girl' ? <Girl sx={{ mr: 0.5 }} /> : <Boy sx={{ mr: 0.5 }} />
+          )}
+          {option.name}
+        </li>
+      )}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label={label}
+          required={required}
+          InputProps={{
+            ...params.InputProps,
+            endAdornment: (
+              <>
+                {loading ? <CircularProgress size={20} /> : null}
+                {params.InputProps.endAdornment}
+              </>
+            ),
+          }}
+        />
+      )}
+    />
+  );
+};
+
+export default ProjectOrChildAutocomplete;
+```
+
+**Features:**
+- **Grouped Results:** "Children" and "Projects" sections with `groupBy` prop
+- **Type Badges:** Chip component shows "Child" / "General" / "Campaign"
+- **Gender Icons:** Boy/Girl icons for children (null defaults to Boy)
+- **Dual Entity Fetch:** Parallel API calls for children + projects
+- **Normalized Data:** Projects use `title` but expose as `name` for consistent interface
+- **Debounced Search:** 300ms delay to reduce API calls
+- **Loading States:** CircularProgress indicator during fetch
+
+**Child Gender Field:**
+- Optional field (boy/girl/null) on Child model
+- Icons: `<Boy />` for boy/null, `<Girl />` for girl
+- Used in ChildList (after name, hidden if null) and autocomplete (before name)
+- Full validation and presenter support in backend
+
+**See:** TICKET-052 (Grouped Autocomplete + Gender Field)
+
+---
+
+### Currency Utilities (DRY Pattern)
+
+**Purpose:** Single source of truth for currency conversion between cents (database) and dollars (display).
+
+**Why Cents?**
+- Industry standard (Stripe, PayPal, all payment processors use cents/smallest unit)
+- Avoids floating-point precision errors ($10.999999 issues)
+- Integer math is accurate and reliable
+- Future-proof for Stripe webhooks (always send/receive cents)
+
+**Implementation:**
+```typescript
+// src/utils/currency.ts
+
+/**
+ * Format cents as currency string for display
+ * @param cents - Amount in cents (e.g., 10000)
+ * @returns Formatted currency string (e.g., "$100.00")
+ */
+export const formatCurrency = (cents: number): string => {
+  return `$${(cents / 100).toFixed(2)}`;
+};
+
+/**
+ * Parse dollar string/number to cents for API
+ * @param dollars - Amount in dollars (e.g., "100" or 100)
+ * @returns Amount in cents (e.g., 10000)
+ */
+export const parseCurrency = (dollars: string | number): number => {
+  return Math.round(parseFloat(String(dollars)) * 100);
+};
+```
+
+**Usage in Forms (Input → API):**
+```typescript
+// src/components/DonationForm.tsx
+import { parseCurrency } from '../utils/currency';
+
+const DonationForm: React.FC = () => {
+  const [amount, setAmount] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    await apiClient.post('/api/donations', {
+      donation: {
+        amount: parseCurrency(amount),  // "100" → 10000 cents
+        // ... other fields
+      },
+    });
+  };
+
+  return (
+    <TextField
+      label="Amount ($)"
+      type="number"
+      value={amount}
+      onChange={(e) => setAmount(e.target.value)}
+    />
+  );
+};
+```
+
+**Usage in Display (API → UI):**
+```typescript
+// src/components/DonationList.tsx
+import { formatCurrency } from '../utils/currency';
+
+const DonationList: React.FC<{ donations: Donation[] }> = ({ donations }) => {
+  return (
+    <Stack spacing={2}>
+      {donations.map((donation) => (
+        <Card key={donation.id}>
+          <Typography variant="h6">
+            {formatCurrency(donation.amount)}  {/* 10000 → "$100.00" */}
+          </Typography>
+          <Typography>{donation.donor_name}</Typography>
+        </Card>
+      ))}
+    </Stack>
+  );
+};
+```
+
+**Files Using Currency Utilities:**
+
+**parseCurrency (Forms):**
+- `DonationForm.tsx` - Donation amount input
+- `SponsorshipForm.tsx` - Sponsorship amount input
+
+**formatCurrency (Display):**
+- `DonationList.tsx` - Donation amounts
+- `ChildList.tsx` - Sponsorship amounts
+- `SponsorshipList.tsx` - Monthly amounts
+
+**Tests:**
+```typescript
+// src/utils/__tests__/currency.test.ts
+import { formatCurrency, parseCurrency } from '../currency';
+
+describe('formatCurrency', () => {
+  it('formats cents as dollars', () => {
+    expect(formatCurrency(10000)).toBe('$100.00');
+    expect(formatCurrency(550)).toBe('$5.50');
+    expect(formatCurrency(1)).toBe('$0.01');
+  });
+});
+
+describe('parseCurrency', () => {
+  it('parses dollars as cents', () => {
+    expect(parseCurrency('100')).toBe(10000);
+    expect(parseCurrency(5.50)).toBe(550);
+    expect(parseCurrency('0.01')).toBe(1);
+  });
+});
+```
+
+**See:** TICKET-071 (Currency Utilities Standardization)
+
+---
+
+*Last updated: 2025-11-26*
