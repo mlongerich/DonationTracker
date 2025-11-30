@@ -281,4 +281,67 @@ describe('DonorList', () => {
 
     expect(handleSelectionChange).toHaveBeenCalledWith([1]);
   });
+
+  it('displays phone when present', () => {
+    const donors = [
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+        phone: '(555) 123-4567',
+      },
+    ];
+
+    render(<DonorList donors={donors} />);
+
+    expect(screen.getByText(/\(555\) 123-4567/)).toBeInTheDocument();
+  });
+
+  it('shows "No phone" when phone is missing', () => {
+    const donors = [
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
+    ];
+
+    render(<DonorList donors={donors} />);
+
+    expect(screen.getByText(/no phone/i)).toBeInTheDocument();
+  });
+
+  it('displays address when present', () => {
+    const donors = [
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+        full_address: '123 Main St\nSan Francisco CA 94102',
+      },
+    ];
+
+    render(<DonorList donors={donors} />);
+
+    expect(screen.getByText(/123 Main St/)).toBeInTheDocument();
+    expect(screen.getByText(/San Francisco CA 94102/)).toBeInTheDocument();
+  });
+
+  it('shows "No address" when address is missing', () => {
+    const donors = [
+      {
+        id: 1,
+        name: 'John Doe',
+        email: 'john@example.com',
+        displayable_email: 'john@example.com',
+      },
+    ];
+
+    render(<DonorList donors={donors} />);
+
+    expect(screen.getByText(/no address/i)).toBeInTheDocument();
+  });
 });

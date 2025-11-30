@@ -118,9 +118,7 @@ describe('DonorsPage', () => {
       </BrowserRouter>
     );
 
-    expect(
-      screen.getByPlaceholderText(/search by name or email/i)
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/search donors/i)).toBeInTheDocument();
   });
 
   it('debounces search query by 300ms', async () => {
@@ -142,7 +140,7 @@ describe('DonorsPage', () => {
     // Clear initial mount API call
     mockedApiClient.get.mockClear();
 
-    const searchInput = screen.getByPlaceholderText(/search by name or email/i);
+    const searchInput = screen.getByPlaceholderText(/search donors/i);
 
     // Type in search box
     await user.type(searchInput, 'John');
@@ -156,13 +154,26 @@ describe('DonorsPage', () => {
       await Promise.resolve(); // Let useEffect run
     });
 
-    // Now API should be called with search params
+    // Now API should be called with search params (Ransack grouping syntax)
     await waitFor(() => {
       expect(mockedApiClient.get).toHaveBeenCalledWith(
         '/api/donors',
         expect.objectContaining({
           params: expect.objectContaining({
-            q: { name_or_email_cont: 'John' },
+            q: {
+              g: [
+                {
+                  m: 'or',
+                  name_cont: 'John',
+                  email_cont: 'John',
+                  phone_cont: 'John',
+                  address_line1_cont: 'John',
+                  city_cont: 'John',
+                  state_cont: 'John',
+                  zip_code_cont: 'John',
+                },
+              ],
+            },
           }),
         })
       );

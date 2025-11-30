@@ -20,7 +20,7 @@ describe('Donor Search & Pagination', () => {
     cy.contains('Alice Brown').should('be.visible');
 
     // Search for "Alice"
-    cy.get('input[placeholder="Search by name or email..."]').type('Alice');
+    cy.get('input[placeholder="Search donors..."]').type('Alice');
 
     // Wait for debounce and results to update
     cy.wait(500);
@@ -42,7 +42,7 @@ describe('Donor Search & Pagination', () => {
     cy.get('[data-testid="donor-row"]', { timeout: 10000 }).should('have.length', 3);
 
     // Search for "n" - should find mlongerich@gmail.com and michael@mailinator.com
-    cy.get('input[placeholder="Search by name or email..."]').type('n');
+    cy.get('input[placeholder="Search donors..."]').type('n');
 
     // Wait for debounce
     cy.wait(500);
@@ -62,7 +62,7 @@ describe('Donor Search & Pagination', () => {
     cy.createDonor('User Three', 'user3@gmail.com');
 
     // Search for "@gmail"
-    cy.get('input[placeholder="Search by name or email..."]').type('@gmail');
+    cy.get('input[placeholder="Search donors..."]').type('@gmail');
 
     // Wait for debounce
     cy.wait(500);
@@ -80,7 +80,7 @@ describe('Donor Search & Pagination', () => {
     cy.createDonor('Alice Brown', 'abrown@example.com');
 
     // Search for "Ali" (partial first name)
-    cy.get('input[placeholder="Search by name or email..."]').type('Ali');
+    cy.get('input[placeholder="Search donors..."]').type('Ali');
 
     // Wait for debounce
     cy.wait(500);
@@ -98,7 +98,7 @@ describe('Donor Search & Pagination', () => {
     cy.createDonor('Charlie Smith', 'csmith@example.com');
 
     // Search for "Smith" (last name)
-    cy.get('input[placeholder="Search by name or email..."]').type('Smith');
+    cy.get('input[placeholder="Search donors..."]').type('Smith');
 
     // Wait for debounce
     cy.wait(500);
@@ -108,5 +108,75 @@ describe('Donor Search & Pagination', () => {
     cy.contains('Alice Smith').should('be.visible');
     cy.contains('Charlie Smith').should('be.visible');
     cy.contains('Bob Johnson').should('not.exist');
+  });
+
+  it('searches donors by phone number', () => {
+    // Create donor with phone via API directly
+    cy.request('POST', 'http://localhost:3002/api/donors', {
+      donor: {
+        name: 'Phone Test User',
+        email: 'phonetest@example.com',
+        phone: '(555) 123-4567',
+      },
+    });
+
+    // Create donor without phone
+    cy.createDonor('No Phone User', 'nophone@example.com');
+
+    // Visit donors page
+    cy.visit('/donors');
+    cy.get('[data-testid="donor-row"]', { timeout: 10000 }).should(
+      'have.length',
+      2
+    );
+
+    // Search for phone number
+    cy.get('input[placeholder="Search donors..."]').type('555');
+
+    // Wait for debounce
+    cy.wait(500);
+
+    // Should show only donor with matching phone
+    cy.get('[data-testid="donor-row"]').should('have.length', 1);
+    cy.contains('Phone Test User').should('be.visible');
+    cy.contains('(555) 123-4567').should('be.visible');
+    cy.contains('No Phone User').should('not.exist');
+  });
+
+  it('searches donors by city', () => {
+    // Create donors with different cities
+    cy.request('POST', 'http://localhost:3002/api/donors', {
+      donor: {
+        name: 'SF User',
+        email: 'sf@example.com',
+        city: 'San Francisco',
+      },
+    });
+    cy.request('POST', 'http://localhost:3002/api/donors', {
+      donor: {
+        name: 'NY User',
+        email: 'ny@example.com',
+        city: 'New York',
+      },
+    });
+
+    // Visit donors page
+    cy.visit('/donors');
+    cy.get('[data-testid="donor-row"]', { timeout: 10000 }).should(
+      'have.length',
+      2
+    );
+
+    // Search for city
+    cy.get('input[placeholder="Search donors..."]').type('San Francisco');
+
+    // Wait for debounce
+    cy.wait(500);
+
+    // Should show only San Francisco donor
+    cy.get('[data-testid="donor-row"]').should('have.length', 1);
+    cy.contains('SF User').should('be.visible');
+    cy.contains('San Francisco').should('be.visible');
+    cy.contains('NY User').should('not.exist');
   });
 });

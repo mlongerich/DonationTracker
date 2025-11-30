@@ -17,8 +17,9 @@ Cypress.Commands.add('clearDonors', () => {
  * @param email - Donor email
  */
 Cypress.Commands.add('createDonor', (name: string, email: string) => {
-  cy.get('input[type="text"]').first().type(name);
-  cy.get('input[type="email"]').type(email);
+  // Use label-based selection to find the correct fields
+  cy.contains('label', /^name/i).parent().find('input').clear().type(name);
+  cy.contains('label', /^email/i).parent().find('input').clear().type(email);
   cy.contains('button', /submit/i).click();
 
   // Wait for Snackbar to appear (it's in a Portal, so need to search entire document)
@@ -40,6 +41,6 @@ Cypress.Commands.add('clickEditDonor', () => {
  * @param email - Expected donor email
  */
 Cypress.Commands.add('verifyFormPreFilled', (name: string, email: string) => {
-  cy.get('input[type="text"]').first().should('have.value', name);
-  cy.get('input[type="email"]').should('have.value', email);
+  cy.contains('label', /^name/i).parent().find('input').should('have.value', name);
+  cy.contains('label', /^email/i).parent().find('input').should('have.value', email);
 });

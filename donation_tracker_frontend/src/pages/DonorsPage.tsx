@@ -141,7 +141,7 @@ const DonorsPage = () => {
         </Typography>
         <TextField
           fullWidth
-          placeholder="Search by name or email..."
+          placeholder="Search donors..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           sx={{ mb: 2 }}

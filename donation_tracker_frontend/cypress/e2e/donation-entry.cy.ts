@@ -185,14 +185,18 @@ describe('Donation Entry', () => {
     const donorName = `Quick Donor ${Date.now()}`;
     const donorEmail = `quick${Date.now()}@example.com`;
 
-    // Find inputs within the dialog
+    // Find inputs within the dialog by label
     cy.contains('Create New Donor')
       .parent()
-      .find('input[type="text"]')
+      .contains('label', /^name$/i)
+      .parent()
+      .find('input')
       .type(donorName);
     cy.contains('Create New Donor')
       .parent()
-      .find('input[type="email"]')
+      .contains('label', /^email$/i)
+      .parent()
+      .find('input')
       .type(donorEmail);
     cy.contains('Create New Donor')
       .parent()
@@ -226,14 +230,18 @@ describe('Donation Entry', () => {
     // Click the create donor icon button
     cy.get('button[aria-label="create donor"]').click();
 
-    // Fill out form with invalid email (find inputs within dialog)
+    // Fill out form with invalid email (find inputs by label)
     cy.contains('Create New Donor')
       .parent()
-      .find('input[type="text"]')
+      .contains('label', /^name$/i)
+      .parent()
+      .find('input')
       .type('Test Donor');
     cy.contains('Create New Donor')
       .parent()
-      .find('input[type="email"]')
+      .contains('label', /^email$/i)
+      .parent()
+      .find('input')
       .type('invalid-email');
     cy.contains('Create New Donor')
       .parent()
@@ -291,9 +299,10 @@ describe('Donation Entry', () => {
       .first()
       .type(projectTitle);
 
-    // Submit project creation using the dialog's submit button
+    // Submit project creation using the dialog's visible submit button
     cy.get('[role="dialog"]')
       .find('button[type="submit"]')
+      .filter(':visible')
       .click();
 
     // Wait for API call and dialog to close
@@ -389,9 +398,10 @@ describe('Donation Entry', () => {
     // Switch to project tab
     cy.contains('button[role="tab"]', /create project/i).click();
 
-    // Wait for form to appear, then find the submit button (NOT the tab button)
+    // Wait for form to appear, then find the visible submit button
     cy.get('[role="dialog"]')
       .find('button[type="submit"]')
+      .filter(':visible')
       .should('be.disabled');
 
     // Type in title field
@@ -403,6 +413,7 @@ describe('Donation Entry', () => {
     // Submit button should now be enabled
     cy.get('[role="dialog"]')
       .find('button[type="submit"]')
+      .filter(':visible')
       .should('not.be.disabled');
   });
 
@@ -419,17 +430,20 @@ describe('Donation Entry', () => {
     // Submit button should be disabled when name is empty
     cy.get('[role="dialog"]')
       .find('button[type="submit"]')
+      .filter(':visible')
       .should('be.disabled');
 
-    // Type in name field
-    cy.contains('label', /name/i)
-      .parent()
-      .find('input')
+    // Type in name field (child form only has one Name field)
+    cy.get('[role="dialog"]')
+      .find('input[required]')
+      .filter(':visible')
+      .first()
       .type('Maria');
 
     // Submit button should now be enabled
     cy.get('[role="dialog"]')
       .find('button[type="submit"]')
+      .filter(':visible')
       .should('not.be.disabled');
   });
 

@@ -6,6 +6,14 @@ export interface Donor {
   name: string;
   email: string;
   displayable_email: string | null; // null for placeholder emails (@mailinator.com)
+  phone?: string | null;
+  address_line1?: string | null;
+  address_line2?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip_code?: string | null;
+  country?: string | null;
+  full_address?: string | null;
   discarded_at?: string | null;
   merged_into_id?: number | null;
   last_donation_date?: string | null;
@@ -17,6 +25,13 @@ export interface Donor {
 export interface DonorFormData {
   name: string;
   email: string;
+  phone?: string;
+  address_line1?: string;
+  address_line2?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
+  country?: string;
 }
 
 /**

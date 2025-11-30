@@ -39,7 +39,20 @@ export const useDonors = (): UseDonorsReturn => {
       };
 
       if (options.search?.trim()) {
-        params.q = { name_or_email_cont: options.search };
+        params.q = {
+          g: [
+            {
+              m: 'or',
+              name_cont: options.search,
+              email_cont: options.search,
+              phone_cont: options.search,
+              address_line1_cont: options.search,
+              city_cont: options.search,
+              state_cont: options.search,
+              zip_code_cont: options.search,
+            },
+          ],
+        };
       }
 
       const response = await apiClient.get('/api/donors', { params });

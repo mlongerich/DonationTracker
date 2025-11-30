@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -19,7 +19,12 @@ interface DonorMergeModalProps {
   open: boolean;
   donors: Donor[];
   onClose: () => void;
-  onConfirm: (fieldSelections: { name: number; email: number }) => void;
+  onConfirm: (fieldSelections: {
+    name: number;
+    email: number;
+    phone: number;
+    address: number;
+  }) => void;
 }
 
 const DonorMergeModal: React.FC<DonorMergeModalProps> = ({
@@ -28,10 +33,21 @@ const DonorMergeModal: React.FC<DonorMergeModalProps> = ({
   onClose,
   onConfirm,
 }) => {
-  const [selectedName, setSelectedName] = useState<number>(donors[0]?.id || 0);
-  const [selectedEmail, setSelectedEmail] = useState<number>(
-    donors[0]?.id || 0
-  );
+  const [selectedName, setSelectedName] = useState<number>(0);
+  const [selectedEmail, setSelectedEmail] = useState<number>(0);
+  const [selectedPhone, setSelectedPhone] = useState<number>(0);
+  const [selectedAddress, setSelectedAddress] = useState<number>(0);
+
+  // Initialize selections when donors change
+  useEffect(() => {
+    if (donors.length > 0) {
+      const firstDonorId = donors[0].id;
+      setSelectedName(firstDonorId);
+      setSelectedEmail(firstDonorId);
+      setSelectedPhone(firstDonorId);
+      setSelectedAddress(firstDonorId);
+    }
+  }, [donors]);
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
@@ -40,8 +56,20 @@ const DonorMergeModal: React.FC<DonorMergeModalProps> = ({
         <Box sx={{ display: 'flex', gap: 2 }}>
           {donors.map((donor) => (
             <Box key={donor.id}>
-              <Typography>{donor.name}</Typography>
-              <Typography>{donor.email}</Typography>
+              <Typography variant="subtitle1" fontWeight="bold">
+                {donor.name}
+              </Typography>
+              <Typography variant="body2">{donor.email}</Typography>
+              <Typography variant="body2" color="text.secondary">
+                {donor.phone || 'No phone'}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ whiteSpace: 'pre-line' }}
+              >
+                {donor.full_address || 'No address'}
+              </Typography>
             </Box>
           ))}
         </Box>
@@ -64,7 +92,7 @@ const DonorMergeModal: React.FC<DonorMergeModalProps> = ({
             </RadioGroup>
           </FormControl>
 
-          <FormControl component="fieldset">
+          <FormControl component="fieldset" sx={{ mb: 2 }}>
             <FormLabel component="legend">Email</FormLabel>
             <RadioGroup
               value={selectedEmail}
@@ -80,6 +108,41 @@ const DonorMergeModal: React.FC<DonorMergeModalProps> = ({
               ))}
             </RadioGroup>
           </FormControl>
+
+          <FormControl component="fieldset" sx={{ mb: 2 }}>
+            <FormLabel component="legend">Phone</FormLabel>
+            <RadioGroup
+              value={selectedPhone}
+              onChange={(e) => setSelectedPhone(Number(e.target.value))}
+            >
+              {donors.map((donor) => (
+                <FormControlLabel
+                  key={donor.id}
+                  value={donor.id}
+                  control={<Radio />}
+                  label={donor.phone || 'No phone'}
+                />
+              ))}
+            </RadioGroup>
+          </FormControl>
+
+          <FormControl component="fieldset">
+            <FormLabel component="legend">Address</FormLabel>
+            <RadioGroup
+              value={selectedAddress}
+              onChange={(e) => setSelectedAddress(Number(e.target.value))}
+            >
+              {donors.map((donor) => (
+                <FormControlLabel
+                  key={donor.id}
+                  value={donor.id}
+                  control={<Radio />}
+                  label={donor.full_address || 'No address'}
+                  sx={{ alignItems: 'flex-start' }}
+                />
+              ))}
+            </RadioGroup>
+          </FormControl>
         </Box>
       </DialogContent>
       <DialogActions>
@@ -87,7 +150,12 @@ const DonorMergeModal: React.FC<DonorMergeModalProps> = ({
         <Button
           variant="contained"
           onClick={() => {
-            onConfirm({ name: selectedName, email: selectedEmail });
+            onConfirm({
+              name: selectedName,
+              email: selectedEmail,
+              phone: selectedPhone,
+              address: selectedAddress,
+            });
             onClose();
           }}
         >

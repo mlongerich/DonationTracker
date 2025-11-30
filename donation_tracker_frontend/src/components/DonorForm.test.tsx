@@ -57,6 +57,13 @@ describe('DonorForm', () => {
     expect(handleSubmit).toHaveBeenCalledWith({
       name: 'John Doe',
       email: 'john@example.com',
+      phone: '',
+      address_line1: '',
+      address_line2: '',
+      city: '',
+      state: '',
+      zip_code: '',
+      country: 'USA',
     });
 
     // NEW PATTERN: Form should NOT make API calls
@@ -156,6 +163,13 @@ describe('DonorForm', () => {
     expect(handleSubmit).toHaveBeenCalledWith({
       name: 'Updated Name',
       email: 'original@example.com',
+      phone: '',
+      address_line1: '',
+      address_line2: '',
+      city: '',
+      state: '',
+      zip_code: '',
+      country: 'USA',
     });
     expect(mockedApiClient.patch).not.toHaveBeenCalled();
   });
@@ -208,5 +222,21 @@ describe('DonorForm', () => {
     await user.click(screen.getByRole('button', { name: /cancel/i }));
 
     expect(handleCancel).toHaveBeenCalled();
+  });
+
+  it('renders phone and address fields', () => {
+    render(
+      <ThemeProvider theme={theme}>
+        <DonorForm onSubmit={jest.fn()} />
+      </ThemeProvider>
+    );
+
+    expect(screen.getByLabelText(/phone/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/address line 1/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/address line 2/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/city/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/state/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/zip/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/country/i)).toBeInTheDocument();
   });
 });

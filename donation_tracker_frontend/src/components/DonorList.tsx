@@ -104,6 +104,28 @@ const DonorList: React.FC<DonorListProps> = ({
                       ? donor.displayable_email
                       : '(No email provided)'}
                   </Typography>
+                  {donor.phone ? (
+                    <Typography variant="body2" color="text.secondary">
+                      📞 {donor.phone}
+                    </Typography>
+                  ) : (
+                    <Typography variant="body2" color="text.disabled">
+                      No phone
+                    </Typography>
+                  )}
+                  {donor.full_address ? (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ whiteSpace: 'pre-line' }}
+                    >
+                      {donor.full_address}
+                    </Typography>
+                  ) : (
+                    <Typography variant="body2" color="text.disabled">
+                      No address
+                    </Typography>
+                  )}
                   <Typography variant="body2" color="text.secondary">
                     Last Donation:{' '}
                     {donor.last_donation_date || 'No donations yet'}
