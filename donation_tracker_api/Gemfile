@@ -34,6 +34,12 @@ gem "paper_trail"
 # Soft delete
 gem "discard"
 
+# Phone number validation
+gem "phonelib"
+
+# Postal code validation (233 countries)
+gem "validates_zipcode"
+
 # Background jobs
 gem "sidekiq"
 

@@ -89,7 +89,18 @@ class DonorMergeService
     merged_attributes = {}
     @field_selections.each do |field, source_donor_id|
       source_donor = @donors.find { |donor| donor.id == source_donor_id }
-      merged_attributes[field] = source_donor.send(field)
+
+      # Handle address as a composite field
+      if field == :address
+        merged_attributes[:address_line1] = source_donor.address_line1
+        merged_attributes[:address_line2] = source_donor.address_line2
+        merged_attributes[:city] = source_donor.city
+        merged_attributes[:state] = source_donor.state
+        merged_attributes[:zip_code] = source_donor.zip_code
+        merged_attributes[:country] = source_donor.country
+      else
+        merged_attributes[field] = source_donor.send(field)
+      end
     end
     merged_attributes
   end

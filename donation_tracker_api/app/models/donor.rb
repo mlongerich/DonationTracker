@@ -30,23 +30,25 @@ class Donor < ApplicationRecord
   has_many :children, through: :sponsorships
 
   before_validation :set_defaults
+  before_validation :normalize_zip_code
   before_discard :check_active_sponsorships
 
   validates :name, presence: true
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }, uniqueness: { case_sensitive: false, conditions: -> { kept } }
+  validates :phone, phone: { possible: true, allow_blank: true }
+  validates :zip_code, zipcode: { country_code_attribute: :country, allow_blank: true }
 
   # Ransack: Explicitly whitelist searchable attributes
   def self.ransackable_attributes(_auth_object = nil)
-    [ "name", "email", "created_at", "updated_at", "last_updated_at", "name_or_email", "discarded_at" ]
+    [
+      "name", "email", "phone",
+      "address_line1", "city", "state", "zip_code", "country",
+      "created_at", "updated_at", "last_updated_at", "discarded_at"
+    ]
   end
 
   def self.ransackable_associations(_auth_object = nil)
     %w[donations sponsorships children]
-  end
-
-  # Custom Ransack searcher for name OR email
-  ransacker :name_or_email do
-    Arel.sql("CONCAT(name, ' ', email)")
   end
 
   def can_be_deleted?
@@ -57,7 +59,26 @@ class Donor < ApplicationRecord
     donations.maximum(:date)
   end
 
+  def full_address
+    parts = [
+      address_line1,
+      address_line2,
+      city_state_zip,
+      country_display
+    ].compact.reject(&:blank?)
+
+    parts.any? ? parts.join("\n") : nil
+  end
+
   private
+
+  def city_state_zip
+    [ city, state, zip_code ].compact.reject(&:blank?).join(' ')
+  end
+
+  def country_display
+    country if country.present? && country != 'USA'
+  end
 
   def check_active_sponsorships
     if sponsorships.active.exists?
@@ -70,9 +91,26 @@ class Donor < ApplicationRecord
     self.name = "Anonymous" if name.blank?
 
     if email.blank?
-      # Generate email from name (after name has been set)
-      clean_name = name.gsub(/\s+/, "")
-      self.email = "#{clean_name}@mailinator.com"
+      # Priority: phone > address > name
+      if phone.present?
+        sanitized_phone = phone.gsub(/\D/, "")
+        self.email = "anonymous-#{sanitized_phone}@mailinator.com"
+      elsif address_line1.present? || city.present?
+        # Generate from address components
+        address_parts = [address_line1, city].compact.reject(&:blank?)
+        sanitized_address = address_parts.join("-").gsub(/\s+/, "").downcase
+        self.email = "anonymous-#{sanitized_address}@mailinator.com"
+      else
+        # Pure anonymous - use name
+        clean_name = name.gsub(/\s+/, "")
+        self.email = "#{clean_name}@mailinator.com"
+      end
     end
+  end
+
+  def normalize_zip_code
+    return unless zip_code.present? && (country == 'US' || country == 'USA')
+    # Pad 4-digit US zip codes with leading zero (6419 → 06419)
+    self.zip_code = zip_code.rjust(5, '0') if zip_code.length == 4 && zip_code.match?(/^\d{4}$/)
   end
 end

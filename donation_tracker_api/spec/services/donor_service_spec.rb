@@ -69,6 +69,92 @@ RSpec.describe DonorService, type: :service do
       expect(second_result[:donor].name).to eq("Anonymous")
       expect(second_result[:donor].email).to eq("Anonymous@mailinator.com")
     end
+
+    it "preserves existing phone when newer record has blank phone" do
+      existing = Donor.create!(name: "John Smith", email: "john@example.com", phone: "5551234567", last_updated_at: 1.week.ago)
+      newer_data = { name: "John Smith", email: "john@example.com", phone: "" }
+
+      result = DonorService.find_or_update_by_email(newer_data, 1.day.ago)
+
+      expect(result[:created]).to be false
+      expect(result[:donor].id).to eq(existing.id)
+      expect(result[:donor].phone).to eq("5551234567")  # Preserved!
+    end
+
+    it "updates phone when newer record has non-blank phone" do
+      existing = Donor.create!(name: "John Smith", email: "john@example.com", phone: "5551234567", last_updated_at: 1.week.ago)
+      newer_data = { name: "John Smith", email: "john@example.com", phone: "5559999999" }
+
+      result = DonorService.find_or_update_by_email(newer_data, 1.day.ago)
+
+      expect(result[:created]).to be false
+      expect(result[:donor].id).to eq(existing.id)
+      expect(result[:donor].phone).to eq("5559999999")  # Updated!
+    end
+
+    it "preserves existing address when newer record has blank address fields" do
+      existing = Donor.create!(
+        name: "John Smith",
+        email: "john@example.com",
+        address_line1: "123 Main St",
+        city: "Springfield",
+        state: "IL",
+        zip_code: "62701",
+        country: "US",
+        last_updated_at: 1.week.ago
+      )
+      newer_data = {
+        name: "John Smith",
+        email: "john@example.com",
+        address_line1: "",
+        city: "",
+        state: "",
+        zip_code: "",
+        country: ""
+      }
+
+      result = DonorService.find_or_update_by_email(newer_data, 1.day.ago)
+
+      expect(result[:created]).to be false
+      expect(result[:donor].id).to eq(existing.id)
+      expect(result[:donor].address_line1).to eq("123 Main St")  # Preserved!
+      expect(result[:donor].city).to eq("Springfield")
+      expect(result[:donor].state).to eq("IL")
+      expect(result[:donor].zip_code).to eq("62701")
+      expect(result[:donor].country).to eq("US")
+    end
+
+    it "updates address when newer record has non-blank address fields" do
+      existing = Donor.create!(
+        name: "John Smith",
+        email: "john@example.com",
+        address_line1: "123 Main St",
+        city: "Springfield",
+        state: "IL",
+        zip_code: "62701",
+        country: "US",
+        last_updated_at: 1.week.ago
+      )
+      newer_data = {
+        name: "John Smith",
+        email: "john@example.com",
+        address_line1: "456 Oak Ave",
+        city: "Chicago",
+        state: "IL",
+        zip_code: "60601",
+        country: "US"
+      }
+
+      result = DonorService.find_or_update_by_email(newer_data, 1.day.ago)
+
+      expect(result[:created]).to be false
+      expect(result[:donor].id).to eq(existing.id)
+      expect(result[:donor].address_line1).to eq("456 Oak Ave")  # Updated!
+      expect(result[:donor].city).to eq("Chicago")
+      expect(result[:donor].state).to eq("IL")
+      expect(result[:donor].zip_code).to eq("60601")
+      expect(result[:donor].country).to eq("US")
+    end
   end
 
   describe ".find_or_update_by_email_or_stripe_customer" do

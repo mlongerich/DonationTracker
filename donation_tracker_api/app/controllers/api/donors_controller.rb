@@ -42,7 +42,7 @@ class Api::DonorsController < ApplicationController
   end
 
   def create
-    donor_params = params.require(:donor).permit(:name, :email)
+    donor_params = params.require(:donor).permit(:name, :email, :phone, :address_line1, :address_line2, :city, :state, :zip_code, :country)
     result = DonorService.find_or_update_by_email(donor_params, Time.current)
 
     status = result[:created] ? :created : :ok
@@ -56,7 +56,7 @@ class Api::DonorsController < ApplicationController
 
   def update
     donor = Donor.find(params[:id])
-    donor_params = params.require(:donor).permit(:name, :email)
+    donor_params = params.require(:donor).permit(:name, :email, :phone, :address_line1, :address_line2, :city, :state, :zip_code, :country)
 
     # Update with current timestamp for date-based conflict resolution
     donor.update!(donor_params.merge(last_updated_at: Time.current))

@@ -101,7 +101,14 @@ class StripePaymentImportService
     donor_result = DonorService.find_or_update_by_email_or_stripe_customer(
       {
         name: @csv_row["Billing Details Name"],
-        email: @csv_row["Cust Email"]
+        email: @csv_row["Cust Email"],
+        phone: @csv_row["Cust Phone"],
+        address_line1: @csv_row["Billing Details Address Line 1"],
+        address_line2: @csv_row["Billing Details Address Line 2"],
+        city: @csv_row["Billing Details Address City"],
+        state: @csv_row["Billing Detail Address State"],
+        zip_code: @csv_row["Billing Details Address Postal Code"],
+        country: @csv_row["Billing Details Address Country"]
       },
       @csv_row["Cust ID"],
       DateTime.parse(@csv_row["Created Formatted"])

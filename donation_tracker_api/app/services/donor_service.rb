@@ -56,7 +56,7 @@ class DonorService
   end
 
   def self.find_or_update_by_email(donor_attributes, transaction_date)
-    lookup_email = normalize_email(donor_attributes[:email], donor_attributes[:name])
+    lookup_email = normalize_email(donor_attributes)
     existing_donor = find_existing_donor(lookup_email)
 
     if existing_donor
@@ -68,13 +68,30 @@ class DonorService
 
   private
 
-  def self.normalize_email(email, name)
+  def self.normalize_email(donor_attributes)
+    email = donor_attributes[:email]
     return email unless email.blank?
 
-    # If email is blank, generate it from name (matching Donor model logic)
-    normalized_name = name.blank? ? "Anonymous" : name
-    clean_name = normalized_name.gsub(/\s+/, "")
-    "#{clean_name}@mailinator.com"
+    # If email is blank, generate from phone/address/name (matching Donor model logic)
+    # Priority: phone > address > name
+    phone = donor_attributes[:phone]
+    address_line1 = donor_attributes[:address_line1]
+    city = donor_attributes[:city]
+    name = donor_attributes[:name]
+
+    if phone.present?
+      sanitized_phone = phone.gsub(/\D/, "")
+      "anonymous-#{sanitized_phone}@mailinator.com"
+    elsif address_line1.present? || city.present?
+      address_parts = [address_line1, city].compact.reject(&:blank?)
+      sanitized_address = address_parts.join("-").gsub(/\s+/, "").downcase
+      "anonymous-#{sanitized_address}@mailinator.com"
+    else
+      # Pure anonymous - use name
+      normalized_name = name.blank? ? "Anonymous" : name
+      clean_name = normalized_name.gsub(/\s+/, "")
+      "#{clean_name}@mailinator.com"
+    end
   end
 
   def self.find_existing_donor(lookup_email)
@@ -93,6 +110,13 @@ class DonorService
   def self.build_update_attributes(donor_attributes, transaction_date)
     update_attrs = donor_attributes.merge(last_updated_at: transaction_date)
     update_attrs.delete(:name) if donor_attributes[:name].blank?
+    update_attrs.delete(:phone) if donor_attributes[:phone].blank?
+    update_attrs.delete(:address_line1) if donor_attributes[:address_line1].blank?
+    update_attrs.delete(:address_line2) if donor_attributes[:address_line2].blank?
+    update_attrs.delete(:city) if donor_attributes[:city].blank?
+    update_attrs.delete(:state) if donor_attributes[:state].blank?
+    update_attrs.delete(:zip_code) if donor_attributes[:zip_code].blank?
+    update_attrs.delete(:country) if donor_attributes[:country].blank?
     update_attrs
   end
 

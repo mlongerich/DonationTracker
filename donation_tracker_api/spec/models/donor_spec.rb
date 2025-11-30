@@ -44,6 +44,24 @@ RSpec.describe Donor, type: :model do
     expect(donor.email).to eq("Anonymous@mailinator.com")
   end
 
+  it "generates unique email from phone when name and email are blank" do
+    donor = create(:donor, name: "", email: "", phone: "5551234567")
+    expect(donor.name).to eq("Anonymous")
+    expect(donor.email).to eq("anonymous-5551234567@mailinator.com")
+  end
+
+  it "generates unique email from address when name and email are blank" do
+    donor = create(:donor, name: "", email: "", address_line1: "123 Main St", city: "Springfield")
+    expect(donor.name).to eq("Anonymous")
+    expect(donor.email).to eq("anonymous-123mainst-springfield@mailinator.com")
+  end
+
+  it "prioritizes phone over address when both present and name/email blank" do
+    donor = create(:donor, name: "", email: "", phone: "5551234567", address_line1: "123 Main St", city: "Springfield")
+    expect(donor.name).to eq("Anonymous")
+    expect(donor.email).to eq("anonymous-5551234567@mailinator.com")
+  end
+
   it "tracks changes with PaperTrail when donor is updated" do
     donor = create(:donor, name: "John Smith", email: "john@example.com")
 
@@ -189,6 +207,79 @@ RSpec.describe Donor, type: :model do
       donor = create(:donor)
 
       expect(donor.last_donation_date).to be_nil
+    end
+  end
+
+  describe "phone validation" do
+    it "accepts valid phone number" do
+      donor = build(:donor, phone: "5551234567")
+      expect(donor).to be_valid
+    end
+
+    it "rejects invalid phone number" do
+      donor = build(:donor, phone: "123")
+      expect(donor).not_to be_valid
+      expect(donor.errors[:phone]).to be_present
+    end
+
+    it "allows blank phone number" do
+      donor = build(:donor, phone: nil)
+      expect(donor).to be_valid
+    end
+  end
+
+  describe "zip code validation" do
+    it "accepts valid US 5-digit zip code" do
+      donor = build(:donor, zip_code: "12345", country: "US")
+      expect(donor).to be_valid
+    end
+
+    it "rejects invalid zip code" do
+      donor = build(:donor, zip_code: "ABCDE", country: "US")
+      expect(donor).not_to be_valid
+      expect(donor.errors[:zip_code]).to be_present
+    end
+
+    it "allows blank zip code" do
+      donor = build(:donor, zip_code: nil)
+      expect(donor).to be_valid
+    end
+
+    it "pads 4-digit US zip code with leading zero" do
+      donor = build(:donor, zip_code: "6419", country: "US")
+      donor.valid?
+      expect(donor.zip_code).to eq("06419")
+    end
+
+    it "does not pad 4-digit zip code for non-US countries" do
+      donor = build(:donor, zip_code: "1234", country: "CA")
+      donor.valid?
+      expect(donor.zip_code).to eq("1234")
+    end
+
+    it "does not modify 5-digit US zip codes" do
+      donor = build(:donor, zip_code: "12345", country: "US")
+      donor.valid?
+      expect(donor.zip_code).to eq("12345")
+    end
+  end
+
+  describe "#full_address" do
+    it "returns nil when all address fields blank" do
+      donor = build(:donor)
+      expect(donor.full_address).to be_nil
+    end
+
+    it "returns formatted address when all fields present" do
+      donor = build(:donor,
+        address_line1: "123 Main St",
+        address_line2: "Apt 4B",
+        city: "San Francisco",
+        state: "CA",
+        zip_code: "94102"
+      )
+
+      expect(donor.full_address).to eq("123 Main St\nApt 4B\nSan Francisco CA 94102")
     end
   end
 end

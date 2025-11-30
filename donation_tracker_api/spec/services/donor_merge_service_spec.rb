@@ -151,5 +151,50 @@ RSpec.describe DonorMergeService do
         expect(result[:merged_donor]).to be_present
       end
     end
+
+    it 'merges phone field from selected donor' do
+      donor_with_phone = create(:donor, name: 'Phone User', email: 'phone@example.com', phone: '5551234567')
+      donor_without_phone = create(:donor, name: 'No Phone', email: 'nophone@example.com')
+
+      field_selections = {
+        name: donor_with_phone.id,
+        email: donor_with_phone.id,
+        phone: donor_with_phone.id
+      }
+
+      result = DonorMergeService.new(
+        donor_ids: [ donor_with_phone.id, donor_without_phone.id ],
+        field_selections: field_selections
+      ).merge
+
+      expect(result[:merged_donor].phone).to eq('5551234567')
+    end
+
+    it 'merges address fields as a composite from selected donor' do
+      donor_with_address = create(:donor,
+        name: 'Address User',
+        email: 'address@example.com',
+        address_line1: '123 Main St',
+        city: 'Springfield',
+        state: 'IL',
+        zip_code: '62701',
+        country: 'US')
+      donor_without_address = create(:donor, name: 'No Address', email: 'noaddress@example.com')
+
+      field_selections = {
+        name: donor_without_address.id,
+        email: donor_without_address.id,
+        address: donor_with_address.id
+      }
+
+      result = DonorMergeService.new(
+        donor_ids: [ donor_with_address.id, donor_without_address.id ],
+        field_selections: field_selections
+      ).merge
+
+      merged = result[:merged_donor]
+      expect(merged.address_line1).to eq('123 Main St')
+      expect(merged.city).to eq('Springfield')
+    end
   end
 end

@@ -134,12 +134,20 @@ RSpec.describe "/api/donors", type: :request do
       expect(json_response["donors"][0]["email"]).to eq("test1@example.com")
     end
 
-    it "filters donors by name OR email using Ransack" do
+    it "filters donors by name OR email using Ransack OR combinator" do
       _donor1 = create(:donor, name: "Michael Longerich", email: "mlongerich@gmail.com")
       _donor2 = create(:donor, name: "John Smith", email: "michael@mailinator.com")
       _donor3 = create(:donor, name: "Bob Example", email: "example@yahoo.com")
 
-      get "/api/donors", params: { q: { name_or_email_cont: "n" } }, headers: { "Host" => "api" }
+      get "/api/donors", params: {
+        q: {
+          g: [{
+            m: 'or',
+            name_cont: 'michael',
+            email_cont: 'michael'
+          }]
+        }
+      }, headers: { "Host" => "api" }
 
       expect(response).to have_http_status(:ok)
       json_response = JSON.parse(response.body)
@@ -149,6 +157,30 @@ RSpec.describe "/api/donors", type: :request do
         [ "Michael Longerich", "mlongerich@gmail.com" ],
         [ "John Smith", "michael@mailinator.com" ]
       )
+    end
+
+    it "filters donors by phone number using omni-search" do
+      _donor1 = create(:donor, name: "Phone User", email: "phone@example.com", phone: "(555) 123-4567")
+      _donor2 = create(:donor, name: "No Phone", email: "nophone@example.com", phone: nil)
+
+      get "/api/donors", params: { q: { phone_cont: "555" } }, headers: { "Host" => "api" }
+
+      expect(response).to have_http_status(:ok)
+      json_response = JSON.parse(response.body)
+      expect(json_response["donors"].length).to eq(1)
+      expect(json_response["donors"][0]["name"]).to eq("Phone User")
+    end
+
+    it "filters donors by city using omni-search" do
+      _donor1 = create(:donor, name: "SF User", email: "sf@example.com", city: "San Francisco")
+      _donor2 = create(:donor, name: "NY User", email: "ny@example.com", city: "New York")
+
+      get "/api/donors", params: { q: { city_cont: "San" } }, headers: { "Host" => "api" }
+
+      expect(response).to have_http_status(:ok)
+      json_response = JSON.parse(response.body)
+      expect(json_response["donors"].length).to eq(1)
+      expect(json_response["donors"][0]["name"]).to eq("SF User")
     end
 
     it "paginates donors using Kaminari" do

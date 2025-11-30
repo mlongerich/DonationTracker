@@ -302,6 +302,7 @@ GEM
     pg (1.6.2-arm64-darwin)
     pg (1.6.2-x86_64-linux)
     pg (1.6.2-x86_64-linux-musl)
+    phonelib (0.10.14)
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
@@ -491,6 +492,8 @@ GEM
     uniform_notifier (1.18.0)
     uri (1.0.3)
     useragent (0.16.11)
+    validates_zipcode (0.5.4)
+      activemodel (>= 4.2.0)
     vcr (6.3.1)
       base64
     version_gem (1.1.9)
@@ -538,6 +541,7 @@ DEPENDENCIES
   omniauth-rails_csrf_protection
   paper_trail
   pg (~> 1.1)
+  phonelib
   puma (>= 5.0)
   rack-cors
   rails (~> 8.0.2)
@@ -553,6 +557,7 @@ DEPENDENCIES
   stripe
   thruster
   tzinfo-data
+  validates_zipcode
   vcr
   webmock
 
