@@ -1918,4 +1918,103 @@ describe('parseCurrency', () => {
 
 ---
 
-*Last updated: 2025-11-26*
+## Testing Patterns
+
+### FactoryBot Traits
+
+Use traits to create reusable test data combinations without duplicating factory definitions.
+
+**When to use:**
+- Optional fields that appear in multiple test scenarios
+- Common data combinations (e.g., contact info, addresses)
+- Testing different states or configurations
+
+**Donor Factory Example (TICKET-100):**
+```ruby
+# spec/factories/donors.rb
+FactoryBot.define do
+  factory :donor do
+    sequence(:email) { |n| "donor#{n}@example.com" }
+    name { Faker::Name.name }
+    last_updated_at { Time.current }
+
+    # Phone only
+    trait :with_phone do
+      phone { Faker::PhoneNumber.phone_number }
+    end
+
+    # Address only
+    trait :with_address do
+      address_line1 { Faker::Address.street_address }
+      address_line2 { Faker::Address.secondary_address }
+      city { Faker::Address.city }
+      state { Faker::Address.state_abbr }
+      zip_code { Faker::Address.zip_code }
+      country { "US" }
+    end
+
+    # Both phone and address
+    trait :with_full_contact do
+      phone { Faker::PhoneNumber.phone_number }
+      address_line1 { Faker::Address.street_address }
+      city { Faker::Address.city }
+      state { Faker::Address.state_abbr }
+      zip_code { Faker::Address.zip_code }
+      country { "US" }
+    end
+
+    # Archived donor
+    trait :archived do
+      discarded_at { 1.week.ago }
+    end
+  end
+end
+```
+
+**Usage in Tests:**
+```ruby
+# spec/models/donor_spec.rb
+RSpec.describe Donor, type: :model do
+  describe 'phone validation' do
+    it 'accepts valid US phone number' do
+      donor = create(:donor, :with_phone)
+      expect(donor).to be_valid
+    end
+  end
+
+  describe 'full_address method' do
+    it 'combines address fields' do
+      donor = create(:donor, :with_address)
+      expect(donor.full_address).to include(donor.city)
+    end
+  end
+
+  describe 'anonymous email generation' do
+    it 'uses phone when name/email blank' do
+      donor = create(:donor, name: "", email: "", :with_phone)
+      expect(donor.email).to match(/anonymous-\d+@mailinator.com/)
+    end
+  end
+
+  describe 'merge with contact info' do
+    let(:donor1) { create(:donor, :with_full_contact) }
+    let(:donor2) { create(:donor, :with_phone) }
+
+    it 'preserves selected contact information' do
+      # Test merge logic
+    end
+  end
+end
+```
+
+**Benefits:**
+- DRY test code (define traits once, reuse everywhere)
+- Clear test intent (`:with_full_contact` vs manually setting 6 fields)
+- Easy to maintain (update trait definition, all tests updated)
+- Composable (combine multiple traits)
+
+**See:** TICKET-100 (Donor Contact Information)
+
+---
+
+*Last updated: 2025-11-28*

@@ -78,6 +78,7 @@ Current work items and user stories being actively developed.
 - [TICKET-099: Expand Custom Hooks Library](completed/TICKET-099-expand-custom-hooks-library.md) - ✅ Complete (2025-11-18)
 - [TICKET-021: Quick Entity Creation (Donor/Project/Child) from Donation Page](completed/TICKET-021-quick-entity-creation-from-donation-page.md) - ✅ Complete (2025-11-19)
 - [TICKET-126: Intelligent Pre-Commit Documentation Validation](completed/TICKET-126-intelligent-documentation-check.md) - ✅ Complete (2025-11-26)
+- [TICKET-100: Add Physical Address to Donor Records](completed/TICKET-100-add-physical-address-donor-records.md) - ✅ Complete (2025-11-28)
 
 ### 🔵 In Progress Tickets
 
@@ -133,7 +134,7 @@ Current work items and user stories being actively developed.
 - [TICKET-046: Add Project Filter to Donations Page](TICKET-046-donation-list-project-filter.md) - 📋 Planned
 - [TICKET-086: Delete Donation Within 24-Hour Window](TICKET-086-delete-donation-24-hour-window.md) - 📋 Planned (🟡 Medium, S) - *Quick error correction*
 - [TICKET-087: Donor Bulk Operations](TICKET-087-donor-bulk-operations.md) - 📋 Planned (🟡 Medium, M) - *Archive/restore/export multiple donors*
-- [TICKET-088: Donor Export to CSV/Excel](TICKET-088-donor-export-csv-excel.md) - 📋 Planned (🟢 Low, S) - *Single export button*
+- [TICKET-088: Donor Export to CSV/Excel](TICKET-088-donor-export-csv-excel.md) - 📋 Ready to Implement (🟢 Low, S) - *Single export button* - Dependencies: ✅ TICKET-100 (Phone + Address fields) - COMPLETE
 - [TICKET-089: Archived Donor Donation Visibility Policy](TICKET-089-archived-donor-donation-visibility.md) - 📋 Planned (🟡 Medium, S) - *Business rule + indicator*
 - [TICKET-090: Fix Cypress in Docker (Alpine ARM64)](TICKET-090-fix-cypress-docker-alpine-arm64.md) - 📋 Planned (🟡 Medium, M) - *Switch to Debian base image*
 - [TICKET-091: Admin Page with CSV Import GUI](TICKET-091-admin-page-csv-import-gui.md) - 📋 Planned (🔴 High, M) - *CSV import via web interface*
@@ -159,7 +160,6 @@ Current work items and user stories being actively developed.
 - [TICKET-061: Auto-Create Sponsorship from Donation](TICKET-061-auto-create-sponsorship-from-donation.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-092: Child Name+Gender Uniqueness Validation](TICKET-092-child-name-gender-uniqueness-validation.md) - 📋 Planned (🟡 Medium, S) - *Prevent duplicate children*
 - [TICKET-093: Project Icons on Projects Page](TICKET-093-project-icons-on-projects-page.md) - 📋 Planned (🟢 Low, XS) - *Visual clarity*
-- [TICKET-100: Add Physical Address to Donor Records](TICKET-100-add-physical-address-donor-records.md) - 📋 Planned (🟡 Medium, M) - *Street, city, state, zip fields for tax receipts*
 - [TICKET-101: Donation Photo Upload (Check Images)](TICKET-101-donation-photo-upload-check-images.md) - 📋 Planned (🔴 High, L) - *Required photo for check donations*
 - [TICKET-102: Child Photo Upload](TICKET-102-child-photo-upload.md) - 📋 Planned (🟡 Medium, M) - *Optional profile photos for sponsored children*
 - [TICKET-103: Monthly Donation Report](TICKET-103-monthly-donation-report.md) - 📋 Planned (🔴 High, M) - *Individual row per donation with totals*
@@ -203,10 +203,10 @@ Current work items and user stories being actively developed.
 ## Quick Stats
 
 - **Total Tickets:** 117 (added TICKET-127, TICKET-131, TICKET-132 from CODE_SMELL_ANALYSIS)
-- **Completed:** 60 (51%)
+- **Completed:** 61 (52%)
 - **In Progress:** 0
-- **Planned:** 55
-- **Estimated Hours Remaining:** ~195.5 hours (~4.9 weeks)
+- **Planned:** 54
+- **Estimated Hours Remaining:** ~192.5 hours (~4.8 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 - **Canceled/Superseded:** 3 (TICKET-041, TICKET-051, TICKET-120)
@@ -222,8 +222,9 @@ Current work items and user stories being actively developed.
 - **Admin Page Improvements:** 6 planned (~7h)
   - New: TICKET-119 (Move Projects to Admin Tab - 1-2h)
   - TICKET-114/115/116/117/118 (filters, status edit, archive, design, source tracking)
-- **Sponsorship & Children Features:** 8 planned (~32h), 10 completed
+- **Sponsorship & Children Features:** 7 planned (~29h), 11 completed
   - ✅ TICKET-077: Last Donation Date Tracking (complete)
+  - ✅ TICKET-100: Add Physical Address to Donor Records (complete)
   - New: TICKET-102 (Child Photos)
   - ❌ TICKET-051: Superseded by TICKET-119
 - **Testing & Quality Assurance:** 10 planned (~27h), 1 completed

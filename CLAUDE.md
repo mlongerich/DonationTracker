@@ -447,6 +447,76 @@ end
 
 **See:** TICKET-062, TICKET-038, TICKET-049
 
+#### Donor Contact Information Patterns
+
+**Phone & Address Validation (TICKET-100):**
+- **Phone validation:** Uses `phonelib` gem with US/international format support
+- **Zip code validation:** Uses `validates_zipcode` gem with country-aware validation (auto-pads 4-digit US codes)
+- **All fields optional:** No required contact info (supports anonymous donors)
+
+**Pattern:**
+```ruby
+class Donor < ApplicationRecord
+  validates :phone, phone: { possible: true, allow_blank: true }
+  validates_zipcode :zip_code, country_code: :country
+  validates :state, length: { is: 2 }, allow_blank: true
+  validates :country, length: { is: 2 }, allow_blank: true
+
+  def full_address
+    [address_line1, address_line2, city, state, zip_code, country]
+      .compact.reject(&:blank?).join(", ")
+  end
+end
+```
+
+**Anonymous Email Generation (Prevents Duplicate Anonymous Donors):**
+- **Problem:** Multiple anonymous donors with different contact info collapse into single "Anonymous@mailinator.com"
+- **Solution:** Generate unique email from contact information
+- **Priority:** phone > address > name
+
+**Implementation (must match in both Donor model and DonorService):**
+```ruby
+# app/models/donor.rb - set_defaults callback
+if email.blank?
+  if phone.present?
+    sanitized_phone = phone.gsub(/\D/, "")
+    self.email = "anonymous-#{sanitized_phone}@mailinator.com"
+  elsif address_line1.present? || city.present?
+    address_parts = [address_line1, city].compact.reject(&:blank?)
+    sanitized_address = address_parts.join("-").gsub(/\s+/, "").downcase
+    self.email = "anonymous-#{sanitized_address}@mailinator.com"
+  else
+    clean_name = name.gsub(/\s+/, "")
+    self.email = "#{clean_name}@mailinator.com"
+  end
+end
+```
+
+**Data Preservation on CSV Import (Blank Updates):**
+- **Problem:** CSV import with blank phone/address overwrites existing donor data
+- **Solution:** Delete blank fields from update hash before updating
+
+**Pattern:**
+```ruby
+class DonorService
+  def self.build_update_attributes(donor_attributes, transaction_date)
+    update_attrs = donor_attributes.merge(last_updated_at: transaction_date)
+
+    # Delete blank fields to preserve existing values
+    update_attrs.delete(:name) if donor_attributes[:name].blank?
+    update_attrs.delete(:phone) if donor_attributes[:phone].blank?
+    update_attrs.delete(:address_line1) if donor_attributes[:address_line1].blank?
+    # ... all address fields
+
+    update_attrs
+  end
+end
+```
+
+**Factory Traits:** `:with_phone`, `:with_address`, `:with_full_contact`
+
+**See:** TICKET-100, docs/PATTERNS.md for factory examples
+
 ### Frontend (React)
 
 - **ESLint**: React, accessibility, TypeScript rules
@@ -647,6 +717,12 @@ useEffect(() => {
 - ✅ setState functions don't need to be in deps (stable by React)
 
 **See:** TICKET-097 (ESLint exhaustive-deps fix)
+
+**Async Prop Updates:**
+- Use `useEffect` for props that load asynchronously (modals/dialogs receiving API data)
+- Initialize state with safe defaults, update in useEffect when prop changes
+- **Bug fix (TICKET-100):** DonorMergeModal initialized with `donors[0]?.id || 0` → sent `0` to API → 500 error
+- **Solution:** Initialize with `0`, add `useEffect(() => { if (donors.length > 0) setField(donors[0].id) }, [donors])`
 
 #### Custom Hooks Library
 
@@ -987,5 +1063,5 @@ bash scripts/test-backend.sh spec/models/donation_spec.rb:227
 ---
 
 *This document is updated as practices evolve*
-*Last updated: 2025-11-26*
+*Last updated: 2025-11-28*
 *Target: 900-1000 lines for optimal Claude Code performance (self-contained essentials with mature pattern library)*

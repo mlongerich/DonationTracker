@@ -17,9 +17,21 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2025-11-26 (Documentation cleanup and optimization)
+**Last Updated:** 2025-11-28 (TICKET-100: Add phone and address to donor records)
 
 **Latest Milestones:**
+- TICKET-100 - Add Physical Address to Donor Records ✅ (2025-11-28)
+  - **Phone & Address Fields:** phone (phonelib validation), address_line1, address_line2, city, state (2-char), zip_code (validates_zipcode with auto-padding), country (2-char ISO)
+  - **Anonymous Email Generation:** Unique email from phone/address (prevents duplicate anonymous donors)
+  - **Priority:** phone > address > name for anonymous donors ("anonymous-5551234567@mailinator.com", "anonymous-123mainst-springfield@mailinator.com")
+  - **Data Preservation:** CSV import with blank phone/address preserves existing values
+  - **Omni-Search:** Ransack search across name, email, phone, and all address fields
+  - **Donor Merge:** Address fields included in merge modal with composite "Address" field selection
+  - **Stripe CSV Import:** Extracts phone and billing address from CSV
+  - **Frontend:** DonorForm with phone/address inputs, DonorList shows phone, DonorMergeModal async loading fix
+  - **Test Coverage:** 20+ backend RSpec tests, 15+ frontend Jest tests, 5 Cypress E2E tests
+  - **Factory Traits:** :with_phone, :with_address, :with_full_contact for testing
+  - See tickets/completed/TICKET-100-add-physical-address-donor-records.md for full implementation
 - TICKET-126 - Intelligent Pre-Commit Documentation Validation ✅ (2025-11-26)
   - **Active validation replaces passive warning** - blocks commits when docs missing
   - Intelligent ticket detection from git changes (modified + untracked files)
@@ -175,8 +187,8 @@
 - TICKET-064 - Smart Sponsorship Detection & Backend Logic ✅ (2025-10-31)
 - TICKET-032 - Custom Hooks Library (useDebouncedValue, usePagination, useRansackFilters) ✅ (2025-10-29)
 
-**Current Focus:** Stripe import redesign complete (TICKET-109, TICKET-110)
-**Next Feature:** TICKET-111 (Rake task output updates) or TICKET-092 (Child uniqueness validation)
+**Current Focus:** Donor contact information complete (TICKET-100)
+**Next Feature:** TICKET-092 (Child uniqueness validation) or TICKET-088 (Donor export CSV/Excel)
 
 **See [docs/project/README.md](docs/project/README.md#current-status) for detailed status**
 
