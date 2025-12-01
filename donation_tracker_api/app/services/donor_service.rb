@@ -83,7 +83,7 @@ class DonorService
       sanitized_phone = phone.gsub(/\D/, "")
       "anonymous-#{sanitized_phone}@mailinator.com"
     elsif address_line1.present? || city.present?
-      address_parts = [address_line1, city].compact.reject(&:blank?)
+      address_parts = [ address_line1, city ].compact.reject(&:blank?)
       sanitized_address = address_parts.join("-").gsub(/\s+/, "").downcase
       "anonymous-#{sanitized_address}@mailinator.com"
     else

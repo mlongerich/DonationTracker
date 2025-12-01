@@ -73,11 +73,11 @@ class Donor < ApplicationRecord
   private
 
   def city_state_zip
-    [ city, state, zip_code ].compact.reject(&:blank?).join(' ')
+    [ city, state, zip_code ].compact.reject(&:blank?).join(" ")
   end
 
   def country_display
-    country if country.present? && country != 'USA'
+    country if country.present? && country != "USA"
   end
 
   def check_active_sponsorships
@@ -97,7 +97,7 @@ class Donor < ApplicationRecord
         self.email = "anonymous-#{sanitized_phone}@mailinator.com"
       elsif address_line1.present? || city.present?
         # Generate from address components
-        address_parts = [address_line1, city].compact.reject(&:blank?)
+        address_parts = [ address_line1, city ].compact.reject(&:blank?)
         sanitized_address = address_parts.join("-").gsub(/\s+/, "").downcase
         self.email = "anonymous-#{sanitized_address}@mailinator.com"
       else
@@ -109,8 +109,8 @@ class Donor < ApplicationRecord
   end
 
   def normalize_zip_code
-    return unless zip_code.present? && (country == 'US' || country == 'USA')
+    return unless zip_code.present? && (country == "US" || country == "USA")
     # Pad 4-digit US zip codes with leading zero (6419 → 06419)
-    self.zip_code = zip_code.rjust(5, '0') if zip_code.length == 4 && zip_code.match?(/^\d{4}$/)
+    self.zip_code = zip_code.rjust(5, "0") if zip_code.length == 4 && zip_code.match?(/^\d{4}$/)
   end
 end

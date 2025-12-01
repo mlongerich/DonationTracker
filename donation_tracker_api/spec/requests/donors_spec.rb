@@ -141,11 +141,11 @@ RSpec.describe "/api/donors", type: :request do
 
       get "/api/donors", params: {
         q: {
-          g: [{
+          g: [ {
             m: 'or',
             name_cont: 'michael',
             email_cont: 'michael'
-          }]
+          } ]
         }
       }, headers: { "Host" => "api" }
 
