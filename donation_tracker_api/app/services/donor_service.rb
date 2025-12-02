@@ -1,79 +1,111 @@
 # frozen_string_literal: true
 
-# Provides stateless donor lookup and matching logic.
+# Provides donor lookup and matching logic with instance-based pattern.
 #
-# This service provides class methods for:
+# This service provides:
 # - Finding or creating donors by email with smart matching
 # - Finding donors by Stripe customer ID with merge chain following
 # - Email normalization for Anonymous donors
 # - Date-based conflict resolution (most recent update wins)
+# - Phone and address field preservation (blank updates don't overwrite existing data)
 #
-# Uses class method pattern for stateless operations.
+# Uses instance method pattern for stateful, multi-step operations.
 #
 # @example Find or create donor by email
-#   result = DonorService.find_or_update_by_email(
-#     { name: "John Doe", email: "john@example.com" },
-#     Time.current
+#   service = DonorService.new(
+#     donor_attributes: { name: "John Doe", email: "john@example.com" },
+#     transaction_date: Time.current
 #   )
+#   result = service.find_or_update
 #   # => { donor: <Donor>, created: true }
 #
 # @example Find donor by Stripe customer ID
-#   result = DonorService.find_or_update_by_email_or_stripe_customer(
-#     { name: "Jane Doe", email: "jane@example.com" },
-#     "cus_123456",
-#     Date.today
+#   service = DonorService.new(
+#     donor_attributes: { name: "Jane Doe", email: "jane@example.com" },
+#     transaction_date: Date.today,
+#     stripe_customer_id: "cus_123456"
 #   )
+#   result = service.find_or_update
 #   # => { donor: <Donor>, created: false, redirected: false }
 #
 # @see Donor model for donor attributes
 # @see DonorMergeService for merging duplicate donors
+# @see TICKET-037 for instance pattern refactoring
 # @see TICKET-075 for Stripe customer ID tracking
+# @see TICKET-100 for phone/address field preservation
 class DonorService
-  def self.find_or_update_by_email_or_stripe_customer(donor_attributes, stripe_customer_id, transaction_date)
-    # Priority 1: Check for existing donor by stripe_customer_id
-    if stripe_customer_id.present?
-      existing_donation = Donation.where(stripe_customer_id: stripe_customer_id).first
-
-      if existing_donation
-        donor = existing_donation.donor
-        original_donor_id = donor.id
-
-        # Follow merge chain if donor was merged
-        while donor.merged_into_id.present?
-          donor = Donor.find(donor.merged_into_id)
-        end
-
-        return {
-          donor: donor,
-          created: false,
-          redirected: (donor.id != original_donor_id)
-        }
-      end
-    end
-
-    # Priority 2: Fallback to email lookup (existing logic)
-    find_or_update_by_email(donor_attributes, transaction_date)
+  def initialize(donor_attributes:, transaction_date:, stripe_customer_id: nil)
+    @donor_attributes = donor_attributes
+    @transaction_date = transaction_date
+    @stripe_customer_id = stripe_customer_id
+    @lookup_email = nil
+    @existing_donor = nil
   end
 
-  def self.find_or_update_by_email(donor_attributes, transaction_date)
-    lookup_email = normalize_email(donor_attributes)
-    existing_donor = find_existing_donor(lookup_email)
-
-    if existing_donor
-      update_existing_donor(existing_donor, donor_attributes, transaction_date)
+  # Main public method - handles both Stripe customer ID and email lookup
+  def find_or_update
+    if stripe_customer_id_lookup_possible?
+      find_by_stripe_customer_id_or_email
     else
-      create_new_donor(donor_attributes, transaction_date)
+      find_by_email
     end
   end
 
   private
 
-  def self.normalize_email(donor_attributes)
-    email = donor_attributes[:email]
-    return email unless email.blank?
+  attr_reader :donor_attributes, :transaction_date, :stripe_customer_id
+  attr_accessor :lookup_email, :existing_donor
 
-    # If email is blank, generate from phone/address/name (matching Donor model logic)
+  def stripe_customer_id_lookup_possible?
+    stripe_customer_id.present?
+  end
+
+  def find_by_stripe_customer_id_or_email
+    # Priority 1: Check for existing donation with stripe_customer_id
+    existing_donation = Donation.where(stripe_customer_id: stripe_customer_id).first
+
+    if existing_donation
+      donor = existing_donation.donor
+      original_donor_id = donor.id
+
+      # Follow merge chain if donor was merged
+      donor = follow_merge_chain(donor)
+
+      return {
+        donor: donor,
+        created: false,
+        redirected: (donor.id != original_donor_id)
+      }
+    end
+
+    # Priority 2: Fallback to email lookup (existing logic)
+    find_by_email
+  end
+
+  def follow_merge_chain(donor)
+    while donor.merged_into_id.present?
+      donor = Donor.find(donor.merged_into_id)
+    end
+    donor
+  end
+
+  def find_by_email
+    normalize_email
+    find_existing_donor
+    create_or_update_donor
+  end
+
+  def normalize_email
+    @lookup_email = if donor_attributes[:email].blank?
+      generate_anonymous_email
+    else
+      donor_attributes[:email]
+    end
+  end
+
+  def generate_anonymous_email
     # Priority: phone > address > name
+    # Must match Donor model set_defaults callback logic (TICKET-100)
     phone = donor_attributes[:phone]
     address_line1 = donor_attributes[:address_line1]
     city = donor_attributes[:city]
@@ -94,20 +126,29 @@ class DonorService
     end
   end
 
-  def self.find_existing_donor(lookup_email)
-    Donor.where("LOWER(email) = ?", lookup_email.downcase).first
+  def find_existing_donor
+    @existing_donor = Donor.where("LOWER(email) = ?", lookup_email.downcase).first
   end
 
-  def self.update_existing_donor(existing_donor, donor_attributes, transaction_date)
+  def create_or_update_donor
+    if existing_donor
+      update_existing_donor
+    else
+      create_new_donor
+    end
+  end
+
+  def update_existing_donor
     last_updated = existing_donor.last_updated_at || Time.zone.at(0)
-    if transaction_date > last_updated
-      update_attrs = build_update_attributes(donor_attributes, transaction_date)
+    if transaction_date >= last_updated
+      update_attrs = build_update_attributes
       existing_donor.update!(update_attrs)
     end
     { donor: existing_donor, created: false }
   end
 
-  def self.build_update_attributes(donor_attributes, transaction_date)
+  def build_update_attributes
+    # Field preservation logic - blank fields don't overwrite existing data (TICKET-100)
     update_attrs = donor_attributes.merge(last_updated_at: transaction_date)
     update_attrs.delete(:name) if donor_attributes[:name].blank?
     update_attrs.delete(:phone) if donor_attributes[:phone].blank?
@@ -120,7 +161,7 @@ class DonorService
     update_attrs
   end
 
-  def self.create_new_donor(donor_attributes, transaction_date)
+  def create_new_donor
     donor = Donor.new(donor_attributes)
     donor.last_updated_at = transaction_date
     donor.save!

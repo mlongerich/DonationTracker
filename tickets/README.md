@@ -67,6 +67,7 @@ Current work items and user stories being actively developed.
 - [TICKET-085: Donation Source & Payment Method Tracking](completed/TICKET-085-donation-source-payment-method-tracking.md) - ✅ Complete (2025-11-11)
 - [TICKET-094: Fix SponsorshipsController Error Handling Pattern](completed/TICKET-094-fix-sponsorships-controller-error-handling.md) - ✅ Complete (2025-11-12)
 - [TICKET-108: Fix E2E Test Infrastructure Flakiness](completed/TICKET-108-fix-e2e-test-flakiness.md) - ✅ Complete (2025-11-12)
+- [TICKET-037: Standardize Service Object Patterns](TICKET-037-standardize-service-object-patterns.md) - ✅ Complete (2025-12-01)
 - [TICKET-053: Sponsorships Page Filters & Pagination UI](completed/TICKET-053-sponsorships-page-filters-pagination-ui.md) - ✅ Complete (2025-11-12)
 - [TICKET-077: Last Donation Date Tracking](completed/TICKET-077-last-donation-date-tracking.md) - ✅ Complete (2025-11-12)
 - [TICKET-096: Refactor DonationList Component Pattern](completed/TICKET-096-refactor-donation-list-component-pattern.md) - ✅ Complete (2025-11-13)
@@ -185,7 +186,6 @@ Current work items and user stories being actively developed.
 
 **Medium Priority:**
 - [TICKET-034: Create Query Objects for Complex Database Queries](TICKET-034-create-query-objects-complex-database-queries.md) - 📋 Planned (🟡 Medium, M) - *Updated with ChildrenController example*
-- [TICKET-037: Standardize Service Object Patterns](TICKET-037-standardize-service-object-patterns.md) - 📋 Planned (🟡 Medium, S) - *Updated with .call interface*
 - [TICKET-033: Implement Policy Objects for Authorization](TICKET-033-implement-policy-objects-authorization.md) - 📋 Planned (🟡 Medium, M)
 - [TICKET-127: Form & Dialog UX Consistency (No Cancel Buttons)](TICKET-127-sponsorshipmodal-dialog-consistency.md) - 📋 Planned (🟡 Medium, M - 2-3h) - *Remove Cancel buttons, add dialog close X, fullWidth fixes*
 - [TICKET-131: Extend Custom Hooks with CRUD Methods](TICKET-131-extend-custom-hooks-crud-methods.md) - 📋 Planned (🟡 Medium, M - 3-4h) - *Move API calls from pages to hooks (DRY)*

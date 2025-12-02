@@ -98,8 +98,8 @@ class StripePaymentImportService
   end
 
   def find_or_create_donor
-    donor_result = DonorService.find_or_update_by_email_or_stripe_customer(
-      {
+    service = DonorService.new(
+      donor_attributes: {
         name: @csv_row["Billing Details Name"],
         email: @csv_row["Cust Email"],
         phone: @csv_row["Cust Phone"],
@@ -110,9 +110,10 @@ class StripePaymentImportService
         zip_code: @csv_row["Billing Details Address Postal Code"],
         country: @csv_row["Billing Details Address Country"]
       },
-      @csv_row["Cust ID"],
-      DateTime.parse(@csv_row["Created Formatted"])
+      transaction_date: DateTime.parse(@csv_row["Created Formatted"]),
+      stripe_customer_id: @csv_row["Cust ID"]
     )
+    donor_result = service.find_or_update
     donor_result[:donor]
   end
 

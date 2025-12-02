@@ -43,7 +43,11 @@ class Api::DonorsController < ApplicationController
 
   def create
     donor_params = params.require(:donor).permit(:name, :email, :phone, :address_line1, :address_line2, :city, :state, :zip_code, :country)
-    result = DonorService.find_or_update_by_email(donor_params, Time.current)
+    service = DonorService.new(
+      donor_attributes: donor_params,
+      transaction_date: Time.current
+    )
+    result = service.find_or_update
 
     status = result[:created] ? :created : :ok
     render json: { donor: DonorPresenter.new(result[:donor]).as_json }, status: status

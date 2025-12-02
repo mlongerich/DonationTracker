@@ -1,10 +1,12 @@
 ## [TICKET-037] Standardize Service Object Patterns
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 **Priority:** 🟢 Low
-**Effort:** S (Small)
+**Effort:** M (Medium - 4-5 hours)
 **Created:** 2025-10-18
-**Dependencies:** None
+**Updated:** 2025-12-01
+**Completed:** 2025-12-01
+**Dependencies:** None (Note: DonorService now includes TICKET-075 Stripe integration and TICKET-100 phone/address preservation)
 
 ### User Story
 As a developer, I want consistent service object patterns across the codebase so that I can easily understand and maintain service logic.
@@ -23,26 +25,97 @@ Per CLAUDE.md conventions:
 - **Class methods** for simple, stateless operations
 - **Instance methods** for complex, multi-step operations with state
 
-### Current Analysis
+### Current Analysis (Updated 2025-12-01)
 
-**DonorService** (class method):
+**DonorService** (class method - 130 lines total):
 ```ruby
-def self.find_or_update_by_email(donor_attributes, timestamp)
-  # 25 lines of logic
-  # Uses multiple local variables
-  # Has private helper method
+class DonorService
+  def self.find_or_update_by_email_or_stripe_customer(donor_attributes, stripe_customer_id, transaction_date)
+    # Priority 1: Check for Stripe customer ID
+    # Priority 2: Fallback to email lookup
+    # Added in TICKET-075 for Stripe integration
+  end
+
+  def self.find_or_update_by_email(donor_attributes, transaction_date)
+    # Complex logic with multiple steps
+    # Includes phone/address preservation (TICKET-100)
+    # 5 private class methods
+  end
+
+  private
+
+  def self.normalize_email(donor_attributes)
+    # Email generation from phone/address/name
+  end
+
+  def self.find_existing_donor(lookup_email)
+    # Database lookup
+  end
+
+  def self.update_existing_donor(existing_donor, donor_attributes, transaction_date)
+    # Date-based conflict resolution
+  end
+
+  def self.build_update_attributes(donor_attributes, transaction_date)
+    # Field preservation logic (phone, address fields)
+  end
+
+  def self.create_new_donor(donor_attributes, transaction_date)
+    # New donor creation
+  end
 end
 ```
 
-**Issue**: This is actually a complex operation that should use instance pattern for consistency with other services.
+**Issue**: This is a complex, multi-step operation with stateful logic that should use instance pattern for consistency with other services (DonorMergeService, DonorImportService, StripePaymentImportService).
 
 ### Acceptance Criteria
-- [ ] Refactor `DonorService` to use instance pattern
-- [ ] Update all callers of `DonorService` to use new pattern
-- [ ] Add comprehensive specs for refactored service
-- [ ] All existing tests pass
-- [ ] Update CLAUDE.md with clarified service object guidelines
+- [ ] Refactor `DonorService` to use instance pattern with unified `find_or_update` method
+- [ ] Support both Stripe customer ID lookup and email lookup in single interface
+- [ ] Update all callers of `DonorService` to use new pattern (3 files: DonorsController, DonorImportService, StripePaymentImportService)
+- [ ] Maintain backwards compatibility during migration (temporary class method wrappers)
+- [ ] Update all existing specs (17 tests) to use instance pattern
+- [ ] All existing tests pass without breaking changes
+- [ ] Remove backwards compatibility wrappers after migration complete
+- [ ] Update CLAUDE.md with real DonorService example for Service Object Patterns section
 - [ ] Document when to use class vs instance methods
+
+### Implementation Notes (2025-12-01)
+
+**Key Decision:** Unify both `find_or_update_by_email` and `find_or_update_by_email_or_stripe_customer` into single `find_or_update` instance method.
+
+**New Interface:**
+```ruby
+# Email-only lookup (DonorImportService, DonorsController)
+service = DonorService.new(
+  donor_attributes: { name: "John", email: "john@example.com" },
+  transaction_date: Time.current
+)
+result = service.find_or_update
+
+# Stripe customer ID + email lookup (StripePaymentImportService)
+service = DonorService.new(
+  donor_attributes: { name: "John", email: "john@example.com" },
+  transaction_date: Time.current,
+  stripe_customer_id: "cus_123"
+)
+result = service.find_or_update
+```
+
+**Backwards Compatibility (Temporary):**
+```ruby
+# Keep during migration, remove after all callers updated
+def self.find_or_update_by_email(donor_attributes, transaction_date)
+  new(donor_attributes: donor_attributes, transaction_date: transaction_date).find_or_update
+end
+
+def self.find_or_update_by_email_or_stripe_customer(donor_attributes, stripe_customer_id, transaction_date)
+  new(
+    donor_attributes: donor_attributes,
+    transaction_date: transaction_date,
+    stripe_customer_id: stripe_customer_id
+  ).find_or_update
+end
+```
 
 ### Technical Approach
 
@@ -292,12 +365,13 @@ end
 ```
 
 ### Files to Modify
-- `app/services/donor_service.rb` (REFACTOR to instance pattern)
-- `app/controllers/api/donors_controller.rb` (UPDATE caller)
-- `app/services/donor_import_service.rb` (UPDATE caller)
-- `spec/services/donor_service_spec.rb` (UPDATE tests)
+- `app/services/donor_service.rb` (REFACTOR to instance pattern - 130 lines)
+- `app/controllers/api/donors_controller.rb` (UPDATE caller - line 46)
+- `app/services/donor_import_service.rb` (UPDATE caller - line 91)
+- `app/services/stripe_payment_import_service.rb` (UPDATE caller - line 101)
+- `spec/services/donor_service_spec.rb` (UPDATE 17 tests)
 - `spec/requests/api/donors_spec.rb` (VERIFY integration tests pass)
-- `CLAUDE.md` (UPDATE service object guidelines)
+- `CLAUDE.md` (UPDATE service object guidelines with real DonorService example)
 
 ### Migration Strategy
 
@@ -329,71 +403,70 @@ end
 
 ### Complexity Metrics Comparison
 
-**Before (class method):**
-- Flog score: ~15-20 (medium complexity)
-- Single long method with multiple responsibilities
-- Hard to test individual steps
+**Before (class methods - Current State 2025-12-01):**
+- Total lines: 130
+- Public class methods: 2 (`find_or_update_by_email`, `find_or_update_by_email_or_stripe_customer`)
+- Private class methods: 5 (`normalize_email`, `find_existing_donor`, `update_existing_donor`, `build_update_attributes`, `create_new_donor`)
+- Flog score: ~20-25 (medium-high complexity)
+- Multiple responsibilities: Stripe lookup, email lookup, merge chain following, phone/address preservation
+- Hard to test individual steps in isolation
 
 **After (instance methods):**
+- Total lines: ~140 (slight increase due to better organization)
+- Public instance methods: 1 unified `find_or_update`
+- Private instance methods: ~10-12 (better separation of concerns)
 - Flog score per method: <10 (low complexity)
-- Clear separation of responsibilities
+- Single responsibility per method
+- Clear separation of Stripe lookup vs email lookup flows
 - Easy to test each step independently
+- Consistent with other services (DonorMergeService, DonorImportService, StripePaymentImportService)
 
-### Standardized .call Interface (Added 2025-10-31)
+### Standardized .call Interface (Deferred - 2025-12-01)
 
-**Pattern Recommendation:** All services should implement `.call` interface for consistency
+**Pattern Recommendation (DEFERRED TO FUTURE TICKET):** While a standardized `.call` interface would provide consistency, we're keeping the current method names for this ticket:
+- DonorService: `find_or_update`
+- DonorMergeService: `merge` (existing)
+- DonorImportService: `import` (existing)
 
+**Rationale for Deferring:**
+- Current method names are descriptive and clear
+- Changing to `.call` would require updating all callers across 3 services
+- Can be done as separate refactoring ticket if desired
+- Focus this ticket on instance pattern consistency only
+
+**Current Pattern After This Ticket:**
 ```ruby
-# Pattern: Class method delegates to instance method
-class DonorService
-  def self.call(donor_attributes:, transaction_date:)
-    new(donor_attributes: donor_attributes, transaction_date: transaction_date).call
-  end
+# DonorService
+service = DonorService.new(donor_attributes: attrs, transaction_date: time)
+result = service.find_or_update
 
-  def initialize(donor_attributes:, transaction_date:)
-    @donor_attributes = donor_attributes
-    @transaction_date = transaction_date
-  end
+# DonorMergeService (existing)
+service = DonorMergeService.new(donor_ids: ids, field_selections: selections)
+result = service.merge
 
-  def call
-    # Implementation (renamed from find_or_update)
-  end
-end
-
-class DonorMergeService
-  def self.call(donor_ids:, field_selections:)
-    new(donor_ids: donor_ids, field_selections: field_selections).call
-  end
-
-  def initialize(donor_ids:, field_selections:)
-    @donor_ids = donor_ids
-    @field_selections = field_selections
-  end
-
-  def call
-    # Implementation (renamed from merge)
-  end
-end
-
-# Controllers always use: ServiceName.call(args)
-result = DonorService.call(donor_attributes: params, transaction_date: Time.current)
-result = DonorMergeService.call(donor_ids: ids, field_selections: selections)
+# DonorImportService (existing)
+service = DonorImportService.new(csv_content)
+result = service.import
 ```
 
-**Benefits:**
-- Consistent interface across all services
-- Easy refactoring (internals can change without breaking callers)
-- Testable (can inject dependencies via initialize)
-- Follows Railway Oriented Programming pattern
+**Future Consideration:** If we want `.call` interface, create separate ticket to:
+1. Add `.call` class method delegators to all services
+2. Update all callers
+3. Optional: Rename instance methods to `call` (breaking change)
 
 ### Related Tickets
-- Follows conventions established in TICKET-014
+- Follows conventions established in TICKET-014 (DonorMergeService instance pattern)
 - Part of code quality improvement initiative (CODE_SMELL_ANALYSIS.md)
+- TICKET-075: Stripe customer ID tracking (added `find_or_update_by_email_or_stripe_customer`)
+- TICKET-100: Phone/address fields (added field preservation logic)
+- TICKET-088: Donor Export CSV (will benefit from consistent service patterns)
 
-### Notes
+### Notes (Updated 2025-12-01)
 - This is a refactoring ticket - no functionality changes
-- All existing tests should pass with updated expectations
-- Keep backwards compatibility during migration if needed
-- Consider adding `frozen_string_literal: true` to all services
-- Document the pattern in CLAUDE.md for future reference
-- `.call` interface makes services interchangeable and composable
+- All existing 17 tests must pass after refactoring
+- DonorService has grown since ticket was originally written (now 130 lines with 2 public methods)
+- Keep backwards compatibility during migration (temporary class method wrappers)
+- Remove wrappers after all 3 callers are updated
+- Document the pattern in CLAUDE.md with real DonorService example
+- `.call` interface deferred to future ticket (focus on instance pattern only)
+- Estimated time increased from S (Small) to M (Medium) due to increased complexity

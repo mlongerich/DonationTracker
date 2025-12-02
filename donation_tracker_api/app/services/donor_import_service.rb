@@ -88,7 +88,11 @@ class DonorImportService
 
   def process_single_row(row, row_number, has_headers, stats)
     donor_attributes = extract_donor_attributes(row, has_headers)
-    result = DonorService.find_or_update_by_email(donor_attributes, stats[:import_time])
+    service = DonorService.new(
+      donor_attributes: donor_attributes,
+      transaction_date: stats[:import_time]
+    )
+    result = service.find_or_update
 
     if result[:created]
       stats[:created_count] += 1

@@ -288,44 +288,63 @@ end
 
 #### Service Object Patterns
 
-**Class Methods (Stateless, Simple):**
+**ALL services use instance methods for consistency (TICKET-037).**
+
+**Instance Pattern (Standard):**
 ```ruby
+# Example: DonorService (130 lines, 10+ private methods)
 class DonorService
-  def self.find_or_update_by_email(attributes, timestamp)
-    # Simple stateless logic
-  end
-end
-```
-
-**Instance Methods (Stateful, Complex):**
-```ruby
-class DonorMergeService
-  def initialize(donor_ids:, field_selections:)
-    @donor_ids = donor_ids
-    @field_selections = field_selections
+  def initialize(donor_attributes:, transaction_date:, stripe_customer_id: nil)
+    @donor_attributes = donor_attributes
+    @transaction_date = transaction_date
+    @stripe_customer_id = stripe_customer_id
+    @lookup_email = nil
+    @existing_donor = nil
   end
 
-  def merge
-    validate_inputs!
-    load_donors
-    perform_merge_transaction
+  def find_or_update
+    if stripe_customer_id_lookup_possible?
+      find_by_stripe_customer_id_or_email
+    else
+      find_by_email
+    end
   end
 
   private
 
-  def validate_inputs!
-    # Extract validation logic
+  def stripe_customer_id_lookup_possible?
+    stripe_customer_id.present?
   end
 
-  def perform_merge_transaction
-    # Extract transaction logic
+  def find_by_email
+    normalize_email
+    find_existing_donor
+    create_or_update_donor
   end
+
+  def normalize_email
+    @lookup_email = donor_attributes[:email].presence || generate_anonymous_email
+  end
+
+  # ... additional private methods for each step
 end
+
+# Usage:
+service = DonorService.new(
+  donor_attributes: { name: "John", email: "john@example.com" },
+  transaction_date: Time.current,
+  stripe_customer_id: "cus_123" # optional
+)
+result = service.find_or_update
+# => { donor: <Donor>, created: true }
 ```
 
-**When to use:**
-- **Class methods**: Simple, stateless operations
-- **Instance methods**: Multi-step workflows, complex validation, state tracking
+**When to use instance pattern:**
+- Multi-step workflows (2+ steps)
+- Internal state tracking (instance variables)
+- Private helper methods needed (3+)
+- Complex conditional logic
+- Multiple responsibilities
 
 #### Stripe CSV Import Patterns
 
