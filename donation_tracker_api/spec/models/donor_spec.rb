@@ -282,4 +282,34 @@ RSpec.describe Donor, type: :model do
       expect(donor.full_address).to eq("123 Main St\nApt 4B\nSan Francisco CA 94102")
     end
   end
+
+  describe "Ransack security whitelists" do
+    describe ".ransackable_attributes" do
+      it "returns whitelisted attributes for search" do
+        expected_attributes = %w[
+          name email phone
+          address_line1 address_line2 city state zip_code country
+          created_at updated_at last_updated_at discarded_at
+        ]
+
+        expect(Donor.ransackable_attributes).to match_array(expected_attributes)
+      end
+
+      it "prevents searching on non-whitelisted attributes" do
+        non_whitelisted = %w[id merged_into_id]
+
+        non_whitelisted.each do |attr|
+          expect(Donor.ransackable_attributes).not_to include(attr)
+        end
+      end
+    end
+
+    describe ".ransackable_associations" do
+      it "returns whitelisted associations for search" do
+        expected_associations = %w[donations sponsorships children]
+
+        expect(Donor.ransackable_associations).to match_array(expected_associations)
+      end
+    end
+  end
 end

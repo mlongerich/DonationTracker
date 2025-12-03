@@ -42,10 +42,12 @@ class Sponsorship < ApplicationRecord
   before_validation :create_sponsorship_project, on: :create
   before_create :restore_archived_associations
 
+  # Whitelist searchable attributes for Ransack (security: prevent SQL injection)
   def self.ransackable_attributes(_auth_object = nil)
     %w[donor_id child_id monthly_amount end_date start_date created_at]
   end
 
+  # Whitelist searchable associations for Ransack (security: prevent unauthorized joins)
   def self.ransackable_associations(_auth_object = nil)
     %w[donor child project]
   end

@@ -17,9 +17,18 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2025-12-01 (TICKET-037: Standardize service object patterns)
+**Last Updated:** 2025-12-03 (TICKET-132: Add Ransack security comments and fix whitelists)
 
 **Latest Milestones:**
+- TICKET-132 - Add Ransack Security Comments and Fix Whitelists ✅ (2025-12-03)
+  - **Security Comments:** Added inline documentation to all ransackable_* methods explaining security purpose
+  - **Missing Security Whitelists:** Added ransackable_associations to Donation model, both methods to Project model
+  - **Bug Fix:** Added missing address_line2 to Donor ransackable_attributes
+  - **Code Consistency:** Converted all models to %w[] word array syntax (Style/WordArray RuboCop rule)
+  - **Comprehensive Testing:** 19 new Ransack whitelist tests across 5 models (Donor, Child, Sponsorship, Donation, Project)
+  - **Security Impact:** Prevents SQL injection via unauthorized attribute searches, prevents unauthorized joins
+  - **Pattern Documentation:** Updated CLAUDE.md with word array preference (%w[] over [""])
+  - See tickets/TICKET-132-add-ransackable-method-comments.md for implementation details
 - TICKET-100 - Add Physical Address to Donor Records ✅ (2025-11-28)
   - **Phone & Address Fields:** phone (phonelib validation), address_line1, address_line2, city, state (2-char), zip_code (validates_zipcode with auto-padding), country (2-char ISO)
   - **Anonymous Email Generation:** Unique email from phone/address (prevents duplicate anonymous donors)

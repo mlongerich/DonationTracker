@@ -305,4 +305,34 @@ RSpec.describe Sponsorship, type: :model do
       expect(sponsorship.last_donation_date).to be_nil
     end
   end
+
+  describe "Ransack security whitelists" do
+    describe ".ransackable_attributes" do
+      it "returns whitelisted attributes for search" do
+        expected_attributes = %w[donor_id child_id monthly_amount end_date start_date created_at]
+
+        expect(Sponsorship.ransackable_attributes).to match_array(expected_attributes)
+      end
+
+      it "prevents searching on non-whitelisted attributes" do
+        non_whitelisted = %w[id project_id updated_at]
+
+        non_whitelisted.each do |attr|
+          expect(Sponsorship.ransackable_attributes).not_to include(attr)
+        end
+      end
+    end
+
+    describe ".ransackable_associations" do
+      it "returns whitelisted associations for search" do
+        expected_associations = %w[donor child project]
+
+        expect(Sponsorship.ransackable_associations).to match_array(expected_associations)
+      end
+
+      it "prevents searching on non-whitelisted associations" do
+        expect(Sponsorship.ransackable_associations).not_to include("donations")
+      end
+    end
+  end
 end

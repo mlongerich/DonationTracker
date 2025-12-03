@@ -113,4 +113,30 @@ RSpec.describe Project, type: :model do
       expect(project.discarded?).to be true
     end
   end
+
+  describe "Ransack security whitelists" do
+    describe ".ransackable_attributes" do
+      it "returns whitelisted attributes for search" do
+        expected_attributes = %w[title project_type description system created_at updated_at discarded_at]
+
+        expect(Project.ransackable_attributes).to match_array(expected_attributes)
+      end
+
+      it "prevents searching on non-whitelisted attributes" do
+        non_whitelisted = %w[id]
+
+        non_whitelisted.each do |attr|
+          expect(Project.ransackable_attributes).not_to include(attr)
+        end
+      end
+    end
+
+    describe ".ransackable_associations" do
+      it "returns whitelisted associations for search" do
+        expected_associations = %w[donations sponsorships]
+
+        expect(Project.ransackable_associations).to match_array(expected_associations)
+      end
+    end
+  end
 end

@@ -38,15 +38,16 @@ class Donor < ApplicationRecord
   validates :phone, phone: { possible: true, allow_blank: true }
   validates :zip_code, zipcode: { country_code_attribute: :country, allow_blank: true }
 
-  # Ransack: Explicitly whitelist searchable attributes
+  # Whitelist searchable attributes for Ransack (security: prevent SQL injection)
   def self.ransackable_attributes(_auth_object = nil)
-    [
-      "name", "email", "phone",
-      "address_line1", "city", "state", "zip_code", "country",
-      "created_at", "updated_at", "last_updated_at", "discarded_at"
+    %w[
+      name email phone
+      address_line1 address_line2 city state zip_code country
+      created_at updated_at last_updated_at discarded_at
     ]
   end
 
+  # Whitelist searchable associations for Ransack (security: prevent unauthorized joins)
   def self.ransackable_associations(_auth_object = nil)
     %w[donations sponsorships children]
   end

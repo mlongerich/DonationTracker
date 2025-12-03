@@ -2,7 +2,13 @@
 inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 
 # Overwrite or add rules to create your own house style
-#
+
+# Enforce consistent word array syntax (prefer %w[] over [""])
+Style/WordArray:
+  EnforcedStyle: percent
+  MinSize: 0  # Enforce even for single-element arrays (consistency)
+  Enabled: true
+
 # # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
 # Layout/SpaceInsideArrayLiteralBrackets:
 #   Enabled: false

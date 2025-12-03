@@ -132,4 +132,34 @@ RSpec.describe Child, type: :model do
       expect(child.last_donation_date).to be_nil
     end
   end
+
+  describe "Ransack security whitelists" do
+    describe ".ransackable_attributes" do
+      it "returns whitelisted attributes for search" do
+        expected_attributes = %w[name discarded_at]
+
+        expect(Child.ransackable_attributes).to match_array(expected_attributes)
+      end
+
+      it "prevents searching on non-whitelisted attributes" do
+        non_whitelisted = %w[id gender created_at updated_at]
+
+        non_whitelisted.each do |attr|
+          expect(Child.ransackable_attributes).not_to include(attr)
+        end
+      end
+    end
+
+    describe ".ransackable_associations" do
+      it "returns whitelisted associations for search" do
+        expected_associations = %w[sponsorships donors]
+
+        expect(Child.ransackable_associations).to match_array(expected_associations)
+      end
+
+      it "prevents searching on non-whitelisted associations" do
+        expect(Child.ransackable_associations).not_to include("donations")
+      end
+    end
+  end
 end

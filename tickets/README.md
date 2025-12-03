@@ -67,6 +67,7 @@ Current work items and user stories being actively developed.
 - [TICKET-085: Donation Source & Payment Method Tracking](completed/TICKET-085-donation-source-payment-method-tracking.md) - ✅ Complete (2025-11-11)
 - [TICKET-094: Fix SponsorshipsController Error Handling Pattern](completed/TICKET-094-fix-sponsorships-controller-error-handling.md) - ✅ Complete (2025-11-12)
 - [TICKET-108: Fix E2E Test Infrastructure Flakiness](completed/TICKET-108-fix-e2e-test-flakiness.md) - ✅ Complete (2025-11-12)
+- [TICKET-132: Add Ransack Security Comments and Fix Whitelists](TICKET-132-add-ransackable-method-comments.md) - ✅ Complete (2025-12-03)
 - [TICKET-037: Standardize Service Object Patterns](TICKET-037-standardize-service-object-patterns.md) - ✅ Complete (2025-12-01)
 - [TICKET-053: Sponsorships Page Filters & Pagination UI](completed/TICKET-053-sponsorships-page-filters-pagination-ui.md) - ✅ Complete (2025-11-12)
 - [TICKET-077: Last Donation Date Tracking](completed/TICKET-077-last-donation-date-tracking.md) - ✅ Complete (2025-11-12)
@@ -196,16 +197,15 @@ Current work items and user stories being actively developed.
 - [TICKET-043: Refine Controller Concerns Implementation](TICKET-043-refine-controller-concerns-implementation.md) - 📋 Planned (🟢 Low, S)
 - [TICKET-045: Refactor DonorImportService Complexity](TICKET-045-refactor-donor-import-service-complexity.md) - 📋 Planned (🟢 Low, M)
 - [TICKET-098: Evaluate Form Objects Pattern](TICKET-098-evaluate-form-objects-pattern.md) - 📋 Planned (🟢 Low, S) - *Research ticket for complex form validation*
-- [TICKET-132: Add Inline Comments to Ransackable Methods](TICKET-132-add-ransackable-method-comments.md) - 📋 Planned (🟢 Low, XS - 30min) - *Document security purpose in models*
 
 ---
 
 ## Quick Stats
 
-- **Total Tickets:** 117 (added TICKET-127, TICKET-131, TICKET-132 from CODE_SMELL_ANALYSIS)
-- **Completed:** 61 (52%)
+- **Total Tickets:** 117 (TICKET-132 complete)
+- **Completed:** 62 (53%)
 - **In Progress:** 0
-- **Planned:** 54
+- **Planned:** 53
 - **Estimated Hours Remaining:** ~192.5 hours (~4.8 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1

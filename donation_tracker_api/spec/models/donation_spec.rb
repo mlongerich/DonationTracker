@@ -362,4 +362,34 @@ RSpec.describe Donation, type: :model do
       expect(donation.project_id).to eq(donation.sponsorship.project_id)
     end
   end
+
+  describe "Ransack security whitelists" do
+    describe ".ransackable_attributes" do
+      it "returns whitelisted attributes for search" do
+        expected_attributes = %w[
+          amount date donor_id project_id payment_method
+          status duplicate_subscription_detected stripe_subscription_id
+          created_at updated_at
+        ]
+
+        expect(Donation.ransackable_attributes).to match_array(expected_attributes)
+      end
+
+      it "prevents searching on non-whitelisted attributes" do
+        non_whitelisted = %w[id sponsorship_id child_id stripe_charge_id]
+
+        non_whitelisted.each do |attr|
+          expect(Donation.ransackable_attributes).not_to include(attr)
+        end
+      end
+    end
+
+    describe ".ransackable_associations" do
+      it "returns whitelisted associations for search" do
+        expected_associations = %w[donor project sponsorship child stripe_invoice]
+
+        expect(Donation.ransackable_associations).to match_array(expected_associations)
+      end
+    end
+  end
 end

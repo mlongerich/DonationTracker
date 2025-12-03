@@ -12,6 +12,6 @@ RSpec.describe "Database Connectivity" do
   it "development and test databases are properly configured" do
     # Ensure we can connect in both environments
     expect(ActiveRecord::Base.connection).to be_active
-    expect(Rails.env).to be_in([ 'development', 'test' ])
+    expect(Rails.env).to be_in(%w[development test])
   end
 end

@@ -199,6 +199,9 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 ### Backend (Rails)
 
 - **RuboCop**: Style guide enforcement, **Brakeman**: Security scanning, **Bullet**: N+1 query detection
+  - **Word Arrays**: Prefer `%w[]` syntax over `[""]` for arrays of simple strings (Style/WordArray)
+  - Example: `%w[donations sponsorships]` not `["donations", "sponsorships"]`
+  - Enforced incrementally (RuboCop catches violations as files are edited)
 - **Class documentation**: YARD-style comments required (purpose, responsibilities, usage, @see tags)
 - **Convention**: Follow Rails patterns
 

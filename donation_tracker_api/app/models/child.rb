@@ -28,10 +28,12 @@ class Child < ApplicationRecord
 
   validates :name, presence: true
 
+  # Whitelist searchable attributes for Ransack (security: prevent SQL injection)
   def self.ransackable_attributes(_auth_object = nil)
-    [ "name", "discarded_at" ]
+    %w[name discarded_at]
   end
 
+  # Whitelist searchable associations for Ransack (security: prevent unauthorized joins)
   def self.ransackable_associations(_auth_object = nil)
     %w[sponsorships donors]
   end

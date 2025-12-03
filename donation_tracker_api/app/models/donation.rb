@@ -72,12 +72,18 @@ class Donation < ApplicationRecord
   validate :date_not_in_future
   validate :sponsorship_project_must_have_sponsorship_id
 
+  # Whitelist searchable attributes for Ransack (security: prevent SQL injection)
   def self.ransackable_attributes(_auth_object = nil)
-    [
-      "amount", "date", "donor_id", "project_id", "payment_method",
-      "status", "duplicate_subscription_detected", "stripe_subscription_id",
-      "created_at", "updated_at"
+    %w[
+      amount date donor_id project_id payment_method
+      status duplicate_subscription_detected stripe_subscription_id
+      created_at updated_at
     ]
+  end
+
+  # Whitelist searchable associations for Ransack (security: prevent unauthorized joins)
+  def self.ransackable_associations(_auth_object = nil)
+    %w[donor project sponsorship child stripe_invoice]
   end
 
   def sponsorship?

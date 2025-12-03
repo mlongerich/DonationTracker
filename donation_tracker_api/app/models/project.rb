@@ -28,6 +28,16 @@ class Project < ApplicationRecord
 
   enum :project_type, { general: 0, campaign: 1, sponsorship: 2 }, prefix: true
 
+  # Whitelist searchable attributes for Ransack (security: prevent SQL injection)
+  def self.ransackable_attributes(_auth_object = nil)
+    %w[title project_type description system created_at updated_at discarded_at]
+  end
+
+  # Whitelist searchable associations for Ransack (security: prevent unauthorized joins)
+  def self.ransackable_associations(_auth_object = nil)
+    %w[donations sponsorships]
+  end
+
   validates :title, presence: true, uniqueness: true
 
   before_destroy :prevent_system_project_deletion
