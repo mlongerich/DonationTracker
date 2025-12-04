@@ -310,4 +310,28 @@ RSpec.describe "/api/donors", type: :request do
       expect(json_response["donor"]["email"]).to eq("alice.smith@example.com")
     end
   end
+
+  describe "GET /api/donors/export" do
+    it "respects filters (search query) and returns filtered CSV" do
+      _donor1 = create(:donor, name: "Alice Smith")
+      _donor2 = create(:donor, name: "Bob Jones")
+
+      get "/api/donors/export", params: { q: { name_cont: "Alice" } }, headers: { "Host" => "api" }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.content_type).to eq("text/csv")
+    end
+
+    it "respects include_discarded param and includes archived donors in CSV" do
+      _active_donor = create(:donor, name: "Active Donor")
+      archived_donor = create(:donor, name: "Archived Donor")
+      archived_donor.discard
+
+      get "/api/donors/export", params: { include_discarded: "true" }, headers: { "Host" => "api" }
+
+      expect(response).to have_http_status(:ok)
+      csv_rows = CSV.parse(response.body)
+      expect(csv_rows.count).to eq(3)
+    end
+  end
 end

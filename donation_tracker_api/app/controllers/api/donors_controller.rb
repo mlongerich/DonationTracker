@@ -93,6 +93,18 @@ class Api::DonorsController < ApplicationController
     render json: { donor: DonorPresenter.new(result[:merged_donor]).as_json }, status: :ok
   end
 
+  def export
+    scope = params[:include_discarded] == "true" ? Donor.with_discarded : Donor.kept
+    scope = scope.where(merged_into_id: nil)
+    filtered_scope = apply_ransack_filters(scope)
+
+    csv_data = DonorExportService.generate_csv(filtered_scope)
+
+    send_data csv_data,
+      filename: "donors_export_#{Date.today.strftime('%Y%m%d')}.csv",
+      type: "text/csv"
+  end
+
   def destroy_all
     # Only allow in development and test environments
     if Rails.env.production?

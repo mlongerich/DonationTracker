@@ -349,22 +349,27 @@ result = service.find_or_update
 - Complex conditional logic
 - Multiple responsibilities
 
-#### Stripe CSV Import Patterns
+#### Stripe CSV Import Patterns (TICKET-070, TICKET-110, TICKET-111)
 
-**StripePaymentImportService (TICKET-070, TICKET-110 - PERMANENT):**
-- **Idempotency**: subscription_id + child_id (sponsorships), charge_id + project_id (projects)
-- **Status determination**: Maps Stripe status (succeeded, failed, refunded, canceled) → donation status enum
-- **Metadata-first extraction**: child_id/project_id from metadata (webhooks), fallback to nickname/description parsing (CSV)
-- **Duplicate detection**: Flags duplicate subscriptions (same child, different subscription_id) as needs_attention
-- Transaction-wrapped for data integrity
+**PERMANENT:** StripePaymentImportService - Idempotency (subscription_id + child_id), status determination, metadata-first extraction, duplicate detection
 
-**StripeCsvBatchImporter (TICKET-071, TICKET-110 - TEMPORARY):**
-- **Status-based counting**: succeeded_count, failed_count, needs_attention_count (tracks donation status)
-- **Error tracking**: Service exceptions (not status failures) go into errors array with row numbers
-- Maps CSV description → projects (10-step pattern matching)
-- Delete after CSV import complete
+**TEMPORARY:** StripeCsvBatchImporter - Status counting, error tracking (delete after CSV import)
 
 **See:** docs/PATTERNS.md for implementation details
+
+#### Donor CSV Export Pattern (TICKET-088)
+
+**Purpose:** Export donor contact info and donation statistics to CSV (13 columns: contact fields + aggregates)
+
+**Key Features:**
+- SQL aggregates (SUM/COUNT/MAX) to avoid N+1 queries
+- Hides @mailinator.com emails (anonymous donors)
+- Exports only final merged records (excludes merged_into_id not null)
+- Ransack filter support (respects search and include_discarded params)
+
+**Service Pattern:** Class method (stateless), uses Ruby CSV library with `send_data` in controller
+
+**See:** docs/PATTERNS.md for full implementation code
 
 #### Controller Concerns
 
@@ -469,75 +474,18 @@ end
 
 **See:** TICKET-062, TICKET-038, TICKET-049
 
-#### Donor Contact Information Patterns
+#### Donor Contact Information Patterns (TICKET-100)
 
-**Phone & Address Validation (TICKET-100):**
-- **Phone validation:** Uses `phonelib` gem with US/international format support
-- **Zip code validation:** Uses `validates_zipcode` gem with country-aware validation (auto-pads 4-digit US codes)
-- **All fields optional:** No required contact info (supports anonymous donors)
+**Validation:** phonelib (US/international), validates_zipcode (country-aware), all fields optional
 
-**Pattern:**
-```ruby
-class Donor < ApplicationRecord
-  validates :phone, phone: { possible: true, allow_blank: true }
-  validates_zipcode :zip_code, country_code: :country
-  validates :state, length: { is: 2 }, allow_blank: true
-  validates :country, length: { is: 2 }, allow_blank: true
+**Anonymous Email Generation:** Unique email from contact info prevents duplicate anonymous donors
+- **Priority:** phone > address > name → `anonymous-5551234567@mailinator.com`
 
-  def full_address
-    [address_line1, address_line2, city, state, zip_code, country]
-      .compact.reject(&:blank?).join(", ")
-  end
-end
-```
-
-**Anonymous Email Generation (Prevents Duplicate Anonymous Donors):**
-- **Problem:** Multiple anonymous donors with different contact info collapse into single "Anonymous@mailinator.com"
-- **Solution:** Generate unique email from contact information
-- **Priority:** phone > address > name
-
-**Implementation (must match in both Donor model and DonorService):**
-```ruby
-# app/models/donor.rb - set_defaults callback
-if email.blank?
-  if phone.present?
-    sanitized_phone = phone.gsub(/\D/, "")
-    self.email = "anonymous-#{sanitized_phone}@mailinator.com"
-  elsif address_line1.present? || city.present?
-    address_parts = [address_line1, city].compact.reject(&:blank?)
-    sanitized_address = address_parts.join("-").gsub(/\s+/, "").downcase
-    self.email = "anonymous-#{sanitized_address}@mailinator.com"
-  else
-    clean_name = name.gsub(/\s+/, "")
-    self.email = "#{clean_name}@mailinator.com"
-  end
-end
-```
-
-**Data Preservation on CSV Import (Blank Updates):**
-- **Problem:** CSV import with blank phone/address overwrites existing donor data
-- **Solution:** Delete blank fields from update hash before updating
-
-**Pattern:**
-```ruby
-class DonorService
-  def self.build_update_attributes(donor_attributes, transaction_date)
-    update_attrs = donor_attributes.merge(last_updated_at: transaction_date)
-
-    # Delete blank fields to preserve existing values
-    update_attrs.delete(:name) if donor_attributes[:name].blank?
-    update_attrs.delete(:phone) if donor_attributes[:phone].blank?
-    update_attrs.delete(:address_line1) if donor_attributes[:address_line1].blank?
-    # ... all address fields
-
-    update_attrs
-  end
-end
-```
+**CSV Import Data Preservation:** Delete blank fields from update hash (preserves existing values)
 
 **Factory Traits:** `:with_phone`, `:with_address`, `:with_full_contact`
 
-**See:** TICKET-100, docs/PATTERNS.md for factory examples
+**See:** docs/PATTERNS.md for implementation code and validation examples
 
 ### Frontend (React)
 
@@ -751,51 +699,13 @@ useEffect(() => {
 **When to Create:**
 - Logic duplicated in 2+ components, complex stateful logic, reduces 20+ lines
 
-**Implemented Hooks:**
-- **Utility Hooks:**
-  - `useDebouncedValue` - Debounce input values (300ms default)
-  - `usePagination` - Pagination state management
-  - `useRansackFilters` - Ransack query building
-- **Entity Hooks (Data Fetching):**
-  - `useChildren` - Fetch children with sponsorships, search, pagination
-  - `useDonors` - Fetch donors with archive/restore, search, pagination
-  - `useDonations` - Fetch donations with filters (date, donor, payment method)
-  - `useSponsorships` - Fetch sponsorships with end action, search, pagination
-  - `useProjects` - Fetch projects with archive support, pagination
+**Types:** Utility hooks (debounce, pagination, filters), Entity hooks (data fetching with consistent return signature)
 
-**Pattern (Entity Hooks):**
-```typescript
-// Consistent return signature across all entity hooks
-const {
-  items,              // Array of entities
-  loading,            // Boolean loading state
-  error,              // Error string or null
-  paginationMeta,     // Pagination metadata
-  fetchItems,         // Fetch function with options
-  // ...entity-specific actions (archive, restore, end, etc.)
-} = useEntityHook();
-
-// Usage in page components
-useEffect(() => {
-  fetchItems({
-    page: currentPage,
-    perPage: 10,
-    search: debouncedQuery,
-    // ...entity-specific filters
-  });
-}, [currentPage, debouncedQuery, fetchItems]);
-```
-
-**Benefits:**
-- Consistent data fetching across all pages
-- Centralized error handling and loading states
-- Reusable across components
-- Easy to test in isolation
-- Reduces page component complexity
+**Pattern:** All entity hooks return `{ items, loading, error, paginationMeta, fetchItems, ...actions }`
 
 **Location:** `src/hooks/` with barrel export
 
-**See:** docs/PATTERNS.md for full API and code examples (TICKET-032, TICKET-066, TICKET-099)
+**See:** docs/PATTERNS.md for full hook list and API (TICKET-032, TICKET-066, TICKET-099)
 
 #### Grouped Autocomplete with Type Badges & Gender Icons
 
@@ -847,45 +757,17 @@ export const parseCurrency = (dollars: string | number): number => {
 
 **See:** TICKET-071
 
-#### Quick Create Dialog Pattern (Modal Entity Creation)
+#### Quick Create Dialog Pattern (TICKET-021)
 
-**Purpose:** Create entities (donors, projects, children) without leaving current page, preserving form state
+**When to Use:** Create related entity mid-workflow without leaving page (prevents data loss)
 
-**When to Use:**
-- User needs to create related entity mid-workflow (e.g., creating donation but donor doesn't exist)
-- Prevents context switching and data loss from page navigation
-- Follows "Add Sponsor" pattern from Children page
+**Pattern:** Icon button + dialog (dialog handles API, form returns data)
 
-**Pattern (Icon Button + Dialog):**
-```tsx
-// Icon button next to autocomplete
-<Box sx={{ display: 'flex', gap: 1 }}>
-  <DonorAutocomplete value={donor} onChange={setDonor} size="small" />
-  <IconButton aria-label="create donor" onClick={() => setDialogOpen(true)}>
-    <AddIcon />
-  </IconButton>
-</Box>
+**Features:** Pre-fill support, auto-selection, error handling (Snackbar), form reset (dialogKey), API in dialog
 
-// Dialog component handles API calls and error states
-const QuickDonorCreateDialog: React.FC<Props> = ({ open, onClose, onSuccess, preFillData }) => {
-  // Error state in dialog, form only returns data
-  // Auto-select created entity via onSuccess callback
-  // Snackbar for 422 validation + network errors
-};
-```
+**Variants:** Single entity (QuickDonorCreateDialog), Tabbed multi-entity (QuickEntityCreateDialog)
 
-**Key Features:**
-- **Pre-fill Support:** Pass search input to dialog
-- **Auto-selection:** Created entity immediately selected in autocomplete
-- **Error Handling:** 422 validation + network errors via Snackbar
-- **Form Reset:** `dialogKey` pattern resets forms on close
-- **API in Dialog:** Dialog handles API calls, form only returns data
-
-**Variants:**
-- **Single Entity:** QuickDonorCreateDialog (one form)
-- **Tabbed Multi-Entity:** QuickEntityCreateDialog (Child/Project tabs with separate error states)
-
-**See:** docs/PATTERNS.md for full implementation code (TICKET-021)
+**See:** docs/PATTERNS.md for implementation code
 
 #### React Router Multi-Page Architecture
 

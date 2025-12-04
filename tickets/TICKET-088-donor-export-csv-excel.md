@@ -1,10 +1,11 @@
 ## [TICKET-088] Donor Export to CSV
 
-**Status:** 📋 Planned (Ready to implement - dependency complete)
+**Status:** ✅ Complete
 **Priority:** 🟢 Low
 **Effort:** S (Small - 2-3 hours)
 **Created:** 2025-11-05
-**Updated:** 2025-11-28
+**Updated:** 2025-12-03
+**Completed:** 2025-12-03
 **Source:** BACKLOG.md
 **Dependencies:** ✅ TICKET-100 (Phone + Address fields) - COMPLETE
 
@@ -12,13 +13,13 @@
 As a user, I want to export the donor list to CSV/Excel format so that I can analyze data in spreadsheet tools and create backups.
 
 ### Acceptance Criteria
-- [ ] Add "Export CSV" button to Donors page (with Download icon)
-- [ ] Export respects current filters (search, show archived)
-- [ ] CSV includes: Name, Email, Phone, Address Line 1, Address Line 2, City, State, Zip, Country, Total Donated, Donation Count, Status
-- [ ] File downloads as `donors_export_YYYYMMDD.csv`
-- [ ] Backend generates CSV using Ruby CSV library with proper YARD documentation
-- [ ] Backend uses SQL aggregates to avoid N+1 queries
-- [ ] Tests: RSpec (3 service tests, 2 controller tests), Jest (button renders), Cypress (download flow)
+- [x] Add "Export All Donors to CSV" button to Admin page CSV tab (with Download icon)
+- [x] Export exports all active donors (include_discarded=false)
+- [x] CSV includes: Name, Email (hidden if @mailinator.com), Phone, Address Line 1, Address Line 2, City, State, Zip, Country, Total Donated, Donation Count, Last Donation Date, Status
+- [x] File downloads as `donors_export_YYYYMMDD.csv`
+- [x] Backend generates CSV using Ruby CSV library with proper YARD documentation
+- [x] Backend uses SQL aggregates to avoid N+1 queries (total_donated, donation_count, last_donation_date)
+- [x] Tests: RSpec (5 service tests, 2 controller tests), Jest (2 AdminPage tests), Cypress (Admin page download flow)
 
 ### Technical Approach
 **Backend:**

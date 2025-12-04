@@ -17,9 +17,20 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2025-12-03 (TICKET-132: Add Ransack security comments and fix whitelists)
+**Last Updated:** 2025-12-04 (TICKET-088: Donor Export to CSV)
 
 **Latest Milestones:**
+- TICKET-088 - Donor Export to CSV ✅ (2025-12-04)
+  - **Admin Page CSV Tab:** Added "Export All Donors to CSV" button on Admin page
+  - **13 CSV Columns:** Name, Email, Phone, Address (4 fields), Total Donated, Donation Count, Last Donation Date, Status
+  - **SQL Aggregates:** Uses SUM/COUNT/MAX with left_joins to avoid N+1 queries (efficient for large donor lists)
+  - **Email Privacy:** Hides @mailinator.com emails (anonymous donors) by exporting empty string
+  - **Merged Donor Handling:** Exports only final merged records (excludes merged_into_id not null)
+  - **Currency Formatting:** Converts cents to dollars with format_currency helper
+  - **Test Coverage:** 5 service tests (empty list, no donations, aggregates, last donation date, mailinator emails), 2 controller tests (filters, include_discarded), 2 AdminPage Jest tests, 1 Cypress E2E test
+  - **DonorExportService:** Class method pattern (stateless CSV generation) with Ruby CSV library
+  - **Ransack Support:** Respects search filters and include_discarded parameter
+  - See tickets/completed/TICKET-088-donor-export-csv-excel.md for implementation details
 - TICKET-132 - Add Ransack Security Comments and Fix Whitelists ✅ (2025-12-03)
   - **Security Comments:** Added inline documentation to all ransackable_* methods explaining security purpose
   - **Missing Security Whitelists:** Added ransackable_associations to Donation model, both methods to Project model
@@ -196,8 +207,8 @@
 - TICKET-064 - Smart Sponsorship Detection & Backend Logic ✅ (2025-10-31)
 - TICKET-032 - Custom Hooks Library (useDebouncedValue, usePagination, useRansackFilters) ✅ (2025-10-29)
 
-**Current Focus:** Donor contact information complete (TICKET-100)
-**Next Feature:** TICKET-092 (Child uniqueness validation) or TICKET-088 (Donor export CSV/Excel)
+**Current Focus:** Donor export complete (TICKET-088)
+**Next Feature:** TICKET-092 (Child uniqueness validation) or TICKET-093 (Project icons)
 
 **See [docs/project/README.md](docs/project/README.md#current-status) for detailed status**
 
