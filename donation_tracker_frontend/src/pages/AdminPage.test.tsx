@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { BrowserRouter } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -46,11 +47,9 @@ describe('AdminPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders CSV Import tab', () => {
+  it('renders CSV tab', () => {
     renderWithProviders(<AdminPage />);
-    expect(
-      screen.getByRole('tab', { name: /csv import/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /^csv$/i })).toBeInTheDocument();
   });
 
   it('renders PendingReviewSection in first tab', async () => {
@@ -59,5 +58,42 @@ describe('AdminPage', () => {
     expect(
       await screen.findByText(/no donations need attention/i)
     ).toBeInTheDocument();
+  });
+
+  it('renders Export Donors button in CSV tab', async () => {
+    const user = userEvent.setup({ delay: null });
+
+    renderWithProviders(<AdminPage />);
+
+    const csvTab = screen.getByRole('tab', { name: /^csv$/i });
+    await user.click(csvTab);
+
+    expect(
+      screen.getByRole('button', { name: /export all donors to csv/i })
+    ).toBeInTheDocument();
+  });
+
+  it('calls export API when Export button is clicked', async () => {
+    const user = userEvent.setup({ delay: null });
+
+    renderWithProviders(<AdminPage />);
+
+    const csvTab = screen.getByRole('tab', { name: /^csv$/i });
+    await user.click(csvTab);
+
+    const exportButton = screen.getByRole('button', {
+      name: /export all donors to csv/i,
+    });
+    await user.click(exportButton);
+
+    expect(mockedApiClient.get).toHaveBeenCalledWith(
+      '/api/donors/export',
+      expect.objectContaining({
+        params: expect.objectContaining({
+          include_discarded: false,
+        }),
+        responseType: 'blob',
+      })
+    );
   });
 });
