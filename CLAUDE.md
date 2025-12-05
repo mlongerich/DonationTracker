@@ -349,9 +349,14 @@ result = service.find_or_update
 - Complex conditional logic
 - Multiple responsibilities
 
-#### Stripe CSV Import Patterns (TICKET-070, TICKET-110, TICKET-111)
+#### Stripe CSV Import Patterns (TICKET-070, TICKET-110, TICKET-111, TICKET-134)
 
-**PERMANENT:** StripePaymentImportService - Idempotency (subscription_id + child_id), status determination, metadata-first extraction, duplicate detection
+**PERMANENT:** StripePaymentImportService - Idempotency (subscription_id + child_id), status determination, metadata-first extraction, duplicate detection, email fallback handling
+
+**Email Fallback Logic (TICKET-134):**
+- Priority 1: `Cust Email` (primary customer email)
+- Priority 2: `Billing Details Email` (fallback when Cust Email empty - handles 121 rows)
+- Priority 3: Anonymous email generation (when both empty - handles 138 rows via DonorService)
 
 **TEMPORARY:** StripeCsvBatchImporter - Status counting, error tracking (delete after CSV import)
 

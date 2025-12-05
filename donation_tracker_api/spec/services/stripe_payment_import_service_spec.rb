@@ -477,5 +477,57 @@ RSpec.describe StripePaymentImportService do
         expect(second_donation.needs_attention_reason).to include('Duplicate child in same invoice')
       end
     end
+
+    context 'with email fallback handling (TICKET-134)' do
+      it 'uses Billing Details Email when Cust Email is empty' do
+        csv_row = valid_csv_row.merge(
+          'Cust Email' => '',
+          'Billing Details Email' => 'billing@example.com',
+          'Transaction ID' => 'txn_billing_fallback'
+        )
+
+        result = described_class.new(csv_row).import
+
+        expect(result[:success]).to be true
+        donor = Donor.find_by(email: 'billing@example.com')
+        expect(donor).to be_present
+        expect(result[:donations].first.donor).to eq(donor)
+      end
+
+      it 'prefers Cust Email when both Cust Email and Billing Details Email are present' do
+        csv_row = valid_csv_row.merge(
+          'Cust Email' => 'customer@example.com',
+          'Billing Details Email' => 'billing@example.com',
+          'Transaction ID' => 'txn_both_emails'
+        )
+
+        result = described_class.new(csv_row).import
+
+        expect(result[:success]).to be true
+        donor = Donor.find_by(email: 'customer@example.com')
+        expect(donor).to be_present
+        expect(result[:donations].first.donor).to eq(donor)
+        # Should NOT create donor with billing email
+        expect(Donor.find_by(email: 'billing@example.com')).to be_nil
+      end
+
+      it 'generates anonymous email when both Cust Email and Billing Details Email are empty' do
+        csv_row = valid_csv_row.merge(
+          'Billing Details Name' => 'Kaitlyn E Bryan',
+          'Cust Email' => '',
+          'Billing Details Email' => '',
+          'Cust Phone' => '',
+          'Transaction ID' => 'txn_no_emails'
+        )
+
+        result = described_class.new(csv_row).import
+
+        expect(result[:success]).to be true
+        donor = result[:donations].first.donor
+        expect(donor).to be_present
+        expect(donor.email).to eq('KaitlynEBryan@mailinator.com')
+        expect(donor.name).to eq('Kaitlyn E Bryan')
+      end
+    end
   end
 end

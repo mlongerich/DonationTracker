@@ -101,7 +101,7 @@ class StripePaymentImportService
     service = DonorService.new(
       donor_attributes: {
         name: @csv_row["Billing Details Name"],
-        email: @csv_row["Cust Email"],
+        email: donor_email,
         phone: @csv_row["Cust Phone"],
         address_line1: @csv_row["Billing Details Address Line 1"],
         address_line2: @csv_row["Billing Details Address Line 2"],
@@ -115,6 +115,12 @@ class StripePaymentImportService
     )
     donor_result = service.find_or_update
     donor_result[:donor]
+  end
+
+  def donor_email
+    # Use Billing Details Email as fallback when Cust Email is empty
+    # Handles 121 rows where Stripe export has email in wrong column (TICKET-134)
+    @csv_row["Cust Email"].presence || @csv_row["Billing Details Email"]
   end
 
   def get_child

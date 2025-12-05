@@ -17,9 +17,18 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2025-12-04 (TICKET-088: Donor Export to CSV)
+**Last Updated:** 2025-12-05 (TICKET-134: Stripe CSV Email Fallback Handling)
 
 **Latest Milestones:**
+- TICKET-134 - Stripe CSV Email Fallback Handling ✅ (2025-12-05)
+  - **Email Fallback Logic:** 3-tier priority system for donor email extraction from Stripe CSV
+  - **Priority 1:** Cust Email (primary customer email from Stripe)
+  - **Priority 2:** Billing Details Email (fallback when Cust Email empty - fixes 121 rows)
+  - **Priority 3:** Anonymous email generation (when both empty - handles 138 rows via DonorService)
+  - **Bug Fix:** Resolves "Email is invalid" validation errors during CSV import
+  - **Test Coverage:** 3 new test cases (billing fallback, priority preference, anonymous generation)
+  - **Pattern:** donor_email helper method in StripePaymentImportService
+  - See tickets/TICKET-134-stripe-csv-email-fallback.md for implementation details
 - TICKET-088 - Donor Export to CSV ✅ (2025-12-04)
   - **Admin Page CSV Tab:** Added "Export All Donors to CSV" button on Admin page
   - **13 CSV Columns:** Name, Email, Phone, Address (4 fields), Total Donated, Donation Count, Last Donation Date, Status
