@@ -1,6 +1,6 @@
 ## [TICKET-134] Stripe CSV Import: Email Fallback Handling
 
-**Status:** ✅ Complete
+**Status:** ✅ Complete (commit ca89572)
 **Priority:** 🔴 High
 **Type:** Bug Fix / Enhancement
 

@@ -5,8 +5,10 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import AdminPage from './AdminPage';
 import apiClient from '../api/client';
+import * as hooks from '../hooks';
 
 jest.mock('../api/client');
+jest.mock('../hooks');
 const mockedApiClient = apiClient as jest.Mocked<typeof apiClient>;
 
 const renderWithProviders = (component: React.ReactElement) => {
@@ -32,6 +34,15 @@ describe('AdminPage', () => {
           per_page: 25,
         },
       },
+    });
+
+    // Mock useProjects hook for ProjectsSection
+    (hooks.useProjects as jest.Mock).mockReturnValue({
+      projects: [],
+      loading: false,
+      error: null,
+      paginationMeta: null,
+      fetchProjects: jest.fn(),
     });
   });
 
@@ -95,5 +106,29 @@ describe('AdminPage', () => {
         responseType: 'blob',
       })
     );
+  });
+
+  it('renders Projects tab', () => {
+    renderWithProviders(<AdminPage />);
+    expect(
+      screen.getByRole('tab', { name: /projects/i })
+    ).toBeInTheDocument();
+  });
+
+  it('shows ProjectsSection when Projects tab is clicked', async () => {
+    const user = userEvent.setup({ delay: null });
+
+    renderWithProviders(<AdminPage />);
+
+    const projectsTab = screen.getByRole('tab', { name: /projects/i });
+    await user.click(projectsTab);
+
+    // ProjectsSection should render with its headings (using heading role to be specific)
+    expect(
+      screen.getByRole('heading', { name: /create project/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /project list/i })
+    ).toBeInTheDocument();
   });
 });

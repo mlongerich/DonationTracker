@@ -7,7 +7,6 @@ import { theme } from './theme';
 import Layout from './components/Layout';
 import DonationsPage from './pages/DonationsPage';
 import DonorsPage from './pages/DonorsPage';
-import ProjectsPage from './pages/ProjectsPage';
 import ChildrenPage from './pages/ChildrenPage';
 import SponsorshipsPage from './pages/SponsorshipsPage';
 import AdminPage from './pages/AdminPage';
@@ -25,7 +24,6 @@ function App() {
               <Route path="donors" element={<DonorsPage />} />
               <Route path="children" element={<ChildrenPage />} />
               <Route path="sponsorships" element={<SponsorshipsPage />} />
-              <Route path="projects" element={<ProjectsPage />} />
               <Route path="admin" element={<AdminPage />} />
             </Route>
           </Routes>

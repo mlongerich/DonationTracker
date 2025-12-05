@@ -34,12 +34,17 @@ As a user, I want Projects management in the Admin page (as a tab) instead of a 
 - Consistent grouping of admin features
 - Projects still easily accessible when needed
 
+**Current AdminPage State (as of 2025-12-05):**
+- Tab 0: Pending Review (TICKET-111)
+- Tab 1: CSV (donor export from TICKET-088)
+- Tab 2: Projects (to be added by this ticket)
+
 ---
 
 ### Acceptance Criteria
 
 **AdminPage Tab:**
-- [ ] Add "Projects" tab to AdminPage (3rd tab after "Pending Review" and "CSV Import")
+- [ ] Add "Projects" tab to AdminPage (3rd tab after "Pending Review" and "CSV")
 - [ ] Tab renders ProjectsSection component
 - [ ] ProjectsSection includes full CRUD functionality
 - [ ] ProjectsSection includes archive/restore functionality
@@ -48,7 +53,7 @@ As a user, I want Projects management in the Admin page (as a tab) instead of a 
 
 **Navigation & Routing:**
 - [ ] Remove `/projects` route from App.tsx
-- [ ] Remove "Projects" button from Navigation.tsx
+- [ ] Remove "Projects" button from Navigation.tsx (line 24-26)
 - [ ] Projects only accessible via `/admin` page, tab 2 (index 2)
 - [ ] Direct link to Admin Projects tab: `/admin` (user selects tab)
 
@@ -341,15 +346,42 @@ describe('ProjectsSection', () => {
 ```typescript
 // donation_tracker_frontend/src/pages/AdminPage.tsx
 import React, { useState } from 'react';
-import { Box, Container, Typography, Tabs, Tab } from '@mui/material';
+import { Box, Container, Typography, Tabs, Tab, Button } from '@mui/material';
+import Download from '@mui/icons-material/Download';
 import PendingReviewSection from '../components/PendingReviewSection';
 import ProjectsSection from '../components/ProjectsSection';
+import apiClient from '../api/client';
 
 const AdminPage: React.FC = () => {
   const [currentTab, setCurrentTab] = useState(0);
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setCurrentTab(newValue);
+  };
+
+  const handleDonorExport = async () => {
+    try {
+      const params: Record<string, unknown> = {
+        include_discarded: false,
+      };
+
+      const response = await apiClient.get('/api/donors/export', {
+        params,
+        responseType: 'blob',
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      link.setAttribute('download', `donors_export_${timestamp}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error('Failed to export donors:', err);
+    }
   };
 
   return (
@@ -360,13 +392,27 @@ const AdminPage: React.FC = () => {
 
       <Tabs value={currentTab} onChange={handleTabChange}>
         <Tab label="Pending Review" />
-        <Tab label="CSV Import" />
+        <Tab label="CSV" />
         <Tab label="Projects" />
       </Tabs>
 
       <Box sx={{ mt: 3 }}>
         {currentTab === 0 && <PendingReviewSection />}
-        {currentTab === 1 && <Typography>CSV Import coming soon</Typography>}
+        {currentTab === 1 && (
+          <Box>
+            <Typography variant="h6" gutterBottom>
+              Export Donors
+            </Typography>
+            <Button
+              variant="contained"
+              startIcon={<Download />}
+              onClick={handleDonorExport}
+              sx={{ mb: 3 }}
+            >
+              Export All Donors to CSV
+            </Button>
+          </Box>
+        )}
         {currentTab === 2 && <ProjectsSection />}
       </Box>
     </Container>
@@ -518,10 +564,11 @@ describe('Project Management (Admin Tab)', () => {
 ### UI/UX Design Specifications
 
 **AdminPage Tab Layout:**
-- Tabs: `["Pending Review", "CSV Import", "Projects"]`
+- Tabs: `["Pending Review", "CSV", "Projects"]`
 - Projects tab index: 2
 - Container: `maxWidth="lg"` (same as AdminPage)
 - Margin top: 3 (same as other tabs)
+- CSV tab functionality: Donor export (TICKET-088)
 
 **ProjectsSection Layout:**
 - No page title (AdminPage already has "Admin" title)
@@ -551,6 +598,7 @@ describe('Project Management (Admin Tab)', () => {
 
 **Related:**
 - TICKET-111: Admin Pending Review UI (established AdminPage tab pattern)
+- TICKET-088: Donor CSV Export (CSV tab content - completed 2025-12-05)
 - TICKET-009: Project-based donations (CRUD functionality already implemented)
 
 ---
@@ -640,11 +688,13 @@ describe('Project Management (Admin Tab)', () => {
 - **No Backend Changes:** All changes are frontend-only
 - **Navigation Clarity:** Reduces top nav from 6 to 5 buttons (cleaner UX)
 - **Future Enhancement:** Can add pagination/filters to ProjectsSection later (TICKET-051 ideas)
-- **AdminPage Evolution:** CSV Import tab placeholder can be replaced with actual import UI later
+- **AdminPage Evolution:** CSV tab currently has donor export functionality (TICKET-088). Can add CSV import UI later.
 - **Design Decision:** Projects are admin-focused, not operational (correct categorization)
+- **Current State (2025-12-05):** AdminPage has "Pending Review" and "CSV" tabs. Projects tab to be added as 3rd tab.
 
 ---
 
 *Created: 2025-11-17*
+*Last Updated: 2025-12-05 (updated to reflect TICKET-088 CSV tab completion)*
 *Estimated Effort: 1-2 hours*
 *Impact: Frontend navigation UX improvement*

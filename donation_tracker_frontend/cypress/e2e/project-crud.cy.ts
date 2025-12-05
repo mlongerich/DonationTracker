@@ -2,7 +2,9 @@ describe('Project Management - Full CRUD Workflow', () => {
   beforeEach(() => {
     // Clean database before each test
     cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
-    cy.visit('/projects');
+    // Visit Admin page and click Projects tab
+    cy.visit('/admin');
+    cy.contains('button', 'Projects').click();
   });
 
   describe('Project Creation', () => {
@@ -199,8 +201,9 @@ describe('Project Management - Full CRUD Workflow', () => {
             }
           });
 
-          // Visit projects page to see the project
-          cy.visit('/projects');
+          // Visit Admin page and navigate to Projects tab
+          cy.visit('/admin');
+          cy.contains('button', 'Projects').click();
           cy.wait(1000);
 
           // Verify delete button is NOT visible (cascade delete protection)
@@ -257,8 +260,9 @@ describe('Project Management - Full CRUD Workflow', () => {
             // Intercept GET to ensure fresh data
             cy.intercept('GET', '/api/projects*').as('getProjects');
 
-            // Visit projects page
-            cy.visit('/projects');
+            // Visit Admin page and navigate to Projects tab
+            cy.visit('/admin');
+            cy.contains('button', 'Projects').click();
 
             // Wait for API response
             cy.wait('@getProjects');
@@ -329,7 +333,9 @@ describe('Project Management - Full CRUD Workflow', () => {
             }
           });
 
-          cy.visit('/projects');
+          // Visit Admin page and navigate to Projects tab
+          cy.visit('/admin');
+          cy.contains('button', 'Projects').click();
           cy.wait(1000);
 
           // Verify system project has no delete button (only archive)
@@ -376,8 +382,9 @@ describe('Project Management - Full CRUD Workflow', () => {
             }
           });
 
-          // Visit projects page
-          cy.visit('/projects');
+          // Visit Admin page and navigate to Projects tab
+          cy.visit('/admin');
+          cy.contains('button', 'Projects').click();
           cy.wait(2000); // Wait for project data to load with can_be_deleted flag
 
           // Archive the project (should show archive button since it has donations)

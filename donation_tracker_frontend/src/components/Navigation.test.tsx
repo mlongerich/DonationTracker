@@ -25,14 +25,14 @@ describe('Navigation', () => {
     expect(screen.getByRole('link', { name: /donors/i })).toBeInTheDocument();
   });
 
-  it('renders Projects link', () => {
+  it('does not render Projects link (moved to Admin page)', () => {
     render(
       <BrowserRouter>
         <Navigation />
       </BrowserRouter>
     );
 
-    expect(screen.getByRole('link', { name: /projects/i })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /^projects$/i })).not.toBeInTheDocument();
   });
 
   it('renders Children link', () => {

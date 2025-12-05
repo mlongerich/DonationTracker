@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import Container from '@mui/material/Container';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import ProjectForm from '../components/ProjectForm';
-import ProjectList from '../components/ProjectList';
+import ProjectForm from './ProjectForm';
+import ProjectList from './ProjectList';
 import { createProject, updateProject, deleteProject } from '../api/client';
 import apiClient from '../api/client';
 import { Project } from '../types';
 import { useProjects } from '../hooks';
 
-const ProjectsPage: React.FC = () => {
+const ProjectsSection: React.FC = () => {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [formKey, setFormKey] = useState(0);
   const [success, setSuccess] = useState<
@@ -98,64 +97,58 @@ const ProjectsPage: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="md">
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Manage Projects
+    <Box>
+      {success && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          Project {success} successfully!
+        </Alert>
+      )}
+
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" component="h2" gutterBottom>
+          {editingProject ? 'Edit Project' : 'Create Project'}
         </Typography>
-
-        {success && (
-          <Alert severity="success" sx={{ mb: 2 }}>
-            Project {success} successfully!
-          </Alert>
-        )}
-
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" component="h2" gutterBottom>
-            {editingProject ? 'Edit Project' : 'Create Project'}
-          </Typography>
-          <ProjectForm
-            key={formKey}
-            onSubmit={handleSubmit}
-            project={editingProject || undefined}
-          />
-        </Box>
-
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" component="h2" gutterBottom>
-            Project List
-          </Typography>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={showArchived}
-                onChange={(e) => setShowArchived(e.target.checked)}
-              />
-            }
-            label="Show Archived Projects"
-            sx={{ mb: 2 }}
-          />
-          <ProjectList
-            projects={projects}
-            onEdit={setEditingProject}
-            onDelete={handleDelete}
-            onArchive={handleArchive}
-            onRestore={handleRestore}
-          />
-        </Box>
-        <Snackbar
-          open={!!error}
-          autoHideDuration={6000}
-          onClose={() => setError(null)}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        >
-          <Alert severity="error" onClose={() => setError(null)}>
-            {error}
-          </Alert>
-        </Snackbar>
+        <ProjectForm
+          key={formKey}
+          onSubmit={handleSubmit}
+          project={editingProject || undefined}
+        />
       </Box>
-    </Container>
+
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h6" component="h2" gutterBottom>
+          Project List
+        </Typography>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={showArchived}
+              onChange={(e) => setShowArchived(e.target.checked)}
+            />
+          }
+          label="Show Archived Projects"
+          sx={{ mb: 2 }}
+        />
+        <ProjectList
+          projects={projects}
+          onEdit={setEditingProject}
+          onDelete={handleDelete}
+          onArchive={handleArchive}
+          onRestore={handleRestore}
+        />
+      </Box>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={() => setError(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert severity="error" onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 };
 
-export default ProjectsPage;
+export default ProjectsSection;

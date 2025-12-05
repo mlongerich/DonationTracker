@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Container, Typography, Tabs, Tab, Button } from '@mui/material';
 import Download from '@mui/icons-material/Download';
 import PendingReviewSection from '../components/PendingReviewSection';
+import ProjectsSection from '../components/ProjectsSection';
 import apiClient from '../api/client';
 
 const AdminPage: React.FC = () => {
@@ -45,6 +46,7 @@ const AdminPage: React.FC = () => {
       <Tabs value={currentTab} onChange={handleTabChange}>
         <Tab label="Pending Review" />
         <Tab label="CSV" />
+        <Tab label="Projects" />
       </Tabs>
 
       <Box sx={{ mt: 3 }}>
@@ -64,6 +66,7 @@ const AdminPage: React.FC = () => {
             </Button>
           </Box>
         )}
+        {currentTab === 2 && <ProjectsSection />}
       </Box>
     </Container>
   );

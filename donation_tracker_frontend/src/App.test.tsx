@@ -64,12 +64,12 @@ describe('App', () => {
   it('renders navigation links', () => {
     render(<App />);
 
-    // Navigation should have links
+    // Navigation should have links (Projects moved to Admin tab)
     expect(
       screen.getByRole('link', { name: /donations/i })
     ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /donors/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /projects/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /admin/i })).toBeInTheDocument();
   });
 
   it('has /admin route', () => {

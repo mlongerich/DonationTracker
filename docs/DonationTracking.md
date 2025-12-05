@@ -17,9 +17,20 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2025-12-05 (TICKET-134: Stripe CSV Email Fallback Handling)
+**Last Updated:** 2025-12-05 (TICKET-119: Move Projects to Admin Page Tab)
 
 **Latest Milestones:**
+- TICKET-119 - Move Projects to Admin Page Tab ✅ (2025-12-05)
+  - **AdminPage Tab Structure:** Projects moved from standalone page to Admin page as 3rd tab
+  - **Tab Organization:** Tab 0 (Pending Review), Tab 1 (CSV Export), Tab 2 (Projects)
+  - **ProjectsSection Component:** Self-contained section with full CRUD functionality (15 tests preserved)
+  - **Navigation Cleanup:** Removed Projects button from top nav (5 buttons instead of 6)
+  - **Route Changes:** Removed /projects route, Projects accessed via /admin → Projects tab
+  - **Zero Regression:** All 15 functional tests migrated, all unit & E2E tests passing
+  - **UX Improvement:** Clear separation of operational pages vs admin features
+  - **Pattern:** Section components are self-contained with own state, handlers, notifications
+  - **Test Coverage:** ProjectsSection (15 tests), AdminPage (2 new tests), updated 3 Cypress E2E files
+  - See tickets/TICKET-119-move-projects-to-admin-tab.md for implementation details
 - TICKET-134 - Stripe CSV Email Fallback Handling ✅ (2025-12-05)
   - **Email Fallback Logic:** 3-tier priority system for donor email extraction from Stripe CSV
   - **Priority 1:** Cust Email (primary customer email from Stripe)

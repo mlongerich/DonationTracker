@@ -817,6 +817,31 @@ function Layout() {
 
 **See:** docs/PATTERNS.md for full code examples
 
+#### AdminPage Tab Organization
+
+**Purpose:** Group administrative/configuration features separately from operational pages
+
+**Current Structure (as of TICKET-119):**
+- **Tab 0**: Pending Review - Donations needing attention (TICKET-111)
+- **Tab 1**: CSV - Donor export functionality (TICKET-088)
+- **Tab 2**: Projects - Project CRUD and archive management (TICKET-119)
+
+**Pattern:** Section components (e.g., `ProjectsSection`, `PendingReviewSection`) are self-contained with:
+- Own state management (useState, useEffect)
+- Own CRUD handlers
+- No props from AdminPage (fully independent)
+- Own success/error notifications
+
+**Navigation:** Admin features accessed via `/admin` route, not standalone pages
+
+**Benefits:**
+- Clear separation: Operational pages (Donations, Donors, Children, Sponsorships) vs Admin
+- Reduced top navigation clutter
+- Grouped administrative functionality
+- Maintains full feature accessibility
+
+**See:** TICKET-119 for Projects migration pattern
+
 ### Pre-commit Requirements
 
 **Before committing:**

@@ -1,8 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import ProjectsPage from './ProjectsPage';
+import ProjectsSection from './ProjectsSection';
 import {
-  fetchProjects,
   createProject,
   updateProject,
   deleteProject,
@@ -15,7 +14,6 @@ jest.mock('../api/client', () => ({
     get: jest.fn(),
     post: jest.fn(),
   },
-  fetchProjects: jest.fn(),
   createProject: jest.fn(),
   updateProject: jest.fn(),
   deleteProject: jest.fn(),
@@ -23,29 +21,20 @@ jest.mock('../api/client', () => ({
 
 const mockedApiClient = apiClient as jest.Mocked<typeof apiClient>;
 
-describe('ProjectsPage', () => {
+describe('ProjectsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (fetchProjects as jest.Mock).mockResolvedValue({ projects: [] });
     mockedApiClient.get.mockResolvedValue({ data: { projects: [] } });
   });
 
-  it('renders page title', () => {
-    render(<ProjectsPage />);
-
-    expect(
-      screen.getByRole('heading', { name: /manage projects/i })
-    ).toBeInTheDocument();
-  });
-
   it('renders project form', () => {
-    render(<ProjectsPage />);
+    render(<ProjectsSection />);
 
     expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
   });
 
   it('renders empty project list', () => {
-    render(<ProjectsPage />);
+    render(<ProjectsSection />);
 
     expect(screen.getByText(/no projects/i)).toBeInTheDocument();
   });
@@ -64,7 +53,7 @@ describe('ProjectsPage', () => {
       data: { projects: mockProjects },
     });
 
-    render(<ProjectsPage />);
+    render(<ProjectsSection />);
 
     await waitFor(() => {
       expect(mockedApiClient.get).toHaveBeenCalledWith('/api/projects', {
@@ -81,7 +70,7 @@ describe('ProjectsPage', () => {
     (createProject as jest.Mock).mockResolvedValue({});
 
     const user = userEvent.setup();
-    render(<ProjectsPage />);
+    render(<ProjectsSection />);
 
     await user.type(screen.getByLabelText(/title/i), 'New Project');
     await user.click(screen.getByRole('button', { name: /create project/i }));
@@ -111,7 +100,7 @@ describe('ProjectsPage', () => {
     });
 
     const user = userEvent.setup();
-    render(<ProjectsPage />);
+    render(<ProjectsSection />);
 
     await waitFor(() => {
       expect(screen.getByText('Summer Campaign')).toBeInTheDocument();
@@ -139,12 +128,9 @@ describe('ProjectsPage', () => {
       data: { projects: mockProjects },
     });
     (updateProject as jest.Mock).mockResolvedValue({});
-    (fetchProjects as jest.Mock).mockResolvedValue({
-      projects: mockProjects,
-    });
 
     const user = userEvent.setup();
-    render(<ProjectsPage />);
+    render(<ProjectsSection />);
 
     await waitFor(() => {
       expect(screen.getByText('Summer Campaign')).toBeInTheDocument();
@@ -171,19 +157,12 @@ describe('ProjectsPage', () => {
     });
   });
 
-  it('renders projects page', () => {
-    render(<ProjectsPage />);
-
-    // Verify page renders with form
-    expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
-  });
-
   it('clears form fields after successful project creation', async () => {
     mockedApiClient.post.mockResolvedValue({});
     mockedApiClient.get.mockResolvedValue({ data: { projects: [] } });
 
     const user = userEvent.setup();
-    render(<ProjectsPage />);
+    render(<ProjectsSection />);
 
     // Fill form
     await user.type(screen.getByLabelText(/title/i), 'New Project');
@@ -201,10 +180,9 @@ describe('ProjectsPage', () => {
 
   it('displays success Alert after creating project', async () => {
     (createProject as jest.Mock).mockResolvedValue({});
-    (fetchProjects as jest.Mock).mockResolvedValue({ projects: [] });
 
     const user = userEvent.setup();
-    render(<ProjectsPage />);
+    render(<ProjectsSection />);
 
     await user.type(screen.getByLabelText(/title/i), 'New Project');
     await user.click(screen.getByRole('button', { name: /create project/i }));
@@ -232,12 +210,9 @@ describe('ProjectsPage', () => {
       data: { projects: mockProjects },
     });
     (deleteProject as jest.Mock).mockResolvedValue({});
-    (fetchProjects as jest.Mock).mockResolvedValue({
-      projects: mockProjects,
-    });
 
     const user = userEvent.setup();
-    render(<ProjectsPage />);
+    render(<ProjectsSection />);
 
     await waitFor(() => {
       expect(screen.getByText('Summer Campaign')).toBeInTheDocument();
@@ -257,9 +232,8 @@ describe('ProjectsPage', () => {
     mockedApiClient.get.mockResolvedValue({
       data: { projects: [] },
     });
-    (fetchProjects as jest.Mock).mockResolvedValue({ projects: [] });
 
-    render(<ProjectsPage />);
+    render(<ProjectsSection />);
 
     await waitFor(() => {
       expect(
@@ -304,7 +278,7 @@ describe('ProjectsPage', () => {
       data: { projects: [newProject] },
     });
 
-    render(<ProjectsPage />);
+    render(<ProjectsSection />);
 
     // Create project
     await user.type(screen.getByLabelText(/title/i), 'New Project');
@@ -350,7 +324,7 @@ describe('ProjectsPage', () => {
         },
       });
 
-      render(<ProjectsPage />);
+      render(<ProjectsSection />);
 
       await waitFor(() => {
         expect(screen.getByText('Summer Campaign')).toBeInTheDocument();
@@ -391,7 +365,7 @@ describe('ProjectsPage', () => {
         },
       });
 
-      render(<ProjectsPage />);
+      render(<ProjectsSection />);
 
       await waitFor(() => {
         expect(screen.getByText('Summer Campaign')).toBeInTheDocument();
@@ -432,7 +406,7 @@ describe('ProjectsPage', () => {
         },
       });
 
-      render(<ProjectsPage />);
+      render(<ProjectsSection />);
 
       await waitFor(() => {
         expect(screen.getByText('Summer Campaign')).toBeInTheDocument();

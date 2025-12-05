@@ -168,6 +168,7 @@ Current work items and user stories being actively developed.
 - [TICKET-104: Quarterly Donation Report](TICKET-104-quarterly-donation-report.md) - 📋 Planned (🔴 High, M) - *Consolidated by donor with gross/net amounts*
 - [TICKET-105: Annual Donation Report](TICKET-105-annual-donation-report.md) - 📋 Planned (🔴 High, S) - *Year-end report for tax receipts*
 - [TICKET-106: Admin Override for Donation Deletion](TICKET-106-admin-override-donation-deletion.md) - 📋 Planned (🟡 Medium, M) - *Admin bypass for 24-hour delete restriction*
+- [TICKET-133: Individual Donor Giving Statements](TICKET-133-individual-donor-giving-statements.md) - 📋 Planned (🔴 High, M) - *Personalized PDF statements for donor tax documentation*
 
 #### Testing & Quality Assurance
 
@@ -202,19 +203,19 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 117 (TICKET-088 complete)
-- **Completed:** 63 (54%)
+- **Total Tickets:** 118 (TICKET-133 added)
+- **Completed:** 63 (53%)
 - **In Progress:** 0
-- **Planned:** 52
-- **Estimated Hours Remaining:** ~192.5 hours (~4.8 weeks)
+- **Planned:** 53
+- **Estimated Hours Remaining:** ~198.5 hours (~5.0 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 - **Canceled/Superseded:** 3 (TICKET-041, TICKET-051, TICKET-120)
 
 ### By Category
 
-- **Feature Development:** 20 planned (~76.5h), 13 completed
-  - New: TICKET-100 (Donor Address), TICKET-101 (Check Photos), TICKET-102 (Child Photos), TICKET-103/104/105 (Reports), TICKET-106 (Admin Delete Override)
+- **Feature Development:** 21 planned (~82.5h), 13 completed
+  - New: TICKET-100 (Donor Address), TICKET-101 (Check Photos), TICKET-102 (Child Photos), TICKET-103/104/105 (Reports), TICKET-106 (Admin Delete Override), TICKET-133 (Donor Statements)
 - **Stripe Integration:** 4 planned (~22h), 1 completed
   - **PERMANENT:** ✅ TICKET-070 (core service - complete), TICKET-076 (failed payments tracking - planned)
   - **TEMPORARY:** TICKET-071 (batch import - blocked on user testing), TICKET-072 (error UI - optional)
