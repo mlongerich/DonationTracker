@@ -263,7 +263,7 @@ describe('Children and Sponsorship Management', () => {
     // Submit
     cy.contains('h2', 'Edit Child')
       .parent()
-      .contains('button', /submit/i)
+      .contains('button', /update/i)
       .click();
 
     // Verify Girl icon appears (Boy icon gone)
@@ -306,7 +306,7 @@ describe('Children and Sponsorship Management', () => {
     // Submit
     cy.contains('h2', 'Edit Child')
       .parent()
-      .contains('button', /submit/i)
+      .contains('button', /update/i)
       .click();
 
     // Verify no gender icon appears
