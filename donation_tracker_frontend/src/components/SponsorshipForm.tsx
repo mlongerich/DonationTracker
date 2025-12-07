@@ -7,13 +7,11 @@ import { parseCurrency } from '../utils/currency';
 
 interface SponsorshipFormProps {
   onSubmit: (data: SponsorshipFormData) => void | Promise<void>;
-  onCancel: () => void;
   childId?: number;
 }
 
 const SponsorshipForm: React.FC<SponsorshipFormProps> = ({
   onSubmit,
-  onCancel,
   childId,
 }) => {
   const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
@@ -60,14 +58,14 @@ const SponsorshipForm: React.FC<SponsorshipFormProps> = ({
         required
         size="small"
       />
-      <Stack direction="row" spacing={2}>
-        <Button variant="contained" onClick={handleSubmit}>
-          Submit
-        </Button>
-        <Button variant="outlined" onClick={onCancel}>
-          Cancel
-        </Button>
-      </Stack>
+      <Button
+        variant="contained"
+        color="primary"
+        fullWidth
+        onClick={handleSubmit}
+      >
+        Submit
+      </Button>
     </Stack>
   );
 };

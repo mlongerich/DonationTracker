@@ -298,7 +298,7 @@ describe('ChildrenPage', () => {
     const nameInput = screen.getByLabelText(/name/i);
     await user.clear(nameInput);
     await user.type(nameInput, 'Maria Updated');
-    await user.click(screen.getByRole('button', { name: /submit/i }));
+    await user.click(screen.getByRole('button', { name: /update/i }));
 
     await waitFor(() => {
       expect(mockedApiClient.put).toHaveBeenCalledWith('/api/children/1', {

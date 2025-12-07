@@ -7,17 +7,28 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChildFormData } from '../types';
 
 interface ChildFormProps {
   onSubmit: (data: ChildFormData) => void;
   initialData?: ChildFormData;
+  onCancel?: () => void;
 }
 
-const ChildForm: React.FC<ChildFormProps> = ({ onSubmit, initialData }) => {
+const ChildForm: React.FC<ChildFormProps> = ({ onSubmit, initialData, onCancel }) => {
   const [name, setName] = useState(initialData?.name || '');
   const [gender, setGender] = useState(initialData?.gender || '');
+
+  useEffect(() => {
+    if (initialData) {
+      setName(initialData.name);
+      setGender(initialData.gender || '');
+    } else {
+      setName('');
+      setGender('');
+    }
+  }, [initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,15 +61,32 @@ const ChildForm: React.FC<ChildFormProps> = ({ onSubmit, initialData }) => {
             <MenuItem value="girl">Girl</MenuItem>
           </Select>
         </FormControl>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          disabled={!name.trim()}
-        >
-          Submit
-        </Button>
+        {initialData && onCancel ? (
+          <Stack direction="row" spacing={2}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              disabled={!name.trim()}
+            >
+              Update
+            </Button>
+            <Button variant="outlined" color="error" onClick={onCancel} fullWidth>
+              Cancel
+            </Button>
+          </Stack>
+        ) : (
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            disabled={!name.trim()}
+          >
+            Submit
+          </Button>
+        )}
       </Stack>
     </form>
   );

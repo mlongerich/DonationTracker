@@ -73,7 +73,7 @@ describe('SponsorshipModal', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('calls onClose when cancel button clicked', async () => {
+  it('calls onClose when close button clicked', async () => {
     const mockOnClose = jest.fn();
     const user = userEvent.setup();
 
@@ -87,8 +87,8 @@ describe('SponsorshipModal', () => {
       />
     );
 
-    const cancelButton = screen.getByRole('button', { name: /cancel/i });
-    await user.click(cancelButton);
+    const closeButton = screen.getByLabelText('close');
+    await user.click(closeButton);
 
     expect(mockOnClose).toHaveBeenCalled();
   });

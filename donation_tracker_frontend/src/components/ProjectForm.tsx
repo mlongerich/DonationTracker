@@ -9,12 +9,14 @@ interface ProjectFormProps {
   onSubmit: (data: ProjectFormData) => void;
   project?: Project;
   initialTitle?: string;
+  onCancel?: () => void;
 }
 
 const ProjectForm: React.FC<ProjectFormProps> = ({
   onSubmit,
   project,
   initialTitle,
+  onCancel,
 }) => {
   const [title, setTitle] = useState(initialTitle || '');
   const [description, setDescription] = useState('');
@@ -25,8 +27,12 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
       setTitle(project.title);
       setDescription(project.description || '');
       setProjectType(project.project_type);
+    } else {
+      setTitle(initialTitle || '');
+      setDescription('');
+      setProjectType('general');
     }
-  }, [project]);
+  }, [project, initialTitle]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,9 +75,32 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
           <MenuItem value="campaign">Campaign</MenuItem>
           <MenuItem value="sponsorship">Sponsorship</MenuItem>
         </TextField>
-        <Button type="submit" variant="contained" disabled={!title.trim()}>
-          {project ? 'Update Project' : 'Create Project'}
-        </Button>
+        {project && onCancel ? (
+          <Stack direction="row" spacing={2}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              disabled={!title.trim()}
+            >
+              Update Project
+            </Button>
+            <Button variant="outlined" color="error" onClick={onCancel} fullWidth>
+              Cancel
+            </Button>
+          </Stack>
+        ) : (
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            disabled={!title.trim()}
+          >
+            Create Project
+          </Button>
+        )}
       </Stack>
     </form>
   );

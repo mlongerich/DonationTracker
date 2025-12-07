@@ -17,9 +17,21 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2025-12-05 (TICKET-119: Move Projects to Admin Page Tab)
+**Last Updated:** 2025-12-07 (TICKET-127: StandardDialog Component & Form UX Consistency)
 
 **Latest Milestones:**
+- TICKET-127 - StandardDialog Component & Form UX Consistency ✅ (2025-12-07)
+  - **StandardDialog Component:** Created generic dialog wrapper eliminating 180+ lines of duplication across SponsorshipModal, QuickDonorCreateDialog, QuickEntityCreateDialog
+  - **Interface:** open, onClose, title, children, error, onErrorClose, maxWidth - provides standard close X button and error handling
+  - **Conditional Cancel Buttons:** Cancel now shows ONLY in edit mode (when initialData/project/donor AND onCancel provided) - no Cancel in create mode or modal forms
+  - **Cancel Button Styling:** Error color (red) for visual distinction, side-by-side layout with Update button
+  - **Forms Updated:** ChildForm, DonorForm, ProjectForm all follow conditional Cancel pattern
+  - **Bug Fix:** ProjectForm and ChildForm now clear fields when Cancel clicked (useEffect syncs with prop changes)
+  - **SponsorshipForm:** Removed Cancel button (modal-only component), Submit button now fullWidth + color="primary"
+  - **Test Coverage:** StandardDialog (5 tests), form clear tests added to ProjectForm and ChildForm, all affected component tests updated
+  - **Net Impact:** -17 lines of code, significantly better maintainability, single source of truth for dialogs
+  - **Documentation:** CLAUDE.md updated with StandardDialog Pattern section and revised Form Component Pattern
+  - See tickets/TICKET-127-sponsorshipmodal-dialog-consistency.md for full implementation details
 - TICKET-119 - Move Projects to Admin Page Tab ✅ (2025-12-05)
   - **AdminPage Tab Structure:** Projects moved from standalone page to Admin page as 3rd tab
   - **Tab Organization:** Tab 0 (Pending Review), Tab 1 (CSV Export), Tab 2 (Projects)

@@ -1,16 +1,10 @@
 import { useState, useEffect } from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
   Tabs,
   Tab,
   Box,
-  Snackbar,
-  Alert,
-  IconButton,
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import StandardDialog from './StandardDialog';
 import ChildForm from './ChildForm';
 import ProjectForm from './ProjectForm';
 import { ChildFormData, ProjectFormData } from '../types';
@@ -32,8 +26,7 @@ const QuickEntityCreateDialog: React.FC<QuickEntityCreateDialogProps> = ({
   preFillText,
 }) => {
   const [currentTab, setCurrentTab] = useState<'child' | 'project'>('child');
-  const [childError, setChildError] = useState<string | null>(null);
-  const [projectError, setProjectError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [dialogKey, setDialogKey] = useState(0);
 
   const handleChildSubmit = async (data: ChildFormData) => {
@@ -54,15 +47,11 @@ const QuickEntityCreateDialog: React.FC<QuickEntityCreateDialogProps> = ({
         const errorMessage = Array.isArray(validationErrors)
           ? validationErrors.join(', ')
           : err.response.data.error || 'Validation failed';
-        setChildError(errorMessage);
+        setError(errorMessage);
       } else {
-        setChildError(err.response?.data?.error || 'Failed to create child');
+        setError(err.response?.data?.error || 'Failed to create child');
       }
     }
-  };
-
-  const handleCloseChildError = () => {
-    setChildError(null);
   };
 
   const handleProjectSubmit = async (data: ProjectFormData) => {
@@ -83,26 +72,21 @@ const QuickEntityCreateDialog: React.FC<QuickEntityCreateDialogProps> = ({
         const errorMessage = Array.isArray(validationErrors)
           ? validationErrors.join(', ')
           : err.response.data.error || 'Validation failed';
-        setProjectError(errorMessage);
+        setError(errorMessage);
       } else {
-        setProjectError(
+        setError(
           err.response?.data?.error || 'Failed to create project'
         );
       }
     }
   };
 
-  const handleCloseProjectError = () => {
-    setProjectError(null);
-  };
-
   const handleTabChange = (
     _event: React.SyntheticEvent,
     newValue: 'child' | 'project'
   ) => {
-    // Clear errors when switching tabs
-    setChildError(null);
-    setProjectError(null);
+    // Clear error when switching tabs
+    setError(null);
     setCurrentTab(newValue);
   };
 
@@ -111,81 +95,41 @@ const QuickEntityCreateDialog: React.FC<QuickEntityCreateDialogProps> = ({
     if (!open) {
       setDialogKey((prev) => prev + 1);
       setCurrentTab('child');
-      setChildError(null);
-      setProjectError(null);
+      setError(null);
     }
   }, [open]);
 
   return (
-    <>
-      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          Create New Entity
-          <IconButton
-            aria-label="close"
-            onClick={onClose}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
+    <StandardDialog
+      open={open}
+      onClose={onClose}
+      title="Create New Entity"
+      error={error}
+      onErrorClose={() => setError(null)}
+    >
+      <Box sx={{ mt: -1 }}>
         <Tabs value={currentTab} onChange={handleTabChange}>
           <Tab label="Create Child" value="child" />
           <Tab label="Create Project" value="project" />
         </Tabs>
-        <DialogContent sx={{ pt: 3 }} key={dialogKey}>
-          <Box
-            sx={{ display: currentTab === 'child' ? 'block' : 'none', mt: 1 }}
-          >
-            <ChildForm
-              onSubmit={handleChildSubmit}
-              initialData={
-                preFillText ? { name: preFillText, gender: null } : undefined
-              }
-            />
-          </Box>
-          <Box
-            sx={{ display: currentTab === 'project' ? 'block' : 'none', mt: 1 }}
-          >
-            <ProjectForm
-              onSubmit={handleProjectSubmit}
-              initialTitle={preFillText}
-            />
-          </Box>
-        </DialogContent>
-      </Dialog>
-      <Snackbar
-        open={!!childError}
-        autoHideDuration={6000}
-        onClose={handleCloseChildError}
-      >
-        <Alert
-          onClose={handleCloseChildError}
-          severity="error"
-          sx={{ width: '100%' }}
-        >
-          {childError}
-        </Alert>
-      </Snackbar>
-      <Snackbar
-        open={!!projectError}
-        autoHideDuration={6000}
-        onClose={handleCloseProjectError}
-      >
-        <Alert
-          onClose={handleCloseProjectError}
-          severity="error"
-          sx={{ width: '100%' }}
-        >
-          {projectError}
-        </Alert>
-      </Snackbar>
-    </>
+      </Box>
+      <Box key={dialogKey} sx={{ mt: 2 }}>
+        <Box sx={{ display: currentTab === 'child' ? 'block' : 'none' }}>
+          <ChildForm
+            onSubmit={handleChildSubmit}
+            initialData={
+              preFillText ? { name: preFillText, gender: null } : undefined
+            }
+          />
+        </Box>
+        <Box sx={{ display: currentTab === 'project' ? 'block' : 'none' }}>
+          <ProjectForm
+            onSubmit={handleProjectSubmit}
+            initialTitle={preFillText}
+          />
+        </Box>
+      </Box>
+    </StandardDialog>
   );
 };
 

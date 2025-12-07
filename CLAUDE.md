@@ -583,6 +583,75 @@ import { Donor } from '../types';
 />
 ```
 
+#### StandardDialog Pattern
+
+**Purpose:** Generic dialog wrapper component that eliminates boilerplate and ensures consistent dialog UX across the application.
+
+**Extracted:** TICKET-127 (2025-12-05) - Eliminated 180+ lines of duplication from 3 dialogs
+
+**Implementation:**
+```typescript
+// src/components/StandardDialog.tsx
+interface StandardDialogProps {
+  open: boolean;              // Dialog open state
+  onClose: () => void;        // Close handler
+  title: string;              // Dialog title
+  children: React.ReactNode;  // Form/content to render
+  error?: string | null;      // Optional error message
+  onErrorClose?: () => void;  // Error dismissal handler
+  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';  // Dialog width (default 'sm')
+}
+```
+
+**Features:**
+- Close button (X) with CloseIcon in DialogTitle (absolute positioned)
+- Standard sizing: `maxWidth={maxWidth} fullWidth`
+- Standard padding: `DialogContent sx={{ pt: 3 }}`, `Box sx={{ mt: 1 }}`
+- Integrated Snackbar + Alert error handling (optional error prop)
+- Single source of truth for dialog UX
+
+**Usage Example:**
+```tsx
+const SponsorshipModal: React.FC<Props> = ({ open, onClose, childName, onSuccess }) => {
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (data: FormData) => {
+    try {
+      await apiClient.post('/api/sponsorships', { sponsorship: data });
+      onSuccess();
+      onClose();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'An unexpected error occurred');
+    }
+  };
+
+  return (
+    <StandardDialog
+      open={open}
+      onClose={onClose}
+      title={`Add Sponsor for ${childName}`}
+      error={error}
+      onErrorClose={() => setError(null)}
+    >
+      <SponsorshipForm onSubmit={handleSubmit} />
+    </StandardDialog>
+  );
+};
+```
+
+**Benefits:**
+- Eliminates 60-80 lines of boilerplate per dialog
+- Ensures consistent close button, sizing, padding, error handling
+- Future dialogs automatically inherit consistent UX
+- Single place to fix dialog-wide bugs
+
+**Current Usage:**
+- SponsorshipModal (82 → 54 lines)
+- QuickDonorCreateDialog (105 → 65 lines)
+- QuickEntityCreateDialog (192 → 137 lines) - supports tabs + conditional content
+
+**See:** TICKET-127
+
 #### MUI Component Sizing
 
 **Standard:** All form inputs use `size="small"` (40px height vs 56px default)
@@ -634,34 +703,71 @@ const DonationList = ({ donations, onFilterChange }) => {
 **Standard:** All form components follow consistent UX patterns for maintainability
 
 **Button Configuration:**
-- **No Cancel button** - Forms embedded in pages (user can navigate away naturally)
 - **Submit button:** Full-width, primary color (`variant="contained" color="primary" fullWidth`)
-- **Placement:** Bottom of form
+- **Cancel button:** Conditional - only in edit mode for inline page forms
+  - **Inline page forms (CREATE mode)**: NO Cancel - user navigates away via page links
+  - **Inline page forms (EDIT mode)**: YES Cancel - exits edit mode back to list view
+  - **Modal/Dialog forms**: NO Cancel - dialog has close X button instead
+- **Cancel styling:** Error color (`color="error"`) for visual distinction
+- **Placement:** Bottom of form, side-by-side layout in edit mode
 
-**Example (ChildForm, DonationForm):**
+**Example (Inline Page Form - CREATE mode):**
 ```tsx
 <Box component="form" onSubmit={handleSubmit}>
   {/* Form fields */}
   <TextField label="Name" size="small" fullWidth required />
 
-  {/* Submit button */}
+  {/* Submit button only */}
   <Button type="submit" variant="contained" color="primary" fullWidth>
-    {initialData ? 'Update' : 'Create'}
+    Submit
   </Button>
+</Box>
+```
+
+**Example (Inline Page Form - EDIT mode):**
+```tsx
+<Box component="form" onSubmit={handleSubmit}>
+  {/* Form fields */}
+  <TextField label="Name" size="small" fullWidth required />
+
+  {/* Conditional buttons based on edit mode */}
+  {initialData && onCancel ? (
+    <Stack direction="row" spacing={2}>
+      <Button type="submit" variant="contained" color="primary" fullWidth>
+        Update
+      </Button>
+      <Button variant="outlined" color="error" onClick={onCancel} fullWidth>
+        Cancel
+      </Button>
+    </Stack>
+  ) : (
+    <Button type="submit" variant="contained" color="primary" fullWidth>
+      Submit
+    </Button>
+  )}
 </Box>
 ```
 
 **Props:**
 - `onSubmit: (data: FormData) => Promise<void>` - Required
 - `initialData?: FormData` - Optional (edit mode if provided)
-- ~~`onCancel`~~ - Removed (not needed for embedded forms)
+- `onCancel?: () => void` - Optional (Cancel button shows only when BOTH `initialData` AND `onCancel` provided)
 
 **Rationale:**
-- Embedded forms don't need Cancel (user navigates away via page links)
-- Full-width Submit button is more prominent and mobile-friendly
-- Consistent across DonationForm, ChildForm, ProjectForm
+- CREATE mode: No Cancel needed (user navigates away via page links)
+- EDIT mode: Cancel exits edit mode back to list view
+- Modal forms: No Cancel needed (dialog has close X)
+- Error color on Cancel provides clear visual distinction from primary action
+- Side-by-side layout in edit mode is mobile-friendly and clear
 
-**See:** TICKET-050 (ChildForm consistency improvements)
+**Implemented Forms:**
+- DonationForm ✅
+- ChildForm ✅ (TICKET-127)
+- ProjectForm ✅ (TICKET-127)
+- DonorForm ✅ (TICKET-127)
+- SponsorshipForm ✅ (modal only - no Cancel, TICKET-127)
+
+**See:** TICKET-050 (ChildForm consistency), TICKET-127 (conditional Cancel pattern)
 
 #### React Hooks Best Practices
 

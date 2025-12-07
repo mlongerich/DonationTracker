@@ -1,14 +1,5 @@
 import { useState } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Snackbar,
-  Alert,
-  Box,
-  IconButton,
-} from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
+import StandardDialog from './StandardDialog';
 import DonorForm from './DonorForm';
 import { DonorFormData } from '../types';
 import apiClient from '../api/client';
@@ -52,53 +43,21 @@ const QuickDonorCreateDialog: React.FC<QuickDonorCreateDialogProps> = ({
     }
   };
 
-  const handleCloseError = () => {
-    setError(null);
-  };
-
   return (
-    <>
-      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          Create New Donor
-          <IconButton
-            aria-label="close"
-            onClick={onClose}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ pt: 3 }}>
-          <Box sx={{ mt: 1 }}>
-            <DonorForm
-              key={open ? `${preFillName}-${preFillEmail}` : 'closed'}
-              initialName={preFillName}
-              initialEmail={preFillEmail}
-              onSubmit={handleSubmit}
-            />
-          </Box>
-        </DialogContent>
-      </Dialog>
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={handleCloseError}
-      >
-        <Alert
-          onClose={handleCloseError}
-          severity="error"
-          sx={{ width: '100%' }}
-        >
-          {error}
-        </Alert>
-      </Snackbar>
-    </>
+    <StandardDialog
+      open={open}
+      onClose={onClose}
+      title="Create New Donor"
+      error={error}
+      onErrorClose={() => setError(null)}
+    >
+      <DonorForm
+        key={open ? `${preFillName}-${preFillEmail}` : 'closed'}
+        initialName={preFillName}
+        initialEmail={preFillEmail}
+        onSubmit={handleSubmit}
+      />
+    </StandardDialog>
   );
 };
 

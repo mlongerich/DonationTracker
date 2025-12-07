@@ -128,7 +128,7 @@ describe('DonorForm', () => {
 
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm donor={donor} onSubmit={jest.fn()} />
+        <DonorForm donor={donor} onSubmit={jest.fn()} onCancel={jest.fn()} />
       </ThemeProvider>
     );
 
@@ -150,7 +150,7 @@ describe('DonorForm', () => {
 
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm donor={donor} onSubmit={handleSubmit} />
+        <DonorForm donor={donor} onSubmit={handleSubmit} onCancel={jest.fn()} />
       </ThemeProvider>
     );
 
@@ -174,17 +174,18 @@ describe('DonorForm', () => {
     expect(mockedApiClient.patch).not.toHaveBeenCalled();
   });
 
-  it('shows Cancel button when editing donor', () => {
+  it('shows Cancel button when editing donor (donor AND onCancel provided)', () => {
     const donor = {
       id: 1,
       name: 'Existing Donor',
       email: 'existing@example.com',
       displayable_email: 'existing@example.com',
     };
+    const mockCancel = jest.fn();
 
     render(
       <ThemeProvider theme={theme}>
-        <DonorForm donor={donor} onSubmit={jest.fn()} />
+        <DonorForm donor={donor} onSubmit={jest.fn()} onCancel={mockCancel} />
       </ThemeProvider>
     );
 

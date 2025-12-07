@@ -82,6 +82,7 @@ Current work items and user stories being actively developed.
 - [TICKET-126: Intelligent Pre-Commit Documentation Validation](completed/TICKET-126-intelligent-documentation-check.md) - ✅ Complete (2025-11-26)
 - [TICKET-100: Add Physical Address to Donor Records](completed/TICKET-100-add-physical-address-donor-records.md) - ✅ Complete (2025-11-28)
 - [TICKET-088: Donor Export to CSV](completed/TICKET-088-donor-export-csv-excel.md) - ✅ Complete (2025-12-04)
+- [TICKET-127: StandardDialog Component & Form UX Consistency](TICKET-127-sponsorshipmodal-dialog-consistency.md) - ✅ Complete (2025-12-07)
 
 ### 🔵 In Progress Tickets
 
@@ -189,7 +190,6 @@ Current work items and user stories being actively developed.
 **Medium Priority:**
 - [TICKET-034: Create Query Objects for Complex Database Queries](TICKET-034-create-query-objects-complex-database-queries.md) - 📋 Planned (🟡 Medium, M) - *Updated with ChildrenController example*
 - [TICKET-033: Implement Policy Objects for Authorization](TICKET-033-implement-policy-objects-authorization.md) - 📋 Planned (🟡 Medium, M)
-- [TICKET-127: Form & Dialog UX Consistency (No Cancel Buttons)](TICKET-127-sponsorshipmodal-dialog-consistency.md) - 📋 Planned (🟡 Medium, M - 2-3h) - *Remove Cancel buttons, add dialog close X, fullWidth fixes*
 - [TICKET-131: Extend Custom Hooks with CRUD Methods](TICKET-131-extend-custom-hooks-crud-methods.md) - 📋 Planned (🟡 Medium, M - 3-4h) - *Move API calls from pages to hooks (DRY)*
 
 **Low Priority:**

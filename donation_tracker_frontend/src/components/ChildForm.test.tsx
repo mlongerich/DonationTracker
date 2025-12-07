@@ -80,4 +80,65 @@ describe('ChildForm', () => {
 
     expect(mockSubmit).toHaveBeenCalledWith({ name: 'Sam', gender: null });
   });
+
+  it('renders Cancel button when in edit mode (initialData provided)', () => {
+    const mockSubmit = jest.fn();
+    const mockCancel = jest.fn();
+    const initialData = { name: 'Maria', gender: 'girl' };
+
+    render(
+      <ChildForm
+        onSubmit={mockSubmit}
+        initialData={initialData}
+        onCancel={mockCancel}
+      />
+    );
+
+    expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
+  });
+
+  it('does NOT render Cancel button when in create mode (no initialData)', () => {
+    const mockSubmit = jest.fn();
+
+    render(<ChildForm onSubmit={mockSubmit} />);
+
+    expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
+  });
+
+  it('calls onCancel when Cancel button clicked in edit mode', async () => {
+    const mockSubmit = jest.fn();
+    const mockCancel = jest.fn();
+    const user = userEvent.setup();
+    const initialData = { name: 'Maria', gender: 'girl' };
+
+    render(
+      <ChildForm
+        onSubmit={mockSubmit}
+        initialData={initialData}
+        onCancel={mockCancel}
+      />
+    );
+
+    const cancelButton = screen.getByRole('button', { name: /cancel/i });
+    await user.click(cancelButton);
+
+    expect(mockCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears form fields when initialData prop changes from value to undefined', () => {
+    const initialData = { name: 'Maria', gender: 'girl' };
+
+    const { rerender } = render(
+      <ChildForm onSubmit={jest.fn()} initialData={initialData} />
+    );
+
+    // Verify fields are populated with initial data
+    expect(screen.getByLabelText(/name/i)).toHaveValue('Maria');
+
+    // Re-render without initialData (simulating Cancel click)
+    rerender(<ChildForm onSubmit={jest.fn()} initialData={undefined} />);
+
+    // Verify fields are cleared
+    expect(screen.getByLabelText(/name/i)).toHaveValue('');
+  });
 });

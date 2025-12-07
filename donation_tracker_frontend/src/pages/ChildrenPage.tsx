@@ -143,6 +143,7 @@ const ChildrenPage = () => {
               name: editingChild.name,
               gender: editingChild.gender || undefined,
             }}
+            onCancel={() => setEditingChild(null)}
           />
         ) : (
           <ChildForm key={formKey} onSubmit={handleCreate} />

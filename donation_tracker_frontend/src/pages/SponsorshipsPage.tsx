@@ -91,7 +91,6 @@ const SponsorshipsPage: React.FC = () => {
           </Typography>
           <SponsorshipForm
             onSubmit={handleCreateSponsorship}
-            onCancel={() => {}}
             childId={undefined}
           />
         </CardContent>

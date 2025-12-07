@@ -112,6 +112,7 @@ const ProjectsSection: React.FC = () => {
           key={formKey}
           onSubmit={handleSubmit}
           project={editingProject || undefined}
+          onCancel={editingProject ? () => setEditingProject(null) : undefined}
         />
       </Box>
 

@@ -141,17 +141,18 @@ function DonorForm({
           fullWidth
           size="small"
         />
-        <Button type="submit" variant="contained" color="primary" fullWidth>
-          {donor ? 'Update' : 'Submit'}
-        </Button>
-        {donor && (
-          <Button
-            variant="outlined"
-            color="secondary"
-            fullWidth
-            onClick={onCancel}
-          >
-            Cancel
+        {donor && onCancel ? (
+          <Stack direction="row" spacing={2}>
+            <Button type="submit" variant="contained" color="primary" fullWidth>
+              Update
+            </Button>
+            <Button variant="outlined" color="error" onClick={onCancel} fullWidth>
+              Cancel
+            </Button>
+          </Stack>
+        ) : (
+          <Button type="submit" variant="contained" color="primary" fullWidth>
+            Submit
           </Button>
         )}
       </Stack>

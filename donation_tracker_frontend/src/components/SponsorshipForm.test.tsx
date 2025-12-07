@@ -16,65 +16,43 @@ jest.mock('../api/client', () => ({
 describe('SponsorshipForm', () => {
   it('renders donor autocomplete field', () => {
     const mockSubmit = jest.fn();
-    const mockCancel = jest.fn();
 
-    render(
-      <SponsorshipForm
-        onSubmit={mockSubmit}
-        onCancel={mockCancel}
-        childId={1}
-      />
-    );
+    render(<SponsorshipForm onSubmit={mockSubmit} childId={1} />);
 
     expect(screen.getByLabelText(/donor/i)).toBeInTheDocument();
   });
 
   it('renders monthly amount field', () => {
     const mockSubmit = jest.fn();
-    const mockCancel = jest.fn();
 
-    render(
-      <SponsorshipForm
-        onSubmit={mockSubmit}
-        onCancel={mockCancel}
-        childId={1}
-      />
-    );
+    render(<SponsorshipForm onSubmit={mockSubmit} childId={1} />);
 
     expect(screen.getByLabelText(/monthly amount/i)).toBeInTheDocument();
   });
 
-  it('calls onCancel when cancel clicked', async () => {
+  it('does not render Cancel button', () => {
     const mockSubmit = jest.fn();
-    const mockCancel = jest.fn();
-    const user = userEvent.setup();
 
-    render(
-      <SponsorshipForm
-        onSubmit={mockSubmit}
-        onCancel={mockCancel}
-        childId={1}
-      />
-    );
+    render(<SponsorshipForm onSubmit={mockSubmit} childId={1} />);
 
-    const cancelButton = screen.getByText(/cancel/i);
-    await user.click(cancelButton);
+    expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
+  });
 
-    expect(mockCancel).toHaveBeenCalled();
+  it('Submit button is fullWidth and primary color', () => {
+    const mockSubmit = jest.fn();
+
+    render(<SponsorshipForm onSubmit={mockSubmit} childId={1} />);
+
+    const submitButton = screen.getByRole('button', { name: /submit/i });
+    expect(submitButton).toHaveClass('MuiButton-fullWidth');
+    expect(submitButton).toHaveClass('MuiButton-colorPrimary');
   });
 
   it('does not call onSubmit when donor not selected', async () => {
     const mockSubmit = jest.fn();
-    const mockCancel = jest.fn();
     const user = userEvent.setup();
 
-    render(
-      <SponsorshipForm
-        onSubmit={mockSubmit}
-        onCancel={mockCancel}
-        childId={1}
-      />
-    );
+    render(<SponsorshipForm onSubmit={mockSubmit} childId={1} />);
 
     // Type monthly amount only (no donor selected)
     const amountField = screen.getByLabelText(/monthly amount/i);
@@ -91,15 +69,8 @@ describe('SponsorshipForm', () => {
 
   it('defaults monthly amount to 100', () => {
     const mockSubmit = jest.fn();
-    const mockCancel = jest.fn();
 
-    render(
-      <SponsorshipForm
-        onSubmit={mockSubmit}
-        onCancel={mockCancel}
-        childId={1}
-      />
-    );
+    render(<SponsorshipForm onSubmit={mockSubmit} childId={1} />);
 
     const amountField = screen.getByLabelText(
       /monthly amount/i
@@ -109,16 +80,9 @@ describe('SponsorshipForm', () => {
 
   it('does not call onSubmit when amount is 0', async () => {
     const mockSubmit = jest.fn();
-    const mockCancel = jest.fn();
     const user = userEvent.setup();
 
-    render(
-      <SponsorshipForm
-        onSubmit={mockSubmit}
-        onCancel={mockCancel}
-        childId={1}
-      />
-    );
+    render(<SponsorshipForm onSubmit={mockSubmit} childId={1} />);
 
     // Explicitly set amount to 0
     const amountField = screen.getByLabelText(/monthly amount/i);
@@ -135,9 +99,8 @@ describe('SponsorshipForm', () => {
 
   it('renders child autocomplete when childId not provided', () => {
     const mockSubmit = jest.fn();
-    const mockCancel = jest.fn();
 
-    render(<SponsorshipForm onSubmit={mockSubmit} onCancel={mockCancel} />);
+    render(<SponsorshipForm onSubmit={mockSubmit} />);
 
     expect(screen.getByLabelText(/child/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/donor/i)).toBeInTheDocument();
@@ -145,10 +108,9 @@ describe('SponsorshipForm', () => {
 
   it('does not call onSubmit when child not selected and childId not provided', async () => {
     const mockSubmit = jest.fn();
-    const mockCancel = jest.fn();
     const user = userEvent.setup();
 
-    render(<SponsorshipForm onSubmit={mockSubmit} onCancel={mockCancel} />);
+    render(<SponsorshipForm onSubmit={mockSubmit} />);
 
     // Type monthly amount only (no child or donor selected)
     const amountField = screen.getByLabelText(/monthly amount/i);

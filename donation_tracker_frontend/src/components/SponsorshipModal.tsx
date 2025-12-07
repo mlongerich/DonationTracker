@@ -1,12 +1,5 @@
 import { useState } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Snackbar,
-  Alert,
-  Box,
-} from '@mui/material';
+import StandardDialog from './StandardDialog';
 import SponsorshipForm from './SponsorshipForm';
 import { SponsorshipFormData } from '../types';
 import apiClient from '../api/client';
@@ -44,38 +37,16 @@ const SponsorshipModal: React.FC<SponsorshipModalProps> = ({
     }
   };
 
-  const handleCloseError = () => {
-    setError(null);
-  };
-
   return (
-    <>
-      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Sponsor for {childName}</DialogTitle>
-        <DialogContent sx={{ pt: 3 }}>
-          <Box sx={{ mt: 1 }}>
-            <SponsorshipForm
-              childId={childId}
-              onSubmit={handleSubmit}
-              onCancel={onClose}
-            />
-          </Box>
-        </DialogContent>
-      </Dialog>
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={handleCloseError}
-      >
-        <Alert
-          onClose={handleCloseError}
-          severity="error"
-          sx={{ width: '100%' }}
-        >
-          {error}
-        </Alert>
-      </Snackbar>
-    </>
+    <StandardDialog
+      open={open}
+      onClose={onClose}
+      title={`Add Sponsor for ${childName}`}
+      error={error}
+      onErrorClose={() => setError(null)}
+    >
+      <SponsorshipForm childId={childId} onSubmit={handleSubmit} />
+    </StandardDialog>
   );
 };
 
