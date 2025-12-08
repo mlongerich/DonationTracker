@@ -1,106 +1,130 @@
-## [TICKET-091] Admin Page with CSV Import GUI
+## [TICKET-091] Stripe CSV Import GUI
 
-**Status:** 📋 Planned
-**Priority:** 🔴 High
-**Effort:** M (Medium - 3-4 hours)
+**Status:** ✅ Complete
+**Priority:** 🟡 Medium
+**Effort:** S (Small - 3 hours)
 **Created:** 2025-11-05
-**Dependencies:** TICKET-002 (Donor import service) ✅, TICKET-070 (Stripe import service) ✅
+**Updated:** 2025-12-08
+**Completed:** 2025-12-08
+**Dependencies:** TICKET-071 (Stripe batch import rake task) ✅, TICKET-088 (Admin page + CSV export) ✅
+
+### Implementation Summary (2025-12-08)
+**Completed:** Added Stripe CSV import functionality to Admin page CSV tab.
+
+**Key Features:**
+- ✅ MUI-styled file upload with hidden input + label pattern
+- ✅ Loading state with 120s timeout for large CSV files
+- ✅ Error handling with user-friendly messages
+- ✅ Results display (succeeded/skipped/failed/needs_attention counts)
+- ✅ Binary mode file handling to support non-UTF-8 CSV files
+- ✅ Clear button to reset form
+- ✅ Full test coverage: 5 RSpec + 7 Jest + 1 Cypress E2E tests
+
+**Commits:**
+- `backend: add Stripe CSV import endpoint to Admin controller (TICKET-091)`
+- `frontend: add Stripe CSV import UI to Admin page (TICKET-091)`
+
+**Implementation Strategy:** Reuse existing rake task service (`StripeCsvBatchImporter`) - controller acts as thin wrapper, no new business logic needed.
+
+**Scope:** Stripe CSV import only (creates both donors and donations). Donor-only import is obsolete since Stripe import handles donor creation via DonorService.
 
 ### User Story
-As an admin, I want a dedicated Admin page with CSV import functionality so that I can import donor and Stripe payment data through the web interface without needing backend CLI access.
+As an admin, I want Stripe CSV import functionality in the Admin page so that I can import Stripe payment data (donors + donations) through the web interface without needing backend CLI access.
 
 ### Problem Statement
 **Current Workflow:**
-- CSV imports require backend CLI access (rake tasks)
+- Stripe CSV imports require backend CLI access (`rake stripe:import_csv`)
 - Non-technical users cannot import data
-- Difficult to test TICKET-071 (Stripe batch import) without GUI
 - Import errors not visible until checking logs
 
 **Desired Workflow:**
-- Navigate to Admin page in web interface
-- Upload CSV file (drag-and-drop or button)
-- Select import type (Donors or Stripe Payments)
-- View real-time progress and results
+- Navigate to Admin page → CSV tab
+- Upload Stripe CSV file (file picker button)
+- View real-time import results (succeeded, failed, needs attention, skipped counts)
 - See detailed error messages for failed rows
 
 ### Acceptance Criteria
 
-#### Frontend - Admin Page
-- [ ] Add "Admin" navigation tab to main menu
-- [ ] Create AdminPage component at route `/admin`
-- [ ] Material-UI layout with sections for admin tools
-- [ ] Future-ready: Placeholder for additional admin features
+#### Frontend - Admin Page (EXISTING ✅)
+- [x] Add "Admin" navigation tab to main menu (TICKET-088)
+- [x] Create AdminPage component at route `/admin` (TICKET-088)
+- [x] Tab structure: Pending Review | CSV | Projects (TICKET-088, TICKET-111, TICKET-119)
+- [x] CSV tab: Export functionality (TICKET-088)
 
-#### Frontend - CSV Import Section
-- [ ] File upload component (Material-UI)
-  - Drag-and-drop zone OR file picker button
+#### Frontend - CSV Import Section (NEW - Add to existing CSV tab)
+- [x] File upload component (Material-UI)
+  - File picker button
   - Accept `.csv` files only
   - Show selected filename
+  - Label: "Stripe CSV Import"
 
-- [ ] Import type selector
-  - Dropdown/radio: "Donor Import" or "Stripe Payment Import"
-  - Default: Donor Import
-
-- [ ] Upload button
+- [x] Upload button
   - Disabled until file selected
   - Triggers API call with CSV file
   - Shows loading spinner during upload
+  - Text: "Import Stripe CSV"
 
-- [ ] Results display
-  - Success message: "Imported 45 donors successfully"
-  - Error summary: "3 rows failed to import"
-  - Expandable error table with row numbers and error messages
-  - Download errors as CSV button (optional)
+- [x] Results display
+  - Success message: "✅ Succeeded: X donations"
+  - Skipped message: "⏭️ Skipped: Y duplicates"
+  - Attention message: "⚠️ Needs Attention: Z donations"
+  - Error summary: "❌ Failed: N rows"
+  - Error list with row numbers and error messages
+  - Clear button to start new import
 
 #### Backend - Admin API Endpoints
-- [ ] POST `/api/admin/import/donors`
+- [x] POST `/api/admin/import/stripe_payments`
   - Accepts multipart/form-data with CSV file
-  - Calls `DonorImportService.import_csv(csv_data)`
-  - Returns: `{ success_count, error_count, errors: [{row, email, error}] }`
+  - Calls `StripeCsvBatchImporter.new(file_path).import`
+  - Returns: `{ success_count, skipped_count, failed_count, needs_attention_count, errors: [{row, error}] }`
 
-- [ ] POST `/api/admin/import/stripe_payments`
-  - Accepts multipart/form-data with CSV file
-  - Calls `StripePaymentImportService.import_batch(csv_data)`
-  - Returns: `{ success_count, error_count, skipped_count, errors: [{row, invoice_id, error}] }`
-
-- [ ] Authorization (future enhancement)
+- [x] Authorization (future enhancement)
   - For now: No auth check (single-user internal tool)
   - TODO: Add admin role check when TICKET-008 (auth) complete
 
 #### Testing
-- [ ] RSpec: Admin import endpoints (6 tests)
-  - POST /api/admin/import/donors with valid CSV
-  - POST /api/admin/import/donors with invalid CSV
-  - POST /api/admin/import/stripe_payments with valid CSV
-  - POST with missing file
-  - POST with non-CSV file
-  - POST with empty CSV
+- [x] RSpec: Admin import endpoint (5 tests) ✅
+  - POST /api/admin/import/stripe_payments with valid CSV → returns success
+  - POST /api/admin/import/stripe_payments with errors → returns error summary
+  - POST with missing file → returns 500
+  - POST with malformed CSV → handles gracefully
+  - POST with non-UTF-8 encoding → handles gracefully (binary mode)
 
-- [ ] Jest: AdminPage and CSV upload (8 tests)
-  - AdminPage renders
-  - File upload component renders
-  - Import type selector renders
+- [x] Jest: AdminPage CSV import (7 tests) ✅
+  - CSV import section renders with file input
   - File selection updates state
-  - Upload button triggers API call
-  - Results display shows success/error counts
-  - Error table displays error rows
+  - Upload button disabled when no file selected
+  - Upload button calls API with FormData
+  - Success result displays all counts (succeeded, skipped, needs_attention, failed)
+  - Clear button resets form state
+  - Loading state displays during import
 
-- [ ] Cypress E2E: Full CSV import workflow (2 tests)
-  - Upload donor CSV → verify success message → verify donors in list
-  - Upload invalid CSV → verify error message displayed
+- [x] Cypress E2E: Stripe CSV import workflow (1 test) ✅
+  - Upload Stripe CSV → verify result display (success or error)
 
 ### Technical Implementation
 
-#### Frontend - AdminPage Component
+#### Frontend - AdminPage Component (MODIFY EXISTING)
+**Current CSV tab (TICKET-088):**
 ```tsx
-// src/pages/AdminPage.tsx (NEW)
-import { useState } from 'react';
-import { Box, Typography, Paper, Button, Select, MenuItem } from '@mui/material';
-import { uploadDonorCSV, uploadStripePaymentCSV } from '../api/client';
+{currentTab === 1 && (
+  <Box>
+    <Typography variant="h6" gutterBottom>Export Donors</Typography>
+    <Button variant="contained" startIcon={<Download />} onClick={handleDonorExport}>
+      Export All Donors to CSV
+    </Button>
+  </Box>
+)}
+```
 
-const AdminPage = () => {
+**Updated CSV tab (add import below export):**
+```tsx
+// src/pages/AdminPage.tsx (MODIFY - add to existing CSV tab)
+const AdminPage: React.FC = () => {
+  const [currentTab, setCurrentTab] = useState(0);
+
+  // ADD: Import state
   const [file, setFile] = useState<File | null>(null);
-  const [importType, setImportType] = useState<'donors' | 'stripe'>('donors');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
 
@@ -112,16 +136,13 @@ const AdminPage = () => {
 
   const handleUpload = async () => {
     if (!file) return;
-
     setLoading(true);
     try {
       const formData = new FormData();
       formData.append('file', file);
-
-      const response = importType === 'donors'
-        ? await uploadDonorCSV(formData)
-        : await uploadStripePaymentCSV(formData);
-
+      const response = await apiClient.post('/api/admin/import/stripe_payments', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
       setResult(response.data);
     } catch (error: any) {
       setResult({ error: error.response?.data?.error || 'Upload failed' });
@@ -130,179 +151,142 @@ const AdminPage = () => {
     }
   };
 
-  return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Admin Tools
+  const handleClearResult = () => {
+    setFile(null);
+    setResult(null);
+  };
+
+  // MODIFY: CSV tab (currentTab === 1)
+  {currentTab === 1 && (
+    <Box>
+      {/* Existing Export Section */}
+      <Typography variant="h6" gutterBottom>Export Donors</Typography>
+      <Button variant="contained" startIcon={<Download />} onClick={handleDonorExport} sx={{ mb: 4 }}>
+        Export All Donors to CSV
+      </Button>
+
+      {/* NEW: Stripe CSV Import Section */}
+      <Typography variant="h6" gutterBottom>Stripe CSV Import</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        Import creates both donors and donations from Stripe payment exports
       </Typography>
 
-      {/* CSV Import Section */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          CSV Import
-        </Typography>
+      <input
+        type="file"
+        accept=".csv"
+        onChange={handleFileChange}
+        style={{ marginBottom: '16px', display: 'block' }}
+      />
 
-        {/* Import Type Selector */}
-        <Select
-          value={importType}
-          onChange={(e) => setImportType(e.target.value as 'donors' | 'stripe')}
-          fullWidth
-          sx={{ mb: 2 }}
-        >
-          <MenuItem value="donors">Donor Import</MenuItem>
-          <MenuItem value="stripe">Stripe Payment Import</MenuItem>
-        </Select>
+      {file && <Typography variant="body2" sx={{ mb: 2 }}>Selected: {file.name}</Typography>}
 
-        {/* File Upload */}
-        <input
-          type="file"
-          accept=".csv"
-          onChange={handleFileChange}
-          style={{ marginBottom: '16px' }}
-        />
+      <Button
+        variant="contained"
+        onClick={handleUpload}
+        disabled={!file || loading}
+        fullWidth
+        sx={{ mb: 2 }}
+      >
+        {loading ? 'Importing...' : 'Import Stripe CSV'}
+      </Button>
 
-        {file && <Typography variant="body2">Selected: {file.name}</Typography>}
-
-        {/* Upload Button */}
-        <Button
-          variant="contained"
-          onClick={handleUpload}
-          disabled={!file || loading}
-          fullWidth
-        >
-          {loading ? 'Uploading...' : 'Upload CSV'}
-        </Button>
-
-        {/* Results Display */}
-        {result && (
-          <Box sx={{ mt: 3 }}>
-            {result.error ? (
-              <Typography color="error">{result.error}</Typography>
-            ) : (
-              <>
-                <Typography color="success.main">
-                  ✅ Imported {result.success_count} rows successfully
+      {result && (
+        <Box sx={{ mt: 3 }}>
+          {result.error ? (
+            <Typography color="error">{result.error}</Typography>
+          ) : (
+            <>
+              <Typography color="success.main">
+                ✅ Succeeded: {result.success_count} donations
+              </Typography>
+              {result.skipped_count > 0 && (
+                <Typography color="info.main">
+                  ⏭️ Skipped: {result.skipped_count} duplicates
                 </Typography>
-                {result.error_count > 0 && (
-                  <>
-                    <Typography color="error">
-                      ❌ {result.error_count} rows failed
+              )}
+              {result.needs_attention_count > 0 && (
+                <Typography color="warning.main">
+                  ⚠️ Needs Attention: {result.needs_attention_count} donations
+                </Typography>
+              )}
+              {result.failed_count > 0 && (
+                <Typography color="error">
+                  ❌ Failed: {result.failed_count} donations
+                </Typography>
+              )}
+              {result.errors?.length > 0 && (
+                <Box sx={{ mt: 2, maxHeight: 300, overflow: 'auto' }}>
+                  {result.errors.map((err: any, idx: number) => (
+                    <Typography key={idx} variant="body2" color="text.secondary">
+                      Row {err.row}: {err.error}
                     </Typography>
-                    {/* Error Table */}
-                    <Box sx={{ mt: 2, maxHeight: 300, overflow: 'auto' }}>
-                      {result.errors?.map((err: any, idx: number) => (
-                        <Typography key={idx} variant="body2" color="text.secondary">
-                          Row {err.row}: {err.error}
-                        </Typography>
-                      ))}
-                    </Box>
-                  </>
-                )}
-              </>
-            )}
-          </Box>
-        )}
-      </Paper>
-
-      {/* Future: Additional admin tools */}
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Additional Tools
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          More admin features coming soon...
-        </Typography>
-      </Paper>
+                  ))}
+                </Box>
+              )}
+              <Button variant="outlined" onClick={handleClearResult} sx={{ mt: 2 }}>
+                Clear
+              </Button>
+            </>
+          )}
+        </Box>
+      )}
     </Box>
-  );
+  )}
 };
-
-export default AdminPage;
 ```
 
 #### Frontend - API Client
-```tsx
-// src/api/client.ts (ADD)
-export const uploadDonorCSV = (formData: FormData) => {
-  return apiClient.post('/api/admin/import/donors', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
-};
+**Note:** No separate API client functions needed - inline API calls in component (see above)
 
-export const uploadStripePaymentCSV = (formData: FormData) => {
-  return apiClient.post('/api/admin/import/stripe_payments', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' }
-  });
-};
-```
-
-#### Frontend - Router
+#### Frontend - Router (ALREADY EXISTS ✅)
 ```tsx
-// src/App.tsx (UPDATE)
+// src/App.tsx (NO CHANGES - route already exists from TICKET-088)
 <Route path="/admin" element={<AdminPage />} />
-
-// Navigation
-<Button component={Link} to="/admin">Admin</Button>
 ```
 
-#### Backend - Admin Controller
+#### Backend - Admin Controller (REUSES EXISTING SERVICE ✅)
 ```ruby
-# app/controllers/api/admin_controller.rb (NEW)
-class Api::AdminController < ApplicationController
-  # Future: Add authorization check
-  # before_action :require_admin
+# app/controllers/api/admin_controller.rb (NEW - ~35 lines, thin wrapper)
+# frozen_string_literal: true
 
-  def import_donors
-    csv_file = params[:file]
+# Handles Stripe CSV imports via web interface.
+#
+# This controller provides:
+# - Stripe CSV import (reuses StripeCsvBatchImporter from rake task)
+# - Creates both donors and donations (via DonorService internally)
+#
+# No business logic here - service handles all import logic.
+#
+# @see StripeCsvBatchImporter for Stripe import logic
+# @see lib/tasks/stripe_import.rake for CLI equivalent
+module Api
+  class AdminController < ApplicationController
+    # Future: Add authorization check
+    # before_action :require_admin
 
-    unless csv_file&.content_type == 'text/csv'
-      render json: { error: 'Invalid file type. Please upload a CSV file.' }, status: :unprocessable_entity
-      return
+    def import_stripe_payments
+      # Save uploaded file temporarily (StripeCsvBatchImporter needs file path)
+      temp_file = Tempfile.new(['stripe_import', '.csv'])
+      temp_file.write(params[:file].read)
+      temp_file.rewind
+
+      # Reuse existing service (same as rake task!)
+      importer = StripeCsvBatchImporter.new(temp_file.path)
+      result = importer.import
+
+      render json: {
+        success_count: result[:succeeded_count],
+        skipped_count: result[:skipped_count],
+        failed_count: result[:failed_count],
+        needs_attention_count: result[:needs_attention_count],
+        errors: result[:errors].map { |e| { row: e[:row], error: e[:message] } }
+      }
+    rescue StandardError => e
+      render json: { error: "Import failed: #{e.message}" }, status: :internal_server_error
+    ensure
+      temp_file&.close
+      temp_file&.unlink
     end
-
-    csv_data = csv_file.read
-    result = DonorImportService.import_csv(csv_data)
-
-    render json: {
-      success_count: result[:imported].size,
-      error_count: result[:errors].size,
-      errors: result[:errors].map do |error|
-        {
-          row: error[:row],
-          email: error[:email],
-          error: error[:reason]
-        }
-      end
-    }
-  rescue StandardError => e
-    render json: { error: "Import failed: #{e.message}" }, status: :internal_server_error
-  end
-
-  def import_stripe_payments
-    csv_file = params[:file]
-
-    unless csv_file&.content_type == 'text/csv'
-      render json: { error: 'Invalid file type. Please upload a CSV file.' }, status: :unprocessable_entity
-      return
-    end
-
-    csv_data = csv_file.read
-    result = StripePaymentImportService.import_batch(csv_data)
-
-    render json: {
-      success_count: result[:imported_count],
-      skipped_count: result[:skipped_count],
-      error_count: result[:errors]&.size || 0,
-      errors: result[:errors]&.map do |error|
-        {
-          row: error[:row],
-          invoice_id: error[:invoice_id],
-          error: error[:reason]
-        }
-      end || []
-    }
-  rescue StandardError => e
-    render json: { error: "Import failed: #{e.message}" }, status: :internal_server_error
   end
 end
 ```
@@ -312,95 +296,105 @@ end
 # config/routes.rb (ADD)
 namespace :api do
   namespace :admin do
-    post 'import/donors', to: 'admin#import_donors'
     post 'import/stripe_payments', to: 'admin#import_stripe_payments'
   end
 end
 ```
 
-#### Backend - Service Updates (if needed)
-```ruby
-# app/services/donor_import_service.rb (UPDATE if needed)
-# Ensure import_csv returns { imported: [], errors: [] } format
+#### Backend - Service Reuse (NO CHANGES NEEDED ✅)
+**Existing service (already tested via rake task):**
+- `StripeCsvBatchImporter` - Used by `rake stripe:import_csv` (TICKET-071, TICKET-110)
+- Internally calls `DonorService` to create/update donors (TICKET-002)
 
-# app/services/stripe_payment_import_service.rb (UPDATE if needed)
-# Ensure import_batch returns { imported_count, skipped_count, errors: [] } format
+**No modifications needed** - controller calls service with same arguments as rake task.
+
+**CLI to API equivalence:**
+```bash
+# CLI: docker-compose exec api bundle exec rake stripe:import_csv[stripe.csv]
+# API: POST /api/admin/import/stripe_payments (file upload)
+# Both use: StripeCsvBatchImporter.new(file_path).import
+# Both create: Donors (via DonorService) + Donations + Sponsorships
 ```
 
 ### UX Design
 
-**Admin Page Layout:**
+**Admin Page Layout (Current with tabs from TICKET-088, TICKET-111, TICKET-119):**
 ```
-┌─────────────────────────────────────────┐
-│  Admin Tools                            │
-├─────────────────────────────────────────┤
-│                                         │
-│  CSV Import                             │
-│  ┌───────────────────────────────────┐  │
-│  │ Import Type: [Donor Import    ▼]  │  │
-│  │                                   │  │
-│  │ [Choose File] donors.csv          │  │
-│  │                                   │  │
-│  │ [Upload CSV]                      │  │
-│  │                                   │  │
-│  │ ✅ Imported 45 donors successfully│  │
-│  │ ❌ 3 rows failed                  │  │
-│  │                                   │  │
-│  │ Row 5: Invalid email format       │  │
-│  │ Row 12: Duplicate email           │  │
-│  │ Row 23: Missing name              │  │
-│  └───────────────────────────────────┘  │
-│                                         │
-│  Additional Tools                       │
-│  ┌───────────────────────────────────┐  │
-│  │ More admin features coming soon...│  │
-│  └───────────────────────────────────┘  │
-└─────────────────────────────────────────┘
+┌────────────────────────────────────────────────┐
+│  Admin                                         │
+│  [Pending Review] [CSV] [Projects]             │
+├────────────────────────────────────────────────┤
+│                                                │
+│  CSV Tab Content:                              │
+│                                                │
+│  Export Donors                                 │
+│  [📥 Export All Donors to CSV]                 │
+│                                                │
+│  ───────────────────────────────────────────   │
+│                                                │
+│  Stripe CSV Import                             │
+│  Import creates both donors and donations      │
+│  from Stripe payment exports                   │
+│                                                │
+│  [Choose File] stripe_payments.csv             │
+│                                                │
+│  [Import Stripe CSV]                           │
+│                                                │
+│  ✅ Succeeded: 145 donations                   │
+│  ⏭️ Skipped: 10 duplicates                     │
+│  ⚠️ Needs Attention: 2 donations               │
+│  ❌ Failed: 3 donations                        │
+│                                                │
+│  Row 42: Invalid child name                    │
+│  Row 87: Missing donor email                   │
+│  Row 103: Malformed date                       │
+│                                                │
+│  [Clear]                                       │
+└────────────────────────────────────────────────┘
 ```
 
 ### Files to Create
 **Backend:**
-- `app/controllers/api/admin_controller.rb` (NEW - ~80 lines)
-- `spec/requests/api/admin_spec.rb` (NEW - ~100 lines, 6 tests)
+- `app/controllers/api/admin_controller.rb` (NEW - ~35 lines, thin wrapper)
+- `spec/requests/api/admin_spec.rb` (NEW - ~60 lines, 4 tests)
 
 **Frontend:**
-- `src/pages/AdminPage.tsx` (NEW - ~200 lines)
-- `src/pages/AdminPage.test.tsx` (NEW - ~120 lines, 8 tests)
-- `cypress/e2e/admin-csv-import.cy.ts` (NEW - ~80 lines, 2 tests)
+- `cypress/e2e/admin-csv-import.cy.ts` (NEW - ~60 lines, 2 tests)
 
 ### Files to Modify
 **Backend:**
-- `config/routes.rb` (add admin namespace routes)
-- `app/services/donor_import_service.rb` (ensure consistent return format)
-- `app/services/stripe_payment_import_service.rb` (ensure consistent return format)
+- `config/routes.rb` (add admin namespace route - 5 lines)
 
 **Frontend:**
-- `src/App.tsx` (add /admin route)
-- `src/components/Navigation.tsx` (add Admin tab, if separate nav component)
-- `src/api/client.ts` (add upload methods)
+- `src/pages/AdminPage.tsx` (MODIFY - add Stripe import to CSV tab ~60 lines added)
+- `src/pages/AdminPage.test.tsx` (MODIFY - add import tests ~50 lines added, 6 tests)
+
+**Services (NO CHANGES ✅):**
+- `app/services/stripe_csv_batch_importer.rb` - Already tested via rake task, used as-is
+- `app/services/donor_service.rb` - Already tested, called internally by Stripe import
 
 ### Testing Strategy
 
-**Backend RSpec (6 tests):**
-1. POST /admin/import/donors with valid CSV → returns success
-2. POST /admin/import/donors with invalid CSV → returns errors
-3. POST /admin/import/stripe_payments with valid CSV → returns success
-4. POST with missing file → returns 422
-5. POST with non-CSV file → returns 422
-6. POST with empty CSV → returns error
+**Backend RSpec (4 NEW tests in new admin_spec.rb - controller integration only):**
+1. POST /api/admin/import/stripe_payments with valid CSV → returns success (calls StripeCsvBatchImporter)
+2. POST /api/admin/import/stripe_payments with errors → returns error summary
+3. POST with missing file → returns 500
+4. POST with malformed CSV → handles gracefully
 
-**Frontend Jest (8 tests):**
-1. AdminPage renders
-2. File upload input renders
-3. Import type selector renders with both options
-4. File selection updates state
-5. Upload button disabled when no file selected
-6. Upload button calls API with FormData
-7. Success result displays counts
-8. Error result displays error messages
+**Note:** Service logic already tested via existing specs:
+- `spec/services/stripe_csv_batch_importer_spec.rb` (TICKET-071, TICKET-110)
+- `spec/services/donor_service_spec.rb` (TICKET-002, called internally)
 
-**Cypress E2E (2 tests):**
-1. Upload donor CSV → verify success message → navigate to donors page → verify imported
+**Frontend Jest (6 NEW tests - add to existing AdminPage.test.tsx):**
+1. Stripe CSV import section renders with file input and help text
+2. File selection updates state
+3. Upload button disabled when no file selected
+4. Upload button calls API with FormData
+5. Success result displays all counts (succeeded, skipped, needs_attention, failed)
+6. Clear button resets form state
+
+**Cypress E2E (2 NEW tests in admin-csv-import.cy.ts):**
+1. Upload Stripe CSV → verify success counts → navigate to donations/donors pages → verify data imported
 2. Upload invalid CSV → verify error message with row details
 
 ### Security Considerations
@@ -447,30 +441,51 @@ end
 - **TICKET-072:** Import Error Recovery UI (could be merged into this admin page)
 
 ### Estimated Time
-- Backend controller + tests: 1.5 hours
-- Frontend AdminPage + upload: 1.5 hours
-- Frontend tests: 1 hour
+- Backend controller + routes + tests: 45 minutes (thin wrapper, single endpoint)
+- Frontend Stripe import UI: 45 minutes (modify existing AdminPage CSV tab)
+- Frontend tests: 45 minutes (add to existing tests)
 - E2E tests: 30 minutes
-- **Total:** 4.5 hours
+- **Total:** 2.75 hours (~3 hours)
+
+**Time savings:**
+- ~1 hour (no service development, reuse rake task logic)
+- ~30 minutes (no donor import, single endpoint only)
 
 ### Success Criteria
-- [ ] Admin page accessible via /admin route
-- [ ] CSV file upload works for donors
-- [ ] CSV file upload works for Stripe payments
-- [ ] Success message shows import counts
-- [ ] Error messages show row-level details
-- [ ] All tests passing (RSpec + Jest + Cypress)
-- [ ] TICKET-071 unblocked for testing
+- [x] Admin page accessible via /admin route (TICKET-088 ✅)
+- [x] Admin page has CSV tab (TICKET-088 ✅)
+- [x] Stripe CSV file upload works (creates donors + donations) ✅
+- [x] Success message shows all counts (succeeded, skipped, needs_attention, failed) ✅
+- [x] Error messages show row-level details ✅
+- [x] Clear button resets import form ✅
+- [x] All tests passing (RSpec + Jest + Cypress) ✅
+- [x] Stripe imports can be done via GUI (no CLI access needed) ✅
 
 ### Related Tickets
-- TICKET-002: Stripe CSV Donor Import ✅ (backend service)
-- TICKET-070: Stripe CSV Import Foundation ✅ (backend service)
-- TICKET-071: Stripe CSV Batch Import Task 🟡 (blocked - this unblocks!)
-- TICKET-072: Import Error Recovery UI 📋 (could merge into admin page)
-- TICKET-008: Authentication with Google OAuth 📋 (add admin check)
+**Dependencies (completed):**
+- TICKET-002: DonorService ✅ (called internally by Stripe import)
+- TICKET-070: StripePaymentImportService ✅ (foundation for batch import)
+- TICKET-071: Stripe CSV Batch Import ✅ (rake task fully tested)
+- TICKET-110: Import Status & Metadata ✅ (status counting logic)
+- TICKET-088: Donor CSV Export ✅ (created AdminPage + CSV tab with export)
+- TICKET-111: Pending Review Section ✅ (added Pending Review tab to AdminPage)
+- TICKET-119: Projects Admin Tab ✅ (added Projects tab to AdminPage)
+
+**Enables:**
+- Non-technical users to import Stripe payment data
+- GUI testing of Stripe imports (no CLI access needed)
+
+**Future Integration:**
+- TICKET-072: Import Error Recovery UI 📋 (could add to CSV tab)
+- TICKET-008: Authentication with Google OAuth 📋 (add admin role check)
 
 ### Notes
-- **Priority:** High - Unblocks TICKET-071 and enables non-technical CSV imports
-- **Future Features:** Database backups, user management, system settings
-- **UX:** Simple file upload with clear feedback (errors visible immediately)
-- **Tech Debt:** Consider consolidating import services into single polymorphic API
+- **Priority:** Medium - Enables non-technical Stripe CSV imports via web interface
+- **Scope Simplification:** Stripe import only (creates both donors + donations). Donor-only import removed as obsolete.
+- **Code Reuse Strategy:** Controller is thin wrapper around existing rake task service (StripeCsvBatchImporter) - zero new business logic
+- **Effort Reduction:**
+  - ~100 lines less code than originally estimated (no AdminPage creation, AdminPage exists from TICKET-088/111/119)
+  - ~1.5 hours less work (no service development, no donor import, single endpoint, controller only ~35 lines)
+  - All import logic already tested via rake task specs (TICKET-071, TICKET-110)
+- **UX:** Simple file upload with detailed status feedback (4 count types: succeeded, skipped, needs_attention, failed)
+- **Future Features:** Download error CSV, async processing for large files, progress bar, drag-and-drop upload
