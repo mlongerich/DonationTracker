@@ -289,6 +289,41 @@ end
 
 **See:** TICKET-068 (pattern established), TICKET-094 (SponsorshipsController fixed)
 
+#### Admin Controller Pattern
+
+**Purpose:** Web interface for administrative operations (CSV import, bulk operations)
+
+**Pattern:**
+```ruby
+# app/controllers/api/admin_controller.rb
+class AdminController < ApplicationController
+  def import_stripe_payments
+    temp_file = Tempfile.new(['stripe_import', '.csv'])
+    temp_file.binmode  # Binary mode for non-UTF-8 CSV files
+    temp_file.write(params[:file].read)
+    temp_file.rewind
+
+    importer = StripeCsvBatchImporter.new(temp_file.path)
+    result = importer.import
+
+    render json: { success_count: result[:succeeded_count], ... }
+  rescue StandardError => e
+    render json: { error: "Import failed: #{e.message}" }, status: :internal_server_error
+  ensure
+    temp_file&.close
+    temp_file&.unlink
+  end
+end
+```
+
+**Key Features:**
+- Reuses existing service layer (StripeCsvBatchImporter)
+- Binary file handling for encoding compatibility
+- Timeout-aware (frontend uses 120s timeout for large imports)
+- Returns detailed status counts (succeeded/skipped/failed/needs_attention)
+
+**Implementation:** TICKET-091 (Stripe CSV import GUI)
+
 #### Service Object Patterns
 
 **ALL services use instance methods for consistency (TICKET-037).**
@@ -927,9 +962,9 @@ function Layout() {
 
 **Purpose:** Group administrative/configuration features separately from operational pages
 
-**Current Structure (as of TICKET-119):**
+**Current Structure (as of TICKET-119, TICKET-091):**
 - **Tab 0**: Pending Review - Donations needing attention (TICKET-111)
-- **Tab 1**: CSV - Donor export functionality (TICKET-088)
+- **Tab 1**: CSV - Donor export + Stripe CSV import (TICKET-088, TICKET-091)
 - **Tab 2**: Projects - Project CRUD and archive management (TICKET-119)
 
 **Pattern:** Section components (e.g., `ProjectsSection`, `PendingReviewSection`) are self-contained with:

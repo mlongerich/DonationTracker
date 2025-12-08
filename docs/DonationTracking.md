@@ -17,9 +17,19 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2025-12-07 (TICKET-127: StandardDialog Component & Form UX Consistency)
+**Last Updated:** 2025-12-08 (TICKET-091: Stripe CSV Import GUI)
 
 **Latest Milestones:**
+- TICKET-091 - Stripe CSV Import GUI ✅ (2025-12-08)
+  - **Admin CSV Import:** Added Stripe CSV upload to Admin page CSV tab (alongside existing donor export)
+  - **Backend API:** Admin controller POST /api/admin/import/stripe_payments endpoint with binary file handling for non-UTF-8 CSVs
+  - **Service Reuse:** Controller thin wrapper around existing StripeCsvBatchImporter (same logic as rake task)
+  - **Frontend UI:** MUI file picker button, loading state ("Importing..."), success/error result display with counts (succeeded/skipped/failed/needs_attention)
+  - **Timeout Handling:** 120s axios timeout for large CSV imports (default 10s too short)
+  - **Encoding Fix:** Binary mode (binmode) prevents UTF-8 conversion errors on file upload
+  - **Test Coverage:** 5 RSpec tests (success, errors, missing file, malformed CSV, encoding), 7 Jest tests (render, file selection, upload button, API call, results, clear, loading), 1 Cypress E2E test
+  - **User Flow:** Admin page → CSV tab → Choose File → Import Stripe CSV → View detailed results
+  - See tickets/TICKET-091-admin-page-csv-import-gui.md for full implementation details
 - TICKET-127 - StandardDialog Component & Form UX Consistency ✅ (2025-12-07)
   - **StandardDialog Component:** Created generic dialog wrapper eliminating 180+ lines of duplication across SponsorshipModal, QuickDonorCreateDialog, QuickEntityCreateDialog
   - **Interface:** open, onClose, title, children, error, onErrorClose, maxWidth - provides standard close X button and error handling

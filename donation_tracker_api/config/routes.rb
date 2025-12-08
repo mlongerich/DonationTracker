@@ -35,6 +35,9 @@ Rails.application.routes.draw do
     # Search endpoint
     get "search/project_or_child", to: "search#project_or_child"
 
+    # Admin endpoints
+    post "admin/import/stripe_payments", to: "admin#import_stripe_payments"
+
     # Test-only routes (development/test environments only)
     namespace :test do
       delete "cleanup", action: :cleanup
