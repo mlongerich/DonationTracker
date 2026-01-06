@@ -109,6 +109,7 @@ donation_tracker_frontend/.vitest/
 # Cypress test artifacts
 donation_tracker_frontend/cypress/screenshots/
 donation_tracker_frontend/cypress/videos/
+donation_tracker_frontend/cypress/downloads/
 
 # Pact contracts and logs (generated during tests)
 donation_tracker_frontend/pacts/*.json
