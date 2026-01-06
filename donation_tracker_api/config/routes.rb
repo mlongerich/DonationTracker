@@ -38,6 +38,9 @@ Rails.application.routes.draw do
     # Admin endpoints
     post "admin/import/stripe_payments", to: "admin#import_stripe_payments"
 
+    # Reports endpoints
+    get "reports/donations", to: "reports#donations"
+
     # Test-only routes (development/test environments only)
     namespace :test do
       delete "cleanup", action: :cleanup
