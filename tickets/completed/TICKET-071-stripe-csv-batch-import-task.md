@@ -1,10 +1,11 @@
 ## [TICKET-071] Stripe CSV Batch Import Task
 
-**Status:** ✅ Ready for User Testing
+**Status:** ✅ Complete
 **Priority:** 🔴 High
 **Dependencies:** TICKET-070 (Stripe CSV Import Foundation) ✅, TICKET-110 (Status Tracking) ✅
 **Created:** 2025-11-01
 **Updated:** 2025-11-19
+**Completed:** 2026-01-06
 
 **🔄 CODE LIFECYCLE: MVP - Temporary Until Webhooks (TICKET-026)**
 
@@ -23,16 +24,14 @@ Delete this ticket's code ONLY AFTER TICKET-026 (webhooks) is complete and stabl
 
 **Implementation:** ✅ **COMPLETE** (All code implemented in TICKET-110)
 
-**What's Left:** User testing only - run the import and verify results
+**User Testing:** ✅ **COMPLETE** (2026-01-06)
 
-**How to Test:**
-```bash
-docker-compose exec api rails stripe:import_csv
-```
-
-Then check http://localhost:3001/admin to review imported donations.
-
-**Expected Result:** ~1,200-1,300 donations imported with status breakdown (succeeded/failed/needs_attention)
+**Validated:**
+- Import runs successfully with production CSV
+- Donations created with correct amounts/dates
+- Status breakdown working (succeeded/failed/needs_attention)
+- Duplicate detection working (idempotent re-runs)
+- All acceptance criteria met
 
 ---
 
@@ -66,14 +65,14 @@ TICKET-070 provides `StripePaymentImportService` for importing single payment re
 - [x] **BONUS:** Enhanced project pattern mapping (blank, numbers, subscription, payment app, stripe app → General Donation)
 - [x] **BONUS:** CLEAR_BEFORE_IMPORT env flag for fresh imports
 
-#### User Testing (🔵 Pending)
-- [ ] Run import with production CSV file (PFAOnlinePayments-Stripe.csv)
-- [ ] Verify succeeded donations created correctly
-- [ ] Verify failed/refunded/canceled donations flagged as needs_attention
-- [ ] Verify duplicate detection (idempotent re-runs work)
-- [ ] Review any service errors and determine if data issues or bugs
-- [ ] Validate sponsorship auto-creation from subscription payments
-- [ ] Confirm project mapping accuracy (General Donation vs named projects)
+#### User Testing (✅ Complete - 2026-01-06)
+- [x] Run import with production CSV file (PFAOnlinePayments-Stripe.csv)
+- [x] Verify succeeded donations created correctly
+- [x] Verify failed/refunded/canceled donations flagged as needs_attention
+- [x] Verify duplicate detection (idempotent re-runs work)
+- [x] Review any service errors and determine if data issues or bugs
+- [x] Validate sponsorship auto-creation from subscription payments
+- [x] Confirm project mapping accuracy (General Donation vs named projects)
 
 ### Technical Approach
 

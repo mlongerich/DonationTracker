@@ -84,6 +84,7 @@ Current work items and user stories being actively developed.
 - [TICKET-088: Donor Export to CSV](completed/TICKET-088-donor-export-csv-excel.md) - ✅ Complete (2025-12-04)
 - [TICKET-119: Move Projects to Admin Page Tab](completed/TICKET-119-move-projects-to-admin-tab.md) - ✅ Complete (2025-12-05)
 - [TICKET-127: StandardDialog Component & Form UX Consistency](TICKET-127-sponsorshipmodal-dialog-consistency.md) - ✅ Complete (2025-12-07)
+- [TICKET-071: Stripe CSV Batch Import Task](completed/TICKET-071-stripe-csv-batch-import-task.md) - ✅ Complete (2026-01-06)
 
 ### 🔵 In Progress Tickets
 
@@ -148,7 +149,7 @@ Current work items and user stories being actively developed.
 - [TICKET-076: Failed Stripe Payments Tracking](TICKET-076-failed-stripe-payments-tracking.md) - ⏸️ **Paused - Superseded by TICKET-109/110/111** (🔴 High, M) - *Work preserved in backup/ticket-076-complete branch*
 
 **🗑️ TEMPORARY (One-Time Use):**
-- [TICKET-071: Stripe CSV Batch Import Task](TICKET-071-stripe-csv-batch-import-task.md) - 🟡 Blocked - Pending User Testing (🔴 High, M) - *Throwaway: delete after CSV import*
+- [TICKET-071: Stripe CSV Batch Import Task](completed/TICKET-071-stripe-csv-batch-import-task.md) - ✅ Complete (2026-01-06) - *MVP batch import - delete after TICKET-026 webhooks stable*
 - [TICKET-072: Import Error Recovery UI](TICKET-072-import-error-recovery-ui.md) - 📋 Planned (🟢 Low, M) - *Optional: skip if <10 failures*
 
 **POST-MVP (Future Enhancements):**
@@ -203,12 +204,12 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 118 (TICKET-133 added)
-- **Completed:** 64 (54%)
+- **Total Tickets:** 118
+- **Completed:** 65 (55%)
 - **In Progress:** 0
-- **Planned:** 52
-- **Estimated Hours Remaining:** ~196.5 hours (~4.9 weeks)
-- **Blocked:** 1
+- **Planned:** 51
+- **Estimated Hours Remaining:** ~193.5 hours (~4.8 weeks)
+- **Blocked:** 0
 - **Deferred/Accepted Risk:** 1
 - **Canceled/Superseded:** 3 (TICKET-041, TICKET-051, TICKET-120)
 
@@ -216,9 +217,9 @@ Current work items and user stories being actively developed.
 
 - **Feature Development:** 21 planned (~82.5h), 13 completed
   - New: TICKET-100 (Donor Address), TICKET-101 (Check Photos), TICKET-102 (Child Photos), TICKET-103/104/105 (Reports), TICKET-106 (Admin Delete Override), TICKET-133 (Donor Statements)
-- **Stripe Integration:** 4 planned (~22h), 1 completed
+- **Stripe Integration:** 3 planned (~19h), 2 completed
   - **PERMANENT:** ✅ TICKET-070 (core service - complete), TICKET-076 (failed payments tracking - planned)
-  - **TEMPORARY:** TICKET-071 (batch import - blocked on user testing), TICKET-072 (error UI - optional)
+  - **TEMPORARY:** ✅ TICKET-071 (batch import - complete), TICKET-072 (error UI - optional)
   - **POST-MVP:** 🟢 TICKET-026 (webhooks - ready, updated for TICKET-112), TICKET-027 (mapping UI - future)
 - **Admin Page Improvements:** 5 planned (~5h), 1 completed
   - ✅ TICKET-119: Move Projects to Admin Tab (complete)
@@ -239,7 +240,7 @@ Current work items and user stories being actively developed.
     - TICKET-131: Extend Custom Hooks with CRUD Methods (3-4h)
     - TICKET-132: Add Ransackable Method Comments (0.5h)
 - **In Progress:** 0
-- **Blocked:** 1 (TICKET-071)
+- **Blocked:** 0
 - **Deferred/Accepted Risk:** 1 (TICKET-049)
 - **Canceled/Superseded:** 3 (TICKET-041, TICKET-051, TICKET-120)
 
@@ -249,17 +250,17 @@ Current work items and user stories being actively developed.
 - ✅ TICKET-070: `StripePaymentImportService` - Core donation processing (reused by webhooks) - **COMPLETE**
 - 📋 TICKET-026: `Webhooks::StripeController` - Production webhook endpoint - **PLANNED**
 
-**TEMPORARY CODE (Delete After CSV Import):**
-- 🟡 TICKET-071: `StripeCsvBatchImporter` + rake task - One-time batch wrapper - **BLOCKED (user testing)**
+**TEMPORARY CODE (MVP - Delete After Webhooks Stable):**
+- ✅ TICKET-071: `StripeCsvBatchImporter` + rake task - MVP batch wrapper - **COMPLETE (2026-01-06)**
 - 📋 TICKET-072: `ImportError` model + UI - Optional error review (skip if <10 failures) - **PLANNED**
 
 **Implementation Order:**
 1. ✅ TICKET-070 (foundation - PERMANENT) - **COMPLETE**
-2. 🟡 TICKET-071 (one-time import - TEMPORARY) - **BLOCKED (user testing)**
-3. Run CSV import (production data migration)
+2. ✅ TICKET-071 (batch import - MVP TEMPORARY) - **COMPLETE (2026-01-06)**
+3. ✅ Run CSV import (production data migration) - **VALIDATED**
 4. TICKET-072 (only if >10 failures - OPTIONAL)
-5. Delete TICKET-071 and TICKET-072 code
-6. **POST-MVP:** TICKET-026 (webhooks - PERMANENT, reuses TICKET-070)
+5. **POST-MVP:** TICKET-026 (webhooks - PERMANENT, reuses TICKET-070)
+6. Delete TICKET-071 and TICKET-072 code (after TICKET-026 stable)
 7. **POST-MVP:** TICKET-027 (mapping admin UI - FUTURE)
 
 ---

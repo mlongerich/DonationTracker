@@ -17,9 +17,19 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2025-12-08 (TICKET-091: Stripe CSV Import GUI)
+**Last Updated:** 2026-01-06 (TICKET-071: Stripe CSV Batch Import - User Testing Complete)
 
 **Latest Milestones:**
+- TICKET-071 - Stripe CSV Batch Import Task ✅ (2026-01-06)
+  - **User Testing Complete:** Validated production CSV import working as expected
+  - **Import Verified:** Donations created correctly with proper status breakdown
+  - **Idempotency Confirmed:** Duplicate detection prevents re-import of existing donations
+  - **Sponsorship Auto-creation:** Subscription payments correctly create child sponsorships
+  - **Project Mapping:** Pattern matching correctly assigns General Donation vs named projects
+  - **MVP Status:** Functional batch import solution used until TICKET-026 (webhooks) complete
+  - **CLI Usage:** `docker-compose exec api rails stripe:import_csv` (default path or custom file)
+  - **GUI Alternative:** Admin page CSV tab provides web-based import (TICKET-091)
+  - See tickets/TICKET-071-stripe-csv-batch-import-task.md for implementation details
 - TICKET-091 - Stripe CSV Import GUI ✅ (2025-12-08)
   - **Admin CSV Import:** Added Stripe CSV upload to Admin page CSV tab (alongside existing donor export)
   - **Backend API:** Admin controller POST /api/admin/import/stripe_payments endpoint with binary file handling for non-UTF-8 CSVs
