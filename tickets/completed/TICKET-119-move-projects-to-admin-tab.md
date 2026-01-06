@@ -1,9 +1,10 @@
 ## [TICKET-119] Move Projects to Admin Page Tab
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 **Priority:** 🟡 Medium
 **Effort:** S-M (Small-Medium - 1-2 hours)
 **Created:** 2025-11-17
+**Completed:** 2025-12-05
 **Dependencies:** None
 
 ### User Story

@@ -82,6 +82,7 @@ Current work items and user stories being actively developed.
 - [TICKET-126: Intelligent Pre-Commit Documentation Validation](completed/TICKET-126-intelligent-documentation-check.md) - ✅ Complete (2025-11-26)
 - [TICKET-100: Add Physical Address to Donor Records](completed/TICKET-100-add-physical-address-donor-records.md) - ✅ Complete (2025-11-28)
 - [TICKET-088: Donor Export to CSV](completed/TICKET-088-donor-export-csv-excel.md) - ✅ Complete (2025-12-04)
+- [TICKET-119: Move Projects to Admin Page Tab](completed/TICKET-119-move-projects-to-admin-tab.md) - ✅ Complete (2025-12-05)
 - [TICKET-127: StandardDialog Component & Form UX Consistency](TICKET-127-sponsorshipmodal-dialog-consistency.md) - ✅ Complete (2025-12-07)
 
 ### 🔵 In Progress Tickets
@@ -126,7 +127,6 @@ Current work items and user stories being actively developed.
 - [TICKET-116: Add Archive Functionality to Admin Page](TICKET-116-admin-archive-donations.md) - 📋 Planned (🟡 Medium, S) - *Soft delete for invalid donations*
 - [TICKET-117: Standardize Admin Page Card Design](TICKET-117-admin-consistent-card-design.md) - 📋 Planned (🟢 Low, XS) - *Visual consistency*
 - [TICKET-118: Add Source Tracking to Donations](TICKET-118-donation-source-tracking.md) - 📋 Planned (🟡 Medium, S) - *CSV/webhook/manual audit trail*
-- [TICKET-119: Move Projects to Admin Page Tab](TICKET-119-move-projects-to-admin-tab.md) - 📋 Planned (🟡 Medium, S-M) - *Projects as admin tab instead of standalone page*
 
 #### Feature Development
 - [TICKET-008: Basic Authentication with Google OAuth](TICKET-008-basic-authentication-google-oauth.md) - 📋 Planned
@@ -204,10 +204,10 @@ Current work items and user stories being actively developed.
 ## Quick Stats
 
 - **Total Tickets:** 118 (TICKET-133 added)
-- **Completed:** 63 (53%)
+- **Completed:** 64 (54%)
 - **In Progress:** 0
-- **Planned:** 53
-- **Estimated Hours Remaining:** ~198.5 hours (~5.0 weeks)
+- **Planned:** 52
+- **Estimated Hours Remaining:** ~196.5 hours (~4.9 weeks)
 - **Blocked:** 1
 - **Deferred/Accepted Risk:** 1
 - **Canceled/Superseded:** 3 (TICKET-041, TICKET-051, TICKET-120)
@@ -220,8 +220,8 @@ Current work items and user stories being actively developed.
   - **PERMANENT:** ✅ TICKET-070 (core service - complete), TICKET-076 (failed payments tracking - planned)
   - **TEMPORARY:** TICKET-071 (batch import - blocked on user testing), TICKET-072 (error UI - optional)
   - **POST-MVP:** 🟢 TICKET-026 (webhooks - ready, updated for TICKET-112), TICKET-027 (mapping UI - future)
-- **Admin Page Improvements:** 6 planned (~7h)
-  - New: TICKET-119 (Move Projects to Admin Tab - 1-2h)
+- **Admin Page Improvements:** 5 planned (~5h), 1 completed
+  - ✅ TICKET-119: Move Projects to Admin Tab (complete)
   - TICKET-114/115/116/117/118 (filters, status edit, archive, design, source tracking)
 - **Sponsorship & Children Features:** 7 planned (~29h), 11 completed
   - ✅ TICKET-077: Last Donation Date Tracking (complete)
