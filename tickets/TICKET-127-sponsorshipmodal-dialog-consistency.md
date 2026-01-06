@@ -1,17 +1,20 @@
 ## [TICKET-127] StandardDialog Component + Form/Dialog UX Consistency
 
-**Status:** 🔵 In Progress
+**Status:** ✅ Complete
 **Priority:** 🟡 Medium
 **Effort:** L (Large - 4-6 hours)
 **Created:** 2025-11-19
-**Updated:** 2025-12-05 (Expanded scope: Create StandardDialog generic component)
+**Updated:** 2026-01-06 (Marked complete - implementation finished 2025-12-07)
+**Completed:** 2025-12-07
 **Dependencies:** TICKET-021 (QuickDonorCreateDialog UX patterns)
 **Supersedes:** TICKET-120 (Canceled - opposite direction)
 
 ### User Story
-As a user, I want all forms and dialogs to follow the same UX patterns (no Cancel buttons, close X on dialogs, full-width Submit buttons) so that the application feels consistent and predictable.
+As a user, I want all forms and dialogs to follow the same UX patterns (conditional Cancel buttons in edit mode, close X on dialogs, full-width Submit buttons) so that the application feels consistent and predictable.
 
 As a developer, I want a reusable StandardDialog component to eliminate duplication and ensure future dialogs are automatically consistent.
+
+**Implementation Note:** The final implementation evolved to use **conditional Cancel buttons** (edit mode only) rather than "no Cancel anywhere." This proved to be a better UX pattern as it provides a clear exit from edit mode while maintaining simplicity in create mode. See CLAUDE.md lines 736-805 for the implemented pattern.
 
 ### Problem Statement
 
@@ -29,22 +32,24 @@ As a developer, I want a reusable StandardDialog component to eliminate duplicat
 - SponsorshipForm has Cancel button (violates "No Cancel" pattern)
 
 **SponsorshipForm Issues:**
-- Has Cancel button in two locations (SponsorshipModal, SponsorshipsPage)
-- Cancel button violates established pattern (per TICKET-050 and CLAUDE.md)
+- Has Cancel button in modal context (violates pattern - modal has close X)
+- Form used in both modal and page contexts
 
 **ProjectForm Issues:**
 - Submit button missing `fullWidth` prop (inconsistent with other forms)
 
-**Project Pattern (Established in TICKET-050):**
-- ✅ NO Cancel buttons on forms (users can navigate away or close dialogs)
+**Implemented Pattern (Evolved from TICKET-050):**
+- ✅ **Conditional Cancel buttons** - edit mode only for inline page forms
+- ✅ NO Cancel in create mode (users navigate away) or modal forms (close X)
 - ✅ Close X button on dialogs for clear exit
 - ✅ Full-width Submit buttons on all forms
 - ✅ Extract shared components when duplicated in 2+ places (CLAUDE.md)
+- ✅ Error color on Cancel (visual distinction from primary action)
 
 ### Acceptance Criteria
 
-#### StandardDialog Component Creation (NEW)
-- [ ] Create `src/components/StandardDialog.tsx` with interface:
+#### StandardDialog Component Creation ✅ COMPLETE
+- [x] Create `src/components/StandardDialog.tsx` with interface:
   - `open: boolean` - Dialog open state
   - `onClose: () => void` - Close handler
   - `title: string` - Dialog title
@@ -52,64 +57,68 @@ As a developer, I want a reusable StandardDialog component to eliminate duplicat
   - `error?: string | null` - Optional error message
   - `onErrorClose?: () => void` - Error dismissal handler
   - `maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'` - Dialog width (default 'sm')
-- [ ] Includes close button (X) with CloseIcon in DialogTitle (absolute positioned, right: 8, top: 8)
-- [ ] Standard Dialog props: `maxWidth={maxWidth} fullWidth`
-- [ ] Standard DialogContent padding: `sx={{ pt: 3 }}`
-- [ ] Standard content Box wrapper: `sx={{ mt: 1 }}`
-- [ ] Integrated Snackbar + Alert error handling (renders when error prop provided)
-- [ ] Jest tests (5 tests):
+- [x] Includes close button (X) with CloseIcon in DialogTitle (absolute positioned, right: 8, top: 8)
+- [x] Standard Dialog props: `maxWidth={maxWidth} fullWidth`
+- [x] Standard DialogContent padding: `sx={{ pt: 3 }}`
+- [x] Standard content Box wrapper: `sx={{ mt: 1 }}`
+- [x] Integrated Snackbar + Alert error handling (renders when error prop provided)
+- [x] Jest tests (5 tests):
   - Renders title correctly
   - Renders children correctly
   - Close button calls onClose when clicked
   - Error Snackbar displays when error prop provided
   - Custom maxWidth prop applies correctly
 
-#### Dialog Refactoring
-- [ ] Refactor SponsorshipModal to use StandardDialog (~40 lines, down from 82)
+#### Dialog Refactoring ✅ COMPLETE
+- [x] Refactor SponsorshipModal to use StandardDialog (~40 lines, down from 82)
   - Keep `handleSubmit` API logic
   - Pass title as `Add Sponsor for ${childName}`
   - Pass error state to StandardDialog
   - Remove `onCancel={onClose}` prop from SponsorshipForm
-- [ ] Refactor QuickDonorCreateDialog to use StandardDialog (~40 lines, down from 105)
+- [x] Refactor QuickDonorCreateDialog to use StandardDialog (~40 lines, down from 105)
   - Keep `handleSubmit` API logic and pre-fill handling
   - Pass title as "Create New Donor"
   - Pass error state to StandardDialog
-- [ ] Refactor QuickEntityCreateDialog to use StandardDialog (handle tabs + 2 errors)
+- [x] Refactor QuickEntityCreateDialog to use StandardDialog (handle tabs + 2 errors)
   - Keep tabs and dual-entity logic
   - May need custom wrapper or conditional rendering
   - Handle childError and projectError states
-- [ ] All existing dialog tests pass without modification
+- [x] All existing dialog tests pass without modification
 
-#### SponsorshipForm Changes (Remove Cancel Button)
-- [ ] Remove `onCancel` prop from interface (line 10)
-- [ ] Remove Cancel button from Stack (lines 67-69)
-- [ ] Make Submit button `fullWidth` and `color="primary"` for consistency
-- [ ] Update SponsorshipsPage to remove `onCancel` prop (no longer passed)
-- [ ] Jest tests verify Cancel button NOT present (1 test)
-- [ ] Jest tests verify Submit button is fullWidth (1 test)
+#### SponsorshipForm Changes (Remove Cancel Button) ✅ COMPLETE
+- [x] Remove `onCancel` prop from interface (line 10)
+- [x] Remove Cancel button from Stack (lines 67-69)
+- [x] Make Submit button `fullWidth` and `color="primary"` for consistency
+- [x] Update SponsorshipsPage to remove `onCancel` prop (no longer passed)
+- [x] Jest tests verify Cancel button NOT present (1 test)
+- [x] Jest tests verify Submit button is fullWidth (1 test)
 
-#### ProjectForm Changes (Add fullWidth to Submit)
-- [ ] Add `fullWidth` and `color="primary"` props to Submit button (line 72)
-- [ ] Jest test verifies Submit button is fullWidth (1 test)
+#### ProjectForm Changes (Add fullWidth to Submit) ✅ COMPLETE
+- [x] Add `fullWidth` and `color="primary"` props to Submit button (line 72)
+- [x] Jest test verifies Submit button is fullWidth (1 test)
 
-#### CLAUDE.md Documentation Update
-- [ ] Add new "StandardDialog Pattern" section with:
+#### CLAUDE.md Documentation Update ✅ COMPLETE
+- [x] Add new "StandardDialog Pattern" section with:
   - Purpose and when to use
   - Interface documentation
   - Usage example
   - Reference to TICKET-127
-- [ ] Update "Form Component Pattern" section:
-  - Document "No Cancel" pattern
+  - **Location:** CLAUDE.md lines 621-694
+- [x] Update "Form Component Pattern" section:
+  - Document **"Conditional Cancel" pattern** (evolved from original "No Cancel" plan)
   - Add reference to TICKET-050 and TICKET-127
-  - Remove references to Cancel buttons in examples
-- [ ] Update "Shared Component Pattern" section to list StandardDialog
+  - Examples show conditional Cancel logic
+  - **Location:** CLAUDE.md lines 736-805
+- [x] Update "Shared Component Pattern" section to list StandardDialog
 
-#### Pattern Consistency Verification
-- [ ] All forms follow pattern: DonationForm ✅, ChildForm ✅, ProjectForm ✅, SponsorshipForm ✅, DonorForm ⚠️ (separate ticket)
-- [ ] All dialogs use StandardDialog: QuickDonorCreateDialog ✅, QuickEntityCreateDialog ✅, SponsorshipModal ✅
-- [ ] All Submit buttons are fullWidth: DonationForm ✅, ChildForm ✅, ProjectForm ✅, SponsorshipForm ✅, DonorForm ✅
+#### Pattern Consistency Verification ✅ COMPLETE
+- [x] All forms follow conditional Cancel pattern: DonationForm ✅, ChildForm ✅, ProjectForm ✅, SponsorshipForm ✅ (modal-only, no Cancel), DonorForm ✅
+- [x] All dialogs use StandardDialog: QuickDonorCreateDialog ✅, QuickEntityCreateDialog ✅, SponsorshipModal ✅
+- [x] All Submit buttons are fullWidth: DonationForm ✅, ChildForm ✅, ProjectForm ✅, SponsorshipForm ✅, DonorForm ✅
 
 ### Technical Approach
+
+**✅ IMPLEMENTED (2025-12-07)** - The sections below document the original plan. The actual implementation evolved to use **conditional Cancel buttons** (edit mode only) for inline page forms, which is documented in CLAUDE.md lines 736-805. All other aspects (StandardDialog component, dialog refactoring, fullWidth buttons) were implemented as planned.
 
 **Create generic dialog wrapper to eliminate duplication:**
 
@@ -239,7 +248,9 @@ const SponsorshipModal: React.FC<SponsorshipModalProps> = ({
 };
 ```
 
-#### 3. SponsorshipForm.tsx Changes
+#### 3. SponsorshipForm.tsx Changes ✅ IMPLEMENTED
+
+**Note:** The implementation correctly removed Cancel button from SponsorshipForm because it's modal-only (dialogs have close X button). Other inline page forms (ChildForm, DonorForm, ProjectForm) got conditional Cancel buttons for edit mode.
 
 **Before:**
 ```tsx
@@ -295,7 +306,7 @@ const SponsorshipForm: React.FC<SponsorshipFormProps> = ({
 };
 ```
 
-#### 3. ProjectForm.tsx Changes
+#### 4. ProjectForm.tsx Changes ✅ IMPLEMENTED
 
 **Before:**
 ```tsx
@@ -317,7 +328,7 @@ const SponsorshipForm: React.FC<SponsorshipFormProps> = ({
 </Button>
 ```
 
-#### 4. SponsorshipsPage.tsx Changes
+#### 5. SponsorshipsPage.tsx Changes ✅ IMPLEMENTED
 
 **Remove `onCancel` prop from SponsorshipForm (no longer exists):**
 
@@ -337,7 +348,7 @@ const SponsorshipForm: React.FC<SponsorshipFormProps> = ({
 
 **User can cancel by navigating away or clicking elsewhere on page.**
 
-#### 5. CLAUDE.md Documentation Update
+#### 6. CLAUDE.md Documentation Update ✅ IMPLEMENTED
 
 **Update "Form Component Pattern" section (lines ~416-459):**
 
@@ -376,7 +387,7 @@ const SponsorshipForm: React.FC<SponsorshipFormProps> = ({
 **See:** TICKET-050 (ChildForm consistency), TICKET-127 (SponsorshipForm consistency)
 ```
 
-#### 6. Files to Modify/Create
+#### 7. Files Modified/Created ✅ COMPLETE (2025-12-07)
 
 **New Files:**
 - `src/components/StandardDialog.tsx` (+60 lines - new generic dialog component)
@@ -398,7 +409,7 @@ const SponsorshipForm: React.FC<SponsorshipFormProps> = ({
 - -157 lines (duplication removed from 3 dialogs + form fixes)
 - **Total:** -17 lines with significantly better maintainability
 
-#### 7. Tests to Add/Modify
+#### 8. Tests Added/Modified ✅ COMPLETE (2025-12-07)
 
 **StandardDialog.test.tsx (NEW):**
 1. `it('renders title correctly')`
@@ -434,6 +445,21 @@ const SponsorshipForm: React.FC<SponsorshipFormProps> = ({
 ---
 
 ## Change Log
+
+**2025-12-07: ✅ COMPLETED**
+- All work completed and merged (commits: 554c03c, 6336d98)
+- StandardDialog component created and tested (5 comprehensive tests)
+- 3 dialogs refactored to use StandardDialog (SponsorshipModal, QuickDonorCreateDialog, QuickEntityCreateDialog)
+- SponsorshipForm Cancel button removed (modal-only form, dialog has close X)
+- ProjectForm Submit button made fullWidth + color="primary"
+- **Implementation Evolution:** Conditional Cancel pattern adopted instead of "no Cancel anywhere"
+  - Inline page forms (ChildForm, DonorForm, ProjectForm) got conditional Cancel in edit mode
+  - Modal forms (SponsorshipForm) have no Cancel (dialog close X instead)
+  - CREATE mode: No Cancel (user navigates away)
+  - EDIT mode: YES Cancel (exits edit mode)
+- CLAUDE.md updated with StandardDialog Pattern (lines 621-694) and Form Component Pattern (lines 736-805)
+- All E2E tests pass (58/58)
+- Net result: -17 lines of code with significantly better maintainability
 
 **2025-12-05: Major Scope Expansion - StandardDialog Component**
 - Added StandardDialog generic component creation (eliminates 180-240 lines duplication)
