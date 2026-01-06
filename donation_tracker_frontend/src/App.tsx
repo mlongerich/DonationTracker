@@ -9,6 +9,7 @@ import DonationsPage from './pages/DonationsPage';
 import DonorsPage from './pages/DonorsPage';
 import ChildrenPage from './pages/ChildrenPage';
 import SponsorshipsPage from './pages/SponsorshipsPage';
+import ReportsPage from './pages/ReportsPage';
 import AdminPage from './pages/AdminPage';
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
               <Route path="donors" element={<DonorsPage />} />
               <Route path="children" element={<ChildrenPage />} />
               <Route path="sponsorships" element={<SponsorshipsPage />} />
+              <Route path="reports" element={<ReportsPage />} />
               <Route path="admin" element={<AdminPage />} />
             </Route>
           </Routes>

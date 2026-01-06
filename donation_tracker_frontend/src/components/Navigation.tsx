@@ -21,6 +21,9 @@ const Navigation = () => {
           <Button color="inherit" component={RouterLink} to="/sponsorships">
             Sponsorships
           </Button>
+          <Button color="inherit" component={RouterLink} to="/reports">
+            Reports
+          </Button>
           <Button color="inherit" component={RouterLink} to="/admin">
             Admin
           </Button>
