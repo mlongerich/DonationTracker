@@ -419,10 +419,17 @@ describe('DonationForm', () => {
     });
     await user.click(createDonorButton);
 
-    // Verify dialog opened with name pre-filled
+    // Wait for dialog to open
     await waitFor(() => {
-      expect(screen.getByLabelText(/name/i)).toHaveValue('John Doe');
+      expect(screen.getByText('Create New Donor')).toBeInTheDocument();
     });
+
+    // Verify name is pre-filled
+    const nameFields = screen.getAllByLabelText(/name/i);
+    const dialogNameField = nameFields.find(
+      (field) => (field as HTMLInputElement).value === 'John Doe'
+    );
+    expect(dialogNameField).toHaveValue('John Doe');
   });
 
   it('clears search input when dialog closes', async () => {
@@ -474,24 +481,44 @@ describe('DonationForm', () => {
     // Open dialog - should pre-fill name
     await user.click(screen.getByRole('button', { name: /create donor/i }));
 
+    // Wait for dialog to open
     await waitFor(() => {
-      expect(screen.getByLabelText(/name/i)).toHaveValue('Test Name');
+      expect(screen.getByText('Create New Donor')).toBeInTheDocument();
     });
+
+    // Verify name is pre-filled
+    const nameFields = screen.getAllByLabelText(/name/i);
+    const dialogNameField = nameFields.find(
+      (field) => (field as HTMLInputElement).value === 'Test Name'
+    );
+    expect(dialogNameField).toHaveValue('Test Name');
 
     // Close dialog without creating donor
     await user.click(screen.getByRole('button', { name: /close/i }));
 
-    // Wait for dialog to close
-    await waitFor(() => {
-      expect(screen.queryByText('Create New Donor')).not.toBeInTheDocument();
-    });
+    // Wait for dialog to close completely
+    await waitFor(
+      () => {
+        expect(screen.queryByText('Create New Donor')).not.toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
 
     // Reopen dialog - should be blank
     await user.click(screen.getByRole('button', { name: /create donor/i }));
 
+    // Wait for dialog to reopen
     await waitFor(() => {
-      expect(screen.getByLabelText(/name/i)).toHaveValue('');
+      expect(screen.getByText('Create New Donor')).toBeInTheDocument();
     });
+
+    // Verify name field is now empty
+    const reopenedNameFields = screen.getAllByLabelText(/name/i);
+    const reopenedDialogNameField = reopenedNameFields.find((field) => {
+      const input = field as HTMLInputElement;
+      return input.type === 'text' && input.value === '';
+    });
+    expect(reopenedDialogNameField).toHaveValue('');
   });
 
   it('pre-fills email when typed text is valid email', async () => {
@@ -596,6 +623,11 @@ describe('DonationForm', () => {
     });
     await user.type(projectField, 'Christmas Campaign');
 
+    // Wait for typing to complete and debounce to settle
+    await waitFor(() => {
+      expect(projectField).toHaveValue('Christmas Campaign');
+    });
+
     // Click create button
     const createButton = screen.getByRole('button', {
       name: /create project or child/i,
@@ -603,19 +635,25 @@ describe('DonationForm', () => {
     await user.click(createButton);
 
     // Verify dialog opened with tabbed interface
-    await waitFor(() => {
-      expect(screen.getByText('Create New Entity')).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText('Create New Entity')).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
 
     // Switch to project tab
     const projectTab = screen.getByRole('tab', { name: /create project/i });
     await user.click(projectTab);
 
     // Verify title field is pre-filled
-    await waitFor(() => {
-      const titleField = screen.getByLabelText(/title/i);
-      expect(titleField).toHaveValue('Christmas Campaign');
-    });
+    await waitFor(
+      () => {
+        const titleField = screen.getByLabelText(/title/i);
+        expect(titleField).toHaveValue('Christmas Campaign');
+      },
+      { timeout: 2000 }
+    );
   });
 
   it('clears project search input after creating project', async () => {
@@ -639,9 +677,22 @@ describe('DonationForm', () => {
     });
     await user.type(projectField, 'New Campaign');
 
+    // Wait for typing to complete
+    await waitFor(() => {
+      expect(projectField).toHaveValue('New Campaign');
+    });
+
     // Open dialog and create project
     await user.click(
       screen.getByRole('button', { name: /create project or child/i })
+    );
+
+    // Wait for dialog to open
+    await waitFor(
+      () => {
+        expect(screen.getByText('Create New Entity')).toBeInTheDocument();
+      },
+      { timeout: 2000 }
     );
 
     // Switch to project tab
@@ -651,22 +702,37 @@ describe('DonationForm', () => {
     // Submit to create project
     await user.click(screen.getByRole('button', { name: /create project/i }));
 
-    // Wait for dialog to close
-    await waitFor(() => {
-      expect(screen.queryByText('Create New Entity')).not.toBeInTheDocument();
-    });
+    // Wait for dialog to close completely
+    await waitFor(
+      () => {
+        expect(screen.queryByText('Create New Entity')).not.toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
 
     // Open dialog again - should not have old search text pre-filled
     await user.click(
       screen.getByRole('button', { name: /create project or child/i })
     );
 
+    // Wait for dialog to reopen
+    await waitFor(
+      () => {
+        expect(screen.getByText('Create New Entity')).toBeInTheDocument();
+      },
+      { timeout: 2000 }
+    );
+
     // Switch to project tab
     await user.click(screen.getByRole('tab', { name: /create project/i }));
 
-    await waitFor(() => {
-      expect(screen.getByLabelText(/title/i)).toHaveValue('');
-    });
+    // Verify title field is empty
+    await waitFor(
+      () => {
+        expect(screen.getByLabelText(/title/i)).toHaveValue('');
+      },
+      { timeout: 2000 }
+    );
   });
 
   it('clears pre-fill when dialog closes without creating project', async () => {

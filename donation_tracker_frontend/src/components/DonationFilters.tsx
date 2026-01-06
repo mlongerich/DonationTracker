@@ -8,11 +8,7 @@ import {
   Button,
   Alert,
 } from '@mui/material';
-import {
-  DatePicker,
-  DateValidationError,
-  PickerChangeHandlerContext,
-} from '@mui/x-date-pickers';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { Dayjs } from 'dayjs';
 import DonorAutocomplete, { Donor } from './DonorAutocomplete';
 
@@ -62,10 +58,7 @@ const DonationFilters: React.FC<DonationFiltersProps> = ({
     return true;
   };
 
-  const handleStartDateChange = (
-    value: Dayjs | null,
-    _context: PickerChangeHandlerContext<DateValidationError>
-  ) => {
+  const handleStartDateChange = (value: Dayjs | null) => {
     setStartDate(value);
     if (
       value &&
@@ -85,10 +78,7 @@ const DonationFilters: React.FC<DonationFiltersProps> = ({
     }
   };
 
-  const handleEndDateChange = (
-    value: Dayjs | null,
-    _context: PickerChangeHandlerContext<DateValidationError>
-  ) => {
+  const handleEndDateChange = (value: Dayjs | null) => {
     setEndDate(value);
     if (
       value &&

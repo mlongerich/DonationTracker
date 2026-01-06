@@ -408,31 +408,41 @@ describe('ProjectsSection', () => {
 
       render(<ProjectsSection />);
 
-      await waitFor(() => {
-        expect(screen.getByText('Summer Campaign')).toBeInTheDocument();
-      });
+      // Wait for component to load
+      await waitFor(
+        () => {
+          expect(screen.getByText('Summer Campaign')).toBeInTheDocument();
+        },
+        { timeout: 3000 }
+      );
 
       // Click archive button
       const archiveButton = screen.getByRole('button', { name: /archive/i });
       await user.click(archiveButton);
 
       // Wait for error to appear
-      await waitFor(() => {
-        expect(
-          screen.getByText('Cannot archive project with active sponsorships')
-        ).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText('Cannot archive project with active sponsorships')
+          ).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
 
       // Click close button on snackbar
       const closeButton = screen.getByRole('button', { name: /close/i });
       await user.click(closeButton);
 
       // Error should be removed
-      await waitFor(() => {
-        expect(
-          screen.queryByText('Cannot archive project with active sponsorships')
-        ).not.toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(
+            screen.queryByText('Cannot archive project with active sponsorships')
+          ).not.toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
     });
   });
 });

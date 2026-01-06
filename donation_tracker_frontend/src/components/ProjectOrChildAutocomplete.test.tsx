@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ProjectOrChildAutocomplete from './ProjectOrChildAutocomplete';
 
@@ -20,29 +20,33 @@ describe('ProjectOrChildAutocomplete', () => {
   });
 
   it('debounces search input (300ms)', async () => {
-    const user = userEvent.setup();
-    const mockData = { projects: [], children: [] };
+    jest.useFakeTimers();
+    try {
+      const user = userEvent.setup({ delay: null });
+      const mockData = { projects: [], children: [] };
 
-    (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
+      (searchProjectOrChild as jest.Mock).mockResolvedValue(mockData);
 
-    render(<ProjectOrChildAutocomplete value={null} onChange={() => {}} />);
+      render(<ProjectOrChildAutocomplete value={null} onChange={() => {}} />);
 
-    const searchField = screen.getByRole('combobox');
-    await user.type(searchField, 't');
-    await user.type(searchField, 'e');
-    await user.type(searchField, 's');
-    await user.type(searchField, 't');
+      const searchField = screen.getByRole('combobox');
+      await user.type(searchField, 'test');
 
-    // Should not call API immediately
-    expect(searchProjectOrChild).not.toHaveBeenCalled();
+      // Should not call API immediately
+      expect(searchProjectOrChild).not.toHaveBeenCalled();
 
-    // Should call API after 300ms debounce
-    await waitFor(
-      () => expect(searchProjectOrChild).toHaveBeenCalledWith('test'),
-      {
-        timeout: 400,
-      }
-    );
+      // Advance timers past debounce delay
+      act(() => {
+        jest.advanceTimersByTime(300);
+      });
+
+      // Should call API after 300ms debounce
+      await waitFor(() =>
+        expect(searchProjectOrChild).toHaveBeenCalledWith('test')
+      );
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('fetches projects when typing', async () => {

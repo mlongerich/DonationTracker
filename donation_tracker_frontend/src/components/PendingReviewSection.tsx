@@ -7,7 +7,7 @@ import {
   FormControl,
   InputLabel,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import type { Dayjs } from 'dayjs';
 import apiClient from '../api/client';
 import PendingReviewDonationList from './PendingReviewDonationList';
