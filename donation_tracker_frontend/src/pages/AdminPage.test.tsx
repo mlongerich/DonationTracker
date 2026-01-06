@@ -110,9 +110,7 @@ describe('AdminPage', () => {
 
   it('renders Projects tab', () => {
     renderWithProviders(<AdminPage />);
-    expect(
-      screen.getByRole('tab', { name: /projects/i })
-    ).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: /projects/i })).toBeInTheDocument();
   });
 
   it('shows ProjectsSection when Projects tab is clicked', async () => {
@@ -157,9 +155,7 @@ describe('AdminPage', () => {
     await user.click(csvTab);
 
     const file = new File(['test'], 'test.csv', { type: 'text/csv' });
-    const input = document.querySelector(
-      '#csv-file-input'
-    ) as HTMLInputElement;
+    const input = screen.getByTestId('csv-file-input');
     await user.upload(input, file);
 
     expect(screen.getByText(/selected: test.csv/i)).toBeInTheDocument();
@@ -197,9 +193,7 @@ describe('AdminPage', () => {
     await user.click(csvTab);
 
     const file = new File(['test'], 'test.csv', { type: 'text/csv' });
-    const input = document.querySelector(
-      '#csv-file-input'
-    ) as HTMLInputElement;
+    const input = screen.getByTestId('csv-file-input');
     await user.upload(input, file);
 
     const uploadButton = screen.getByRole('button', {
@@ -234,9 +228,7 @@ describe('AdminPage', () => {
     await user.click(csvTab);
 
     const file = new File(['test'], 'test.csv', { type: 'text/csv' });
-    const input = document.querySelector(
-      '#csv-file-input'
-    ) as HTMLInputElement;
+    const input = screen.getByTestId('csv-file-input');
     await user.upload(input, file);
 
     const uploadButton = screen.getByRole('button', {
@@ -272,9 +264,7 @@ describe('AdminPage', () => {
     await user.click(csvTab);
 
     const file = new File(['test'], 'test.csv', { type: 'text/csv' });
-    const input = document.querySelector(
-      '#csv-file-input'
-    ) as HTMLInputElement;
+    const input = screen.getByTestId('csv-file-input');
     await user.upload(input, file);
 
     const uploadButton = screen.getByRole('button', {
@@ -309,9 +299,7 @@ describe('AdminPage', () => {
     await user.click(csvTab);
 
     const file = new File(['test'], 'test.csv', { type: 'text/csv' });
-    const input = document.querySelector(
-      '#csv-file-input'
-    ) as HTMLInputElement;
+    const input = screen.getByTestId('csv-file-input');
     await user.upload(input, file);
 
     const uploadButton = screen.getByRole('button', {
@@ -348,9 +336,7 @@ describe('AdminPage', () => {
     await user.click(csvTab);
 
     const file = new File(['test'], 'test.csv', { type: 'text/csv' });
-    const input = document.querySelector(
-      '#csv-file-input'
-    ) as HTMLInputElement;
+    const input = screen.getByTestId('csv-file-input');
     await user.upload(input, file);
 
     const uploadButton = screen.getByRole('button', {

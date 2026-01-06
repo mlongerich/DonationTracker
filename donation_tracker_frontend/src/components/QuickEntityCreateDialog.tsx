@@ -1,9 +1,5 @@
 import { useState, useEffect } from 'react';
-import {
-  Tabs,
-  Tab,
-  Box,
-} from '@mui/material';
+import { Tabs, Tab, Box } from '@mui/material';
 import StandardDialog from './StandardDialog';
 import ChildForm from './ChildForm';
 import ProjectForm from './ProjectForm';
@@ -74,9 +70,7 @@ const QuickEntityCreateDialog: React.FC<QuickEntityCreateDialogProps> = ({
           : err.response.data.error || 'Validation failed';
         setError(errorMessage);
       } else {
-        setError(
-          err.response?.data?.error || 'Failed to create project'
-        );
+        setError(err.response?.data?.error || 'Failed to create project');
       }
     }
   };

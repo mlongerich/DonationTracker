@@ -92,9 +92,10 @@ describe('useDonors', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.error).toBe('Server error');
-      expect(result.current.donors).toEqual([]);
       expect(result.current.loading).toBe(false);
     });
+
+    expect(result.current.error).toBe('Server error');
+    expect(result.current.donors).toEqual([]);
   });
 });

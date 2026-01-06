@@ -1,11 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import ProjectsSection from './ProjectsSection';
-import {
-  createProject,
-  updateProject,
-  deleteProject,
-} from '../api/client';
+import { createProject, updateProject, deleteProject } from '../api/client';
 import apiClient from '../api/client';
 
 jest.mock('../api/client', () => ({
@@ -438,7 +434,9 @@ describe('ProjectsSection', () => {
       await waitFor(
         () => {
           expect(
-            screen.queryByText('Cannot archive project with active sponsorships')
+            screen.queryByText(
+              'Cannot archive project with active sponsorships'
+            )
           ).not.toBeInTheDocument();
         },
         { timeout: 2000 }

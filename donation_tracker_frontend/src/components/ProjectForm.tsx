@@ -86,7 +86,12 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
             >
               Update Project
             </Button>
-            <Button variant="outlined" color="error" onClick={onCancel} fullWidth>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={onCancel}
+              fullWidth
+            >
               Cancel
             </Button>
           </Stack>

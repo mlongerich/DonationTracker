@@ -36,13 +36,19 @@ const AdminPage: React.FC = () => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const response = await apiClient.post('/api/admin/import/stripe_payments', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 120000, // 2 minute timeout for large CSV imports
-      });
+      const response = await apiClient.post(
+        '/api/admin/import/stripe_payments',
+        formData,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+          timeout: 120000, // 2 minute timeout for large CSV imports
+        }
+      );
       setResult(response.data);
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Upload failed: An unexpected error occurred';
+      const errorMessage =
+        error.response?.data?.error ||
+        'Upload failed: An unexpected error occurred';
       setResult({
         success_count: 0,
         skipped_count: 0,
@@ -75,7 +81,10 @@ const AdminPage: React.FC = () => {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+      const timestamp = new Date()
+        .toISOString()
+        .split('T')[0]
+        .replace(/-/g, '');
       link.setAttribute('download', `donors_export_${timestamp}.csv`);
       document.body.appendChild(link);
       link.click();
@@ -119,11 +128,13 @@ const AdminPage: React.FC = () => {
               Stripe CSV Import
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Import creates both donors and donations from Stripe payment exports
+              Import creates both donors and donations from Stripe payment
+              exports
             </Typography>
 
             <input
               id="csv-file-input"
+              data-testid="csv-file-input"
               type="file"
               accept=".csv"
               onChange={handleFileChange}
@@ -172,7 +183,8 @@ const AdminPage: React.FC = () => {
                     )}
                     {result.needs_attention_count > 0 && (
                       <Typography color="warning.main">
-                        ⚠️ Needs Attention: {result.needs_attention_count} donations
+                        ⚠️ Needs Attention: {result.needs_attention_count}{' '}
+                        donations
                       </Typography>
                     )}
                     {result.failed_count > 0 && (

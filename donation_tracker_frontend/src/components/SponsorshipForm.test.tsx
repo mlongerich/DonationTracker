@@ -35,7 +35,9 @@ describe('SponsorshipForm', () => {
 
     render(<SponsorshipForm onSubmit={mockSubmit} childId={1} />);
 
-    expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /cancel/i })
+    ).not.toBeInTheDocument();
   });
 
   it('Submit button is fullWidth and primary color', () => {

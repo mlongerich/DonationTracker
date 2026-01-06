@@ -146,7 +146,12 @@ function DonorForm({
             <Button type="submit" variant="contained" color="primary" fullWidth>
               Update
             </Button>
-            <Button variant="outlined" color="error" onClick={onCancel} fullWidth>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={onCancel}
+              fullWidth
+            >
               Cancel
             </Button>
           </Stack>

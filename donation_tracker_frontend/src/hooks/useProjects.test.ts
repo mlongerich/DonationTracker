@@ -37,10 +37,11 @@ describe('useProjects', () => {
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
-      expect(result.current.projects).toEqual(mockProjects);
-      expect(result.current.paginationMeta).toEqual(mockMeta);
-      expect(result.current.error).toBeNull();
     });
+
+    expect(result.current.projects).toEqual(mockProjects);
+    expect(result.current.paginationMeta).toEqual(mockMeta);
+    expect(result.current.error).toBeNull();
 
     expect(apiClient.get).toHaveBeenCalledWith('/api/projects', {
       params: {

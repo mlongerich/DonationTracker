@@ -49,10 +49,11 @@ describe('useSponsorships', () => {
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
-      expect(result.current.sponsorships).toEqual(mockSponsorships);
-      expect(result.current.paginationMeta).toEqual(mockMeta);
-      expect(result.current.error).toBeNull();
     });
+
+    expect(result.current.sponsorships).toEqual(mockSponsorships);
+    expect(result.current.paginationMeta).toEqual(mockMeta);
+    expect(result.current.error).toBeNull();
 
     expect(apiClient.get).toHaveBeenCalledWith('/api/sponsorships', {
       params: {

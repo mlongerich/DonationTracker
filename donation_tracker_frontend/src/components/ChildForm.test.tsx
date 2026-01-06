@@ -102,7 +102,9 @@ describe('ChildForm', () => {
 
     render(<ChildForm onSubmit={mockSubmit} />);
 
-    expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /cancel/i })
+    ).not.toBeInTheDocument();
   });
 
   it('calls onCancel when Cancel button clicked in edit mode', async () => {

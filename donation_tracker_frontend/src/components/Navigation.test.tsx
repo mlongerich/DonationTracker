@@ -32,7 +32,9 @@ describe('Navigation', () => {
       </BrowserRouter>
     );
 
-    expect(screen.queryByRole('link', { name: /^projects$/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: /^projects$/i })
+    ).not.toBeInTheDocument();
   });
 
   it('renders Children link', () => {

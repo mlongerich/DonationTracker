@@ -65,7 +65,9 @@ const ReportsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [expandedDonors, setExpandedDonors] = useState<Set<string>>(new Set());
-  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
+    new Set()
+  );
 
   const toggleDonorExpand = (donorName: string) => {
     setExpandedDonors((prev) => {
@@ -160,7 +162,8 @@ const ReportsPage: React.FC = () => {
       </Typography>
 
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        Generate a detailed report showing each donation as an individual row with donor contact info and aggregated totals.
+        Generate a detailed report showing each donation as an individual row
+        with donor contact info and aggregated totals.
       </Typography>
 
       {/* Date Range Selectors */}
@@ -233,8 +236,12 @@ const ReportsPage: React.FC = () => {
                 ))}
                 {/* Total Row */}
                 <TableRow>
-                  <TableCell colSpan={2} sx={{ fontWeight: 'bold' }}>Total:</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold' }}>{reportData.meta.total_amount}</TableCell>
+                  <TableCell colSpan={2} sx={{ fontWeight: 'bold' }}>
+                    Total:
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 'bold' }}>
+                    {reportData.meta.total_amount}
+                  </TableCell>
                   <TableCell colSpan={3} />
                 </TableRow>
               </TableBody>
@@ -273,7 +280,9 @@ const ReportsPage: React.FC = () => {
                           <IconButton
                             size="small"
                             sx={{
-                              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                              transform: isExpanded
+                                ? 'rotate(180deg)'
+                                : 'rotate(0deg)',
                               transition: 'transform 0.3s',
                             }}
                           >
@@ -286,7 +295,11 @@ const ReportsPage: React.FC = () => {
                       </TableRow>
                       <TableRow>
                         <TableCell colSpan={4} sx={{ p: 0 }}>
-                          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                          <Collapse
+                            in={isExpanded}
+                            timeout="auto"
+                            unmountOnExit
+                          >
                             <Box sx={{ bgcolor: 'grey.50', p: 2 }}>
                               <Table size="small">
                                 <TableHead>
@@ -298,14 +311,20 @@ const ReportsPage: React.FC = () => {
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                  {donorDonations.map((donation, donationIndex) => (
-                                    <TableRow key={donationIndex}>
-                                      <TableCell>{donation.date}</TableCell>
-                                      <TableCell>{donation.amount}</TableCell>
-                                      <TableCell>{donation.project_or_child}</TableCell>
-                                      <TableCell>{donation.payment_method}</TableCell>
-                                    </TableRow>
-                                  ))}
+                                  {donorDonations.map(
+                                    (donation, donationIndex) => (
+                                      <TableRow key={donationIndex}>
+                                        <TableCell>{donation.date}</TableCell>
+                                        <TableCell>{donation.amount}</TableCell>
+                                        <TableCell>
+                                          {donation.project_or_child}
+                                        </TableCell>
+                                        <TableCell>
+                                          {donation.payment_method}
+                                        </TableCell>
+                                      </TableRow>
+                                    )
+                                  )}
                                 </TableBody>
                               </Table>
                             </Box>
@@ -351,7 +370,9 @@ const ReportsPage: React.FC = () => {
                           <IconButton
                             size="small"
                             sx={{
-                              transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
+                              transform: isExpanded
+                                ? 'rotate(180deg)'
+                                : 'rotate(0deg)',
                               transition: 'transform 0.3s',
                             }}
                           >
@@ -364,7 +385,11 @@ const ReportsPage: React.FC = () => {
                       </TableRow>
                       <TableRow>
                         <TableCell colSpan={4} sx={{ p: 0 }}>
-                          <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                          <Collapse
+                            in={isExpanded}
+                            timeout="auto"
+                            unmountOnExit
+                          >
                             <Box sx={{ bgcolor: 'grey.50', p: 2 }}>
                               <Table size="small">
                                 <TableHead>
@@ -376,14 +401,20 @@ const ReportsPage: React.FC = () => {
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                  {projectDonations.map((donation, donationIndex) => (
-                                    <TableRow key={donationIndex}>
-                                      <TableCell>{donation.date}</TableCell>
-                                      <TableCell>{donation.donor_name}</TableCell>
-                                      <TableCell>{donation.amount}</TableCell>
-                                      <TableCell>{donation.payment_method}</TableCell>
-                                    </TableRow>
-                                  ))}
+                                  {projectDonations.map(
+                                    (donation, donationIndex) => (
+                                      <TableRow key={donationIndex}>
+                                        <TableCell>{donation.date}</TableCell>
+                                        <TableCell>
+                                          {donation.donor_name}
+                                        </TableCell>
+                                        <TableCell>{donation.amount}</TableCell>
+                                        <TableCell>
+                                          {donation.payment_method}
+                                        </TableCell>
+                                      </TableRow>
+                                    )
+                                  )}
                                 </TableBody>
                               </Table>
                             </Box>
@@ -418,7 +449,11 @@ const ReportsPage: React.FC = () => {
         onClose={() => setError(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>
+        <Alert
+          onClose={() => setError(null)}
+          severity="error"
+          sx={{ width: '100%' }}
+        >
           {error}
         </Alert>
       </Snackbar>

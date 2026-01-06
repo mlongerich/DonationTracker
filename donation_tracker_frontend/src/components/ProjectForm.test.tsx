@@ -114,7 +114,11 @@ describe('ProjectForm', () => {
     };
 
     render(
-      <ProjectForm onSubmit={mockOnSubmit} project={project} onCancel={mockOnCancel} />
+      <ProjectForm
+        onSubmit={mockOnSubmit}
+        project={project}
+        onCancel={mockOnCancel}
+      />
     );
 
     expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
@@ -125,7 +129,9 @@ describe('ProjectForm', () => {
 
     render(<ProjectForm onSubmit={mockOnSubmit} />);
 
-    expect(screen.queryByRole('button', { name: /cancel/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /cancel/i })
+    ).not.toBeInTheDocument();
   });
 
   it('clears form fields when project prop changes from value to undefined', () => {
@@ -140,11 +146,15 @@ describe('ProjectForm', () => {
       can_be_deleted: true,
     };
 
-    const { rerender } = render(<ProjectForm onSubmit={jest.fn()} project={project} />);
+    const { rerender } = render(
+      <ProjectForm onSubmit={jest.fn()} project={project} />
+    );
 
     // Verify fields are populated with project data
     expect(screen.getByLabelText(/title/i)).toHaveValue('Test Project');
-    expect(screen.getByLabelText(/description/i)).toHaveValue('Test Description');
+    expect(screen.getByLabelText(/description/i)).toHaveValue(
+      'Test Description'
+    );
 
     // Re-render without project (simulating Cancel click)
     rerender(<ProjectForm onSubmit={jest.fn()} project={undefined} />);

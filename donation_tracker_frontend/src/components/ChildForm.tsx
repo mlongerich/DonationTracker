@@ -16,7 +16,11 @@ interface ChildFormProps {
   onCancel?: () => void;
 }
 
-const ChildForm: React.FC<ChildFormProps> = ({ onSubmit, initialData, onCancel }) => {
+const ChildForm: React.FC<ChildFormProps> = ({
+  onSubmit,
+  initialData,
+  onCancel,
+}) => {
   const [name, setName] = useState(initialData?.name || '');
   const [gender, setGender] = useState(initialData?.gender || '');
 
@@ -72,7 +76,12 @@ const ChildForm: React.FC<ChildFormProps> = ({ onSubmit, initialData, onCancel }
             >
               Update
             </Button>
-            <Button variant="outlined" color="error" onClick={onCancel} fullWidth>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={onCancel}
+              fullWidth
+            >
               Cancel
             </Button>
           </Stack>

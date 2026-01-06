@@ -6,7 +6,11 @@ describe('StandardDialog', () => {
     const mockOnClose = jest.fn();
 
     render(
-      <StandardDialog open={true} onClose={mockOnClose} title="Test Dialog Title">
+      <StandardDialog
+        open={true}
+        onClose={mockOnClose}
+        title="Test Dialog Title"
+      >
         <div>Test Content</div>
       </StandardDialog>
     );

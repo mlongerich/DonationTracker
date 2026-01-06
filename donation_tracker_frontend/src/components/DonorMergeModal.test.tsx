@@ -111,7 +111,9 @@ describe('DonorMergeModal', () => {
     );
 
     // Click Confirm Merge button
-    const confirmButton = screen.getByRole('button', { name: /confirm merge/i });
+    const confirmButton = screen.getByRole('button', {
+      name: /confirm merge/i,
+    });
     await user.click(confirmButton);
 
     // Should be called with all four field selections (defaults to first donor)
@@ -146,7 +148,9 @@ describe('DonorMergeModal', () => {
     );
 
     // Click Confirm Merge button
-    const confirmButton = screen.getByRole('button', { name: /confirm merge/i });
+    const confirmButton = screen.getByRole('button', {
+      name: /confirm merge/i,
+    });
     await user.click(confirmButton);
 
     // Should use first donor's ID (1), NOT 0

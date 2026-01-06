@@ -47,53 +47,71 @@ describe('ReportsPage', () => {
   it('renders generate report button', () => {
     renderWithProvider(<ReportsPage />);
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     expect(generateButton).toBeInTheDocument();
     expect(generateButton).toBeEnabled();
   });
 
   it('displays loading state when generate button is clicked', async () => {
-    jest.spyOn(apiClient, 'get').mockImplementation(() =>
-      new Promise((resolve) =>
-        setTimeout(
-          () =>
-            resolve({
-              data: {
-                donations: [],
-                donor_summary: [],
-                project_summary: [],
-                meta: { start_date: '2025-01-01', end_date: '2025-12-31', total_count: 0, total_amount: '$0.00' },
-              },
-            }),
-          100
+    jest.spyOn(apiClient, 'get').mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () =>
+              resolve({
+                data: {
+                  donations: [],
+                  donor_summary: [],
+                  project_summary: [],
+                  meta: {
+                    start_date: '2025-01-01',
+                    end_date: '2025-12-31',
+                    total_count: 0,
+                    total_amount: '$0.00',
+                  },
+                },
+              }),
+            100
+          )
         )
-      )
     );
 
     const user = userEvent.setup();
     renderWithProvider(<ReportsPage />);
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     user.click(generateButton);
 
     // Button should show loading text (wait for it to appear)
-    const loadingButton = await screen.findByRole('button', { name: /generating report/i });
+    const loadingButton = await screen.findByRole('button', {
+      name: /generating report/i,
+    });
     expect(loadingButton).toBeInTheDocument();
   });
 
   it('displays error message in Snackbar when generate fails', async () => {
     jest.spyOn(apiClient, 'get').mockRejectedValue({
-      response: { data: { error: 'start_date must be before or equal to end_date' } },
+      response: {
+        data: { error: 'start_date must be before or equal to end_date' },
+      },
     });
 
     const user = userEvent.setup();
     renderWithProvider(<ReportsPage />);
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     await user.click(generateButton);
 
     // Error message should appear in Snackbar
-    const errorAlert = await screen.findByText(/start_date must be before or equal to end_date/i);
+    const errorAlert = await screen.findByText(
+      /start_date must be before or equal to end_date/i
+    );
     expect(errorAlert).toBeInTheDocument();
   });
 
@@ -107,30 +125,30 @@ describe('ReportsPage', () => {
           project_or_child: 'General Fund',
           payment_method: 'stripe',
           all_time_total: '$1000.00',
-          project_id: 1
-        }
+          project_id: 1,
+        },
       ],
       donor_summary: [
         {
           donor_name: 'John Doe',
           period_total: '$100.00',
-          all_time_total: '$1000.00'
-        }
+          all_time_total: '$1000.00',
+        },
       ],
       project_summary: [
         {
           project_id: 1,
           project_name: 'General Fund',
           period_total: '$100.00',
-          all_time_total: '$500.00'
-        }
+          all_time_total: '$500.00',
+        },
       ],
       meta: {
         start_date: '2025-01-01',
         end_date: '2025-12-31',
         total_count: 1,
-        total_amount: '$100.00'
-      }
+        total_amount: '$100.00',
+      },
     };
 
     jest.spyOn(apiClient, 'get').mockResolvedValue({ data: mockData });
@@ -138,7 +156,9 @@ describe('ReportsPage', () => {
     const user = userEvent.setup();
     renderWithProvider(<ReportsPage />);
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     await user.click(generateButton);
 
     // Section 1: Donations table should display
@@ -163,23 +183,23 @@ describe('ReportsPage', () => {
           project_or_child: 'General Fund',
           payment_method: 'check',
           all_time_total: '$500.00',
-          project_id: 1
-        }
+          project_id: 1,
+        },
       ],
       donor_summary: [
         {
           donor_name: 'Jane Smith',
           period_total: '$50.00',
-          all_time_total: '$500.00'
-        }
+          all_time_total: '$500.00',
+        },
       ],
       project_summary: [],
       meta: {
         start_date: '2025-01-01',
         end_date: '2025-12-31',
         total_count: 1,
-        total_amount: '$50.00'
-      }
+        total_amount: '$50.00',
+      },
     };
 
     jest.spyOn(apiClient, 'get').mockResolvedValue({ data: mockData });
@@ -187,7 +207,9 @@ describe('ReportsPage', () => {
     const user = userEvent.setup();
     renderWithProvider(<ReportsPage />);
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     await user.click(generateButton);
 
     // Section 2: Donor Summary should display
@@ -208,30 +230,30 @@ describe('ReportsPage', () => {
           project_or_child: 'Campaign ABC',
           payment_method: 'cash',
           all_time_total: '$200.00',
-          project_id: 1
-        }
+          project_id: 1,
+        },
       ],
       donor_summary: [
         {
           donor_name: 'Bob Johnson',
           period_total: '$75.00',
-          all_time_total: '$200.00'
-        }
+          all_time_total: '$200.00',
+        },
       ],
       project_summary: [
         {
           project_id: 1,
           project_name: 'Campaign ABC',
           period_total: '$75.00',
-          all_time_total: '$300.00'
-        }
+          all_time_total: '$300.00',
+        },
       ],
       meta: {
         start_date: '2025-01-01',
         end_date: '2025-12-31',
         total_count: 1,
-        total_amount: '$75.00'
-      }
+        total_amount: '$75.00',
+      },
     };
 
     jest.spyOn(apiClient, 'get').mockResolvedValue({ data: mockData });
@@ -239,7 +261,9 @@ describe('ReportsPage', () => {
     const user = userEvent.setup();
     renderWithProvider(<ReportsPage />);
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     await user.click(generateButton);
 
     // Section 3: Project Summary should display
@@ -259,7 +283,7 @@ describe('ReportsPage', () => {
           project_or_child: 'General Fund',
           payment_method: 'stripe',
           all_time_total: '$100.00',
-          project_id: 1
+          project_id: 1,
         },
         {
           date: '15 February 2025',
@@ -268,23 +292,23 @@ describe('ReportsPage', () => {
           project_or_child: 'Campaign XYZ',
           payment_method: 'check',
           all_time_total: '$100.00',
-          project_id: 1
-        }
+          project_id: 1,
+        },
       ],
       donor_summary: [
         {
           donor_name: 'Alice Cooper',
           period_total: '$55.00',
-          all_time_total: '$100.00'
-        }
+          all_time_total: '$100.00',
+        },
       ],
       project_summary: [],
       meta: {
         start_date: '2025-01-01',
         end_date: '2025-12-31',
         total_count: 2,
-        total_amount: '$55.00'
-      }
+        total_amount: '$55.00',
+      },
     };
 
     jest.spyOn(apiClient, 'get').mockResolvedValue({ data: mockData });
@@ -292,7 +316,9 @@ describe('ReportsPage', () => {
     const user = userEvent.setup();
     renderWithProvider(<ReportsPage />);
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     await user.click(generateButton);
 
     // Wait for Donor Summary to appear
@@ -317,7 +343,7 @@ describe('ReportsPage', () => {
           project_or_child: 'General Fund',
           payment_method: 'stripe',
           all_time_total: '$100.00',
-          project_id: 1
+          project_id: 1,
         },
         {
           date: '15 February 2025',
@@ -326,23 +352,23 @@ describe('ReportsPage', () => {
           project_or_child: 'Campaign XYZ',
           payment_method: 'check',
           all_time_total: '$100.00',
-          project_id: 1
-        }
+          project_id: 1,
+        },
       ],
       donor_summary: [
         {
           donor_name: 'Alice Cooper',
           period_total: '$55.00',
-          all_time_total: '$100.00'
-        }
+          all_time_total: '$100.00',
+        },
       ],
       project_summary: [],
       meta: {
         start_date: '2025-01-01',
         end_date: '2025-12-31',
         total_count: 2,
-        total_amount: '$55.00'
-      }
+        total_amount: '$55.00',
+      },
     };
 
     jest.spyOn(apiClient, 'get').mockResolvedValue({ data: mockData });
@@ -350,7 +376,9 @@ describe('ReportsPage', () => {
     const user = userEvent.setup();
     renderWithProvider(<ReportsPage />);
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     await user.click(generateButton);
 
     // Wait for Donor Summary to appear
@@ -385,7 +413,7 @@ describe('ReportsPage', () => {
           project_or_child: 'General Fund',
           payment_method: 'stripe',
           all_time_total: '$100.00',
-          project_id: 1
+          project_id: 1,
         },
         {
           date: '15 February 2025',
@@ -394,28 +422,28 @@ describe('ReportsPage', () => {
           project_or_child: 'Campaign XYZ',
           payment_method: 'check',
           all_time_total: '$200.00',
-          project_id: 1
-        }
+          project_id: 1,
+        },
       ],
       donor_summary: [
         {
           donor_name: 'Alice Cooper',
           period_total: '$25.00',
-          all_time_total: '$100.00'
+          all_time_total: '$100.00',
         },
         {
           donor_name: 'Bob Smith',
           period_total: '$50.00',
-          all_time_total: '$200.00'
-        }
+          all_time_total: '$200.00',
+        },
       ],
       project_summary: [],
       meta: {
         start_date: '2025-01-01',
         end_date: '2025-12-31',
         total_count: 2,
-        total_amount: '$75.00'
-      }
+        total_amount: '$75.00',
+      },
     };
 
     jest.spyOn(apiClient, 'get').mockResolvedValue({ data: mockData });
@@ -423,7 +451,9 @@ describe('ReportsPage', () => {
     const user = userEvent.setup();
     renderWithProvider(<ReportsPage />);
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     await user.click(generateButton);
 
     await screen.findByText('Donor Summary');
@@ -469,7 +499,7 @@ describe('ReportsPage', () => {
           project_or_child: 'General Fund',
           payment_method: 'stripe',
           all_time_total: '$150.00',
-          project_id: 1
+          project_id: 1,
         },
         {
           date: '12 March 2025',
@@ -478,30 +508,30 @@ describe('ReportsPage', () => {
           project_or_child: 'General Fund',
           payment_method: 'check',
           all_time_total: '$150.00',
-          project_id: 1
-        }
+          project_id: 1,
+        },
       ],
       donor_summary: [
         {
           donor_name: 'Charlie Brown',
           period_total: '$100.00',
-          all_time_total: '$150.00'
-        }
+          all_time_total: '$150.00',
+        },
       ],
       project_summary: [
         {
           project_id: 1,
           project_name: 'General Fund',
           period_total: '$100.00',
-          all_time_total: '$500.00'
-        }
+          all_time_total: '$500.00',
+        },
       ],
       meta: {
         start_date: '2025-01-01',
         end_date: '2025-12-31',
         total_count: 2,
-        total_amount: '$100.00'
-      }
+        total_amount: '$100.00',
+      },
     };
 
     jest.spyOn(apiClient, 'get').mockResolvedValue({ data: mockData });
@@ -509,7 +539,9 @@ describe('ReportsPage', () => {
     const user = userEvent.setup();
     renderWithProvider(<ReportsPage />);
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     await user.click(generateButton);
 
     // Wait for Project Summary to appear
@@ -530,7 +562,7 @@ describe('ReportsPage', () => {
           project_or_child: 'General Fund',
           payment_method: 'stripe',
           all_time_total: '$150.00',
-          project_id: 1
+          project_id: 1,
         },
         {
           date: '12 March 2025',
@@ -539,30 +571,30 @@ describe('ReportsPage', () => {
           project_or_child: 'General Fund',
           payment_method: 'check',
           all_time_total: '$150.00',
-          project_id: 1
-        }
+          project_id: 1,
+        },
       ],
       donor_summary: [
         {
           donor_name: 'Charlie Brown',
           period_total: '$100.00',
-          all_time_total: '$150.00'
-        }
+          all_time_total: '$150.00',
+        },
       ],
       project_summary: [
         {
           project_id: 1,
           project_name: 'General Fund',
           period_total: '$100.00',
-          all_time_total: '$500.00'
-        }
+          all_time_total: '$500.00',
+        },
       ],
       meta: {
         start_date: '2025-01-01',
         end_date: '2025-12-31',
         total_count: 2,
-        total_amount: '$100.00'
-      }
+        total_amount: '$100.00',
+      },
     };
 
     jest.spyOn(apiClient, 'get').mockResolvedValue({ data: mockData });
@@ -570,7 +602,9 @@ describe('ReportsPage', () => {
     const user = userEvent.setup();
     renderWithProvider(<ReportsPage />);
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     await user.click(generateButton);
 
     await screen.findByText('Project Summary');
@@ -604,7 +638,7 @@ describe('ReportsPage', () => {
           project_or_child: 'General Fund',
           payment_method: 'stripe',
           all_time_total: '$150.00',
-          project_id: 1
+          project_id: 1,
         },
         {
           date: '12 March 2025',
@@ -613,41 +647,41 @@ describe('ReportsPage', () => {
           project_or_child: 'Campaign ABC',
           payment_method: 'check',
           all_time_total: '$200.00',
-          project_id: 2
-        }
+          project_id: 2,
+        },
       ],
       donor_summary: [
         {
           donor_name: 'Charlie Brown',
           period_total: '$40.00',
-          all_time_total: '$150.00'
+          all_time_total: '$150.00',
         },
         {
           donor_name: 'Diana Prince',
           period_total: '$60.00',
-          all_time_total: '$200.00'
-        }
+          all_time_total: '$200.00',
+        },
       ],
       project_summary: [
         {
           project_id: 1,
           project_name: 'General Fund',
           period_total: '$40.00',
-          all_time_total: '$300.00'
+          all_time_total: '$300.00',
         },
         {
           project_id: 2,
           project_name: 'Campaign ABC',
           period_total: '$60.00',
-          all_time_total: '$400.00'
-        }
+          all_time_total: '$400.00',
+        },
       ],
       meta: {
         start_date: '2025-01-01',
         end_date: '2025-12-31',
         total_count: 2,
-        total_amount: '$100.00'
-      }
+        total_amount: '$100.00',
+      },
     };
 
     jest.spyOn(apiClient, 'get').mockResolvedValue({ data: mockData });
@@ -655,7 +689,9 @@ describe('ReportsPage', () => {
     const user = userEvent.setup();
     renderWithProvider(<ReportsPage />);
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     await user.click(generateButton);
 
     await screen.findByText('Project Summary');
@@ -701,30 +737,30 @@ describe('ReportsPage', () => {
           project_or_child: 'Sangwan', // Child name
           payment_method: 'stripe',
           all_time_total: '$150.00',
-          project_id: 1 // Child Sponsorship project ID
-        }
+          project_id: 1, // Child Sponsorship project ID
+        },
       ],
       donor_summary: [
         {
           donor_name: 'Jane Smith',
           period_total: '$50.00',
-          all_time_total: '$150.00'
-        }
+          all_time_total: '$150.00',
+        },
       ],
       project_summary: [
         {
           project_id: 1,
           project_name: 'Child Sponsorship', // Project title (different from child name!)
           period_total: '$50.00',
-          all_time_total: '$200.00'
-        }
+          all_time_total: '$200.00',
+        },
       ],
       meta: {
         start_date: '2025-01-01',
         end_date: '2025-12-31',
         total_count: 1,
-        total_amount: '$50.00'
-      }
+        total_amount: '$50.00',
+      },
     };
 
     jest.spyOn(apiClient, 'get').mockResolvedValue({ data: mockData });
@@ -732,7 +768,9 @@ describe('ReportsPage', () => {
     const user = userEvent.setup();
     renderWithProvider(<ReportsPage />);
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     await user.click(generateButton);
 
     await screen.findByText('Project Summary');
@@ -747,12 +785,16 @@ describe('ReportsPage', () => {
 
     // Click on "Child Sponsorship" project row to expand
     const childSponsorshipElements = screen.getAllByText('Child Sponsorship');
-    await user.click(childSponsorshipElements[childSponsorshipElements.length - 1]);
+    await user.click(
+      childSponsorshipElements[childSponsorshipElements.length - 1]
+    );
 
     // After expanding, Jane Smith should appear one more time in the expanded detail
     // This tests the bug fix: filter by project_id (not name) correctly matches child donations
     await waitFor(() => {
-      expect(screen.getAllByText('Jane Smith').length).toBe(initialJaneSmithCount + 1);
+      expect(screen.getAllByText('Jane Smith').length).toBe(
+        initialJaneSmithCount + 1
+      );
     });
 
     // Sangwan still appears only once (it's not shown in Project Summary expansion)
@@ -769,30 +811,30 @@ describe('ReportsPage', () => {
           project_or_child: 'General Fund',
           payment_method: 'stripe',
           all_time_total: '$1000.00',
-          project_id: 1
-        }
+          project_id: 1,
+        },
       ],
       donor_summary: [
         {
           donor_name: 'John Doe',
           period_total: '$100.00',
-          all_time_total: '$1000.00'
-        }
+          all_time_total: '$1000.00',
+        },
       ],
       project_summary: [
         {
           project_id: 1,
           project_name: 'General Fund',
           period_total: '$100.00',
-          all_time_total: '$500.00'
-        }
+          all_time_total: '$500.00',
+        },
       ],
       meta: {
         start_date: '2025-01-01',
         end_date: '2025-12-31',
         total_count: 1,
-        total_amount: '$100.00'
-      }
+        total_amount: '$100.00',
+      },
     };
 
     jest.spyOn(apiClient, 'get').mockResolvedValue({ data: mockData });
@@ -801,12 +843,18 @@ describe('ReportsPage', () => {
     renderWithProvider(<ReportsPage />);
 
     // Download button should not be visible initially
-    expect(screen.queryByRole('button', { name: /download csv report/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /download csv report/i })
+    ).not.toBeInTheDocument();
 
-    const generateButton = screen.getByRole('button', { name: /generate report/i });
+    const generateButton = screen.getByRole('button', {
+      name: /generate report/i,
+    });
     await user.click(generateButton);
 
     // Download button should appear after data is loaded
-    expect(await screen.findByRole('button', { name: /download csv report/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('button', { name: /download csv report/i })
+    ).toBeInTheDocument();
   });
 });
