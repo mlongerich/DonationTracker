@@ -88,6 +88,8 @@ Current work items and user stories being actively developed.
 
 ### 🔵 In Progress Tickets
 
+- [TICKET-008: Basic Authentication with Google OAuth](TICKET-008-basic-authentication-google-oauth.md) - 🔵 In Progress (2026-01-07) - *JWT service & User model complete (6 tests), AuthController pending*
+
 ### ⏸️ Blocked Tickets
 
 ### ⏸️ Deferred - Accepted Risk

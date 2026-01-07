@@ -5,6 +5,11 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Authentication routes (OmniAuth)
+  get "/auth/google_oauth2/callback", to: "auth#google_oauth2"
+  delete "/auth/logout", to: "auth#logout"
+  get "/auth/me", to: "auth#me"
+
   # API routes
   namespace :api do
     # Health check endpoint for E2E test infrastructure

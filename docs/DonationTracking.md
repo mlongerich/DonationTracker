@@ -17,9 +17,20 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2026-01-06 (TICKET-071: Stripe CSV Batch Import - User Testing Complete)
+**Last Updated:** 2026-01-07 (TICKET-008: Authentication Foundation - In Progress)
 
 **Latest Milestones:**
+- TICKET-008 - Google OAuth Authentication Foundation 🔵 (2026-01-07 - IN PROGRESS)
+  - **JWT Service:** Encode/decode with 30-day expiration and automatic validation (4 tests passing)
+  - **User Model:** OAuth fields (provider, uid, email, name, avatar_url) with @projectsforasia.com domain restriction (2 tests passing)
+  - **Database Migration:** Added OAuth fields with composite unique index on [provider, uid] and unique email index
+  - **Factory Bot:** Updated user factory with OAuth traits (:admin, :unauthorized_domain)
+  - **Auth Routes:** Added /auth/google_oauth2/callback, /auth/logout, /auth/me routes
+  - **OmniAuth Config:** Manual Google OAuth2 setup (no Devise middleware for API-only JWT auth)
+  - **Test Coverage:** 6 tests passing (JWT service + User model) with strict TDD (Red-Green-Refactor)
+  - **Technical Decision:** Manual OAuth handling (not Devise :omniauthable) to avoid session requirements in API-only app
+  - **Next Steps:** AuthController implementation (callback/logout/me endpoints), authentication middleware, frontend components, E2E test updates
+  - See tickets/TICKET-008-basic-authentication-google-oauth.md for full implementation plan
 - TICKET-071 - Stripe CSV Batch Import Task ✅ (2026-01-06)
   - **User Testing Complete:** Validated production CSV import working as expected
   - **Import Verified:** Donations created correctly with proper status breakdown
