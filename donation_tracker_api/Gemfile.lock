@@ -108,12 +108,6 @@ GEM
     date (3.4.1)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
-    devise (4.9.4)
-      bcrypt (~> 3.0)
-      orm_adapter (~> 0.1)
-      railties (>= 4.1.0)
-      responders
-      warden (~> 1.2.3)
     diff-lcs (1.6.2)
     discard (1.4.0)
       activerecord (>= 4.2, < 9.0)
@@ -286,7 +280,6 @@ GEM
     omniauth-rails_csrf_protection (1.0.2)
       actionpack (>= 4.2)
       omniauth (~> 2.0)
-    orm_adapter (0.5.0)
     ostruct (0.6.3)
     paper_trail (16.0.0)
       activerecord (>= 6.1)
@@ -380,9 +373,6 @@ GEM
       io-console (~> 0.5)
     request_store (1.7.0)
       rack (>= 1.4)
-    responders (3.1.1)
-      actionpack (>= 5.2)
-      railties (>= 5.2)
     rexml (3.4.4)
     rspec-core (3.13.5)
       rspec-support (~> 3.13.0)
@@ -501,8 +491,6 @@ GEM
       axiom-types (~> 0.1)
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
-    warden (1.2.9)
-      rack (>= 2.0.9)
     webmock (3.25.1)
       addressable (>= 2.8.0)
       crack (>= 0.3.2)
@@ -530,7 +518,6 @@ DEPENDENCIES
   bullet
   csv
   database_cleaner-active_record
-  devise
   discard
   factory_bot_rails
   faker

@@ -35,4 +35,31 @@ RSpec.describe ApplicationController, type: :request do
       end
     end
   end
+
+  describe "Authentication" do
+    # Enable authentication for these specific tests
+    before do
+      allow(Rails).to receive(:env).and_return(ActiveSupport::StringInquirer.new('production'))
+    end
+
+    it "returns 401 Unauthorized when accessing protected endpoint without token" do
+      get "/api/children", headers: { "Host" => "api" }
+
+      expect(response).to have_http_status(:unauthorized)
+      json = JSON.parse(response.body)
+      expect(json["error"]).to include("token")
+    end
+
+    it "allows access to protected endpoint with valid token" do
+      user = create(:user, email: "test@projectsforasia.com")
+      token = JsonWebToken.encode({ user_id: user.id })
+
+      get "/api/children", headers: {
+        "Host" => "api",
+        "Authorization" => "Bearer #{token}"
+      }
+
+      expect(response).to have_http_status(:ok)
+    end
+  end
 end

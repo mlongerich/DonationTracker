@@ -214,6 +214,135 @@ flowchart TB
 
 ---
 
+## Authentication Architecture (API-Only OAuth)
+
+### How OmniAuth Works with Devise in Rails API Mode
+
+**Key Insight:** OmniAuth is Rack middleware (not a controller or model concern). Devise's `config.omniauth` configures this middleware without requiring sessions.
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant OM as OmniAuth<br/>Middleware
+    participant G as Google OAuth
+    participant AC as AuthController
+    participant DB as Database
+
+    U->>F: Click "Login with Google"
+    F->>OM: GET /auth/google_oauth2
+    OM->>G: Redirect to Google
+    G->>U: Login prompt
+    U->>G: Authenticate
+    G->>OM: Redirect /auth/google_oauth2/callback?code=...
+    OM->>OM: Parse OAuth response
+    OM->>AC: request.env['omniauth.auth'] populated
+    AC->>AC: Validate @projectsforasia.com domain
+    AC->>DB: Create/update user
+    AC->>AC: Generate JWT token
+    AC->>F: JSON: { token, user }
+    F->>F: Store JWT in localStorage
+```
+
+### Devise Configuration Layers
+
+**Layer 1: OmniAuth Middleware Configuration (What We Use)**
+
+```ruby
+# config/initializers/devise.rb
+Devise.setup do |config|
+  # ✅ Configures OmniAuth middleware (no sessions required)
+  config.omniauth :google_oauth2,
+                  ENV.fetch('GOOGLE_CLIENT_ID', 'test_client_id'),
+                  ENV.fetch('GOOGLE_CLIENT_SECRET', 'test_client_secret'),
+                  {
+                    scope: 'email,profile',
+                    prompt: 'select_account'
+                  }
+end
+```
+
+**What This Does:**
+- Adds OmniAuth to Rails middleware stack
+- Intercepts requests to `/auth/google_oauth2` (redirect to Google)
+- Intercepts callbacks to `/auth/google_oauth2/callback`
+- Parses OAuth response, populates `request.env['omniauth.auth']`
+- **Does NOT require sessions or cookies**
+
+**Layer 2: Devise OmniAuth Module (What We DON'T Use)**
+
+```ruby
+# app/models/user.rb
+class User < ApplicationRecord
+  # ❌ DON'T USE - This requires sessions!
+  # devise :omniauthable, omniauth_providers: [:google_oauth2]
+end
+```
+
+**What This Does (and why we avoid it):**
+- Adds Devise's built-in callbacks controller
+- Auto-creates session cookies after OAuth
+- Expects web app pattern (redirects, HTML responses)
+- Incompatible with API-only JWT pattern
+
+### Our API-Only Pattern
+
+```ruby
+# app/controllers/auth_controller.rb
+class AuthController < ApplicationController
+  def google_oauth2
+    # OmniAuth middleware already populated this:
+    auth = request.env['omniauth.auth']
+
+    # Manual user creation (no Devise callbacks)
+    user = User.find_or_initialize_by(provider: auth.provider, uid: auth.uid)
+    user.email = auth.info.email
+    user.name = auth.info.name
+    user.save!  # Model validates @projectsforasia.com domain
+
+    # Return JWT (no session cookie)
+    token = JsonWebToken.encode({ user_id: user.id })
+    render json: { token: token, user: { ... } }
+  end
+end
+```
+
+### Why This Architecture?
+
+**Separation of Concerns:**
+- **OmniAuth (Rack)**: Handles OAuth protocol, provider communication
+- **Devise Config**: Configures OmniAuth providers, credentials
+- **AuthController**: Business logic (domain validation, JWT generation)
+- **User Model**: Data validation, persistence
+
+**API-Only Benefits:**
+- No session middleware overhead
+- JWT tokens work across domains/mobile
+- Stateless authentication
+- Client controls token storage
+
+**Testing Benefits:**
+- Mock OmniAuth in tests (`OmniAuth.config.test_mode = true`)
+- No session cookies to manage in tests
+- Direct JWT verification
+
+### Configuration Checklist
+
+**Required:**
+- ✅ `config.omniauth :google_oauth2` in devise.rb
+- ✅ Manual AuthController with callback action
+- ✅ Routes: `get '/auth/google_oauth2/callback', to: 'auth#google_oauth2'`
+- ✅ JsonWebToken service for token generation
+- ✅ Domain validation in User model
+
+**Not Required:**
+- ❌ `devise :omniauthable` in User model
+- ❌ Session middleware
+- ❌ Cookies or CSRF tokens
+- ❌ Devise's callbacks controller
+
+---
+
 ## Testing Strategy
 
 ### Testing Pyramid

@@ -15,6 +15,8 @@
 module Api
   # Health check endpoint for infrastructure monitoring
   class HealthController < ApplicationController
+    skip_before_action :authenticate_request
+
     # GET /api/health
     # Returns health status and timestamp
     def index

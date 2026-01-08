@@ -19,6 +19,8 @@ module Api
   # Test-only controller for E2E test support
   # Only available in development and test environments
   class TestController < ApplicationController
+    skip_before_action :authenticate_request
+
     # DELETE /api/test/cleanup
     # Removes all donations and donors for clean E2E test runs
     def cleanup

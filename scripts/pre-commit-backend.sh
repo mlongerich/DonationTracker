@@ -29,10 +29,12 @@ if ! docker-compose exec -T api bundle exec brakeman --quiet --exit-on-warn; the
 fi
 
 echo "🧪 Running RSpec tests with coverage..."
-if ! docker-compose exec -T api bundle exec rspec; then
+cd ..
+if ! bash scripts/test-backend.sh; then
     echo "❌ Tests are failing - all tests must pass before committing"
     exit 1
 fi
+cd donation_tracker_api
 
 echo "📊 Checking test coverage..."
 # Extract coverage from SimpleCov's last run

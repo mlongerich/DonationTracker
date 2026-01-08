@@ -41,6 +41,11 @@ module DonationTrackerApi
     # Skip views, helpers and assets when generating a new resource.
     config.api_only = true
 
+    # Add session middleware for OmniAuth (OAuth requires sessions during callback)
+    # Sessions are only used during OAuth flow, not for API authentication (we use JWT)
+    config.middleware.use ActionDispatch::Cookies
+    config.middleware.use ActionDispatch::Session::CookieStore, key: "_donation_tracker_session"
+
     # Disable host authorization for API-only app
     config.hosts.clear
   end
