@@ -1014,17 +1014,12 @@ function Layout() {
 - Doc-only changes
 - Cases where docs truly don't need updating
 
-**Option 1: Environment Variable (one-off)**
+**Option 1: Environment Variable (recommended)**
 ```bash
 SKIP_DOC_CHECK=1 git commit -m "hotfix: urgent bug fix"
 ```
 
-**Option 2: Commit Message Tag (documented exception)**
-```bash
-git commit -m "wip: partial implementation [skip-docs]"
-```
-
-**Option 3: Bypass All Hooks (use sparingly)**
+**Option 2: Bypass All Hooks (use sparingly)**
 ```bash
 git commit --no-verify -m "your commit message"
 ```
