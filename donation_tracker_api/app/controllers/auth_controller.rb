@@ -13,7 +13,7 @@
 # @see JsonWebToken for JWT encoding/decoding
 # @see User for domain validation
 class AuthController < ApplicationController
-  skip_before_action :authenticate_request, only: [ :google_oauth2 ]
+  skip_before_action :authenticate_request, only: [ :google_oauth2, :dev_login ]
 
   def google_oauth2
     auth = request.env["omniauth.auth"]
@@ -34,14 +34,32 @@ class AuthController < ApplicationController
 
     token = JsonWebToken.encode({ user_id: user.id })
 
-    render json: {
-      token: token,
-      user: {
-        email: user.email,
-        name: user.name,
-        avatar_url: user.avatar_url
-      }
-    }, status: :ok
+    user_data = {
+      email: user.email,
+      name: user.name,
+      avatar_url: user.avatar_url
+    }
+
+    # Redirect to frontend callback with token and user data
+    frontend_url = ENV.fetch("FRONTEND_URL", "http://localhost:3000")
+    redirect_to "#{frontend_url}/auth/callback?token=#{token}&user=#{CGI.escape(user_data.to_json)}", allow_other_host: true
+  end
+
+  def dev_login
+    # Find seeded admin user
+    user = User.find_by!(provider: "google_oauth2", uid: "admin_test_uid")
+
+    token = JsonWebToken.encode({ user_id: user.id })
+
+    user_data = {
+      email: user.email,
+      name: user.name,
+      avatar_url: user.avatar_url
+    }
+
+    # Redirect to frontend callback with token and user data
+    frontend_url = ENV.fetch("FRONTEND_URL", "http://localhost:3000")
+    redirect_to "#{frontend_url}/auth/callback?token=#{token}&user=#{CGI.escape(user_data.to_json)}", allow_other_host: true
   end
 
   def me

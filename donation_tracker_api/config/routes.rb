@@ -7,6 +7,7 @@ Rails.application.routes.draw do
 
   # Authentication routes (OmniAuth)
   get "/auth/google_oauth2/callback", to: "auth#google_oauth2"
+  get "/auth/dev_login", to: "auth#dev_login"
   delete "/auth/logout", to: "auth#logout"
   get "/auth/me", to: "auth#me"
 
