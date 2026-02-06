@@ -22,6 +22,17 @@ const mockedApiClient = apiClient as jest.Mocked<typeof apiClient>;
 describe('App', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
+
+    // Set up authenticated state for tests
+    localStorage.setItem('auth_token', 'test_token_123');
+    localStorage.setItem('auth_user', JSON.stringify({
+      id: 1,
+      email: 'admin@projectsforasia.com',
+      name: 'Admin User',
+      avatar_url: 'https://example.com/avatar.jpg'
+    }));
+
     // Mock API calls to prevent errors
     mockedApiClient.get.mockImplementation((url: string) => {
       if (

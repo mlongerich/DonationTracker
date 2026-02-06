@@ -1,7 +1,16 @@
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Button, Box, Typography } from '@mui/material';
+import { useAuth } from '../hooks/useAuth';
 
 const Navigation = () => {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <AppBar position="static">
       <Toolbar>
@@ -26,6 +35,9 @@ const Navigation = () => {
           </Button>
           <Button color="inherit" component={RouterLink} to="/admin">
             Admin
+          </Button>
+          <Button color="inherit" onClick={handleLogout}>
+            Logout
           </Button>
         </Box>
       </Toolbar>
