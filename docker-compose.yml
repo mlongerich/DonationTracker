@@ -128,7 +128,7 @@ services:
     command: >
       bash -c "
         rm -f tmp/pids/server.pid &&
-        bundle exec rails db:create db:migrate RAILS_ENV=test &&
+        bundle exec rails db:create db:migrate db:seed RAILS_ENV=test &&
         bundle exec rails server -b 0.0.0.0 -p 3002
       "
     profiles:
