@@ -29,5 +29,13 @@ declare namespace Cypress {
      * @example cy.verifyFormPreFilled('Jane Smith', 'jane@example.com')
      */
     verifyFormPreFilled(name: string, email: string): Chainable<void>;
+
+    /**
+     * Logs in as the seeded admin user for authenticated E2E tests
+     * Sets auth_token and auth_user in localStorage
+     * Call this before cy.visit() to authenticate the session
+     * @example cy.login()
+     */
+    login(): Chainable<void>;
   }
 }

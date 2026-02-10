@@ -1,5 +1,6 @@
 describe('Donor CSV Export', () => {
   beforeEach(() => {
+    cy.login();
     cy.clearDonors();
     cy.visit('/admin');
     cy.contains('Donation Tracker').should('be.visible');

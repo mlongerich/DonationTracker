@@ -1,5 +1,6 @@
 describe('Project Management', () => {
   beforeEach(() => {
+    cy.login();
     // Visit Admin page and click Projects tab
     cy.visit('/admin');
     cy.contains('button', 'Projects').click();

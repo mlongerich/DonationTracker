@@ -1,5 +1,6 @@
 describe('Donor Merge - Donation & Sponsorship Reassignment', () => {
   beforeEach(() => {
+    cy.login();
     // Clear database
     cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
   });

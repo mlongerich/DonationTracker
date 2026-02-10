@@ -1,5 +1,6 @@
 describe('Donor Search & Pagination', () => {
   beforeEach(() => {
+    cy.login();
     cy.clearDonors();
     cy.visit('/donors');
     // Wait for page to fully load

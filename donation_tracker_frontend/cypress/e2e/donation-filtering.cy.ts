@@ -55,6 +55,7 @@ describe('Donation Date Range Filtering', () => {
   };
 
   beforeEach(() => {
+    cy.login();
     // Clean database before each test
     cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
 

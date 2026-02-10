@@ -1,5 +1,6 @@
 describe('Donor Email Display', () => {
   beforeEach(() => {
+    cy.login();
     cy.clearDonors();
     cy.visit('/donors');
     cy.contains('Donation Tracker').should('be.visible');

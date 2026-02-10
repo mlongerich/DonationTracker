@@ -1,5 +1,6 @@
 describe('Donor Form', () => {
   beforeEach(() => {
+    cy.login();
     cy.visit('/donors');
   });
 

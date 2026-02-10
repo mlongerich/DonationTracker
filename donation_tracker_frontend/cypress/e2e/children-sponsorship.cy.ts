@@ -1,5 +1,6 @@
 describe('Children and Sponsorship Management', () => {
   beforeEach(() => {
+    cy.login();
     // Clean database before each test
     cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
     cy.visit('/children');

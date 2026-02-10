@@ -1,5 +1,6 @@
 describe('Project Management - Full CRUD Workflow', () => {
   beforeEach(() => {
+    cy.login();
     // Clean database before each test
     cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
     // Visit Admin page and click Projects tab
