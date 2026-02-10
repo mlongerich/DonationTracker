@@ -1,6 +1,10 @@
 class DropFailedStripePayments < ActiveRecord::Migration[8.0]
-  def change
-    drop_table :failed_stripe_payments do |t|
+  def up
+    drop_table :failed_stripe_payments if table_exists?(:failed_stripe_payments)
+  end
+
+  def down
+    create_table :failed_stripe_payments do |t|
       t.string :stripe_transaction_id, null: false
       t.string :donor_name
       t.string :donor_email
