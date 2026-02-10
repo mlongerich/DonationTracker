@@ -527,6 +527,108 @@ end
 
 **See:** docs/PATTERNS.md for implementation code and validation examples
 
+#### Authentication & Authorization (TICKET-008)
+
+**Pattern:** Google OAuth2 + JWT tokens for single-tenant admin application
+
+**Backend Authentication:**
+```ruby
+# app/controllers/auth_controller.rb
+class AuthController < ApplicationController
+  skip_before_action :authenticate_request, only: [:google_oauth2, :dev_login]
+
+  def google_oauth2
+    auth = request.env["omniauth.auth"]
+
+    # Domain restriction: Only @projectsforasia.com emails
+    unless auth.info.email.end_with?("@projectsforasia.com")
+      render json: { error: "Access denied. Only @projectsforasia.com email addresses are allowed." }, status: :forbidden
+      return
+    end
+
+    user = User.find_or_initialize_by(provider: auth.provider, uid: auth.uid)
+    user.update!(email: auth.info.email, name: auth.info.name, avatar_url: auth.info.image)
+
+    token = JsonWebToken.encode({ user_id: user.id })
+
+    # Redirect to frontend callback with token and user data
+    frontend_url = ENV.fetch("FRONTEND_URL", "http://localhost:3000")
+    redirect_to "#{frontend_url}/auth/callback?token=#{token}&user=#{CGI.escape(user_data.to_json)}", allow_other_host: true
+  end
+
+  def dev_login
+    # Development/E2E testing only - uses seeded admin user
+    user = User.find_by!(provider: "google_oauth2", uid: "admin_test_uid")
+    token = JsonWebToken.encode({ user_id: user.id })
+    # ... redirect to frontend callback
+  end
+end
+
+# app/controllers/application_controller.rb
+class ApplicationController < ActionController::API
+  before_action :authenticate_request
+
+  private
+
+  def authenticate_request
+    header = request.headers['Authorization']
+    token = header.split(' ').last if header
+    decoded = JsonWebToken.decode(token)
+    @current_user = User.find(decoded[:user_id])
+  rescue ActiveRecord::RecordNotFound, JWT::DecodeError
+    render json: { error: 'Authorization token missing' }, status: :unauthorized
+  end
+end
+```
+
+**JWT Service:**
+```ruby
+# app/services/json_web_token.rb
+class JsonWebToken
+  SECRET_KEY = Rails.application.credentials.jwt_secret_key || ENV['JWT_SECRET_KEY']
+
+  def self.encode(payload, exp = 30.days.from_now)
+    payload[:exp] = exp.to_i
+    JWT.encode(payload, SECRET_KEY)
+  end
+
+  def self.decode(token)
+    decoded = JWT.decode(token, SECRET_KEY)[0]
+    HashWithIndifferentAccess.new(decoded)
+  end
+end
+```
+
+**Authentication Flow:**
+1. User clicks "Sign in with Google" on `/login`
+2. Frontend redirects to `/auth/google_oauth2`
+3. OmniAuth handles Google OAuth dance
+4. Backend validates email domain (@projectsforasia.com)
+5. Backend generates JWT (30-day expiration)
+6. Backend redirects to frontend `/auth/callback?token=...&user=...`
+7. Frontend stores JWT in localStorage
+8. Frontend includes `Authorization: Bearer <token>` on all API requests
+9. Backend middleware validates JWT and sets `@current_user`
+
+**Dev Login (Development/E2E):**
+- Endpoint: `GET /auth/dev_login`
+- Uses seeded admin user (admin@projectsforasia.com, uid: admin_test_uid)
+- Generates real JWT token
+- Available in development/test environments only
+- Accessible via "Dev Login" button on LoginPage
+
+**Protected Endpoints:**
+- All `/api/*` routes require authentication
+- Exceptions: `/api/health`, `/auth/*`, `/rails/health`
+- 401 response for missing/invalid tokens
+
+**Domain Restriction:**
+- Only @projectsforasia.com emails allowed
+- Enforced in AuthController before user creation
+- Returns 403 Forbidden for unauthorized domains
+
+**See:** TICKET-008 for full implementation details
+
 ### Frontend (React)
 
 - **ESLint**: React, accessibility, TypeScript rules
@@ -534,6 +636,130 @@ end
 - **TypeScript**: Strict mode
 - **Mobile-first**: Responsive components
 - **Axios**: Standardized API client
+
+#### Authentication Pattern (TICKET-008)
+
+**AuthContext + useAuth Hook:**
+```typescript
+// src/contexts/AuthContext.tsx
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem('auth_user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+  const [token, setToken] = useState<string | null>(() =>
+    localStorage.getItem('auth_token')
+  );
+
+  const login = (token: string, user: User) => {
+    localStorage.setItem('auth_token', token);
+    localStorage.setItem('auth_user', JSON.stringify(user));
+    setToken(token);
+    setUser(user);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    setToken(null);
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+// Usage: const { user, isAuthenticated, logout } = useAuth();
+```
+
+**API Client Interceptor:**
+```typescript
+// src/api/client.ts
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+```
+
+**Protected Routes:**
+```typescript
+// src/components/ProtectedRoute.tsx
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
+// src/App.tsx
+<Route path="/" element={<Layout />}>
+  <Route index element={<ProtectedRoute><DonationsPage /></ProtectedRoute>} />
+  <Route path="donors" element={<ProtectedRoute><DonorsPage /></ProtectedRoute>} />
+</Route>
+```
+
+**Login Page:**
+- Google OAuth button redirects to `/auth/google_oauth2`
+- Dev login button (development only) redirects to `/auth/dev_login`
+- Environment-based feature flag: `process.env.NODE_ENV === 'development'`
+
+**Callback Page:**
+- Extracts `token` and `user` from URL query params
+- Calls `login(token, user)` from AuthContext
+- Redirects to home page
+
+**E2E Authentication Helper:**
+```typescript
+// cypress/support/commands.ts
+Cypress.Commands.add('login', () => {
+  cy.request({
+    method: 'GET',
+    url: `${Cypress.env('apiUrl')}/auth/dev_login`,
+    followRedirect: false,
+  }).then((response) => {
+    const redirectUrl = new URL(response.headers.location);
+    const token = redirectUrl.searchParams.get('token');
+    const userJson = redirectUrl.searchParams.get('user');
+    Cypress.env('auth_token', token);
+    Cypress.env('auth_user', userJson);
+  });
+});
+
+// cypress/support/e2e.ts - Auto-inject auth into cy.visit()
+Cypress.Commands.overwrite('visit', (originalFn, url, options) => {
+  return originalFn(url, {
+    ...options,
+    onBeforeLoad(win) {
+      const authToken = Cypress.env('auth_token');
+      const authUser = Cypress.env('auth_user');
+      if (authToken && authUser) {
+        win.localStorage.setItem('auth_token', authToken);
+        win.localStorage.setItem('auth_user', authUser);
+      }
+    },
+  });
+});
+
+// Usage in tests: cy.login(); cy.visit('/donors');
+```
+
+**See:** TICKET-008, authentication.cy.ts for E2E tests
 
 #### Error Boundary Pattern
 
@@ -1083,11 +1309,15 @@ bash scripts/test-backend.sh spec/models/donation_spec.rb:227
 
 ## 🔒 Security Requirements
 
-**Backend:** Input validation, parameterized queries, XSS protection, rate limiting, never commit secrets
+**Authentication:** Google OAuth2 with domain restriction (@projectsforasia.com only), JWT tokens (30-day expiration), all API routes protected except `/auth/*` and `/api/health`
 
-**Frontend:** Sanitize inputs, secure token storage, HTTPS, CSP headers
+**Backend:** Input validation, parameterized queries, XSS protection, rate limiting, never commit secrets, JWT secret in credentials/ENV
 
-**Keys:** master.key local only, environment variables for deployment, audit git history
+**Frontend:** Sanitize inputs, JWT in localStorage, auto-logout on 401, HTTPS enforced, CSP headers
+
+**Keys:** master.key local only, environment variables for deployment (GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, JWT_SECRET_KEY), audit git history
+
+**See:** TICKET-008 for authentication implementation, TICKET-136 for production OAuth setup
 
 ---
 

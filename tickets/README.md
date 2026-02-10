@@ -85,10 +85,11 @@ Current work items and user stories being actively developed.
 - [TICKET-119: Move Projects to Admin Page Tab](completed/TICKET-119-move-projects-to-admin-tab.md) - ✅ Complete (2025-12-05)
 - [TICKET-127: StandardDialog Component & Form UX Consistency](TICKET-127-sponsorshipmodal-dialog-consistency.md) - ✅ Complete (2025-12-07)
 - [TICKET-071: Stripe CSV Batch Import Task](completed/TICKET-071-stripe-csv-batch-import-task.md) - ✅ Complete (2026-01-06)
+- [TICKET-008: Basic Authentication with Google OAuth](completed/TICKET-008-basic-authentication-google-oauth.md) - ✅ Complete (2026-02-10)
 
 ### 🔵 In Progress Tickets
 
-- [TICKET-008: Basic Authentication with Google OAuth](TICKET-008-basic-authentication-google-oauth.md) - 🔵 In Progress (2026-01-07) - *JWT service & User model complete (6 tests), AuthController pending*
+*No tickets currently in progress.*
 
 ### ⏸️ Blocked Tickets
 
@@ -132,7 +133,6 @@ Current work items and user stories being actively developed.
 - [TICKET-118: Add Source Tracking to Donations](TICKET-118-donation-source-tracking.md) - 📋 Planned (🟡 Medium, S) - *CSV/webhook/manual audit trail*
 
 #### Feature Development
-- [TICKET-008: Basic Authentication with Google OAuth](TICKET-008-basic-authentication-google-oauth.md) - 📋 Planned
 - [TICKET-011: Recurring Donation Tracking](TICKET-011-recurring-donation-tracking.md) - 📋 Planned
 - [TICKET-012: Stripe Webhook Integration](TICKET-012-stripe-webhook-integration.md) - 📋 Planned
 - [TICKET-018: Fix Donation Amount Decimal Formatting](TICKET-018-donation-amount-decimal-formatting.md) - 📋 Planned
@@ -207,17 +207,17 @@ Current work items and user stories being actively developed.
 ## Quick Stats
 
 - **Total Tickets:** 118
-- **Completed:** 65 (55%)
+- **Completed:** 66 (56%)
 - **In Progress:** 0
-- **Planned:** 51
-- **Estimated Hours Remaining:** ~193.5 hours (~4.8 weeks)
+- **Planned:** 50
+- **Estimated Hours Remaining:** ~183.5 hours (~4.6 weeks)
 - **Blocked:** 0
 - **Deferred/Accepted Risk:** 1
 - **Canceled/Superseded:** 3 (TICKET-041, TICKET-051, TICKET-120)
 
 ### By Category
 
-- **Feature Development:** 21 planned (~82.5h), 13 completed
+- **Feature Development:** 20 planned (~72.5h), 14 completed
   - New: TICKET-100 (Donor Address), TICKET-101 (Check Photos), TICKET-102 (Child Photos), TICKET-103/104/105 (Reports), TICKET-106 (Admin Delete Override), TICKET-133 (Donor Statements)
 - **Stripe Integration:** 3 planned (~19h), 2 completed
   - **PERMANENT:** ✅ TICKET-070 (core service - complete), TICKET-076 (failed payments tracking - planned)

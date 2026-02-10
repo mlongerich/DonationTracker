@@ -1,9 +1,10 @@
 ## [TICKET-008] Basic Authentication with Google OAuth
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 **Priority:** 🔴 High (Security - blocks all other E2E tests)
 **Dependencies:** None
-**Estimated Effort:** L (8-12 hours)
+**Completed:** 2026-02-10
+**Actual Effort:** ~10 hours
 
 ### User Story
 As an admin, I want to log in with Google OAuth using my @projectsforasia.com email so that only authorized organization members can access the donation system.
@@ -11,36 +12,36 @@ As an admin, I want to log in with Google OAuth using my @projectsforasia.com em
 ### Acceptance Criteria
 
 #### Backend (Rails API)
-- [ ] Run `bundle install` to install auth gems (devise, omniauth-google-oauth2, omniauth-rails_csrf_protection, jwt)
-- [ ] Run Devise generator and configure for API mode
-- [ ] Create migration to add OAuth fields to User model (provider, uid, email, name, avatar_url)
-- [ ] Update User model with Devise + OmniAuth configuration
-- [ ] Validate email domain (@projectsforasia.com) in User model
-- [ ] Create AuthController with callback and logout endpoints
-- [ ] Reject OAuth callback for non-@projectsforasia.com emails with 403
-- [ ] Create JWT token service (encode/decode)
-- [ ] Add authentication middleware to ApplicationController
-- [ ] Configure CORS for OAuth callback flow
-- [ ] Add auth routes: POST /auth/google_oauth2, GET /auth/google_oauth2/callback, DELETE /auth/logout, GET /auth/me
-- [ ] RSpec tests for JWT service
-- [ ] RSpec request tests for auth endpoints (including domain validation)
-- [ ] Factory Bot user factory with OAuth traits
+- [x] Run `bundle install` to install auth gems (devise, omniauth-google-oauth2, omniauth-rails_csrf_protection, jwt)
+- [x] Run Devise generator and configure for API mode
+- [x] Create migration to add OAuth fields to User model (provider, uid, email, name, avatar_url)
+- [x] Update User model with Devise + OmniAuth configuration
+- [x] Validate email domain (@projectsforasia.com) in User model
+- [x] Create AuthController with callback and logout endpoints
+- [x] Reject OAuth callback for non-@projectsforasia.com emails with 403
+- [x] Create JWT token service (encode/decode)
+- [x] Add authentication middleware to ApplicationController
+- [x] Configure CORS for OAuth callback flow
+- [x] Add auth routes: POST /auth/google_oauth2, GET /auth/google_oauth2/callback, DELETE /auth/logout, GET /auth/me
+- [x] RSpec tests for JWT service
+- [x] RSpec request tests for auth endpoints (including domain validation)
+- [x] Factory Bot user factory with OAuth traits
 
 #### Frontend (React)
-- [ ] Create AuthContext with login/logout/user state
-- [ ] Create API client interceptor to add JWT to requests
-- [ ] Create LoginPage with Google OAuth button
-- [ ] Create ProtectedRoute wrapper component
-- [ ] Update Layout/Navigation with conditional logout button
-- [ ] Update App.tsx routes with ProtectedRoute wrapper
-- [ ] Handle token expiration and auto-logout
-- [ ] Update all 19 existing E2E tests to support authentication
-- [ ] Create new E2E test for login/logout flow
+- [x] Create AuthContext with login/logout/user state
+- [x] Create API client interceptor to add JWT to requests
+- [x] Create LoginPage with Google OAuth button
+- [x] Create ProtectedRoute wrapper component
+- [x] Update Layout/Navigation with conditional logout button
+- [x] Update App.tsx routes with ProtectedRoute wrapper
+- [x] Handle token expiration and auto-logout
+- [x] Update all 20 existing E2E tests to support authentication
+- [x] Create new E2E test for login/logout flow
 
 #### Infrastructure
-- [ ] Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to docker-compose.yml
-- [ ] Update .env.example with auth environment variables
-- [ ] Document OAuth setup in README or docs/
+- [x] Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to docker-compose.yml
+- [x] Update .env.example with auth environment variables
+- [x] Document OAuth setup in README or docs/
 
 ### Technical Notes
 
@@ -151,4 +152,36 @@ JWT_SECRET_KEY=your-jwt-secret
 - `docs/AUTHENTICATION.md` (optional) - OAuth setup guide
 
 ### Related Commits
-- (To be added during commit)
+- `8de6ad7` - backend: add JWT service and OAuth foundation for TICKET-008
+- `c7b73d4` - docker: add Google OAuth environment configuration
+- `a368226` - frontend: add authentication foundation for TICKET-008
+- `071aa3b` - backend: implement OAuth callback redirect and dev login endpoint
+- `9be974a` - frontend: complete OAuth authentication flow with dev login
+- `62008c8` - fix: make drop_failed_stripe_payments migration idempotent
+- `d58b970` - docker: add db:seed to api-e2e startup command
+- `eecf240` - frontend: add authentication to E2E tests for TICKET-008
+
+### Implementation Summary
+
+**Authentication Flow:**
+- Google OAuth callback redirects to frontend `/auth/callback` with JWT + user data
+- JWT stored in localStorage with 30-day expiration
+- All API requests include `Authorization: Bearer <token>` header
+- Protected routes redirect unauthenticated users to `/login`
+- Domain restriction enforced: only @projectsforasia.com emails allowed
+
+**Dev Login Feature:**
+- Added `/auth/dev_login` endpoint for development/E2E testing
+- Uses seeded admin user (admin@projectsforasia.com)
+- Follows same redirect flow as real OAuth
+- Accessible via "Dev Login" button on LoginPage (development only)
+
+**E2E Test Integration:**
+- Created `cy.login()` Cypress command
+- Automatically injects auth token into localStorage before each test
+- Updated cy.visit() overwrite to handle authentication
+- All 21 E2E test files passing (105 tests total)
+- New authentication.cy.ts covers login/logout/domain restriction flows
+
+**Next Steps:**
+- TICKET-136: Configure production Google OAuth credentials
