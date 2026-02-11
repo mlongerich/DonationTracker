@@ -39,3 +39,34 @@ plugin :solid_queue if ENV["SOLID_QUEUE_IN_PUMA"]
 # Specify the PID file. Defaults to tmp/pids/server.pid in development.
 # In other environments, only set the PID file if requested.
 pidfile ENV["PIDFILE"] if ENV["PIDFILE"]
+
+# Production-specific configuration
+if ENV["RAILS_ENV"] == "production"
+  # Number of worker processes (set to number of CPU cores)
+  # Each worker is a separate process and has its own memory space
+  workers ENV.fetch("WEB_CONCURRENCY") { 2 }
+
+  # Preload application for better memory efficiency
+  # Workers will fork from a preloaded master process
+  preload_app!
+
+  # Allow workers to restart themselves if memory usage grows too high
+  # (requires puma_worker_killer gem for advanced memory management)
+
+  # Worker timeout (kill workers that don't respond within 30 seconds)
+  worker_timeout 30
+
+  # Set up socket backlog
+  backlog 64
+
+  # Worker startup/shutdown hooks
+  on_worker_boot do
+    # Reconnect to database after fork
+    ActiveRecord::Base.establish_connection if defined?(ActiveRecord)
+  end
+
+  before_fork do
+    # Disconnect from database before fork
+    ActiveRecord::Base.connection_pool.disconnect! if defined?(ActiveRecord)
+  end
+end
