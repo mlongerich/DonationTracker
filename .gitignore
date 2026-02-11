@@ -235,6 +235,12 @@ PFAOnlinePayments-Stripe.csv
 # DEPLOYMENT & PRODUCTION
 # ============================================================================
 
+# Environment files (root level for Docker deployment)
+/.env
+/.env.local
+/.env.production
+/.env.*.local
+
 # Deployment keys
 deploy_key*
 id_rsa*

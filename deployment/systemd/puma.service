@@ -1,0 +1,56 @@
+# Systemd service for Puma Rails server
+# Donation Tracker production deployment
+#
+# Installation:
+#   sudo cp deployment/systemd/puma.service /etc/systemd/system/puma.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable puma
+#   sudo systemctl start puma
+#
+# Commands:
+#   sudo systemctl status puma   # Check status
+#   sudo systemctl restart puma  # Restart after code changes
+#   sudo systemctl stop puma     # Stop the service
+#   sudo journalctl -u puma -f   # View logs
+
+[Unit]
+Description=Puma Rails Server for Donation Tracker
+After=network.target postgresql.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=deploy
+WorkingDirectory=/var/www/donation-tracker/donation_tracker_api
+
+# Environment file (contains all environment variables)
+EnvironmentFile=/var/www/donation-tracker/donation_tracker_api/.env.production
+
+# Set Rails environment
+Environment=RAILS_ENV=production
+Environment=RACK_ENV=production
+
+# Puma command
+ExecStart=/home/deploy/.rbenv/shims/bundle exec puma -C config/puma.rb
+
+# Process management
+Restart=always
+RestartSec=10
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Resource limits
+LimitNOFILE=65536
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Logging
+StandardOutput=append:/var/log/puma/stdout.log
+StandardError=append:/var/log/puma/stderr.log
+SyslogIdentifier=puma
+
+[Install]
+WantedBy=multi-user.target
