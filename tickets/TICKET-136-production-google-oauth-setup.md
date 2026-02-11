@@ -1,8 +1,9 @@
 ## [TICKET-136] Production Google OAuth Setup
 
-**Status:** 📋 Ready (TICKET-008 complete)
+**Status:** ⏸️ Blocked by TICKET-137
 **Priority:** 🔴 High
 **Category:** Infrastructure / Deployment
+**Dependencies:** TICKET-137 (Production Infrastructure - needs production domain)
 **Related:** TICKET-008 (Google OAuth Authentication) ✅ Complete
 
 ### User Story

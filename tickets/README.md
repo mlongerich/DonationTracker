@@ -93,6 +93,8 @@ Current work items and user stories being actively developed.
 
 ### ⏸️ Blocked Tickets
 
+- [TICKET-136: Production Google OAuth Setup](TICKET-136-production-google-oauth-setup.md) - ⏸️ Blocked by TICKET-137 (needs production domain)
+
 ### ⏸️ Deferred - Accepted Risk
 
 - [TICKET-049: Child Model Soft Delete with Archive/Restore](TICKET-049-child-soft-delete-archive-restore.md) - ⏸️ Deferred (Frontend protection sufficient, backend API risk accepted)
@@ -131,6 +133,9 @@ Current work items and user stories being actively developed.
 - [TICKET-116: Add Archive Functionality to Admin Page](TICKET-116-admin-archive-donations.md) - 📋 Planned (🟡 Medium, S) - *Soft delete for invalid donations*
 - [TICKET-117: Standardize Admin Page Card Design](TICKET-117-admin-consistent-card-design.md) - 📋 Planned (🟢 Low, XS) - *Visual consistency*
 - [TICKET-118: Add Source Tracking to Donations](TICKET-118-donation-source-tracking.md) - 📋 Planned (🟡 Medium, S) - *CSV/webhook/manual audit trail*
+
+#### Infrastructure & Deployment
+- [TICKET-137: Production Infrastructure & Deployment](TICKET-137-production-infrastructure-deployment.md) - 📋 Planned (🔴 High, L) - *Deploy to production server, configure domain/SSL/database*
 
 #### Feature Development
 - [TICKET-011: Recurring Donation Tracking](TICKET-011-recurring-donation-tracking.md) - 📋 Planned
@@ -206,17 +211,19 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 118
-- **Completed:** 66 (56%)
+- **Total Tickets:** 119
+- **Completed:** 66 (55%)
 - **In Progress:** 0
-- **Planned:** 50
-- **Estimated Hours Remaining:** ~183.5 hours (~4.6 weeks)
-- **Blocked:** 0
+- **Planned:** 51
+- **Blocked:** 1 (TICKET-136 - waiting for TICKET-137)
+- **Estimated Hours Remaining:** ~193.5 hours (~4.8 weeks)
 - **Deferred/Accepted Risk:** 1
 - **Canceled/Superseded:** 3 (TICKET-041, TICKET-051, TICKET-120)
 
 ### By Category
 
+- **Infrastructure & Deployment:** 1 planned (~10h), 0 completed
+  - TICKET-137 (Production Infrastructure) - blocks TICKET-136
 - **Feature Development:** 20 planned (~72.5h), 14 completed
   - New: TICKET-100 (Donor Address), TICKET-101 (Check Photos), TICKET-102 (Child Photos), TICKET-103/104/105 (Reports), TICKET-106 (Admin Delete Override), TICKET-133 (Donor Statements)
 - **Stripe Integration:** 3 planned (~19h), 2 completed
