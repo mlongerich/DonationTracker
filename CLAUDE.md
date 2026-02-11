@@ -1360,8 +1360,14 @@ bash scripts/test-backend.sh spec/models/donation_spec.rb:227
 - Infrastructure setup (env vars, migrations, backups, monitoring)
 - Application configuration (database seeding, Stripe webhooks, email, error tracking)
 
+**Production Stack (TICKET-137):**
+- **Minimal dependencies:** PostgreSQL + Puma + Nginx only
+- **No Redis:** Not used (no background jobs, no ActionCable, no cache store)
+- **No Sidekiq:** Gem removed - all operations are synchronous
+- **Low resource footprint:** Can run on 512MB RAM with proper tuning (see deployment/DEPLOYMENT.md)
+
 ---
 
 *This document is updated as practices evolve*
-*Last updated: 2025-11-28*
+*Last updated: 2025-02-11*
 *Target: 900-1000 lines for optimal Claude Code performance (self-contained essentials with mature pattern library)*

@@ -19,8 +19,6 @@
 **Web Server:** Nginx (reverse proxy)
 **App Server:** Puma (Rails)
 **Database:** PostgreSQL 15
-**Cache:** Redis
-**Background Jobs:** Sidekiq
 **Process Manager:** systemd
 
 ---
@@ -30,9 +28,6 @@
 ```bash
 # Database
 DATABASE_URL=postgresql://user:pass@localhost/donation_tracker_production
-
-# Redis
-REDIS_URL=redis://localhost:6379/0
 
 # Rails
 RAILS_ENV=production
@@ -64,7 +59,7 @@ SENDGRID_API_KEY=...
 ```bash
 # 1. Install dependencies
 sudo apt update
-sudo apt install postgresql redis-server nginx nodejs npm
+sudo apt install postgresql nginx nodejs npm
 
 # 2. Install Ruby via rbenv
 curl -fsSL https://github.com/rbenv/rbenv-installer/raw/main/bin/rbenv-installer | bash
@@ -97,8 +92,6 @@ sudo certbot --nginx -d yourdomain.com -d api.yourdomain.com
 # 8. Start services
 sudo systemctl enable puma
 sudo systemctl start puma
-sudo systemctl enable sidekiq
-sudo systemctl start sidekiq
 ```
 
 ### Ongoing Deployments
