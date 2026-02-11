@@ -13,9 +13,9 @@ Stripe CSV import fails validation for 121 rows where `Cust Email` is empty but 
 Row 1412: Validation failed: Email is invalid
   Data: {
     amount: "13.1",
-    name: "Clarisa L Rhodes",
+    name: "Example Customer",
     email: nil,  # Cust Email is empty
-    description: "clarisalrhodes@gmail.com",  # Email appears here
+    description: "customer@example.com",  # Email appears here
     nickname: nil,
     date: "2020-12-02 08:19:40 +0000",
     status: "succeeded"
