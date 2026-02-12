@@ -360,8 +360,6 @@ GEM
     rdoc (6.14.2)
       erb
       psych (>= 4.0.0)
-    redis-client (0.25.3)
-      connection_pool
     reek (6.5.0)
       dry-schema (~> 1.13)
       logger (~> 1.6)
@@ -439,12 +437,6 @@ GEM
     sexp_processor (4.17.4)
     shoulda-matchers (6.5.0)
       activesupport (>= 5.2.0)
-    sidekiq (8.0.7)
-      connection_pool (>= 2.5.0)
-      json (>= 2.9.0)
-      logger (>= 1.6.2)
-      rack (>= 3.1.0)
-      redis-client (>= 0.23.2)
     simplecov (0.22.0)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
@@ -538,7 +530,6 @@ DEPENDENCIES
   rubocop-rails-omakase
   rubycritic
   shoulda-matchers
-  sidekiq
   simplecov
   skunk
   stripe
