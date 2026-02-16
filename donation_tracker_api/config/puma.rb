@@ -56,9 +56,6 @@ if ENV["RAILS_ENV"] == "production"
   # Worker timeout (kill workers that don't respond within 30 seconds)
   worker_timeout 30
 
-  # Set up socket backlog
-  backlog 64
-
   # Worker startup/shutdown hooks
   on_worker_boot do
     # Reconnect to database after fork
