@@ -22,7 +22,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-donation_tracker}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-donation_tracker} -d ${DB_NAME:-donation_tracker_production}"]
       interval: 10s
       timeout: 5s
       retries: 5
