@@ -4,12 +4,14 @@ import GoogleIcon from '@mui/icons-material/Google';
 import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
 
 const LoginPage: React.FC = () => {
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+
   const handleGoogleSignIn = () => {
-    window.location.href = 'http://localhost:3001/auth/google_oauth2';
+    window.location.href = `${apiUrl}/auth/google_oauth2`;
   };
 
   const handleDevLogin = () => {
-    window.location.href = 'http://localhost:3001/auth/dev_login';
+    window.location.href = `${apiUrl}/auth/dev_login`;
   };
 
   const isDevelopment = process.env.NODE_ENV === 'development';
