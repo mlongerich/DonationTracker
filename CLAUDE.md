@@ -250,139 +250,38 @@ end
 
 #### Global Error Handling
 
-**ApplicationController** provides global exception handlers for consistent error responses:
+**Pattern:** Use `save!`/`update!`/`find` instead of if/else for consistent error responses
 
-```ruby
-# app/controllers/application_controller.rb
-class ApplicationController < ActionController::API
-  rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
-  rescue_from ActiveRecord::RecordInvalid, with: :render_unprocessable_entity
-  rescue_from ActionController::ParameterMissing, with: :render_bad_request
+**ApplicationController rescue handlers:**
+- `RecordNotFound` → 404 `{ error: "message" }`
+- `RecordInvalid` → 422 `{ errors: [...] }`
+- `ParameterMissing` → 400 `{ error: "message" }`
 
-  # Returns { error: "message" } with 404
-  # Returns { errors: [...] } with 422
-  # Returns { error: "message" } with 400
-end
-```
+**Benefits:** Happy path focus, automatic error responses, proper HTTP codes
 
-**Controller Pattern (use save!/update!/find):**
-
-```ruby
-# Use save! instead of if/else
-def create
-  child = Child.new(child_params)
-  child.save!  # Raises RecordInvalid if validation fails
-  render json: { child: ChildPresenter.new(child).as_json }, status: :created
-end
-
-# Use update! instead of if/else
-def update
-  child = Child.find(params[:id])  # Raises RecordNotFound if not found
-  child.update!(child_params)  # Raises RecordInvalid if validation fails
-  render json: { child: ChildPresenter.new(child).as_json }
-end
-```
-
-**Benefits:** Happy path focus, consistent errors, proper HTTP codes
-
-**Implementation Status:** ✅ All controllers now follow this pattern (TICKET-068, TICKET-094)
-
-**See:** TICKET-068 (pattern established), TICKET-094 (SponsorshipsController fixed)
+**See:** docs/PATTERNS.md for controller examples, TICKET-068, TICKET-094
 
 #### Admin Controller Pattern
 
-**Purpose:** Web interface for administrative operations (CSV import, bulk operations)
+**Purpose:** Web interface for admin operations (CSV import, bulk operations)
 
-**Pattern:**
-```ruby
-# app/controllers/api/admin_controller.rb
-class AdminController < ApplicationController
-  def import_stripe_payments
-    temp_file = Tempfile.new(['stripe_import', '.csv'])
-    temp_file.binmode  # Binary mode for non-UTF-8 CSV files
-    temp_file.write(params[:file].read)
-    temp_file.rewind
+**Key Features:** Reuses service layer, binary file handling, timeout-aware (120s), returns status counts
 
-    importer = StripeCsvBatchImporter.new(temp_file.path)
-    result = importer.import
-
-    render json: { success_count: result[:succeeded_count], ... }
-  rescue StandardError => e
-    render json: { error: "Import failed: #{e.message}" }, status: :internal_server_error
-  ensure
-    temp_file&.close
-    temp_file&.unlink
-  end
-end
-```
-
-**Key Features:**
-- Reuses existing service layer (StripeCsvBatchImporter)
-- Binary file handling for encoding compatibility
-- Timeout-aware (frontend uses 120s timeout for large imports)
-- Returns detailed status counts (succeeded/skipped/failed/needs_attention)
-
-**Implementation:** TICKET-091 (Stripe CSV import GUI)
+**See:** docs/PATTERNS.md for implementation example, TICKET-091
 
 #### Service Object Patterns
 
 **ALL services use instance methods for consistency (TICKET-037).**
 
-**Instance Pattern (Standard):**
-```ruby
-# Example: DonorService (130 lines, 10+ private methods)
-class DonorService
-  def initialize(donor_attributes:, transaction_date:, stripe_customer_id: nil)
-    @donor_attributes = donor_attributes
-    @transaction_date = transaction_date
-    @stripe_customer_id = stripe_customer_id
-    @lookup_email = nil
-    @existing_donor = nil
-  end
-
-  def find_or_update
-    if stripe_customer_id_lookup_possible?
-      find_by_stripe_customer_id_or_email
-    else
-      find_by_email
-    end
-  end
-
-  private
-
-  def stripe_customer_id_lookup_possible?
-    stripe_customer_id.present?
-  end
-
-  def find_by_email
-    normalize_email
-    find_existing_donor
-    create_or_update_donor
-  end
-
-  def normalize_email
-    @lookup_email = donor_attributes[:email].presence || generate_anonymous_email
-  end
-
-  # ... additional private methods for each step
-end
-
-# Usage:
-service = DonorService.new(
-  donor_attributes: { name: "John", email: "john@example.com" },
-  transaction_date: Time.current,
-  stripe_customer_id: "cus_123" # optional
-)
-result = service.find_or_update
-# => { donor: <Donor>, created: true }
-```
-
-**When to use instance pattern:**
+**When to use:**
 - Multi-step workflows (2+ steps)
 - Internal state tracking (instance variables)
 - Private helper methods needed (3+)
 - Complex conditional logic
-- Multiple responsibilities
+
+**Pattern:** Initialize with params, call public method, use private helpers for steps
+
+**See:** docs/PATTERNS.md for DonorService example (130 lines, 10+ methods)
 
 #### Stripe CSV Import Patterns (TICKET-070, TICKET-110, TICKET-111, TICKET-134)
 
@@ -444,24 +343,11 @@ end
 
 **Purpose:** Extract view-specific logic from models/controllers
 
-**Pattern:**
-```ruby
-class DonationPresenter < BasePresenter
-  def as_json(options = {})
-    {
-      id: object.id,
-      amount: object.amount,
-      donor_name: object.donor&.name,  # Computed field
-      # ... other fields
-    }
-  end
-end
-
-# Usage in controller
-CollectionPresenter.new(donations, DonationPresenter).as_json
-```
-
 **When to use:** Complex JSON structures, computed fields, multiple model aggregation
+
+**Pattern:** Presenter class with `as_json` method, use `CollectionPresenter` for arrays
+
+**See:** docs/PATTERNS.md for implementation examples
 
 #### Database Indexing Strategy
 
@@ -487,32 +373,11 @@ CollectionPresenter.new(donations, DonationPresenter).as_json
 
 **Policy:** Prevent accidental data loss
 
-**Pattern (Applied to Donor, Child, Project models):**
-```ruby
-class Donor < ApplicationRecord
-  include Discard::Model  # Soft delete support
+**Pattern:** Soft delete (`discarded_at`), hard delete prevented if associations exist (`dependent: :restrict_with_exception`)
 
-  has_many :donations, dependent: :restrict_with_exception
-  has_many :sponsorships, dependent: :restrict_with_exception
+**Applied to:** Donor, Child, Project models (all have `can_be_deleted?` method)
 
-  def can_be_deleted?
-    donations.empty? && sponsorships.empty?
-  end
-end
-
-class Project < ApplicationRecord
-  has_many :donations, dependent: :restrict_with_exception
-  has_many :sponsorships, dependent: :restrict_with_exception
-
-  def can_be_deleted?
-    !system? && donations.empty? && sponsorships.empty?
-  end
-end
-```
-
-**Implementation:** Soft delete (`discarded_at`), hard delete prevented if associations exist (`restrict_with_exception`)
-
-**See:** TICKET-062, TICKET-038, TICKET-049
+**See:** docs/PATTERNS.md for implementation, TICKET-062, TICKET-038, TICKET-049
 
 #### Donor Contact Information Patterns (TICKET-100)
 
@@ -531,103 +396,28 @@ end
 
 **Pattern:** Google OAuth2 + JWT tokens for single-tenant admin application
 
-**Backend Authentication:**
-```ruby
-# app/controllers/auth_controller.rb
-class AuthController < ApplicationController
-  skip_before_action :authenticate_request, only: [:google_oauth2, :dev_login]
-
-  def google_oauth2
-    auth = request.env["omniauth.auth"]
-
-    # Domain restriction: Only @projectsforasia.com emails
-    unless auth.info.email.end_with?("@projectsforasia.com")
-      render json: { error: "Access denied. Only @projectsforasia.com email addresses are allowed." }, status: :forbidden
-      return
-    end
-
-    user = User.find_or_initialize_by(provider: auth.provider, uid: auth.uid)
-    user.update!(email: auth.info.email, name: auth.info.name, avatar_url: auth.info.image)
-
-    token = JsonWebToken.encode({ user_id: user.id })
-
-    # Redirect to frontend callback with token and user data
-    frontend_url = ENV.fetch("FRONTEND_URL", "http://localhost:3000")
-    redirect_to "#{frontend_url}/auth/callback?token=#{token}&user=#{CGI.escape(user_data.to_json)}", allow_other_host: true
-  end
-
-  def dev_login
-    # Development/E2E testing only - uses seeded admin user
-    user = User.find_by!(provider: "google_oauth2", uid: "admin_test_uid")
-    token = JsonWebToken.encode({ user_id: user.id })
-    # ... redirect to frontend callback
-  end
-end
-
-# app/controllers/application_controller.rb
-class ApplicationController < ActionController::API
-  before_action :authenticate_request
-
-  private
-
-  def authenticate_request
-    header = request.headers['Authorization']
-    token = header.split(' ').last if header
-    decoded = JsonWebToken.decode(token)
-    @current_user = User.find(decoded[:user_id])
-  rescue ActiveRecord::RecordNotFound, JWT::DecodeError
-    render json: { error: 'Authorization token missing' }, status: :unauthorized
-  end
-end
-```
-
-**JWT Service:**
-```ruby
-# app/services/json_web_token.rb
-class JsonWebToken
-  SECRET_KEY = Rails.application.credentials.jwt_secret_key || ENV['JWT_SECRET_KEY']
-
-  def self.encode(payload, exp = 30.days.from_now)
-    payload[:exp] = exp.to_i
-    JWT.encode(payload, SECRET_KEY)
-  end
-
-  def self.decode(token)
-    decoded = JWT.decode(token, SECRET_KEY)[0]
-    HashWithIndifferentAccess.new(decoded)
-  end
-end
-```
-
 **Authentication Flow:**
 1. User clicks "Sign in with Google" on `/login`
 2. Frontend redirects to `/auth/google_oauth2`
-3. OmniAuth handles Google OAuth dance
-4. Backend validates email domain (@projectsforasia.com)
-5. Backend generates JWT (30-day expiration)
-6. Backend redirects to frontend `/auth/callback?token=...&user=...`
-7. Frontend stores JWT in localStorage
-8. Frontend includes `Authorization: Bearer <token>` on all API requests
-9. Backend middleware validates JWT and sets `@current_user`
+3. OmniAuth handles OAuth, validates @projectsforasia.com domain
+4. Backend generates JWT (30-day expiration)
+5. Backend redirects to frontend `/auth/callback?token=...&user=...`
+6. Frontend stores JWT in localStorage
+7. Frontend includes `Authorization: Bearer <token>` on all API requests
+8. Backend middleware validates JWT, sets `@current_user`
 
-**Dev Login (Development/E2E):**
-- Endpoint: `GET /auth/dev_login`
-- Uses seeded admin user (admin@projectsforasia.com, uid: admin_test_uid)
-- Generates real JWT token
-- Available in development/test environments only
-- Accessible via "Dev Login" button on LoginPage
+**Key Components:**
+- `AuthController` - Google OAuth + dev login endpoints
+- `ApplicationController` - JWT authentication middleware
+- `JsonWebToken` - Encode/decode service (30-day expiration)
 
-**Protected Endpoints:**
-- All `/api/*` routes require authentication
-- Exceptions: `/api/health`, `/auth/*`, `/rails/health`
-- 401 response for missing/invalid tokens
+**Domain Restriction:** Only @projectsforasia.com emails (403 Forbidden for others)
 
-**Domain Restriction:**
-- Only @projectsforasia.com emails allowed
-- Enforced in AuthController before user creation
-- Returns 403 Forbidden for unauthorized domains
+**Dev Login:** `GET /auth/dev_login` - Seeded admin user for development/E2E testing
 
-**See:** TICKET-008 for full implementation details
+**Protected Endpoints:** All `/api/*` routes except `/api/health`, `/auth/*`, `/rails/health`
+
+**See:** docs/PATTERNS.md for implementation code, TICKET-008
 
 ### Frontend (React)
 
@@ -640,126 +430,34 @@ end
 #### Authentication Pattern (TICKET-008)
 
 **AuthContext + useAuth Hook:**
-```typescript
-// src/contexts/AuthContext.tsx
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    const storedUser = localStorage.getItem('auth_user');
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
-  const [token, setToken] = useState<string | null>(() =>
-    localStorage.getItem('auth_token')
-  );
-
-  const login = (token: string, user: User) => {
-    localStorage.setItem('auth_token', token);
-    localStorage.setItem('auth_user', JSON.stringify(user));
-    setToken(token);
-    setUser(user);
-  };
-
-  const logout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
-    setToken(null);
-    setUser(null);
-  };
-
-  return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-// Usage: const { user, isAuthenticated, logout } = useAuth();
-```
+- Manages `user`, `token`, `isAuthenticated` state in React Context
+- `login(token, user)` - Stores in localStorage, updates state
+- `logout()` - Clears localStorage, resets state
+- Usage: `const { user, isAuthenticated, logout } = useAuth();`
 
 **API Client Interceptor:**
-```typescript
-// src/api/client.ts
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('auth_user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
-```
+- Request: Adds `Authorization: Bearer <token>` header
+- Response: Auto-logout on 401 (redirects to `/login`)
 
 **Protected Routes:**
-```typescript
-// src/components/ProtectedRoute.tsx
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
-};
-
-// src/App.tsx
-<Route path="/" element={<Layout />}>
-  <Route index element={<ProtectedRoute><DonationsPage /></ProtectedRoute>} />
-  <Route path="donors" element={<ProtectedRoute><DonorsPage /></ProtectedRoute>} />
-</Route>
-```
+- `ProtectedRoute` component wraps all authenticated pages
+- Redirects to `/login` if not authenticated
+- Uses React Router `Navigate` component
 
 **Login Page:**
-- Google OAuth button redirects to `/auth/google_oauth2`
-- Dev login button (development only) redirects to `/auth/dev_login`
-- Environment-based feature flag: `process.env.NODE_ENV === 'development'`
+- Google OAuth button → `/auth/google_oauth2`
+- Dev login button (development only) → `/auth/dev_login`
 
 **Callback Page:**
 - Extracts `token` and `user` from URL query params
 - Calls `login(token, user)` from AuthContext
 - Redirects to home page
 
-**E2E Authentication Helper:**
-```typescript
-// cypress/support/commands.ts
-Cypress.Commands.add('login', () => {
-  cy.request({
-    method: 'GET',
-    url: `${Cypress.env('apiUrl')}/auth/dev_login`,
-    followRedirect: false,
-  }).then((response) => {
-    const redirectUrl = new URL(response.headers.location);
-    const token = redirectUrl.searchParams.get('token');
-    const userJson = redirectUrl.searchParams.get('user');
-    Cypress.env('auth_token', token);
-    Cypress.env('auth_user', userJson);
-  });
-});
+**E2E Authentication:**
+- `cy.login()` command uses `/auth/dev_login` endpoint
+- `cy.visit()` auto-injects auth tokens into localStorage
 
-// cypress/support/e2e.ts - Auto-inject auth into cy.visit()
-Cypress.Commands.overwrite('visit', (originalFn, url, options) => {
-  return originalFn(url, {
-    ...options,
-    onBeforeLoad(win) {
-      const authToken = Cypress.env('auth_token');
-      const authUser = Cypress.env('auth_user');
-      if (authToken && authUser) {
-        win.localStorage.setItem('auth_token', authToken);
-        win.localStorage.setItem('auth_user', authUser);
-      }
-    },
-  });
-});
-
-// Usage in tests: cy.login(); cy.visit('/donors');
-```
-
-**See:** TICKET-008, authentication.cy.ts for E2E tests
+**See:** docs/PATTERNS.md for implementation code, TICKET-008, authentication.cy.ts
 
 #### Error Boundary Pattern
 
@@ -846,72 +544,19 @@ import { Donor } from '../types';
 
 #### StandardDialog Pattern
 
-**Purpose:** Generic dialog wrapper component that eliminates boilerplate and ensures consistent dialog UX across the application.
+**Purpose:** Generic dialog wrapper that eliminates boilerplate, ensures consistent UX
 
-**Extracted:** TICKET-127 (2025-12-05) - Eliminated 180+ lines of duplication from 3 dialogs
+**Features:** Close button (X), standard sizing/padding, integrated Snackbar error handling
 
-**Implementation:**
-```typescript
-// src/components/StandardDialog.tsx
-interface StandardDialogProps {
-  open: boolean;              // Dialog open state
-  onClose: () => void;        // Close handler
-  title: string;              // Dialog title
-  children: React.ReactNode;  // Form/content to render
-  error?: string | null;      // Optional error message
-  onErrorClose?: () => void;  // Error dismissal handler
-  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';  // Dialog width (default 'sm')
-}
-```
+**Props:** `open`, `onClose`, `title`, `children`, `error?`, `onErrorClose?`, `maxWidth?`
 
-**Features:**
-- Close button (X) with CloseIcon in DialogTitle (absolute positioned)
-- Standard sizing: `maxWidth={maxWidth} fullWidth`
-- Standard padding: `DialogContent sx={{ pt: 3 }}`, `Box sx={{ mt: 1 }}`
-- Integrated Snackbar + Alert error handling (optional error prop)
-- Single source of truth for dialog UX
+**Usage:** Wrap form in `<StandardDialog>`, handle API errors in parent with `error` state
 
-**Usage Example:**
-```tsx
-const SponsorshipModal: React.FC<Props> = ({ open, onClose, childName, onSuccess }) => {
-  const [error, setError] = useState<string | null>(null);
+**Benefits:** Eliminates 60-80 lines per dialog, single source of truth for UX
 
-  const handleSubmit = async (data: FormData) => {
-    try {
-      await apiClient.post('/api/sponsorships', { sponsorship: data });
-      onSuccess();
-      onClose();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'An unexpected error occurred');
-    }
-  };
+**Current Usage:** SponsorshipModal, QuickDonorCreateDialog, QuickEntityCreateDialog (tabs)
 
-  return (
-    <StandardDialog
-      open={open}
-      onClose={onClose}
-      title={`Add Sponsor for ${childName}`}
-      error={error}
-      onErrorClose={() => setError(null)}
-    >
-      <SponsorshipForm onSubmit={handleSubmit} />
-    </StandardDialog>
-  );
-};
-```
-
-**Benefits:**
-- Eliminates 60-80 lines of boilerplate per dialog
-- Ensures consistent close button, sizing, padding, error handling
-- Future dialogs automatically inherit consistent UX
-- Single place to fix dialog-wide bugs
-
-**Current Usage:**
-- SponsorshipModal (82 → 54 lines)
-- QuickDonorCreateDialog (105 → 65 lines)
-- QuickEntityCreateDialog (192 → 137 lines) - supports tabs + conditional content
-
-**See:** TICKET-127
+**See:** docs/PATTERNS.md for usage example, TICKET-127
 
 #### MUI Component Sizing
 
@@ -961,110 +606,38 @@ const DonationList = ({ donations, onFilterChange }) => {
 
 #### Form Component Pattern
 
-**Standard:** All form components follow consistent UX patterns for maintainability
-
 **Button Configuration:**
-- **Submit button:** Full-width, primary color (`variant="contained" color="primary" fullWidth`)
-- **Cancel button:** Conditional - only in edit mode for inline page forms
-  - **Inline page forms (CREATE mode)**: NO Cancel - user navigates away via page links
-  - **Inline page forms (EDIT mode)**: YES Cancel - exits edit mode back to list view
-  - **Modal/Dialog forms**: NO Cancel - dialog has close X button instead
-- **Cancel styling:** Error color (`color="error"`) for visual distinction
-- **Placement:** Bottom of form, side-by-side layout in edit mode
-
-**Example (Inline Page Form - CREATE mode):**
-```tsx
-<Box component="form" onSubmit={handleSubmit}>
-  {/* Form fields */}
-  <TextField label="Name" size="small" fullWidth required />
-
-  {/* Submit button only */}
-  <Button type="submit" variant="contained" color="primary" fullWidth>
-    Submit
-  </Button>
-</Box>
-```
-
-**Example (Inline Page Form - EDIT mode):**
-```tsx
-<Box component="form" onSubmit={handleSubmit}>
-  {/* Form fields */}
-  <TextField label="Name" size="small" fullWidth required />
-
-  {/* Conditional buttons based on edit mode */}
-  {initialData && onCancel ? (
-    <Stack direction="row" spacing={2}>
-      <Button type="submit" variant="contained" color="primary" fullWidth>
-        Update
-      </Button>
-      <Button variant="outlined" color="error" onClick={onCancel} fullWidth>
-        Cancel
-      </Button>
-    </Stack>
-  ) : (
-    <Button type="submit" variant="contained" color="primary" fullWidth>
-      Submit
-    </Button>
-  )}
-</Box>
-```
+- **Submit:** Full-width, primary (`variant="contained" color="primary" fullWidth`)
+- **Cancel:** Conditional - only in EDIT mode for inline page forms
+  - CREATE mode: NO Cancel (user navigates away)
+  - EDIT mode: YES Cancel (exits edit mode, `color="error"`)
+  - Modal/Dialog: NO Cancel (dialog has close X)
 
 **Props:**
 - `onSubmit: (data: FormData) => Promise<void>` - Required
 - `initialData?: FormData` - Optional (edit mode if provided)
-- `onCancel?: () => void` - Optional (Cancel button shows only when BOTH `initialData` AND `onCancel` provided)
+- `onCancel?: () => void` - Optional (shows only when BOTH provided)
 
-**Rationale:**
-- CREATE mode: No Cancel needed (user navigates away via page links)
-- EDIT mode: Cancel exits edit mode back to list view
-- Modal forms: No Cancel needed (dialog has close X)
-- Error color on Cancel provides clear visual distinction from primary action
-- Side-by-side layout in edit mode is mobile-friendly and clear
+**Implemented:** DonationForm, ChildForm, ProjectForm, DonorForm, SponsorshipForm
 
-**Implemented Forms:**
-- DonationForm ✅
-- ChildForm ✅ (TICKET-127)
-- ProjectForm ✅ (TICKET-127)
-- DonorForm ✅ (TICKET-127)
-- SponsorshipForm ✅ (modal only - no Cancel, TICKET-127)
-
-**See:** TICKET-050 (ChildForm consistency), TICKET-127 (conditional Cancel pattern)
+**See:** docs/PATTERNS.md for examples, TICKET-050, TICKET-127
 
 #### React Hooks Best Practices
 
 **useCallback for Fetch Functions:**
 - Always wrap fetch functions in `useCallback` to stabilize references
-- Include all dependencies used inside the callback
-- Prevents infinite loops in useEffect hooks
-- No need to include setState functions (they're stable by default)
-
-**Pattern:**
-```typescript
-const fetchData = useCallback(async () => {
-  const response = await apiClient.get('/api/data', {
-    params: { page: currentPage, filter: searchQuery }
-  });
-  setData(response.data.items);
-  setPaginationMeta(response.data.meta);
-}, [currentPage, searchQuery, setPaginationMeta]); // ✅ Include all dependencies
-
-useEffect(() => {
-  fetchData();
-}, [fetchData]); // ✅ Safe to include - stable reference
-```
+- Include all dependencies (setState functions are stable, no need to include)
+- Prevents infinite loops in useEffect
 
 **Common Pitfalls:**
-- ❌ Don't disable exhaustive-deps - fix the root cause instead
-- ❌ Avoid object/array deps that recreate every render (destructure primitives)
-- ✅ setState functions don't need to be in deps (stable by React)
-
-**See:** TICKET-097 (ESLint exhaustive-deps fix)
+- ❌ Don't disable exhaustive-deps - fix root cause
+- ❌ Avoid object/array deps (destructure primitives)
 
 **Async Prop Updates:**
-- Use `useEffect` for props that load asynchronously (modals/dialogs receiving API data)
-- Initialize state with safe defaults, update in useEffect when prop changes
-- **Bug fix (TICKET-100):** DonorMergeModal initialized with `donors[0]?.id || 0` → sent `0` to API → 500 error
-- **Solution:** Initialize with `0`, add `useEffect(() => { if (donors.length > 0) setField(donors[0].id) }, [donors])`
+- Use `useEffect` for async props (modals receiving API data)
+- Initialize with safe defaults, update in useEffect when prop changes
+
+**See:** docs/PATTERNS.md for examples, TICKET-097, TICKET-100
 
 #### Custom Hooks Library
 
@@ -1145,44 +718,14 @@ export const parseCurrency = (dollars: string | number): number => {
 
 **Pattern:** App.tsx (router) → Layout (Outlet) → Pages (state)
 
-**Implementation:**
-```tsx
-// src/App.tsx
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Layout from './components/Layout';
+**Key Components:**
+- `BrowserRouter` wraps Routes
+- `Layout` component renders `<Outlet />` for page content
+- Index route redirects to default page
 
-function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Navigate to="/donors" replace />} />
-          <Route path="donors" element={<DonorsPage />} />
-          <Route path="donations" element={<DonationsPage />} />
-          <Route path="children" element={<ChildrenPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
-  );
-}
+**Best Practices:** Keep App.tsx minimal (routing only), page-level state, E2E tests for all routes
 
-// src/components/Layout.tsx
-import { Outlet } from 'react-router-dom';
-
-function Layout() {
-  return (
-    <>
-      <Navigation />
-      <Outlet /> {/* Pages render here */}
-    </>
-  );
-}
-```
-
-**Best Practices:**
-- Keep App.tsx minimal (routing only), page-level state, index route redirects, E2E tests for all routes
-
-**See:** docs/PATTERNS.md for full code examples
+**See:** docs/PATTERNS.md for full implementation examples
 
 #### AdminPage Tab Organization
 
@@ -1352,22 +895,40 @@ bash scripts/test-backend.sh spec/models/donation_spec.rb:227
 
 ---
 
-## 🔄 Deployment Considerations
+## 🔄 Production Deployment
 
-**See:** docs/project/deployment.md for complete production readiness checklist including:
-- Testing requirements (unit, E2E, QA)
-- Security checklist (SSL, firewall, secrets, audits)
-- Infrastructure setup (env vars, migrations, backups, monitoring)
-- Application configuration (database seeding, Stripe webhooks, email, error tracking)
+**Status:** ✅ **LIVE** - https://donations.projectsforasia.com (TICKET-136, TICKET-137)
 
-**Production Stack (TICKET-137):**
-- **Minimal dependencies:** PostgreSQL + Puma + Nginx only
-- **No Redis:** Not used (no background jobs, no ActionCable, no cache store)
-- **No Sidekiq:** Gem removed - all operations are synchronous
-- **Low resource footprint:** Can run on 512MB RAM with proper tuning (see deployment/DEPLOYMENT.md)
+**Production Environment:**
+- **Server:** DigitalOcean Droplet (1GB RAM, 1 vCPU, Singapore) - $7.20/month
+- **Stack:** Docker Compose + PostgreSQL 15 + Rails 8 + React 18 + Nginx
+- **SSL:** Let's Encrypt (auto-renewal)
+- **Auth:** Google OAuth (Internal - @projectsforasia.com only)
+
+**Deployment Method:** Docker Compose (simpler, matches dev environment)
+
+**Resource Optimization:**
+- Single-mode Puma: `WEB_CONCURRENCY=0`, `RAILS_MAX_THREADS=2`
+- Memory limits: Postgres 256MB, API 220MB, 1GB swap
+- No Redis/Sidekiq (saves ~30-50MB RAM)
+- Result: Runs smoothly on 1GB RAM
+
+**Key Files:**
+- `docker-compose.prod.yml` - Production config
+- `deployment/DEPLOYMENT-DOCKER.md` - Complete deployment guide
+- `docs/OAUTH2-SETUP.md` - Google OAuth setup
+
+**Nginx Pattern:**
+- Specific backend routes (`/auth/google_oauth2`, `/api/`) proxy to `127.0.0.1:3001`
+- Frontend catch-all: `try_files $uri $uri/ /index.html` (React Router)
+- **Critical:** Specific routes BEFORE catch-all
+- Upload limit: `client_max_body_size 50M` (CSV imports)
+
+**See:** `deployment/DEPLOYMENT-DOCKER.md`, `TICKET-137`, `TICKET-136`
 
 ---
 
 *This document is updated as practices evolve*
-*Last updated: 2025-02-11*
+*Last updated: 2026-02-18*
+*Current: 933 lines (34.5% reduction from 1,425 lines)*
 *Target: 900-1000 lines for optimal Claude Code performance (self-contained essentials with mature pattern library)*

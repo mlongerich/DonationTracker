@@ -443,6 +443,66 @@ end
 
 ---
 
+### Admin Controller Pattern
+
+**Purpose:** Web interface for administrative operations (CSV import, bulk operations)
+
+**Implementation:**
+```ruby
+# app/controllers/api/admin_controller.rb
+class AdminController < ApplicationController
+  def import_stripe_payments
+    temp_file = Tempfile.new(['stripe_import', '.csv'])
+    temp_file.binmode  # Binary mode for non-UTF-8 CSV files
+    temp_file.write(params[:file].read)
+    temp_file.rewind
+
+    importer = StripeCsvBatchImporter.new(temp_file.path)
+    result = importer.import
+
+    render json: {
+      success_count: result[:succeeded_count],
+      skipped_count: result[:skipped_count],
+      failed_count: result[:failed_count],
+      needs_attention_count: result[:needs_attention_count]
+    }
+  rescue StandardError => e
+    render json: { error: "Import failed: #{e.message}" }, status: :internal_server_error
+  ensure
+    temp_file&.close
+    temp_file&.unlink
+  end
+end
+```
+
+**Key Features:**
+- Reuses existing service layer (StripeCsvBatchImporter)
+- Binary file handling (`binmode`) for encoding compatibility (handles non-UTF-8 CSV files)
+- Timeout-aware (frontend uses 120s timeout for large imports)
+- Returns detailed status counts (succeeded/skipped/failed/needs_attention)
+- Proper cleanup (`ensure` block closes and deletes temp file)
+
+**Frontend Integration:**
+```typescript
+// AdminPage.tsx - CSV import section
+const handleFileUpload = async (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await apiClient.post('/api/admin/import_stripe_payments', formData, {
+    timeout: 120000, // 2 minutes for large files
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+  // Show results to user
+  console.log(`Success: ${response.data.success_count}, Skipped: ${response.data.skipped_count}`);
+};
+```
+
+**See:** TICKET-091 (Stripe CSV import GUI)
+
+---
+
 ### Stripe CSV Import Pattern (TICKET-070)
 
 **Context:** StripePaymentImportService imports 1,303 historical Stripe transactions from CSV export.
@@ -602,6 +662,142 @@ end
 
 ---
 
+### Authentication & Authorization (TICKET-008)
+
+**Pattern:** Google OAuth2 + JWT tokens for single-tenant admin application
+
+#### Backend Authentication
+
+**AuthController (OAuth + Dev Login):**
+```ruby
+# app/controllers/auth_controller.rb
+class AuthController < ApplicationController
+  skip_before_action :authenticate_request, only: [:google_oauth2, :dev_login]
+
+  def google_oauth2
+    auth = request.env["omniauth.auth"]
+
+    # Domain restriction: Only @projectsforasia.com emails
+    unless auth.info.email.end_with?("@projectsforasia.com")
+      render json: { error: "Access denied. Only @projectsforasia.com email addresses are allowed." }, status: :forbidden
+      return
+    end
+
+    user = User.find_or_initialize_by(provider: auth.provider, uid: auth.uid)
+    user.update!(email: auth.info.email, name: auth.info.name, avatar_url: auth.info.image)
+
+    token = JsonWebToken.encode({ user_id: user.id })
+
+    user_data = { id: user.id, email: user.email, name: user.name, avatar_url: user.avatar_url }
+
+    # Redirect to frontend callback with token and user data
+    frontend_url = ENV.fetch("FRONTEND_URL", "http://localhost:3000")
+    redirect_to "#{frontend_url}/auth/callback?token=#{token}&user=#{CGI.escape(user_data.to_json)}", allow_other_host: true
+  end
+
+  def dev_login
+    # Development/E2E testing only - uses seeded admin user
+    user = User.find_by!(provider: "google_oauth2", uid: "admin_test_uid")
+    token = JsonWebToken.encode({ user_id: user.id })
+    user_data = { id: user.id, email: user.email, name: user.name }
+
+    frontend_url = ENV.fetch("FRONTEND_URL", "http://localhost:3000")
+    redirect_to "#{frontend_url}/auth/callback?token=#{token}&user=#{CGI.escape(user_data.to_json)}", allow_other_host: true
+  end
+end
+```
+
+**ApplicationController (JWT Middleware):**
+```ruby
+# app/controllers/application_controller.rb
+class ApplicationController < ActionController::API
+  before_action :authenticate_request
+
+  private
+
+  def authenticate_request
+    header = request.headers['Authorization']
+    token = header.split(' ').last if header
+    decoded = JsonWebToken.decode(token)
+    @current_user = User.find(decoded[:user_id])
+  rescue ActiveRecord::RecordNotFound, JWT::DecodeError
+    render json: { error: 'Authorization token missing or invalid' }, status: :unauthorized
+  end
+end
+```
+
+**JWT Service:**
+```ruby
+# app/services/json_web_token.rb
+class JsonWebToken
+  SECRET_KEY = Rails.application.credentials.jwt_secret_key || ENV['JWT_SECRET_KEY']
+
+  def self.encode(payload, exp = 30.days.from_now)
+    payload[:exp] = exp.to_i
+    JWT.encode(payload, SECRET_KEY)
+  end
+
+  def self.decode(token)
+    decoded = JWT.decode(token, SECRET_KEY)[0]
+    HashWithIndifferentAccess.new(decoded)
+  end
+end
+```
+
+**OmniAuth Configuration:**
+```ruby
+# config/initializers/omniauth.rb
+OmniAuth.config.allowed_request_methods = [:get, :post]  # CRITICAL for GET requests
+OmniAuth.config.logger = Rails.logger
+OmniAuth.config.silence_get_warning = true if Rails.env.production?
+
+Rails.application.config.middleware.use OmniAuth::Builder do
+  provider :google_oauth2,
+           ENV["GOOGLE_CLIENT_ID"],
+           ENV["GOOGLE_CLIENT_SECRET"],
+           {
+             scope: "email,profile",
+             prompt: "select_account",
+             image_aspect_ratio: "square",
+             image_size: 50,
+             access_type: "online",
+             name: "google_oauth2"
+           }
+end
+```
+
+**Authentication Flow:**
+1. User clicks "Sign in with Google" on `/login`
+2. Frontend redirects to `/auth/google_oauth2`
+3. OmniAuth handles Google OAuth dance
+4. Backend validates email domain (@projectsforasia.com)
+5. Backend generates JWT (30-day expiration)
+6. Backend redirects to frontend `/auth/callback?token=...&user=...`
+7. Frontend stores JWT in localStorage
+8. Frontend includes `Authorization: Bearer <token>` on all API requests
+9. Backend middleware validates JWT and sets `@current_user`
+
+**Dev Login (Development/E2E):**
+- Endpoint: `GET /auth/dev_login`
+- Uses seeded admin user (admin@projectsforasia.com, uid: admin_test_uid)
+- Generates real JWT token
+- Available in development/test environments only
+- Accessible via "Dev Login" button on LoginPage
+
+**Protected Endpoints:**
+- All `/api/*` routes require authentication
+- Exceptions: `/api/health`, `/auth/*`, `/rails/health`
+- 401 response for missing/invalid tokens
+
+**Domain Restriction:**
+- Only @projectsforasia.com emails allowed
+- Enforced in AuthController before user creation
+- Returns 403 Forbidden for unauthorized domains
+
+**See:** TICKET-008 for full implementation details
+
+---
+
 ## Frontend React Patterns
 
 ### TypeScript Type Organization
@@ -744,6 +940,340 @@ const DonorForm: React.FC = () => {
 - Use `type` for unions, primitives, or composed types
 - Add JSDoc comments for complex types
 - Group related types by domain
+
+---
+
+### Frontend Authentication Pattern (TICKET-008)
+
+**Pattern:** AuthContext + useAuth Hook + API Interceptors + Protected Routes
+
+#### AuthContext + useAuth Hook
+
+**Implementation:**
+```typescript
+// src/contexts/AuthContext.tsx
+import React, { createContext, useState, useContext, ReactNode } from 'react';
+
+interface User {
+  id: number;
+  email: string;
+  name: string;
+  avatar_url?: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  login: (token: string, user: User) => void;
+  logout: () => void;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem('auth_user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
+
+  const [token, setToken] = useState<string | null>(() =>
+    localStorage.getItem('auth_token')
+  );
+
+  const login = (token: string, user: User) => {
+    localStorage.setItem('auth_token', token);
+    localStorage.setItem('auth_user', JSON.stringify(user));
+    setToken(token);
+    setUser(user);
+  };
+
+  const logout = () => {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('auth_user');
+    setToken(null);
+    setUser(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = (): AuthContextType => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+};
+```
+
+#### API Client Interceptor
+
+**Implementation:**
+```typescript
+// src/api/client.ts
+import axios from 'axios';
+
+const apiClient = axios.create({
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001',
+});
+
+// Request interceptor: Add Authorization header
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Response interceptor: Auto-logout on 401
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export default apiClient;
+```
+
+#### Protected Routes
+
+**Implementation:**
+```typescript
+// src/components/ProtectedRoute.tsx
+import React from 'react';
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+
+interface ProtectedRouteProps {
+  children: React.ReactNode;
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+export default ProtectedRoute;
+```
+
+**Usage in App.tsx:**
+```typescript
+// src/App.tsx
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import Layout from './components/Layout';
+import LoginPage from './pages/LoginPage';
+import DonorsPage from './pages/DonorsPage';
+
+function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/auth/callback" element={<AuthCallbackPage />} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Navigate to="/donors" replace />} />
+            <Route path="donors" element={<ProtectedRoute><DonorsPage /></ProtectedRoute>} />
+            <Route path="donations" element={<ProtectedRoute><DonationsPage /></ProtectedRoute>} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}
+```
+
+#### Login Page
+
+**Implementation:**
+```typescript
+// src/pages/LoginPage.tsx
+import React from 'react';
+import { Box, Button, Container, Typography, Divider } from '@mui/material';
+import GoogleIcon from '@mui/icons-material/Google';
+import DeveloperModeIcon from '@mui/icons-material/DeveloperMode';
+
+const LoginPage: React.FC = () => {
+  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+
+  const handleGoogleSignIn = () => {
+    window.location.href = `${apiUrl}/auth/google_oauth2`;
+  };
+
+  const handleDevLogin = () => {
+    window.location.href = `${apiUrl}/auth/dev_login`;
+  };
+
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
+  return (
+    <Container maxWidth="sm">
+      <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Typography component="h1" variant="h4" gutterBottom>
+          Donation Tracker
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+          Sign in to continue
+        </Typography>
+
+        <Button
+          variant="contained"
+          size="large"
+          startIcon={<GoogleIcon />}
+          onClick={handleGoogleSignIn}
+          fullWidth
+        >
+          Sign in with Google
+        </Button>
+
+        {isDevelopment && (
+          <>
+            <Divider sx={{ my: 3, width: '100%' }}>OR</Divider>
+            <Button
+              variant="outlined"
+              size="large"
+              startIcon={<DeveloperModeIcon />}
+              onClick={handleDevLogin}
+              fullWidth
+              color="secondary"
+            >
+              Dev Login (Development Only)
+            </Button>
+          </>
+        )}
+      </Box>
+    </Container>
+  );
+};
+
+export default LoginPage;
+```
+
+#### Auth Callback Page
+
+**Implementation:**
+```typescript
+// src/pages/AuthCallbackPage.tsx
+import React, { useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { CircularProgress, Box, Typography } from '@mui/material';
+import { useAuth } from '../contexts/AuthContext';
+
+const AuthCallbackPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { login } = useAuth();
+
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const userJson = searchParams.get('user');
+
+    if (token && userJson) {
+      try {
+        const user = JSON.parse(decodeURIComponent(userJson));
+        login(token, user);
+        navigate('/');
+      } catch (error) {
+        console.error('Failed to parse user data:', error);
+        navigate('/login');
+      }
+    } else {
+      navigate('/login');
+    }
+  }, [searchParams, login, navigate]);
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 8 }}>
+      <CircularProgress />
+      <Typography sx={{ mt: 2 }}>Signing you in...</Typography>
+    </Box>
+  );
+};
+
+export default AuthCallbackPage;
+```
+
+#### E2E Authentication Helper
+
+**Implementation:**
+```typescript
+// cypress/support/commands.ts
+declare global {
+  namespace Cypress {
+    interface Chainable {
+      login(): Chainable<void>;
+    }
+  }
+}
+
+Cypress.Commands.add('login', () => {
+  cy.request({
+    method: 'GET',
+    url: `${Cypress.env('apiUrl')}/auth/dev_login`,
+    followRedirect: false,
+  }).then((response) => {
+    const redirectUrl = new URL(response.headers.location);
+    const token = redirectUrl.searchParams.get('token');
+    const userJson = redirectUrl.searchParams.get('user');
+
+    if (token && userJson) {
+      Cypress.env('auth_token', token);
+      Cypress.env('auth_user', userJson);
+    }
+  });
+});
+
+// cypress/support/e2e.ts - Auto-inject auth into cy.visit()
+Cypress.Commands.overwrite('visit', (originalFn, url, options) => {
+  return originalFn(url, {
+    ...options,
+    onBeforeLoad(win) {
+      const authToken = Cypress.env('auth_token');
+      const authUser = Cypress.env('auth_user');
+      if (authToken && authUser) {
+        win.localStorage.setItem('auth_token', authToken);
+        win.localStorage.setItem('auth_user', authUser);
+      }
+    },
+  });
+});
+```
+
+**Usage in Tests:**
+```typescript
+// cypress/e2e/donors.cy.ts
+describe('Donors Page', () => {
+  beforeEach(() => {
+    cy.login();  // Authenticate before each test
+    cy.visit('/donors');  // Auth auto-injected
+  });
+
+  it('displays donor list', () => {
+    cy.get('[data-testid="donor-list"]').should('exist');
+  });
+});
+```
+
+**See:** TICKET-008, authentication.cy.ts for E2E tests
 
 ---
 
@@ -1797,6 +2327,338 @@ export default ProjectOrChildAutocomplete;
 
 ---
 
+### StandardDialog Pattern (TICKET-127)
+
+**Purpose:** Generic dialog wrapper component that eliminates boilerplate and ensures consistent dialog UX across the application.
+
+**Extracted:** TICKET-127 (2025-12-05) - Eliminated 180+ lines of duplication from 3 dialogs
+
+**Implementation:**
+```typescript
+// src/components/StandardDialog.tsx
+import React from 'react';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
+  Box,
+  Snackbar,
+  Alert,
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+
+interface StandardDialogProps {
+  open: boolean;              // Dialog open state
+  onClose: () => void;        // Close handler
+  title: string;              // Dialog title
+  children: React.ReactNode;  // Form/content to render
+  error?: string | null;      // Optional error message
+  onErrorClose?: () => void;  // Error dismissal handler
+  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';  // Dialog width (default 'sm')
+}
+
+const StandardDialog: React.FC<StandardDialogProps> = ({
+  open,
+  onClose,
+  title,
+  children,
+  error = null,
+  onErrorClose,
+  maxWidth = 'sm',
+}) => {
+  return (
+    <>
+      <Dialog open={open} onClose={onClose} maxWidth={maxWidth} fullWidth>
+        <DialogTitle>
+          {title}
+          <IconButton
+            aria-label="close"
+            onClick={onClose}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: (theme) => theme.palette.grey[500],
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 3 }}>
+          <Box sx={{ mt: 1 }}>
+            {children}
+          </Box>
+        </DialogContent>
+      </Dialog>
+
+      {/* Integrated error handling */}
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={onErrorClose}
+      >
+        <Alert severity="error" onClose={onErrorClose}>
+          {error}
+        </Alert>
+      </Snackbar>
+    </>
+  );
+};
+
+export default StandardDialog;
+```
+
+**Usage Example:**
+```typescript
+// src/components/SponsorshipModal.tsx
+import React, { useState } from 'react';
+import StandardDialog from './StandardDialog';
+import SponsorshipForm from './SponsorshipForm';
+import { SponsorshipFormData } from '../types';
+import apiClient from '../api/client';
+
+interface SponsorshipModalProps {
+  open: boolean;
+  onClose: () => void;
+  childName: string;
+  onSuccess: () => void;
+}
+
+const SponsorshipModal: React.FC<SponsorshipModalProps> = ({
+  open,
+  onClose,
+  childName,
+  onSuccess,
+}) => {
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (data: SponsorshipFormData) => {
+    try {
+      await apiClient.post('/api/sponsorships', { sponsorship: data });
+      onSuccess();
+      onClose();
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'An unexpected error occurred');
+    }
+  };
+
+  return (
+    <StandardDialog
+      open={open}
+      onClose={onClose}
+      title={`Add Sponsor for ${childName}`}
+      error={error}
+      onErrorClose={() => setError(null)}
+    >
+      <SponsorshipForm onSubmit={handleSubmit} />
+    </StandardDialog>
+  );
+};
+
+export default SponsorshipModal;
+```
+
+**Features:**
+- Close button (X) with CloseIcon in DialogTitle (absolute positioned)
+- Standard sizing: `maxWidth={maxWidth} fullWidth`
+- Standard padding: `DialogContent sx={{ pt: 3 }}`, `Box sx={{ mt: 1 }}`
+- Integrated Snackbar + Alert error handling (optional error prop)
+- Single source of truth for dialog UX
+
+**Benefits:**
+- Eliminates 60-80 lines of boilerplate per dialog
+- Ensures consistent close button, sizing, padding, error handling
+- Future dialogs automatically inherit consistent UX
+- Single place to fix dialog-wide bugs
+
+**Current Usage:**
+- SponsorshipModal (82 → 54 lines)
+- QuickDonorCreateDialog (105 → 65 lines)
+- QuickEntityCreateDialog (192 → 137 lines) - supports tabs + conditional content
+
+**See:** TICKET-127
+
+---
+
+### Form Component Pattern
+
+**Standard:** All form components follow consistent UX patterns for maintainability
+
+**Button Configuration:**
+- **Submit button:** Full-width, primary color (`variant="contained" color="primary" fullWidth`)
+- **Cancel button:** Conditional - only in edit mode for inline page forms
+  - **Inline page forms (CREATE mode)**: NO Cancel - user navigates away via page links
+  - **Inline page forms (EDIT mode)**: YES Cancel - exits edit mode back to list view
+  - **Modal/Dialog forms**: NO Cancel - dialog has close X button instead
+- **Cancel styling:** Error color (`color="error"`) for visual distinction
+- **Placement:** Bottom of form, side-by-side layout in edit mode
+
+**Example (Inline Page Form - CREATE mode):**
+```tsx
+<Box component="form" onSubmit={handleSubmit}>
+  {/* Form fields */}
+  <TextField label="Name" size="small" fullWidth required />
+
+  {/* Submit button only */}
+  <Button type="submit" variant="contained" color="primary" fullWidth>
+    Submit
+  </Button>
+</Box>
+```
+
+**Example (Inline Page Form - EDIT mode):**
+```tsx
+<Box component="form" onSubmit={handleSubmit}>
+  {/* Form fields */}
+  <TextField label="Name" size="small" fullWidth required />
+
+  {/* Conditional buttons based on edit mode */}
+  {initialData && onCancel ? (
+    <Stack direction="row" spacing={2}>
+      <Button type="submit" variant="contained" color="primary" fullWidth>
+        Update
+      </Button>
+      <Button variant="outlined" color="error" onClick={onCancel} fullWidth>
+        Cancel
+      </Button>
+    </Stack>
+  ) : (
+    <Button type="submit" variant="contained" color="primary" fullWidth>
+      Submit
+    </Button>
+  )}
+</Box>
+```
+
+**Props:**
+- `onSubmit: (data: FormData) => Promise<void>` - Required
+- `initialData?: FormData` - Optional (edit mode if provided)
+- `onCancel?: () => void` - Optional (Cancel button shows only when BOTH `initialData` AND `onCancel` provided)
+
+**Rationale:**
+- CREATE mode: No Cancel needed (user navigates away via page links)
+- EDIT mode: Cancel exits edit mode back to list view
+- Modal forms: No Cancel needed (dialog has close X)
+- Error color on Cancel provides clear visual distinction from primary action
+- Side-by-side layout in edit mode is mobile-friendly and clear
+
+**Implemented Forms:**
+- DonationForm ✅
+- ChildForm ✅ (TICKET-127)
+- ProjectForm ✅ (TICKET-127)
+- DonorForm ✅ (TICKET-127)
+- SponsorshipForm ✅ (modal only - no Cancel, TICKET-127)
+
+**See:** TICKET-050 (ChildForm consistency), TICKET-127 (conditional Cancel pattern)
+
+---
+
+### React Hooks Best Practices
+
+#### useCallback for Fetch Functions
+
+**Problem:** Fetch functions without stable references cause infinite loops in useEffect.
+
+**Solution:** Always wrap fetch functions in `useCallback` to stabilize references.
+
+**Pattern:**
+```typescript
+const fetchData = useCallback(async () => {
+  const response = await apiClient.get('/api/data', {
+    params: { page: currentPage, filter: searchQuery }
+  });
+  setData(response.data.items);
+  setPaginationMeta(response.data.meta);
+}, [currentPage, searchQuery]); // ✅ Include all dependencies (setState is stable, no need to include)
+
+useEffect(() => {
+  fetchData();
+}, [fetchData]); // ✅ Safe to include - stable reference
+```
+
+**Common Pitfalls:**
+- ❌ Don't disable exhaustive-deps - fix the root cause instead
+- ❌ Avoid object/array deps that recreate every render (destructure primitives)
+- ✅ setState functions don't need to be in deps (stable by React)
+- ✅ Include all primitive values used inside callback
+
+**Example (Wrong - Missing Dependencies):**
+```typescript
+// ❌ ESLint warning: React Hook useCallback has missing dependencies
+const fetchDonors = useCallback(async () => {
+  const response = await apiClient.get('/api/donors', {
+    params: { page: currentPage, include_discarded: showArchived }  // Uses dependencies
+  });
+  setDonors(response.data.donors);
+}, []); // ❌ Missing currentPage and showArchived
+```
+
+**Example (Correct - All Dependencies Included):**
+```typescript
+// ✅ No ESLint warnings
+const fetchDonors = useCallback(async () => {
+  const response = await apiClient.get('/api/donors', {
+    params: { page: currentPage, include_discarded: showArchived }
+  });
+  setDonors(response.data.donors);
+}, [currentPage, showArchived]); // ✅ All dependencies included
+```
+
+**See:** TICKET-097 (ESLint exhaustive-deps fix)
+
+#### Async Prop Updates
+
+**Problem:** Props that load asynchronously (modals/dialogs receiving API data) may be undefined when component initializes.
+
+**Solution:** Use `useEffect` to update state when prop changes.
+
+**Pattern:**
+```typescript
+// ✅ CORRECT: Safe initialization + useEffect for prop updates
+const DonorMergeModal: React.FC<{ donors: Donor[] }> = ({ donors }) => {
+  const [primaryDonorId, setPrimaryDonorId] = useState<number>(0);
+
+  // Update when donors prop changes (async data load)
+  useEffect(() => {
+    if (donors.length > 0) {
+      setPrimaryDonorId(donors[0].id);
+    }
+  }, [donors]);
+
+  // ... rest of component
+};
+```
+
+**Example (Wrong - Unsafe Initialization):**
+```typescript
+// ❌ WRONG: donors[0] may be undefined initially
+const DonorMergeModal: React.FC<{ donors: Donor[] }> = ({ donors }) => {
+  const [primaryDonorId, setPrimaryDonorId] = useState<number>(donors[0]?.id || 0);
+  // If donors[0]?.id is undefined, sends 0 to API → 500 error
+
+  const handleMerge = async () => {
+    await apiClient.post('/api/donors/merge', { primary_donor_id: primaryDonorId });
+    // API receives primary_donor_id: 0 → Donor not found → 500 error
+  };
+};
+```
+
+**Bug Example (TICKET-100):**
+- DonorMergeModal initialized with `donors[0]?.id || 0`
+- If donors array empty initially (async load), `primaryDonorId` = `0`
+- User clicks merge → sends `primary_donor_id: 0` to API
+- API tries `Donor.find(0)` → RecordNotFound → 500 error
+
+**Fix:**
+- Initialize with safe default (`0`)
+- Add `useEffect` to update when prop changes
+- Prevents sending invalid IDs to API
+
+**See:** TICKET-100 (DonorMergeModal async prop bug fix)
+
+---
+
 ### Currency Utilities (DRY Pattern)
 
 **Purpose:** Single source of truth for currency conversion between cents (database) and dollars (display).
@@ -2017,4 +2879,4 @@ end
 
 ---
 
-*Last updated: 2025-11-28*
+*Last updated: 2026-02-18*

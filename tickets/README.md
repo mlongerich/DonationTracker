@@ -86,14 +86,12 @@ Current work items and user stories being actively developed.
 - [TICKET-127: StandardDialog Component & Form UX Consistency](TICKET-127-sponsorshipmodal-dialog-consistency.md) - ✅ Complete (2025-12-07)
 - [TICKET-071: Stripe CSV Batch Import Task](completed/TICKET-071-stripe-csv-batch-import-task.md) - ✅ Complete (2026-01-06)
 - [TICKET-008: Basic Authentication with Google OAuth](completed/TICKET-008-basic-authentication-google-oauth.md) - ✅ Complete (2026-02-10)
+- [TICKET-136: Production Google OAuth Setup](completed/TICKET-136-production-google-oauth-setup.md) - ✅ Complete (2026-02-17)
+- [TICKET-137: Production Infrastructure & Deployment](completed/TICKET-137-production-infrastructure-deployment.md) - ✅ Complete (2026-02-17)
 
 ### 🔵 In Progress Tickets
 
 *No tickets currently in progress.*
-
-### ⏸️ Blocked Tickets
-
-- [TICKET-136: Production Google OAuth Setup](TICKET-136-production-google-oauth-setup.md) - ⏸️ Blocked by TICKET-137 (needs production domain)
 
 ### ⏸️ Deferred - Accepted Risk
 
@@ -135,7 +133,7 @@ Current work items and user stories being actively developed.
 - [TICKET-118: Add Source Tracking to Donations](TICKET-118-donation-source-tracking.md) - 📋 Planned (🟡 Medium, S) - *CSV/webhook/manual audit trail*
 
 #### Infrastructure & Deployment
-- [TICKET-137: Production Infrastructure & Deployment](TICKET-137-production-infrastructure-deployment.md) - 📋 Planned (🔴 High, L) - *Deploy to production server, configure domain/SSL/database*
+- [TICKET-138: Automated Deployment Script](TICKET-138-automated-deployment-script.md) - 📋 Planned (🟡 Medium, L) - *Detect changes, deploy backend/frontend, run migrations, health checks*
 
 #### Feature Development
 - [TICKET-011: Recurring Donation Tracking](TICKET-011-recurring-donation-tracking.md) - 📋 Planned
@@ -211,19 +209,21 @@ Current work items and user stories being actively developed.
 
 ## Quick Stats
 
-- **Total Tickets:** 119
-- **Completed:** 66 (55%)
+- **Total Tickets:** 120
+- **Completed:** 68 (57%)
 - **In Progress:** 0
-- **Planned:** 51
-- **Blocked:** 1 (TICKET-136 - waiting for TICKET-137)
+- **Planned:** 50
+- **Blocked:** 0
 - **Estimated Hours Remaining:** ~193.5 hours (~4.8 weeks)
 - **Deferred/Accepted Risk:** 1
 - **Canceled/Superseded:** 3 (TICKET-041, TICKET-051, TICKET-120)
 
 ### By Category
 
-- **Infrastructure & Deployment:** 1 planned (~10h), 0 completed
-  - TICKET-137 (Production Infrastructure) - blocks TICKET-136
+- **Infrastructure & Deployment:** 1 planned (~10h), 2 completed
+  - ✅ TICKET-136 (Production Google OAuth Setup - complete)
+  - ✅ TICKET-137 (Production Infrastructure & Deployment - complete)
+  - 📋 TICKET-138 (Automated Deployment Script - planned)
 - **Feature Development:** 20 planned (~72.5h), 14 completed
   - New: TICKET-100 (Donor Address), TICKET-101 (Check Photos), TICKET-102 (Child Photos), TICKET-103/104/105 (Reports), TICKET-106 (Admin Delete Override), TICKET-133 (Donor Statements)
 - **Stripe Integration:** 3 planned (~19h), 2 completed
@@ -248,8 +248,6 @@ Current work items and user stories being actively developed.
     - TICKET-127: Form & Dialog UX Consistency (2-3h)
     - TICKET-131: Extend Custom Hooks with CRUD Methods (3-4h)
     - TICKET-132: Add Ransackable Method Comments (0.5h)
-- **In Progress:** 0
-- **Blocked:** 0
 - **Deferred/Accepted Risk:** 1 (TICKET-049)
 - **Canceled/Superseded:** 3 (TICKET-041, TICKET-051, TICKET-120)
 

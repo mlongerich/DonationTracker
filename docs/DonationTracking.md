@@ -17,20 +17,35 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2026-01-07 (TICKET-008: Authentication Foundation - In Progress)
+**Last Updated:** 2026-02-18 (Production Deployment Complete)
 
 **Latest Milestones:**
-- TICKET-008 - Google OAuth Authentication Foundation 🔵 (2026-01-07 - IN PROGRESS)
-  - **JWT Service:** Encode/decode with 30-day expiration and automatic validation (4 tests passing)
-  - **User Model:** OAuth fields (provider, uid, email, name, avatar_url) with @projectsforasia.com domain restriction (2 tests passing)
-  - **Database Migration:** Added OAuth fields with composite unique index on [provider, uid] and unique email index
-  - **Factory Bot:** Updated user factory with OAuth traits (:admin, :unauthorized_domain)
-  - **Auth Routes:** Added /auth/google_oauth2/callback, /auth/logout, /auth/me routes
-  - **OmniAuth Config:** Manual Google OAuth2 setup (no Devise middleware for API-only JWT auth)
-  - **Test Coverage:** 6 tests passing (JWT service + User model) with strict TDD (Red-Green-Refactor)
-  - **Technical Decision:** Manual OAuth handling (not Devise :omniauthable) to avoid session requirements in API-only app
-  - **Next Steps:** AuthController implementation (callback/logout/me endpoints), authentication middleware, frontend components, E2E test updates
-  - See tickets/TICKET-008-basic-authentication-google-oauth.md for full implementation plan
+- TICKET-137 - Production Infrastructure & Deployment ✅ (2026-02-17)
+  - **Production Server:** DigitalOcean Droplet (1GB RAM, 1 vCPU, Singapore) - $7.20/month
+  - **Deployment Method:** Docker Compose (simpler than traditional Ruby/PostgreSQL installation)
+  - **Resource Optimization:** Single-mode Puma, reduced threads, no Redis/Sidekiq - runs smoothly on 1GB RAM
+  - **SSL Configuration:** Let's Encrypt with auto-renewal, Nginx reverse proxy
+  - **Database Setup:** PostgreSQL 15 in Alpine container with automated migrations
+  - **Application Status:** ✅ LIVE at https://donations.projectsforasia.com
+  - **Key Files:** docker-compose.prod.yml, deployment/DEPLOYMENT-DOCKER.md
+  - See tickets/completed/TICKET-137-production-infrastructure-deployment.md for full deployment guide
+- TICKET-136 - Production Google OAuth Setup ✅ (2026-02-17)
+  - **OAuth Configuration:** Google Cloud Console setup for @projectsforasia.com domain
+  - **Internal App Type:** Automatic domain restriction (no consent screen for Workspace users)
+  - **Backend Config:** OmniAuth initializer with GET request support (critical fix)
+  - **Frontend Config:** Environment-based API URL (.env.production with REACT_APP_API_URL)
+  - **Nginx Routing:** Specific location blocks for /auth/google_oauth2 before catch-all
+  - **Authentication Flow:** Complete OAuth → JWT → Frontend workflow verified in production
+  - **Troubleshooting:** Documented common OAuth errors (404, redirect loops, 403 Forbidden)
+  - See tickets/completed/TICKET-136-production-google-oauth-setup.md and docs/OAUTH2-SETUP.md
+- TICKET-008 - Google OAuth Authentication Foundation ✅ (2026-02-10)
+  - **JWT Service:** Encode/decode with 30-day expiration and automatic validation
+  - **User Model:** OAuth fields (provider, uid, email, name, avatar_url) with @projectsforasia.com domain restriction
+  - **AuthController:** Google OAuth callback, dev login for development/E2E testing
+  - **Frontend Auth:** AuthContext + useAuth hook, API interceptors, Protected Routes
+  - **E2E Testing:** Custom cy.login() command, auto-inject auth tokens
+  - **Dev Login:** Seeded admin user for development (bypasses Google OAuth)
+  - See tickets/completed/TICKET-008-basic-authentication-google-oauth.md for full implementation
 - TICKET-071 - Stripe CSV Batch Import Task ✅ (2026-01-06)
   - **User Testing Complete:** Validated production CSV import working as expected
   - **Import Verified:** Donations created correctly with proper status breakdown
