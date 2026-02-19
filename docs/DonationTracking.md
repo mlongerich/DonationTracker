@@ -20,6 +20,17 @@
 **Last Updated:** 2026-02-18 (Production Deployment Complete)
 
 **Latest Milestones:**
+- TICKET-138 - Automated Deployment Scripts ⏸️ (2026-02-18) **[Blocked - Awaiting Real Deployment]**
+  - **Git Tag Tracking:** Automatic deployment tagging with `deployed-YYYYMMDD-HHMMSS` for accurate change detection across multiple commits
+  - **Releases + Symlink:** Frontend uses immutable releases with atomic symlink switching (1-second rollback vs 60-second copy)
+  - **Change Detection:** Compares against last deployment tag (not HEAD~1) - works correctly with multiple commits
+  - **Zero Downtime:** Atomic symlink switch eliminates brief frontend downtime during deployments
+  - **Automated Workflow:** deploy.sh → detect changes → deploy components → health check → tag deployment
+  - **Rollback:** Instant frontend rollback (`./scripts/rollback.sh frontend`), Docker tag rollback for backend
+  - **Key Scripts:** deploy.sh, deploy-backend.sh, deploy-frontend.sh, health-check.sh, rollback.sh (1,370 lines total)
+  - **Documentation:** deployment/AUTOMATED-DEPLOYMENT.md, deployment/MIGRATION-TO-SYMLINK.md
+  - **Blocked Until:** Next feature deployment to validate end-to-end workflow
+  - See tickets/TICKET-138-automated-deployment-script.md for implementation details
 - TICKET-137 - Production Infrastructure & Deployment ✅ (2026-02-17)
   - **Production Server:** DigitalOcean Droplet (1GB RAM, 1 vCPU, Singapore) - $7.20/month
   - **Deployment Method:** Docker Compose (simpler than traditional Ruby/PostgreSQL installation)

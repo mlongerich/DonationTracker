@@ -840,6 +840,26 @@ bash scripts/test-backend.sh spec/models/donation_spec.rb:227
 - E2E testing (isolated test environment on port 3002)
 - Pre-commit scripts (documentation, backend, frontend, hooks, recovery)
 
+**Deployment:**
+```bash
+# Automated deployment (detects changes, dry-run first)
+bash scripts/deploy.sh --dry-run           # Preview deployment
+bash scripts/deploy.sh                     # Deploy (prompts for confirmation)
+bash scripts/deploy.sh --force-backend     # Force backend deployment
+bash scripts/deploy.sh --force-frontend    # Force frontend deployment
+
+# Health checks
+bash scripts/health-check.sh full          # Full system check
+bash scripts/health-check.sh api           # Backend only
+bash scripts/health-check.sh frontend      # Frontend only
+
+# Rollback
+bash scripts/rollback.sh backend           # Rollback backend
+bash scripts/rollback.sh frontend          # Rollback frontend
+```
+
+**See:** deployment/AUTOMATED-DEPLOYMENT.md for complete deployment guide, TICKET-138
+
 ---
 
 ## 🎨 UI/UX Guidelines

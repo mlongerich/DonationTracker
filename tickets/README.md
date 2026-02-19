@@ -133,7 +133,7 @@ Current work items and user stories being actively developed.
 - [TICKET-118: Add Source Tracking to Donations](TICKET-118-donation-source-tracking.md) - 📋 Planned (🟡 Medium, S) - *CSV/webhook/manual audit trail*
 
 #### Infrastructure & Deployment
-- [TICKET-138: Automated Deployment Script](TICKET-138-automated-deployment-script.md) - 📋 Planned (🟡 Medium, L) - *Detect changes, deploy backend/frontend, run migrations, health checks*
+- [TICKET-138: Automated Deployment Script](TICKET-138-automated-deployment-script.md) - ⏸️ Blocked (🟡 Medium, L) - *Implementation complete, blocked pending real deployment to test*
 
 #### Feature Development
 - [TICKET-011: Recurring Donation Tracking](TICKET-011-recurring-donation-tracking.md) - 📋 Planned
