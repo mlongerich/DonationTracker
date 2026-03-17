@@ -784,7 +784,9 @@ describe('DonationForm', () => {
       response: { data: { error: 'Failed to save donation' } },
     });
     (apiClient.get as jest.Mock).mockResolvedValue({
-      data: { donors: [{ id: 1, name: 'Test Donor', email: 'test@example.com' }] },
+      data: {
+        donors: [{ id: 1, name: 'Test Donor', email: 'test@example.com' }],
+      },
     });
 
     const user = userEvent.setup();
@@ -801,16 +803,23 @@ describe('DonationForm', () => {
     await user.click(screen.getByRole('button', { name: /create donation/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent('Failed to save donation');
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Failed to save donation'
+      );
     });
   });
 
   it('shows error alert with validation errors from backend', async () => {
     (createDonation as jest.Mock).mockRejectedValue({
-      response: { status: 422, data: { errors: ['Amount must be greater than 0', 'Date is required'] } },
+      response: {
+        status: 422,
+        data: { errors: ['Amount must be greater than 0', 'Date is required'] },
+      },
     });
     (apiClient.get as jest.Mock).mockResolvedValue({
-      data: { donors: [{ id: 1, name: 'Test Donor', email: 'test@example.com' }] },
+      data: {
+        donors: [{ id: 1, name: 'Test Donor', email: 'test@example.com' }],
+      },
     });
 
     const user = userEvent.setup();
@@ -827,7 +836,9 @@ describe('DonationForm', () => {
     await user.click(screen.getByRole('button', { name: /create donation/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole('alert')).toHaveTextContent('Amount must be greater than 0, Date is required');
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Amount must be greater than 0, Date is required'
+      );
     });
   });
 
@@ -836,7 +847,9 @@ describe('DonationForm', () => {
       response: { data: { error: 'Network error' } },
     });
     (apiClient.get as jest.Mock).mockResolvedValue({
-      data: { donors: [{ id: 1, name: 'Test Donor', email: 'test@example.com' }] },
+      data: {
+        donors: [{ id: 1, name: 'Test Donor', email: 'test@example.com' }],
+      },
     });
 
     const user = userEvent.setup();

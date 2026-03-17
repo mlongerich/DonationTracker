@@ -27,13 +27,62 @@ function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route path="/auth/callback" element={<CallbackPage />} />
               <Route path="/" element={<Layout />}>
-                <Route index element={<ProtectedRoute><DonationsPage /></ProtectedRoute>} />
-                <Route path="donations" element={<ProtectedRoute><DonationsPage /></ProtectedRoute>} />
-                <Route path="donors" element={<ProtectedRoute><DonorsPage /></ProtectedRoute>} />
-                <Route path="children" element={<ProtectedRoute><ChildrenPage /></ProtectedRoute>} />
-                <Route path="sponsorships" element={<ProtectedRoute><SponsorshipsPage /></ProtectedRoute>} />
-                <Route path="reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
-                <Route path="admin" element={<ProtectedRoute><AdminPage /></ProtectedRoute>} />
+                <Route
+                  index
+                  element={
+                    <ProtectedRoute>
+                      <DonationsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="donations"
+                  element={
+                    <ProtectedRoute>
+                      <DonationsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="donors"
+                  element={
+                    <ProtectedRoute>
+                      <DonorsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="children"
+                  element={
+                    <ProtectedRoute>
+                      <ChildrenPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="sponsorships"
+                  element={
+                    <ProtectedRoute>
+                      <SponsorshipsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="reports"
+                  element={
+                    <ProtectedRoute>
+                      <ReportsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="admin"
+                  element={
+                    <ProtectedRoute>
+                      <AdminPage />
+                    </ProtectedRoute>
+                  }
+                />
               </Route>
             </Routes>
           </BrowserRouter>

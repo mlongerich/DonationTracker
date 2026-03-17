@@ -18,11 +18,17 @@ describe('CallbackPage', () => {
 
   it('extracts token and user from URL params and calls login', async () => {
     const token = 'test_jwt_token';
-    const user = { email: 'admin@projectsforasia.com', name: 'Admin', avatar_url: 'https://example.com/avatar.jpg' };
+    const user = {
+      email: 'admin@projectsforasia.com',
+      name: 'Admin',
+      avatar_url: 'https://example.com/avatar.jpg',
+    };
     const userParam = encodeURIComponent(JSON.stringify(user));
 
     render(
-      <MemoryRouter initialEntries={[`/auth/callback?token=${token}&user=${userParam}`]}>
+      <MemoryRouter
+        initialEntries={[`/auth/callback?token=${token}&user=${userParam}`]}
+      >
         <AuthProvider>
           <Routes>
             <Route path="/auth/callback" element={<CallbackPage />} />
@@ -33,7 +39,11 @@ describe('CallbackPage', () => {
 
     await waitFor(() => {
       expect(localStorage.getItem('auth_token')).toBe(token);
+    });
+    await waitFor(() => {
       expect(localStorage.getItem('auth_user')).toBe(JSON.stringify(user));
+    });
+    await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith('/');
     });
   });

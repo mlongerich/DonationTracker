@@ -20,13 +20,20 @@ describe('AuthContext', () => {
 
     it('provides default authentication state', async () => {
       const TestComponent = () => {
-        const { user, token, loading, isAuthenticated } = useContext(AuthContext);
+        const { user, token, loading, isAuthenticated } =
+          useContext(AuthContext);
         return (
           <div>
-            <span data-testid="user">{user === null ? 'null' : 'not-null'}</span>
-            <span data-testid="token">{token === null ? 'null' : 'not-null'}</span>
+            <span data-testid="user">
+              {user === null ? 'null' : 'not-null'}
+            </span>
+            <span data-testid="token">
+              {token === null ? 'null' : 'not-null'}
+            </span>
             <span data-testid="loading">{loading.toString()}</span>
-            <span data-testid="isAuthenticated">{isAuthenticated.toString()}</span>
+            <span data-testid="isAuthenticated">
+              {isAuthenticated.toString()}
+            </span>
           </div>
         );
       };
@@ -80,7 +87,9 @@ describe('AuthContext', () => {
       loginButton.click();
 
       await waitFor(() => {
-        expect(screen.getByTestId('user-email')).toHaveTextContent('admin@projectsforasia.com');
+        expect(screen.getByTestId('user-email')).toHaveTextContent(
+          'admin@projectsforasia.com'
+        );
       });
 
       expect(screen.getByTestId('token')).toHaveTextContent('test_token_123');
@@ -130,7 +139,9 @@ describe('AuthContext', () => {
       loginButton.click();
 
       await waitFor(() => {
-        expect(screen.getByTestId('user-email')).toHaveTextContent('admin@projectsforasia.com');
+        expect(screen.getByTestId('user-email')).toHaveTextContent(
+          'admin@projectsforasia.com'
+        );
       });
 
       // Then logout
@@ -181,7 +192,9 @@ describe('AuthContext', () => {
         expect(screen.getByTestId('loading')).toHaveTextContent('false');
       });
 
-      expect(screen.getByTestId('user-email')).toHaveTextContent('stored@projectsforasia.com');
+      expect(screen.getByTestId('user-email')).toHaveTextContent(
+        'stored@projectsforasia.com'
+      );
       expect(screen.getByTestId('token')).toHaveTextContent('stored_token_456');
     });
 
@@ -202,7 +215,9 @@ describe('AuthContext', () => {
             >
               Login
             </button>
-            <span data-testid="isAuthenticated">{isAuthenticated.toString()}</span>
+            <span data-testid="isAuthenticated">
+              {isAuthenticated.toString()}
+            </span>
           </div>
         );
       };
@@ -215,7 +230,9 @@ describe('AuthContext', () => {
 
       // Initially false
       await waitFor(() => {
-        expect(screen.getByTestId('isAuthenticated')).toHaveTextContent('false');
+        expect(screen.getByTestId('isAuthenticated')).toHaveTextContent(
+          'false'
+        );
       });
 
       // After login, should be true

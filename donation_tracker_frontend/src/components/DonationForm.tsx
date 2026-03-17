@@ -168,7 +168,9 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
             <Alert severity="success">Donation created successfully!</Alert>
           )}
           {error && (
-            <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>
+            <Alert severity="error" onClose={() => setError(null)}>
+              {error}
+            </Alert>
           )}
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <Box sx={{ flex: 1 }}>

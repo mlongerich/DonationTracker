@@ -36,12 +36,15 @@ describe('ProtectedRoute', () => {
   it('renders children when authenticated', async () => {
     // Set up authenticated state in localStorage
     localStorage.setItem('auth_token', 'test_token_123');
-    localStorage.setItem('auth_user', JSON.stringify({
-      id: 1,
-      email: 'admin@projectsforasia.com',
-      name: 'Admin User',
-      avatar_url: 'https://example.com/avatar.jpg'
-    }));
+    localStorage.setItem(
+      'auth_user',
+      JSON.stringify({
+        id: 1,
+        email: 'admin@projectsforasia.com',
+        name: 'Admin User',
+        avatar_url: 'https://example.com/avatar.jpg',
+      })
+    );
 
     render(
       <MemoryRouter initialEntries={['/']}>

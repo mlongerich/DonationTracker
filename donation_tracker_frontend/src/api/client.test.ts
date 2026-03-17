@@ -1,5 +1,8 @@
 // Mock axios first to avoid ESM issues
 // Capture interceptor functions for testing
+// Now we can import and use the actual client module
+import apiClient from './client';
+
 var responseInterceptor: any;
 
 jest.mock('axios', () => ({
@@ -15,15 +18,12 @@ jest.mock('axios', () => ({
           use: jest.fn((_onFulfilled: any, onRejected: any) => {
             responseInterceptor = onRejected; // Capture the error handler
           }),
-          eject: jest.fn()
+          eject: jest.fn(),
         },
       },
     })),
   },
 }));
-
-// Now we can import and use the actual client module
-import apiClient from './client';
 const actualModule = jest.requireActual<typeof import('./client')>('./client');
 const {
   mergeDonors,
@@ -199,7 +199,10 @@ describe('API interceptors', () => {
   it('response interceptor clears auth_token and auth_user on 401 error', async () => {
     // Setup: store auth data in localStorage
     localStorage.setItem('auth_token', 'test_token_123');
-    localStorage.setItem('auth_user', JSON.stringify({ id: 1, name: 'Test User' }));
+    localStorage.setItem(
+      'auth_user',
+      JSON.stringify({ id: 1, name: 'Test User' })
+    );
 
     // Mock window.location.href to prevent actual navigation in tests
     delete (window as any).location;

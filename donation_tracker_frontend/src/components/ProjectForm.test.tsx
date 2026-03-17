@@ -140,9 +140,15 @@ describe('ProjectForm', () => {
 
     await user.click(screen.getByLabelText(/project type/i));
 
-    expect(screen.getByRole('option', { name: /general/i })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: /campaign/i })).toBeInTheDocument();
-    expect(screen.queryByRole('option', { name: /sponsorship/i })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: /general/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: /campaign/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('option', { name: /sponsorship/i })
+    ).not.toBeInTheDocument();
   });
 
   it('shows sponsorship as disabled option when editing a sponsorship project', async () => {
@@ -158,11 +164,19 @@ describe('ProjectForm', () => {
       can_be_deleted: false,
     };
 
-    render(<ProjectForm onSubmit={jest.fn()} project={project} onCancel={jest.fn()} />);
+    render(
+      <ProjectForm
+        onSubmit={jest.fn()}
+        project={project}
+        onCancel={jest.fn()}
+      />
+    );
 
     await user.click(screen.getByLabelText(/project type/i));
 
-    const sponsorshipOption = screen.getByRole('option', { name: /sponsorship/i });
+    const sponsorshipOption = screen.getByRole('option', {
+      name: /sponsorship/i,
+    });
     expect(sponsorshipOption).toBeInTheDocument();
     expect(sponsorshipOption).toHaveAttribute('aria-disabled', 'true');
   });
