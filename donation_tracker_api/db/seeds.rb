@@ -20,3 +20,12 @@ User.find_or_create_by!(
 end
 
 puts "✅ Seeded admin user: admin@projectsforasia.com"
+
+# Create General Donation system project (required for application functionality)
+Project.find_or_create_by!(title: 'General Donation') do |project|
+  project.description = 'Default project for donations not assigned to a specific campaign or initiative'
+  project.project_type = :general
+  project.system = true
+end
+
+puts "✅ Seeded General Donation system project"

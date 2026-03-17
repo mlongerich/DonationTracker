@@ -17,9 +17,19 @@
 
 ## 🚀 Project Status
 
-**Last Updated:** 2026-02-18 (Production Deployment Complete)
+**Last Updated:** 2026-03-17
 
 **Latest Milestones:**
+- TICKET-123 - Projects Extended E2E Tests ✅ (2026-03-17)
+  - **System Project E2E Tests:** 3 new tests validating "General Donation" has no action buttons, non-system projects show buttons, and archive filter doesn't hide system projects
+  - **Strengthened Archive Filter Test:** Creates a real archived project via API to prove the toggle works before verifying General Donation remains visible in all states
+  - **Removed Redundant beforeEach:** Inner describe no longer duplicates outer login/cleanup/navigation
+  - **Sponsorship Type Removed from Create Forms:** ProjectForm no longer offers Sponsorship as a project type option; system-managed sponsorship projects show as disabled when editing
+  - **General Donation Seeded:** Added to seeds.rb so it exists on fresh `docker-compose up`
+  - **DonationForm Error Handling:** Fixed silent catch — errors from the API are now shown to the user in a dismissable Alert
+  - **E2E Test Updated:** "creates a sponsorship project" replaced with "does not offer sponsorship as a project type option"
+  - **Unit Tests Added:** 2 new ProjectForm tests (no sponsorship in create, disabled in edit), 3 new DonationForm tests (error alert, validation errors, dismissable)
+  - See tickets/TICKET-123-projects-extended-e2e-tests.md for details
 - TICKET-138 - Automated Deployment Scripts ⏸️ (2026-02-18) **[Blocked - Awaiting Real Deployment]**
   - **Git Tag Tracking:** Automatic deployment tagging with `deployed-YYYYMMDD-HHMMSS` for accurate change detection across multiple commits
   - **Releases + Symlink:** Frontend uses immutable releases with atomic symlink switching (1-second rollback vs 60-second copy)

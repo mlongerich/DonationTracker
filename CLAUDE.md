@@ -620,7 +620,16 @@ const DonationList = ({ donations, onFilterChange }) => {
 
 **Implemented:** DonationForm, ChildForm, ProjectForm, DonorForm, SponsorshipForm
 
-**See:** docs/PATTERNS.md for examples, TICKET-050, TICKET-127
+**ProjectForm — Sponsorship Type Restriction (TICKET-123):**
+- Sponsorship project type is **not available** in the create form (backend rejects direct donations to sponsorship projects via `sponsorship_project_must_have_sponsorship_id` validation)
+- When editing an existing sponsorship project, the type shows as disabled ("Sponsorship - system managed")
+- Seeds.rb includes `find_or_create_by!` for "General Donation" system project (ensures it exists on fresh setup)
+
+**DonationForm — Error Handling:**
+- API errors displayed in a dismissable Alert (previously silent)
+- Parses both `errors: [...]` arrays and `error: "..."` strings from backend responses
+
+**See:** docs/PATTERNS.md for examples, TICKET-050, TICKET-127, TICKET-123
 
 #### React Hooks Best Practices
 

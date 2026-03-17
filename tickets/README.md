@@ -187,7 +187,7 @@ Current work items and user stories being actively developed.
 - [TICKET-084: Error Handling & Form Validation E2E Tests](TICKET-084-error-handling-validation-e2e-tests.md) - 📋 Planned (🟡 Medium, M) - *Validation + API errors*
 - [TICKET-121: Children Management E2E Tests](TICKET-121-children-management-e2e-tests.md) - 📋 Planned (🟡 Medium, S - 2-3h) - *Child CRUD, archive/restore, gender field, search/filtering*
 - [TICKET-122: Donations Extended E2E Tests](TICKET-122-donations-extended-e2e-tests.md) - 📋 Planned (🟡 Medium, M - 3-4h) - *Edit/delete, status filtering, payment method filtering, project/sponsorship linking*
-- [TICKET-123: Projects Extended E2E Tests](TICKET-123-projects-extended-e2e-tests.md) - 📋 Planned (🟢 Low, S - 1-2h) - *Archive/restore, type filtering, system project protection*
+- [TICKET-123: Projects Extended E2E Tests](TICKET-123-projects-extended-e2e-tests.md) - ✅ Complete (🟢 Low, S) - *System flag UI protection, archive filter validation, sponsorship type removed from create forms, DonationForm error handling*
 - [TICKET-124: Cross-Feature Integration E2E Tests](TICKET-124-cross-feature-integration-e2e-tests.md) - 📋 Planned (🟡 Medium, M - 3h) - *Donation→Project, Donation→Sponsorship, cascade delete prevention*
 - [TICKET-125: Accessibility E2E Tests](TICKET-125-accessibility-e2e-tests.md) - 📋 Planned/POST-MVP (🟢 Low, M - 2-3h) - *Keyboard navigation, ARIA labels, focus management, WCAG 2.1 AA*
 
