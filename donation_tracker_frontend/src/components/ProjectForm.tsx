@@ -73,7 +73,9 @@ const ProjectForm: React.FC<ProjectFormProps> = ({
         >
           <MenuItem value="general">General</MenuItem>
           <MenuItem value="campaign">Campaign</MenuItem>
-          <MenuItem value="sponsorship">Sponsorship</MenuItem>
+          {projectType === 'sponsorship' && (
+            <MenuItem value="sponsorship" disabled>Sponsorship (system managed)</MenuItem>
+          )}
         </TextField>
         {project && onCancel ? (
           <Stack direction="row" spacing={2}>

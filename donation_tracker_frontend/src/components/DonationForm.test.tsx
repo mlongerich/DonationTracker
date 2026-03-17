@@ -779,6 +779,90 @@ describe('DonationForm', () => {
     });
   });
 
+  it('shows error alert when donation creation fails', async () => {
+    (createDonation as jest.Mock).mockRejectedValue({
+      response: { data: { error: 'Failed to save donation' } },
+    });
+    (apiClient.get as jest.Mock).mockResolvedValue({
+      data: { donors: [{ id: 1, name: 'Test Donor', email: 'test@example.com' }] },
+    });
+
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    await user.type(screen.getByLabelText(/amount/i), '100');
+
+    const donorField = screen.getByRole('combobox', { name: /donor/i });
+    await user.type(donorField, 'Test');
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalled());
+    const option = await screen.findByRole('option');
+    await user.click(option);
+
+    await user.click(screen.getByRole('button', { name: /create donation/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Failed to save donation');
+    });
+  });
+
+  it('shows error alert with validation errors from backend', async () => {
+    (createDonation as jest.Mock).mockRejectedValue({
+      response: { status: 422, data: { errors: ['Amount must be greater than 0', 'Date is required'] } },
+    });
+    (apiClient.get as jest.Mock).mockResolvedValue({
+      data: { donors: [{ id: 1, name: 'Test Donor', email: 'test@example.com' }] },
+    });
+
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    await user.type(screen.getByLabelText(/amount/i), '100');
+
+    const donorField = screen.getByRole('combobox', { name: /donor/i });
+    await user.type(donorField, 'Test');
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalled());
+    const option = await screen.findByRole('option');
+    await user.click(option);
+
+    await user.click(screen.getByRole('button', { name: /create donation/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toHaveTextContent('Amount must be greater than 0, Date is required');
+    });
+  });
+
+  it('error alert can be dismissed', async () => {
+    (createDonation as jest.Mock).mockRejectedValue({
+      response: { data: { error: 'Network error' } },
+    });
+    (apiClient.get as jest.Mock).mockResolvedValue({
+      data: { donors: [{ id: 1, name: 'Test Donor', email: 'test@example.com' }] },
+    });
+
+    const user = userEvent.setup();
+    render(<DonationForm />);
+
+    await user.type(screen.getByLabelText(/amount/i), '100');
+
+    const donorField = screen.getByRole('combobox', { name: /donor/i });
+    await user.type(donorField, 'Test');
+    await waitFor(() => expect(apiClient.get).toHaveBeenCalled());
+    const option = await screen.findByRole('option');
+    await user.click(option);
+
+    await user.click(screen.getByRole('button', { name: /create donation/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByTitle(/close/i));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+  });
+
   it('project dialog can be canceled without losing donation form data', async () => {
     const user = userEvent.setup();
     render(<DonationForm />);

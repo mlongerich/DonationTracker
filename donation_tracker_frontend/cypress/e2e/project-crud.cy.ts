@@ -48,25 +48,21 @@ describe('Project Management - Full CRUD Workflow', () => {
       cy.contains('Spring Fundraiser 2024', { timeout: 10000 }).should('be.visible');
     });
 
-    it('creates a sponsorship project and displays in list', () => {
+    it('does not offer sponsorship as a project type option', () => {
       cy.contains('h2', 'Create Project')
         .parent()
         .within(() => {
-          cy.get('input').first().type('Child Education Sponsorship');
-          cy.get('textarea').first().type('Monthly child sponsorship program');
-
-          // Select sponsorship type
+          // Open the Project Type dropdown
           cy.contains('label', 'Project Type').parent().click();
         });
 
-      // Click sponsorship option
-      cy.get('[role="option"]').contains('Sponsorship').click();
+      // Verify sponsorship is not available as an option
+      cy.get('[role="option"]').contains('General').should('exist');
+      cy.get('[role="option"]').contains('Campaign').should('exist');
+      cy.get('[role="option"]').contains('Sponsorship').should('not.exist');
 
-      // Submit form
-      cy.contains('button', /create project/i).click();
-
-      // Verify project appears
-      cy.contains('Child Education Sponsorship', { timeout: 10000 }).should('be.visible');
+      // Close dropdown by pressing Escape
+      cy.get('body').type('{esc}');
     });
 
     it('prevents creating duplicate project titles', () => {
@@ -420,6 +416,101 @@ describe('Project Management - Full CRUD Workflow', () => {
 
           // Project should be active again
           cy.contains('Archive Test Project').should('be.visible');
+        });
+      });
+    });
+  });
+
+  describe('System Project Flag Protection', () => {
+    it('hides all action buttons for "General Donation" system project', () => {
+      // "General Donation" is created via migration with system: true
+      cy.contains('General Donation', { timeout: 10000 }).should('be.visible');
+
+      // Verify NO action buttons exist for system projects
+      // ProjectList.tsx line 51: {!project.system && (...)} hides all buttons
+      cy.contains('General Donation')
+        .parent()
+        .parent()
+        .within(() => {
+          cy.get('button[aria-label="edit"]').should('not.exist');
+          cy.get('button[aria-label="delete"]').should('not.exist');
+          cy.get('button[aria-label="archive"]').should('not.exist');
+          cy.get('button[aria-label="restore"]').should('not.exist');
+        });
+    });
+
+    it('shows action buttons for non-system projects (contrast test)', () => {
+      // Create a non-system project to verify normal behavior
+      cy.contains('h2', 'Create Project')
+        .parent()
+        .within(() => {
+          cy.get('input').first().type('Test Non-System Project');
+          cy.get('textarea').first().type('Should have action buttons');
+        });
+      cy.contains('button', /create project/i).click();
+      cy.contains('Test Non-System Project', { timeout: 10000 }).should('be.visible');
+
+      // Verify action buttons ARE visible for non-system projects
+      cy.contains('Test Non-System Project')
+        .parent()
+        .parent()
+        .within(() => {
+          cy.get('button[aria-label="edit"]').should('be.visible');
+          // Delete or archive button should exist (depending on can_be_deleted)
+          cy.get('button').should('have.length.at.least', 2); // At least edit + one action button
+        });
+    });
+
+    it('system project always visible regardless of archive filter', () => {
+      // Create a project with a donation via API so the archive button appears
+      cy.request('POST', `${Cypress.env('testApiUrl')}/api/donors`, {
+        donor: { name: 'Archive Filter Donor', email: 'archive-filter@example.com' }
+      }).then((donorRes) => {
+        cy.request('POST', `${Cypress.env('testApiUrl')}/api/projects`, {
+          project: { title: 'Archive Filter Test Project', description: 'Will be archived', project_type: 'general' }
+        }).then((projectRes) => {
+          cy.request('POST', `${Cypress.env('testApiUrl')}/api/donations`, {
+            donation: {
+              donor_id: donorRes.body.donor.id,
+              project_id: projectRes.body.project.id,
+              amount: 1000,
+              date: '2024-01-01',
+              payment_method: 'check'
+            }
+          });
+
+          // Reload the Projects tab with fresh data
+          cy.visit('/admin');
+          cy.contains('button', 'Projects').click();
+
+          // Archive the test project
+          cy.contains('Archive Filter Test Project', { timeout: 10000 })
+            .parent()
+            .parent()
+            .within(() => {
+              cy.get('button[aria-label="archive"]').click();
+            });
+          cy.contains('Project archived successfully', { timeout: 10000 });
+
+          // Default view: archived project hidden, General Donation still visible
+          cy.contains('Archive Filter Test Project').should('not.exist');
+          cy.contains('General Donation').should('be.visible');
+
+          // Toggle "Show Archived Projects" ON
+          cy.contains('label', 'Show Archived Projects').click();
+          cy.wait(500);
+
+          // Both the archived project and General Donation are visible
+          cy.contains('Archive Filter Test Project').should('be.visible');
+          cy.contains('General Donation').should('be.visible');
+
+          // Toggle "Show Archived Projects" OFF
+          cy.contains('label', 'Show Archived Projects').click();
+          cy.wait(500);
+
+          // Archived project hidden again, General Donation still visible
+          cy.contains('Archive Filter Test Project').should('not.exist');
+          cy.contains('General Donation').should('be.visible');
         });
       });
     });

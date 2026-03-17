@@ -134,6 +134,39 @@ describe('ProjectForm', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('does not show sponsorship as a selectable option in create mode', async () => {
+    const user = userEvent.setup();
+    render(<ProjectForm onSubmit={jest.fn()} />);
+
+    await user.click(screen.getByLabelText(/project type/i));
+
+    expect(screen.getByRole('option', { name: /general/i })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /campaign/i })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: /sponsorship/i })).not.toBeInTheDocument();
+  });
+
+  it('shows sponsorship as disabled option when editing a sponsorship project', async () => {
+    const user = userEvent.setup();
+    const project = {
+      id: 1,
+      title: 'Child Sponsorship Program',
+      description: 'Monthly sponsorships',
+      project_type: 'sponsorship' as const,
+      system: false,
+      donations_count: 0,
+      sponsorships_count: 5,
+      can_be_deleted: false,
+    };
+
+    render(<ProjectForm onSubmit={jest.fn()} project={project} onCancel={jest.fn()} />);
+
+    await user.click(screen.getByLabelText(/project type/i));
+
+    const sponsorshipOption = screen.getByRole('option', { name: /sponsorship/i });
+    expect(sponsorshipOption).toBeInTheDocument();
+    expect(sponsorshipOption).toHaveAttribute('aria-disabled', 'true');
+  });
+
   it('clears form fields when project prop changes from value to undefined', () => {
     const project = {
       id: 1,

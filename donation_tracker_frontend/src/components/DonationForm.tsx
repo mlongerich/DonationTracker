@@ -40,6 +40,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
   const [paymentMethod, setPaymentMethod] = useState('check');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [donorDialogOpen, setDonorDialogOpen] = useState(false);
   const [donorSearchInput, setDonorSearchInput] = useState('');
   const [entityDialogOpen, setEntityDialogOpen] = useState(false);
@@ -62,6 +63,7 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuccess(false);
+    setError(null);
     setIsSubmitting(true);
 
     if (!selectedDonor) {
@@ -101,8 +103,12 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
       });
       setDate(new Date().toISOString().split('T')[0]);
       onSuccess?.(); // Notify parent to refresh donation list
-    } catch (err) {
-      // Error silently handled
+    } catch (err: any) {
+      const errors = err.response?.data?.errors;
+      const message = Array.isArray(errors)
+        ? errors.join(', ')
+        : err.response?.data?.error || 'Failed to create donation';
+      setError(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -160,6 +166,9 @@ const DonationForm: React.FC<DonationFormProps> = ({ onSuccess }) => {
         <Stack spacing={2}>
           {success && (
             <Alert severity="success">Donation created successfully!</Alert>
+          )}
+          {error && (
+            <Alert severity="error" onClose={() => setError(null)}>{error}</Alert>
           )}
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
             <Box sx={{ flex: 1 }}>
