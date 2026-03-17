@@ -92,7 +92,7 @@ check_docker_containers() {
   fi
 
   # Check database container
-  if docker compose -f docker-compose.prod.yml ps db | grep -q "Up"; then
+  if docker compose -f docker-compose.prod.yml ps postgres | grep -q "Up"; then
     log_info "✓ Database container is running"
   else
     log_error "✗ Database container is not running"
@@ -105,7 +105,7 @@ check_docker_containers() {
 check_database_connection() {
   log_info "Checking database connection"
 
-  if docker compose -f docker-compose.prod.yml exec -T db pg_isready -U donation_tracker > /dev/null 2>&1; then
+  if docker compose -f docker-compose.prod.yml exec -T postgres pg_isready -U donation_tracker > /dev/null 2>&1; then
     log_info "✓ Database connection OK"
     return 0
   else
