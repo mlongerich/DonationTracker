@@ -84,6 +84,107 @@ RSpec.describe "/api/donations", type: :request do
     end
   end
 
+  describe "POST /api/donations with child_id (auto-sponsorship creation)" do
+    let(:donor) { create(:donor) }
+    let(:child) { create(:child) }
+
+    it "creates a sponsorship when child_id is provided and no active sponsorship exists" do
+      expect {
+        post "/api/donations", params: {
+          donation: {
+            amount: 5000,
+            date: Date.today,
+            donor_id: donor.id,
+            child_id: child.id,
+            payment_method: "check"
+          }
+        }
+      }.to change(Sponsorship, :count).by(1)
+
+      expect(response).to have_http_status(:created)
+    end
+
+    it "sets the donation's project_id to the auto-created sponsorship's project" do
+      post "/api/donations", params: {
+        donation: {
+          amount: 5000,
+          date: Date.today,
+          donor_id: donor.id,
+          child_id: child.id,
+          payment_method: "check"
+        }
+      }
+
+      donation = Donation.last
+      expect(donation.project_id).to eq(donation.sponsorship.project_id)
+    end
+
+    it "reuses existing active sponsorship when donor/child/amount already match" do
+      existing_sponsorship = create(:sponsorship, donor: donor, child: child, monthly_amount: 5000)
+
+      expect {
+        post "/api/donations", params: {
+          donation: {
+            amount: 5000,
+            date: Date.today,
+            donor_id: donor.id,
+            child_id: child.id,
+            payment_method: "check"
+          }
+        }
+      }.not_to change(Sponsorship, :count)
+
+      donation = Donation.last
+      expect(donation.sponsorship_id).to eq(existing_sponsorship.id)
+    end
+
+    it "creates a new sponsorship when donor sponsors the same child at a different amount" do
+      create(:sponsorship, donor: donor, child: child, monthly_amount: 3000)
+
+      expect {
+        post "/api/donations", params: {
+          donation: {
+            amount: 5000,
+            date: Date.today,
+            donor_id: donor.id,
+            child_id: child.id,
+            payment_method: "check"
+          }
+        }
+      }.to change(Sponsorship, :count).by(1)
+    end
+
+    it "does not create a sponsorship when child_id is not provided" do
+      expect {
+        post "/api/donations", params: {
+          donation: {
+            amount: 5000,
+            date: Date.today,
+            donor_id: donor.id,
+            payment_method: "check"
+          }
+        }
+      }.not_to change(Sponsorship, :count)
+    end
+
+    it "returns 201 and the donation even when a sponsorship is auto-created" do
+      post "/api/donations", params: {
+        donation: {
+          amount: 5000,
+          date: Date.today,
+          donor_id: donor.id,
+          child_id: child.id,
+          payment_method: "check"
+        }
+      }
+
+      expect(response).to have_http_status(:created)
+      json = JSON.parse(response.body)
+      expect(json).to have_key("donation")
+      expect(json["donation"]["donor_id"]).to eq(donor.id)
+    end
+  end
+
   describe "GET /api/donations" do
     it "returns all donations with donor names" do
       donor = create(:donor, name: "Test Donor")
