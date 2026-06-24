@@ -6,6 +6,33 @@
 
 ---
 
+## Session Routing
+
+**Announce tier on every session start.** Before doing any other work, output a single line stating the inferred tier and the files being loaded. Format: `[Tier N – Label] Loading: file1, file2, ...`. No prose, no preamble.
+
+**Infer tier from the first message:**
+
+| Tier | Trigger | Load |
+|---|---|---|
+| **Tier 1 – Quick task** | Single scoped task ("implement this ticket", "create ADR", "fix this bug") | `CLAUDE.md` only |
+| **Tier 2 – Standard** | Active epic, implementation block, code review | + `docs/development-process.md` + `docs/code-style.md` + `docs/design-guide.md` |
+| **Tier 3 – Planning** | Business logic, spec work, epic or ticket creation, process review | + `docs/business-logic.md` + `docs/implementation-plan.md` |
+
+**Skill loading – load these files when the trigger is detected:**
+
+| Trigger | Skill file to load |
+|---|---|
+| Any `.md` file write or edit | `workflow/skills/writing-style/SKILL.md` (always) |
+| `/epic` / "create epic" / "new epic" / "create E[N]" | `workflow/skills/epic/SKILL.md` |
+| `/ticket` / "create ticket" / "new ticket" / "refine ticket" / "refine T[N]" | `workflow/skills/ticket/SKILL.md` |
+| `/adr` / "create ADR" / "write ADR" / "document this decision" | `workflow/skills/adr/SKILL.md` |
+
+**Templates location:** `workflow/templates/` (epic.md, ticket.md, adr.md, code-style.md)
+
+**Writing style:** all `.md` prose must follow `workflow/skills/writing-style/SKILL.md`. Key rules: no em dashes (—), no semicolons in prose, no colons in prose sentences.
+
+---
+
 ## 🏗️ Project Structure & Repository Strategy
 
 ### Monorepo with Service Separation

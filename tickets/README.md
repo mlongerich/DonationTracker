@@ -1,12 +1,28 @@
-# Active Tickets
+# Tickets
 
-Current work items and user stories being actively developed.
+Work items for the Donation Tracker project.
 
-**How to use:**
+## Epic index
+
+Tickets are grouped into thin vertical slice epics. See `epics/README.md` for the full structure and dependency order.
+
+| Epic | Goal | Status |
+|---|---|---|
+| [Epic 1](epics/epic-1-donation-management-completion.md) | Donation CRUD gaps, source field, read-only enforcement | Not started |
+| [Epic 2](epics/epic-2-sponsorship-lifecycle.md) | Sponsorship actions, timeline views, test gaps | In progress |
+| [Epic 3](epics/epic-3-stripe-webhook.md) | Real-time Stripe webhook integration | Not started |
+| [Epic 4](epics/epic-4-reports.md) | Donation reports and giving statements | Not started |
+| [Epic 5](epics/epic-5-dashboard.md) | Configurable dashboard with stats and charts | Not started |
+
+---
+
+## How to use
+
 - Each ticket is stored in its own file: `TICKET-XXX-descriptive-title.md`
-- Use `/memory` to access during Claude Code sessions
 - Update ticket status as work progresses
 - Link commits to tickets for traceability
+- New epics use `workflow/skills/epic/SKILL.md` via `/epic` command
+- New tickets use `workflow/skills/ticket/SKILL.md` via `/ticket` command
 
 ---
 
