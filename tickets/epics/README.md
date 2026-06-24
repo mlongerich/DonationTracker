@@ -28,10 +28,10 @@ Original category-based structure preserved for reference. Completed tickets rem
 
 | File | Was | Redistributed to |
 |---|---|---|
-| [epic-1-donor-donation-management.md](epic-1-donor-donation-management.md) | Donor and donation CRUD | Epic 1 |
-| [epic-2-child-sponsorship.md](epic-2-child-sponsorship.md) | Child and sponsorship management | Epic 2 |
-| [epic-3-stripe-integration.md](epic-3-stripe-integration.md) | Stripe CSV and webhook | Epic 3 |
-| [epic-4-admin-reporting.md](epic-4-admin-reporting.md) | Admin tools and reports | Epic 4 |
-| [epic-5-auth-deployment.md](epic-5-auth-deployment.md) | Auth and deployment | Complete — no active work remaining |
-| [epic-6-code-quality.md](epic-6-code-quality.md) | Code quality patterns | Baked into every epic |
-| [epic-7-test-coverage.md](epic-7-test-coverage.md) | Test coverage | Baked into every epic (TICKET-140 moved to Epic 2) |
+| [epic-1-donor-donation-management.md](../canceled/epic-1-donor-donation-management.md) | Donor and donation CRUD | Epic 1 |
+| [epic-2-child-sponsorship.md](../canceled/epic-2-child-sponsorship.md) | Child and sponsorship management | Epic 2 |
+| [epic-3-stripe-integration.md](../canceled/epic-3-stripe-integration.md) | Stripe CSV and webhook | Epic 3 |
+| [epic-4-admin-reporting.md](../canceled/epic-4-admin-reporting.md) | Admin tools and reports | Epic 4 |
+| [epic-5-auth-deployment.md](../canceled/epic-5-auth-deployment.md) | Auth and deployment | Complete — no active work remaining |
+| [epic-6-code-quality.md](../canceled/epic-6-code-quality.md) | Code quality patterns | Baked into every epic |
+| [epic-7-test-coverage.md](../canceled/epic-7-test-coverage.md) | Test coverage | Baked into every epic (TICKET-140 moved to Epic 2) |
