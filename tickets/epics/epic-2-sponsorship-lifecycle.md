@@ -4,7 +4,7 @@ updated: 2026-06-24
 
 # Epic 2 – Sponsorship Lifecycle
 
-**Goal:** Complete sponsorship management actions, add monthly timeline views in all three contexts, fix all test gaps in the sponsorship domain, and remove the HTTP test cleanup endpoint.
+**Goal:** Complete sponsorship management actions, add monthly timeline views in all three contexts, and fix all test gaps in the sponsorship domain.
 
 **Demo signal:** Admin ends a sponsorship, a new Stripe payment creates a fresh one, admin views the monthly grid for that donor showing which months were paid and which were gaps. Timeline also visible from the child page and the sponsorship detail page.
 
@@ -16,7 +16,6 @@ updated: 2026-06-24
 
 **In:**
 - TICKET-055: reactivate, delete, end with date, edit (manual-only lock) — in progress
-- TICKET-140: replace HTTP cleanup endpoints with cy.task (BL-44 contradiction fix) — ticket written
 - TICKET-139: show sponsorship projects in Admin Projects tab
 - Monthly timeline view — all three contexts (BL-55):
   - Per sponsorship: 24-month grid on sponsorship detail
@@ -35,7 +34,6 @@ updated: 2026-06-24
 | Ticket | Scope | Status |
 |---|---|---|
 | TICKET-055 | Sponsorship actions: reactivate, delete, end, edit | In progress |
-| TICKET-140 | Replace HTTP test cleanup with cy.task | Not started |
 | TICKET-139 | Show sponsorship projects in Admin tab | Not started |
 | New | Monthly timeline view: per sponsorship | Not started |
 | New | Monthly timeline view: per child and per donor | Not started |
@@ -49,4 +47,4 @@ updated: 2026-06-24
 
 - TICKET-055 must pass all existing specs plus new specs for each action before closing
 - Timeline view query uses GROUP BY month to avoid N+1 (single SQL aggregation)
-- cy.task cleanup verified working before TICKET-140 closes
+- cy.task cleanup (TICKET-140, standalone) must be complete before any new E2E tests are written in this epic

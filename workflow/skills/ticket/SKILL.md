@@ -96,9 +96,9 @@ Fill ALL sections of the template. No `{{placeholder}}` text may remain in the o
 - If this ticket has no user-facing UI, omit the section with that note
 
 **Technical constraints:**
-- API/data contracts: exact endpoint path, request/response shape
-- Patterns to follow: cite specific function names and file paths from the codebase read in Step 3
-- Architecture decisions: any choice that constrains implementation discretion
+- API/data contracts: endpoint path and expected response shape (status code, top-level keys). No code.
+- Patterns to follow: name the established patterns the ticket must respect and where they live in the codebase. Do not describe how to implement them.
+- Architecture decisions: decisions that constrain what the developer may choose. Not a list of instructions for how to write code.
 
 **Quality requirements:**
 - Test scenarios: plain-language description of what must be tested (not function names)
@@ -149,6 +149,7 @@ After writing the ticket:
 
 ## Invariants
 
+- **What, not how.** Tickets describe what must be delivered and what constraints apply. They do not prescribe how the developer writes the code. No code samples, no pseudocode, no function signatures, no implementation steps. The developer reads the acceptance criteria, the constraints, and the codebase — then decides how to write it. If a ticket tells a developer which lines to write, it is wrong.
 - **Just-in-time only.** A full ticket is written only when that ticket is about to be implemented — meaning the previous ticket in the epic is complete and Michael has confirmed to proceed. If asked to write tickets for future work in bulk, write stubs (title + one-liner) only and stop. Full detail comes from reading the actual codebase at implementation time, not from speculation.
 - Template read in Step 1 is non-negotiable. If `templates/ticket.md` cannot be read, stop and report.
 - Codebase read (Step 3) happens before filling technical sections. No section may be filled from memory alone.

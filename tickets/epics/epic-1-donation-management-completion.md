@@ -9,7 +9,7 @@ tags: [project, epic]
 
 **Project:** [[development-process]]
 **Status:** Not started
-**Depends on:** TICKET-140 (cy.task cleanup must exist before E2E tests for this epic are written)
+**Depends on:** TICKET-140 (standalone pre-work ticket — not part of any epic; cy.cleanDb must exist before any E2E tests for this epic are written)
 **Unblocks:** Epic 3 (source column required), Epic 4 (stripe_fee_cents required)
 
 ---

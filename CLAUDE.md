@@ -56,6 +56,16 @@ Key locations:
 
 ## 📋 Ticket & Task Management System
 
+### What, not how (non-negotiable)
+
+Tickets and epics describe **what** must be delivered and the constraints that apply. They do not prescribe how the developer writes the code. No code samples, no pseudocode, no function signatures, no implementation steps in ticket or epic files. The developer reads the AC, the constraints, and the codebase — then decides how to implement it.
+
+**In scope for a ticket:** acceptance criteria, API contracts (endpoint + response shape), named codebase patterns to respect, architecture decisions that narrow the implementation space, test scenarios.
+
+**Out of scope:** code blocks, variable names, exact function signatures, step-by-step implementation instructions.
+
+---
+
 ### Just-in-time rule (non-negotiable)
 
 **Epics and tickets are written at full detail only when they are about to be worked on. Future work gets stubs only.**
