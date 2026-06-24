@@ -1,7 +1,7 @@
 describe('Donor Archive & Restore', () => {
   beforeEach(() => {
     cy.login();
-    cy.clearDonors();
+    cy.cleanDb();
     cy.visit('/donors');
     // Wait for page to fully load
     cy.contains('Donation Tracker').should('be.visible');

@@ -17,7 +17,6 @@ Rails.application.routes.draw do
     get "health", to: "health#index"
 
     resources :donors, only: [ :create, :show, :index, :update, :destroy ] do
-      delete "all", action: :destroy_all, on: :collection
       post "merge", action: :merge, on: :collection
       get "export", action: :export, on: :collection
       post "restore", action: :restore, on: :member
@@ -47,10 +46,6 @@ Rails.application.routes.draw do
     # Reports endpoints
     get "reports/donations", to: "reports#donations"
 
-    # Test-only routes (development/test environments only)
-    namespace :test do
-      delete "cleanup", action: :cleanup
-    end
   end
 
   # Defines the root path route ("/")

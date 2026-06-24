@@ -57,7 +57,7 @@ describe('Donation Date Range Filtering', () => {
   beforeEach(() => {
     cy.login();
     // Clean database before each test
-    cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
+    cy.cleanDb();
 
     // Intercept donations API calls globally for all tests
     cy.intercept('GET', '/api/donations*').as('getDonations');

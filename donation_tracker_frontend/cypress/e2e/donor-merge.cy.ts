@@ -2,7 +2,7 @@ describe('Donor Merge', () => {
   beforeEach(() => {
     cy.login();
     // Clear database
-    cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
+    cy.cleanDb();
     cy.visit('/donors');
   });
 

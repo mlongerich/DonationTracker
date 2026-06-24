@@ -5,10 +5,10 @@
  */
 
 /**
- * Clears all donors from the database (test cleanup)
+ * Cleans the test database via Rake task (invoked through cy.task)
  */
-Cypress.Commands.add('clearDonors', () => {
-  cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
+Cypress.Commands.add('cleanDb', () => {
+  cy.task('db:clean');
 });
 
 /**

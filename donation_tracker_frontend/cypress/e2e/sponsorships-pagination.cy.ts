@@ -2,7 +2,7 @@ describe('Sponsorships Page - Filters and Pagination', () => {
   beforeEach(() => {
     cy.login();
     // Clean database before each test
-    cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
+    cy.cleanDb();
     cy.visit('/sponsorships');
   });
 

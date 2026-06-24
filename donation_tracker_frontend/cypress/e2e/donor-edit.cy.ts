@@ -1,7 +1,7 @@
 describe('Donor Edit Workflow', () => {
   beforeEach(() => {
     cy.login();
-    cy.clearDonors();
+    cy.cleanDb();
     cy.visit('/donors');
   });
 

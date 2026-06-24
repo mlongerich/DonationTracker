@@ -2,7 +2,7 @@ describe('Stripe Donation Badge Display', () => {
   beforeEach(() => {
     cy.login();
     // Clean database before each test
-    cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
+    cy.cleanDb();
   });
 
   it('displays Stripe badge for donations created via Stripe import', () => {

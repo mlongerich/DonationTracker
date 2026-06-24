@@ -279,20 +279,6 @@ RSpec.describe "/api/donors", type: :request do
     end
   end
 
-  describe "DELETE /api/donors/all" do
-    it "deletes all donors (test cleanup)" do
-      create_list(:donor, 3)
-
-      expect {
-        delete "/api/donors/all", headers: { "Host" => "api" }
-      }.to change(Donor, :count).by(-3)
-
-      expect(response).to have_http_status(:ok)
-      json_response = JSON.parse(response.body)
-      expect(json_response["deleted_count"]).to eq(3)
-    end
-  end
-
   describe "POST /api/donors/merge" do
     it "merges donors with selected fields and returns wrapped presenter response" do
       donor1 = create(:donor, name: 'Alice Smith', email: 'alice@example.com')

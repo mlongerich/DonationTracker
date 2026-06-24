@@ -18,7 +18,7 @@ describe('Environment Isolation', () => {
     const testToken = Cypress.env('auth_token');
 
     // 1. Clean test database
-    cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
+    cy.cleanDb();
 
     // 2. Create donor in TEST environment (port 3002)
     cy.request({
@@ -80,18 +80,6 @@ describe('Environment Isolation', () => {
     });
 
     // 5. Clean up test database
-    cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`);
-  });
-
-  it('verifies test cleanup endpoint only works in test/development environments', () => {
-    // This test ensures the cleanup endpoint is protected in production
-    // The endpoint should return 200 in test/dev, but would return 403 in production
-
-    cy.request('DELETE', `${Cypress.env('testApiUrl')}/api/test/cleanup`).then(
-      (response) => {
-        expect(response.status).to.eq(200);
-        expect(response.body.message).to.include('Database cleaned');
-      }
-    );
+    cy.cleanDb();
   });
 });

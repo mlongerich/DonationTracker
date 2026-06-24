@@ -3,10 +3,10 @@
 declare namespace Cypress {
   interface Chainable {
     /**
-     * Clears all donors from the database (test cleanup)
-     * @example cy.clearDonors()
+     * Cleans the test database via Rake task (all donations, sponsorships, donors, children, non-system projects)
+     * @example cy.cleanDb()
      */
-    clearDonors(): Chainable<void>;
+    cleanDb(): Chainable<void>;
 
     /**
      * Creates a donor by filling out and submitting the form

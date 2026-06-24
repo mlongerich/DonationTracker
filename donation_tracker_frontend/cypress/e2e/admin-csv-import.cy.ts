@@ -1,7 +1,7 @@
 describe('Admin CSV Import', () => {
   beforeEach(() => {
     cy.login();
-    cy.request('DELETE', 'http://localhost:3002/api/test/cleanup');
+    cy.cleanDb();
     cy.visit('/admin');
   });
 
