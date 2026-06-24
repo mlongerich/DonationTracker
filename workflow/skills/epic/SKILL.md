@@ -148,8 +148,9 @@ The first ticket is created via `/ticket` immediately before work begins – not
 
 ## Invariants
 
+- **Just-in-time only.** A full epic is written only when that epic is about to become the active one. If the epic being requested is not the next to start, write a stub (title, one-sentence goal, depends-on, unblocks) and stop. Do not fill any other section. The full template is filled when the epic activates.
 - Template read in Step 1 is non-negotiable.
-- Planning context read (Step 2) happens before filling any section. Epic number and sequencing come from `project/implementation-plan.md`, not from counting existing files.
+- Planning context read (Step 2) happens before filling any section. Epic number and sequencing come from `docs/implementation-plan.md`, not from counting existing files.
 - The post-epic gate is always the last section – copy it verbatim, leave all boxes unchecked.
 - Do not create ticket files during epic creation. Tickets are created just-in-time via `/ticket`.
 - **No code in epics.** Epics contain no code samples, no function signatures, no pseudocode, no file diffs. Technical constraints describes architecture decisions, data model choices, and API contracts at a conceptual level.

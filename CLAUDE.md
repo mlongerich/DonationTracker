@@ -56,12 +56,24 @@ Key locations:
 
 ## 📋 Ticket & Task Management System
 
+### Just-in-time rule (non-negotiable)
+
+**Epics and tickets are written at full detail only when they are about to be worked on. Future work gets stubs only.**
+
+- **Future epic (not the next active one):** stub only — title, one-sentence goal, status, depends-on, unblocks. No sections, no ticket table, no architecture decisions.
+- **Active epic (the one starting now):** full template via `/epic`, reading current codebase first.
+- **Future ticket (in the active epic):** one row in the epic's ticket table — scope + test signal. No ticket file.
+- **Next ticket (about to be implemented):** full template via `/ticket`, reading current codebase first.
+
+**Why:** Business rules, codebase patterns, and dependencies change between planning and implementation. A fully written ticket from weeks ago is usually wrong in some detail and wastes tokens to rewrite. Write it right once, just before it is needed.
+
 ### Workflow
 
 1. **New idea during work?** → Add to docs/BACKLOG.md, run `/compact`
-2. **Starting new work?** → Create ticket in tickets/TICKET-XXX-name.md
-3. **Implementing?** → Follow TDD workflow
-4. **Done?** → Update ticket, commit with ticket reference
+2. **Starting a new epic?** → Activate via `/epic`, read current codebase, fill full template. Stubs for future epics only.
+3. **Starting a new ticket?** → Activate via `/ticket`, read current codebase, fill full template. Do not pre-write future tickets.
+4. **Implementing?** → Follow TDD workflow
+5. **Done?** → Update ticket, commit with ticket reference
 
 ### Ticket Template
 

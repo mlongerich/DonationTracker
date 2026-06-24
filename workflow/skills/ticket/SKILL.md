@@ -149,6 +149,7 @@ After writing the ticket:
 
 ## Invariants
 
+- **Just-in-time only.** A full ticket is written only when that ticket is about to be implemented — meaning the previous ticket in the epic is complete and Michael has confirmed to proceed. If asked to write tickets for future work in bulk, write stubs (title + one-liner) only and stop. Full detail comes from reading the actual codebase at implementation time, not from speculation.
 - Template read in Step 1 is non-negotiable. If `templates/ticket.md` cannot be read, stop and report.
 - Codebase read (Step 3) happens before filling technical sections. No section may be filled from memory alone.
 - The post-ticket check is always the last section – copy it verbatim, leave all boxes unchecked.
